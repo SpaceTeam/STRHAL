@@ -1,5 +1,6 @@
 #include "ADS131.h"
 #include "main.h"
+#include "systick.h"
 #include "measurement.h"
 
 static Measurement measurements[8] = { 0 };
@@ -34,10 +35,10 @@ void ADS131_Init(void)
 
 void ADS131_WriteRegister(uint32_t reg, uint32_t value)
 {
-	int32_t txData[2] = { (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
+	/*int32_t txData[2] = { (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
 	int32_t rxData[2] = { 0 };
 
-	/*HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) txData, (uint8_t*) rxData, 2, 1000000);
+	HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) txData, (uint8_t*) rxData, 2, 1000000);
 	while (!HAL_GPIO_ReadPin(ADS_nDRDY_GPIO_Port, ADS_nDRDY_Pin))
 	{
 	};*/
@@ -45,8 +46,8 @@ void ADS131_WriteRegister(uint32_t reg, uint32_t value)
 
 void ADS131_ReadRegisters(uint32_t reg, uint32_t n, uint32_t data[])
 {
-	int32_t txData[256] = { (ADS131_RREG_OPCODE((n - 1), reg)) << 8, 0, 0 };
-/*
+/*	int32_t txData[256] = { (ADS131_RREG_OPCODE((n - 1), reg)) << 8, 0, 0 };
+
 	HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) &txData[0], (uint8_t*) data, 1, 1000000);
 	HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) &txData[1], (uint8_t*) data, n, 1000000);
 	while (!HAL_GPIO_ReadPin(ADS_nDRDY_GPIO_Port, ADS_nDRDY_Pin))
@@ -55,8 +56,8 @@ void ADS131_ReadRegisters(uint32_t reg, uint32_t n, uint32_t data[])
 }
 void ADS131_UpdateData(void)
 {
-	static uint8_t sampling = 0;
-	/*
+	/*static uint8_t sampling = 0;
+
 	if (HAL_GPIO_ReadPin(ADS_nDRDY_GPIO_Port, ADS_nDRDY_Pin))
 	{
 		sampling = 1;

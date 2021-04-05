@@ -6,7 +6,7 @@ static volatile uint64_t systick_count = 0;
 void Systick_Init(void)
 {
 	LL_Init1msTick(SystemCoreClock);
-	  LL_SYSTICK_EnableIT();
+	LL_SYSTICK_EnableIT();
 	systick_count = 0;
 }
 

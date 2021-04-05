@@ -378,25 +378,25 @@ typedef struct
 
 typedef struct
 {
-  __IO uint32_t TTTMC;          /*!< TT Trigger Memory Configuration register,    Address offset: 0x100 */
-  __IO uint32_t TTRMC;          /*!< TT Reference Message Configuration register, Address offset: 0x104 */
-  __IO uint32_t TTOCF;          /*!< TT Operation Configuration register,         Address offset: 0x108 */
-  __IO uint32_t TTMLM;          /*!< TT Matrix Limits register,                   Address offset: 0x10C */
-  __IO uint32_t TURCF;          /*!< TUR Configuration register,                  Address offset: 0x110 */
-  __IO uint32_t TTOCN;          /*!< TT Operation Control register,               Address offset: 0x114 */
-  __IO uint32_t TTGTP;          /*!< TT Global Time Preset register,              Address offset: 0x118 */
-  __IO uint32_t TTTMK;          /*!< TT Time Mark register,                       Address offset: 0x11C */
-  __IO uint32_t TTIR;           /*!< TT Interrupt register,                       Address offset: 0x120 */
-  __IO uint32_t TTIE;           /*!< TT Interrupt Enable register,                Address offset: 0x124 */
-  __IO uint32_t TTILS;          /*!< TT Interrupt Line Select register,           Address offset: 0x128 */
-  __IO uint32_t TTOST;          /*!< TT Operation Status register,                Address offset: 0x12C */
-  __IO uint32_t TURNA;          /*!< TT TUR Numerator Actual register,            Address offset: 0x130 */
-  __IO uint32_t TTLGT;          /*!< TT Local and Global Time register,           Address offset: 0x134 */
-  __IO uint32_t TTCTC;          /*!< TT Cycle Time and Count register,            Address offset: 0x138 */
-  __IO uint32_t TTCPT;          /*!< TT Capture Time register,                    Address offset: 0x13C */
-  __IO uint32_t TTCSM;          /*!< TT Cycle Sync Mark register,                 Address offset: 0x140 */
-  __IO uint32_t RESERVED1[111]; /*!< Reserved,                                            0x144 - 0x2FC */
-  __IO uint32_t TTTS;           /*!< TT Trigger Select register,                  Address offset: 0x300 */
+  __IO uint32_t TTTMC;          //!< TT Trigger Memory Configuration register,    Address offset: 0x100 */
+  __IO uint32_t TTRMC;          //!< TT Reference Message Configuration register, Address offset: 0x104 */
+  __IO uint32_t TTOCF;          //!< TT Operation Configuration register,         Address offset: 0x108 */
+  __IO uint32_t TTMLM;          //!< TT Matrix Limits register,                   Address offset: 0x10C */
+  __IO uint32_t TURCF;          //!< TUR Configuration register,                  Address offset: 0x110 */
+  __IO uint32_t TTOCN;          //!< TT Operation Control register,               Address offset: 0x114 */
+  __IO uint32_t TTGTP;          //!< TT Global Time Preset register,              Address offset: 0x118 */
+  __IO uint32_t TTTMK;          //!< TT Time Mark register,                       Address offset: 0x11C */
+  __IO uint32_t TTIR;           //!< TT Interrupt register,                       Address offset: 0x120 */
+  __IO uint32_t TTIE;           //!< TT Interrupt Enable register,                Address offset: 0x124 */
+  __IO uint32_t TTILS;          //!< TT Interrupt Line Select register,           Address offset: 0x128 */
+  __IO uint32_t TTOST;          //!< TT Operation Status register,                Address offset: 0x12C */
+  __IO uint32_t TURNA;          //!< TT TUR Numerator Actual register,            Address offset: 0x130 */
+  __IO uint32_t TTLGT;          //!< TT Local and Global Time register,           Address offset: 0x134 */
+  __IO uint32_t TTCTC;          //!< TT Cycle Time and Count register,            Address offset: 0x138 */
+  __IO uint32_t TTCPT;          //!< TT Capture Time register,                    Address offset: 0x13C */
+  __IO uint32_t TTCSM;          //!< TT Cycle Sync Mark register,                 Address offset: 0x140 */
+  __IO uint32_t RESERVED1[111]; //!< Reserved,                                            0x144 - 0x2FC */
+  __IO uint32_t TTTS;           //!< TT Trigger Select register,                  Address offset: 0x300 */
 } TTCAN_TypeDef;
 
 /**
