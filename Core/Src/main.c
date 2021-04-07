@@ -1,10 +1,15 @@
 #include "main.h"
 #include "git_version.h"
+#include "ADS131.h"
 #include "cmds.h"
 #include "can.h"
+#include "gpio.h"
+#include "spi.h"
 #include "sysclock.h"
 #include "systick.h"
 #include "serial.h"
+#include "tim.h"
+#include "usart.h"
 #include "adc.h"
 #include "speaker.h"
 #include <stdio.h>
@@ -22,26 +27,34 @@ int main(void)
 	Sysclock_Init();
 	Systick_Init();
 
+	MX_GPIO_Init();
+	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1); //DMA init
 	ADC_Init();
+	MX_SPI1_Init();
+	MX_UART4_Init();
+	MX_TIM4_Init();
+	MX_TIM1_Init();
+
 	Serial_Init();
+
 	Serial_Println(GIT_COMMIT_HASH);
+	ADS131_Init();
 	Speaker_Init();
 	Speaker_Set(300, 200, 50, 5);
 
-	Can_Init(10);
+	//Can_Init(10);
 
-	char send_buffer[256] = {
-			0 };
-	char string[RECEIVE_STRING_SIZE] = "";
+	char send_buffer[1024] = { 0 };
+	//char string[RECEIVE_STRING_SIZE] = "";
 
 	while (1)
 	{
 		tick = Systick_GetTick();
 		Speaker_Update(tick);
-		Can_checkFifo(0);
-		Can_checkFifo(1);
+		//Can_checkFifo(0);
+		//Can_checkFifo(1);
 
-		if (Serial_CheckInput(string))
+		/*if (Serial_CheckInput(string))
 		{
 			uint32_t i = 0;
 			char *p = strtok(string, ":");
@@ -66,26 +79,20 @@ int main(void)
 					0xBE,
 					0xEF };
 			Can_sendMessage(1, tone, testdata, 63);
-			/*
-			 if ( == NOICE)
-			 Serial_Println("message sent\n");
-			 else
-			 Serial_Println("FOCK\n");
-			 */
 
-		}
+			 //if ( == NOICE)
+			 //Serial_Println("message sent\n");
+			 //else
+			 //Serial_Println("FOCK\n");
+
+		}*/
+		ADS131_UpdateData();
 
 		if (tick - uart_last_updated >= UART_UPDATE_TIME)
 		{
 			uart_last_updated = tick;
-			/*sprintf(send_buffer, "%d, %d, %d, %d\n", ADC_GetData(0), ADC_GetData(1), ADC_GetData(2), ADC_GetData(3));
-			 Serial_Print(send_buffer);
-
-			 sprintf(send_buffer + strlen(send_buffer), "%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %08ld\n\r", ADS131_getData(0),
-			 ADS131_getData(1), ADS131_getData(2), ADS131_getData(3), ADS131_getData(4), ADS131_getData(5),
-			 ADS131_getData(6), ADS131_getData(7), ADS131_getStatus());
-			 Serial_print(send_buffer);
-			 */
+			sprintf(send_buffer, "%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld\n\r", ADS131_GetData(0),ADS131_GetData(1), ADS131_GetData(2), ADS131_GetData(3), ADS131_GetData(4), ADS131_GetData(5),ADS131_GetData(6), ADS131_GetData(7), ADS131_GetStatus());
+			Serial_Print(send_buffer);
 		}
 
 	}

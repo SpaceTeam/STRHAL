@@ -18,6 +18,7 @@ extern "C" {
 #include "stm32h7xx_ll_tim.h"
 #include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_gpio.h"
+#include "stm32h7xx_ll_spi.h"
 #include <fdcan_definitions.h>
 
 #include "board_config.h"
