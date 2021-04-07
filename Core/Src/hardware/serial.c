@@ -10,8 +10,11 @@ typedef volatile struct
 	uint16_t QueueOut, QueueIn;
 } Queue;
 
-Queue rxQueue = {
-		0 };
+Queue rxQueue =
+{ 0 };
+
+Queue txQueue =
+{ 0 };
 
 void QueueInit(Queue *queue)
 {
@@ -21,6 +24,10 @@ void QueuePut(Queue *queue, char new)
 {
 	queue->Array[queue->QueueIn] = new;
 	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE - 1);
+}
+uint32_t QueueFillState(Queue *queue)
+{
+	return (queue->QueueIn - queue->QueueOut + QUEUE_SIZE) % QUEUE_SIZE;
 }
 char QueueGet(Queue *queue)
 {
@@ -44,8 +51,8 @@ void Serial_Init(void)
 	 PC10   ------> UART4_TX
 	 PC11   ------> UART4_RX
 	 */
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {
-			0 };
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 	GPIO_InitStruct.Pin = LL_GPIO_PIN_10 | LL_GPIO_PIN_11;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -58,8 +65,8 @@ void Serial_Init(void)
 	NVIC_SetPriority(UART4_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
 	NVIC_EnableIRQ(UART4_IRQn);
 
-	LL_USART_InitTypeDef UART_InitStruct = {
-			0 };
+	LL_USART_InitTypeDef UART_InitStruct =
+	{ 0 };
 	UART_InitStruct.BaudRate = 115200;
 	UART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
 	UART_InitStruct.StopBits = LL_USART_STOPBITS_1;
@@ -73,10 +80,10 @@ void Serial_Init(void)
 	LL_USART_EnableDirectionTx(UART4);
 	LL_USART_EnableDirectionRx(UART4);
 
-	LL_USART_EnableDMAReq_TX(UART4);	//TX DMA
+	//LL_USART_EnableDMAReq_TX(UART4);	//TX DMA
 
 	LL_USART_Enable(UART4);
-
+/*
 	//TX DMA Init
 	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
 	LL_DMA_DisableFifoMode(DMA1, LL_DMA_STREAM_2);
@@ -90,17 +97,28 @@ void Serial_Init(void)
 	LL_DMA_SetMemorySize(DMA1, LL_DMA_STREAM_2, LL_DMA_MDATAALIGN_BYTE);
 	LL_DMA_SetPeriphBurstxfer(DMA1, LL_DMA_STREAM_2, LL_DMA_PBURST_SINGLE);
 	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, LL_USART_DMA_GetRegAddr(UART4, LL_USART_DMA_REG_DATA_TRANSMIT));
-
+*/
 	LL_USART_EnableIT_RXNE_RXFNE(UART4);
+	LL_USART_EnableIT_TXE_TXFNF(UART4);
 
 	LL_USART_ClearFlag_TC(UART4);
 
 	QueueInit(&rxQueue);
+	QueueInit(&txQueue);
 
 }
 
 void Serial_Send(char *string)
 {
+	char *c = string;
+	while (*c)
+	{
+		QueuePut(&txQueue, *c);
+		c++;
+	}
+	LL_USART_EnableIT_TXE_TXFNF(UART4);
+
+/*
 	LL_USART_ClearFlag_TC(UART4);
 	LL_DMA_ClearFlag_TC2(DMA1);
 	LL_DMA_ClearFlag_TE2(DMA1);
@@ -111,7 +129,7 @@ void Serial_Send(char *string)
 	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, strlen(string));
 	LL_USART_ClearFlag_TC(UART4);
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-
+*/
 }
 
 void Serial_Print(char _out[])
@@ -136,7 +154,7 @@ void Serial_Println(char _out[])
 void Serial_PrintInt(uint32_t val)
 {
 	char buffer[100];
-	sprintf(buffer, "%d\r\n", val);
+	sprintf(buffer, "%ld\r\n", val);
 	strcpy(tx_buffer, buffer);
 	Serial_Send(tx_buffer);
 }
@@ -173,6 +191,18 @@ void UART4_IRQHandler(void)
 	if (LL_USART_IsActiveFlag_RXNE_RXFNE(UART4))
 	{
 		QueuePut(&rxQueue, LL_USART_ReceiveData8(UART4));
+	}
+
+	if (LL_USART_IsActiveFlag_TXE_TXFNF(UART4))
+	{
+		if (QueueFillState(&txQueue) != 0)
+		{
+			UART4->TDR = QueueGet(&txQueue);
+		}
+		else
+		{
+			LL_USART_DisableIT_TXE_TXFNF(UART4);
+		}
 	}
 
 }
