@@ -1,49 +1,184 @@
 #include "can.h"
-#include "main.h"
-#include "cmds.h"
-#include "sysclock.h"
+#include "serial.h"
+#include "systick.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
+#define CAN_MESSAGE_RAM_START_ADDRESS (0x4000AC00)
+#define BIT_2_TO_15_MASK         0x0000fffc //TODO Add to memory mapping
 
+static const uint8_t Can_DlcToLength[] = {
+		0,
+		1,
+		2,
+		3,
+		4,
+		5,
+		6,
+		7,
+		8,
+		12,
+		16,
+		20,
+		24,
+		32,
+		48,
+		64 };
 
+static const uint32_t Can_LengthToDlc[] = {
+		0,    //  0
+		1,    //  1
+		2,    //  2
+		3,    //  3
+		4,    //  4
+		5,    //  5
+		6,    //  6
+		7,    //  7
+		8,    //  8
+		9,    //  9
+		9,    // 10
+		9,    // 11
+		9,    // 12
+		10,   // 13
+		10,   // 14
+		10,   // 15
+		10,   // 16
+		11,   // 17
+		11,   // 18
+		11,   // 19
+		11,   // 20
+		12,   // 21
+		12,   // 22
+		12,   // 23
+		12,   // 24
+		13,   // 25
+		13,   // 26
+		13,   // 27
+		13,   // 28
+		13,   // 29
+		13,   // 30
+		13,   // 31
+		13,   // 32
+		14,   // 33
+		14,   // 34
+		14,   // 35
+		14,   // 36
+		14,   // 37
+		14,   // 38
+		14,   // 39
+		14,   // 40
+		14,   // 41
+		14,   // 42
+		14,   // 43
+		14,   // 44
+		14,   // 45
+		14,   // 46
+		14,   // 47
+		14,   // 48
+		15,   // 49
+		15,   // 50
+		15,   // 51
+		15,   // 52
+		15,   // 53
+		15,   // 54
+		15,   // 55
+		15,   // 56
+		15,   // 57
+		15,   // 58
+		15,   // 59
+		15,   // 60
+		15,   // 61
+		15,   // 62
+		15,   // 63
+		15,   // 64
 
+		};
 
-static Can_Message_RAM can1_ram;
-static Can_Message_RAM can2_ram;
+static const Can_Handle handles[] = {
+		{
+				FDCAN1,
+				(Can_Message_RAM*) CAN_MESSAGE_RAM_START_ADDRESS },
+		{
+				FDCAN2,
+				(Can_Message_RAM*) (CAN_MESSAGE_RAM_START_ADDRESS + sizeof(Can_Message_RAM)) } };
 
-
-static Result_t Can_SetRamBlockAddresses(FDCAN_GlobalTypeDef *can, Can_Message_RAM *can_ram)
+static Result_t Can_SetRamBlockAddresses(uint32_t can_handle_index)
 {
-	uint32_t StartAddress;
+	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
+	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 
+	/*	uint32_t StartAddress;
 
-	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, (((uint32_t)can_ram->std_filters) << FDCAN_SIDFC_FLSSA_Pos));	// Standard filter list start address
-	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_LSS, (CAN_STD_FILTER_NUMBER << FDCAN_SIDFC_LSS_Pos));	// Standard filter elements number
-	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, (((uint32_t)can_ram->ext_filters) << FDCAN_XIDFC_FLESA_Pos));	// Extended filter list start address
-	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_LSE, (CAN_EXT_FILTER_NUMBER << FDCAN_XIDFC_LSE_Pos));	// Extended filter elements number
-	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0SA, (((uint32_t)can_ram->rx_fifo0) << FDCAN_RXF0C_F0SA_Pos));	// Rx FIFO 0 start address
-	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0S, (CAN_RX_FIFO0_ELMTS_NUMBER << FDCAN_RXF0C_F0S_Pos));	// Rx FIFO 0 elements number
-	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1SA, (((uint32_t)can_ram->rx_fifo1) << FDCAN_RXF1C_F1SA_Pos));	// Rx FIFO 1 start address
-	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1S, (CAN_RX_FIFO1_ELMTS_NUMBER << FDCAN_RXF1C_F1S_Pos));	// Rx FIFO 1 elements number
+	 StartAddress = (can_handle_index) ? sizeof(Can_Message_RAM) : 0;
 
-	MODIFY_REG(can->RXBC, FDCAN_RXBC_RBSA, (((uint32_t)can_ram->rx_buffer) << FDCAN_RXBC_RBSA_Pos));	// Rx buffer list start address
+	 MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, (StartAddress << FDCAN_SIDFC_FLSSA_Pos));
 
-	MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFSA, (((uint32_t)can_ram->tx_fifo) << FDCAN_TXEFC_EFSA_Pos));// Tx event FIFO start address
-	MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFS, (CAN_TX_EVENT_NUMBER << FDCAN_TXEFC_EFS_Pos));// Tx event FIFO elements number
+	 StartAddress += CAN_STD_FILTER_NUMBER;
+	 MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, (StartAddress << FDCAN_XIDFC_FLESA_Pos));
 
-	MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, (((uint32_t)can_ram->tx_buffer) << FDCAN_TXBC_TBSA_Pos));// Tx buffer list start address
-	MODIFY_REG(can->TXBC, FDCAN_TXBC_NDTB, (CAN_TX_BUFFER_NUMBER << FDCAN_TXBC_NDTB_Pos));// Dedicated Tx buffers number
-	MODIFY_REG(can->TXBC, FDCAN_TXBC_TFQS, ( CAN_TX_FIFO_QUEUE_ELMTS_NUMBER << FDCAN_TXBC_TFQS_Pos));// Tx FIFO/Queue elements number
+	 StartAddress += (CAN_EXT_FILTER_NUMBER * 2U);
+	 MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0SA, (StartAddress << FDCAN_RXF0C_F0SA_Pos));
 
+	 StartAddress += (CAN_RX_FIFO0_ELMTS_SIZE * CAN_RX_FIFO0_ELMTS_NUMBER);
+	 MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1SA, (StartAddress << FDCAN_RXF1C_F1SA_Pos));
+
+	 StartAddress += (CAN_RX_FIFO1_ELMTS_SIZE * CAN_RX_FIFO1_ELMTS_NUMBER);
+	 MODIFY_REG(can->RXBC, FDCAN_RXBC_RBSA, (StartAddress << FDCAN_RXBC_RBSA_Pos));
+
+	 StartAddress += (CAN_RX_BUFFER_SIZE * CAN_RX_BUFFER_NUMBER);
+	 MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFSA, (StartAddress << FDCAN_TXEFC_EFSA_Pos));
+
+	 StartAddress += (CAN_TX_EVENT_NUMBER * 2U);
+	 MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, (StartAddress << FDCAN_TXBC_TBSA_Pos));*/
+
+	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, ((uint32_t)can_ram->std_filters - CAN_MESSAGE_RAM_START_ADDRESS));	// Standard filter list start address
+	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_LSS, (CAN_STD_FILTER_NUMBER << FDCAN_SIDFC_LSS_Pos)); // Standard filter elements number
+	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, ((uint32_t)can_ram->ext_filters - CAN_MESSAGE_RAM_START_ADDRESS));	// Extended filter list start address
+	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_LSE, (CAN_EXT_FILTER_NUMBER << FDCAN_XIDFC_LSE_Pos)); // Extended filter elements number
+	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0SA, ((uint32_t)can_ram->rx_fifo0 - CAN_MESSAGE_RAM_START_ADDRESS)); // Rx FIFO 0 start address
+	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0S, (CAN_RX_FIFO0_ELMTS_NUMBER << FDCAN_RXF0C_F0S_Pos)); // Rx FIFO 0 elements number
+	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1SA, ((uint32_t)can_ram->rx_fifo1 - CAN_MESSAGE_RAM_START_ADDRESS)); // Rx FIFO 1 start address
+	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1S, (CAN_RX_FIFO1_ELMTS_NUMBER << FDCAN_RXF1C_F1S_Pos)); // Rx FIFO 1 elements number
+
+	MODIFY_REG(can->RXBC, FDCAN_RXBC_RBSA, ((uint32_t)can_ram->rx_buffer - CAN_MESSAGE_RAM_START_ADDRESS)); // Rx buffer list start address
+
+	MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFSA, ((uint32_t)can_ram->tx_fifo - CAN_MESSAGE_RAM_START_ADDRESS)); // Tx event FIFO start address
+	MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFS, (CAN_TX_EVENT_NUMBER << FDCAN_TXEFC_EFS_Pos)); // Tx event FIFO elements number
+
+	MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, ((uint32_t)can_ram->tx_buffer - CAN_MESSAGE_RAM_START_ADDRESS)); // Tx buffer list start address
+	MODIFY_REG(can->TXBC, FDCAN_TXBC_NDTB, (CAN_TX_BUFFER_NUMBER << FDCAN_TXBC_NDTB_Pos)); // Dedicated Tx buffers number
+	MODIFY_REG(can->TXBC, FDCAN_TXBC_TFQS, ( CAN_TX_FIFO_QUEUE_ELMTS_NUMBER << FDCAN_TXBC_TFQS_Pos)); // Tx FIFO/Queue elements number
+	CLEAR_BIT(can->TXBC, FDCAN_TXBC_TFQM);
 
 	return NOICE;
 }
-
-Result_t Fdcan_Init(FDCAN_GlobalTypeDef *can)
+Result_t Can_InitFdcan(uint32_t can_handle_index)
 {
+	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
+	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PLL2Q);
 
-	const uint32_t CvtEltSize[] =
-	{ 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 5, 0, 0, 0, 6, 0, 0, 0, 7 };
+	const uint32_t CvtEltSize[] = {
+			0,
+			0,
+			0,
+			0,
+			0,
+			1,
+			2,
+			3,
+			4,
+			0,
+			5,
+			0,
+			0,
+			0,
+			6,
+			0,
+			0,
+			0,
+			7 };
 
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_CSR);
 
@@ -53,7 +188,7 @@ Result_t Fdcan_Init(FDCAN_GlobalTypeDef *can)
 	while ((can->CCCR & FDCAN_CCCR_CSA) == FDCAN_CCCR_CSA)
 	{
 		if ((Systick_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
-			return OOF_INIT_CAN;
+			return OOF_CAN_INIT;
 	}
 
 	SET_BIT(can->CCCR, FDCAN_CCCR_INIT);
@@ -64,25 +199,26 @@ Result_t Fdcan_Init(FDCAN_GlobalTypeDef *can)
 	while ((can->CCCR & FDCAN_CCCR_INIT) == 0U)
 	{
 		if ((Systick_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
-			return OOF_INIT_CAN;
+			return OOF_CAN_INIT;
 	}
 
 	// Enable configuration change
 	SET_BIT(can->CCCR, FDCAN_CCCR_CCE);
 
-	CLEAR_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Enabled
-	//SET_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Disabled
+	//CLEAR_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Enabled
+	SET_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Disabled
 
-	SET_BIT(can->CCCR, FDCAN_CCCR_TXP);    //transmit pause Enabled
-	//CLEAR_BIT(can->CCCR, FDCAN_CCCR_TXP);//transmit pause Disabled
+	//SET_BIT(can->CCCR, FDCAN_CCCR_TXP);    //transmit pause Enabled
+	CLEAR_BIT(can->CCCR, FDCAN_CCCR_TXP);  //transmit pause Disabled
 
-	CLEAR_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling Enabled
-	//SET_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling  Disabled
+	//CLEAR_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling Enabled
+	SET_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling  Disabled
 
 	// Set FDCAN Frame Format
-	MODIFY_REG(can->CCCR, FDCAN_FRAME_FD_BRS, FDCAN_FRAME_FD_BRS);
+	MODIFY_REG(can->CCCR, FDCAN_CCCR_BRSE, FDCAN_CCCR_BRSE);
 
 	// Reset FDCAN Operation Mode
+	SET_BIT(can->CCCR, FDCAN_CCCR_FDOE);
 	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
 	CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
 
@@ -130,7 +266,7 @@ Result_t Fdcan_Init(FDCAN_GlobalTypeDef *can)
 	//		CLEAR_BIT(hfdcan->ttcan->TTOCF, FDCAN_TTOCF_OM);
 
 	// Calculate each RAM block address
-	Result_t result = FDCAN_CalcultateRamBlockAddresses(can);
+	Result_t result = Can_SetRamBlockAddresses(can_handle_index);
 	if (result != NOICE)
 		return result;
 
@@ -144,16 +280,17 @@ Result_t Fdcan_Init(FDCAN_GlobalTypeDef *can)
 	can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Can Start
-    CLEAR_BIT(can->CCCR, FDCAN_CCCR_INIT);
+	CLEAR_BIT(can->CCCR, FDCAN_CCCR_INIT);
 
 	Systick_BusyWait(100);
-
+	return NOICE;
 }
 
 void Can_InitGPIO(void)
 {
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	LL_GPIO_InitTypeDef GPIO_InitStruct = {
+			0 };
 
 	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PLL2Q);
 
@@ -173,10 +310,10 @@ void Can_InitGPIO(void)
 
 	LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	/**FDCAN2 GPIO Configuration
-	 PB12     ------> FDCAN2_RX
-	 PB13     ------> FDCAN2_TX
-	 */
+	//FDCAN2 GPIO Configuration
+	//PB12     ------> FDCAN2_RX
+	//PB13     ------> FDCAN2_TX
+
 	GPIO_InitStruct.Pin = LL_GPIO_PIN_12 | LL_GPIO_PIN_13;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
@@ -185,173 +322,166 @@ void Can_InitGPIO(void)
 	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
+void Can_AddStdFilter(uint32_t can_handle_index, uint32_t filter_index, uint32_t mask, uint32_t filter_id, uint32_t target_location)
+{
+	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 
+	can_ram->std_filters[filter_index].S0.bit.SFEC = target_location; // e.g. FDCAN_FILTER_TO_RXFIFO0
+	can_ram->std_filters[filter_index].S0.bit.SFID1 = filter_id;
+	can_ram->std_filters[filter_index].S0.bit.SFID2 = mask;
+	can_ram->std_filters[filter_index].S0.bit.SFT = FDCAN_FILTER_MASK;
+}
 Result_t Can_Init(uint8_t node_id)
 {
 	Result_t result = OOF;
 	Can_InitGPIO();
 
-	result = Fdcan_Init(FDCAN1);
-	if (result != NOICE)
-		return result;
-	result = Fdcan_Init(FDCAN2);
-	if (result != NOICE)
-		return result;
+	for (uint32_t i = 0; i < 2; i++)
+	{
+		result = Can_InitFdcan(i);
+		if (result != NOICE)
+			return result;
+		Can_AddStdFilter(i, 0, 0x1FF, ((3 << 7) | (node_id << 1)), FDCAN_FILTER_TO_RXFIFO0);
+	}
+	return NOICE;
+}
 
+void Can_checkFifo(uint32_t can_handle_index)
+{
 
+	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
+	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 
+	if (can->RXF0S & FDCAN_RXF0S_F0FL)	//Check FIFO 0
+	{
+		Serial_Print((can == FDCAN1) ? "FDCAN1 Fifo0\n" : "FDCAN2 Fifo0\n");
+
+		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
+
+		uint32_t message_id = can_ram->rx_fifo0[get_index].R0.bit.ID;
+		//uint8_t is_extended = can_ram->rx_fifo0.R0.bit.XTD;
+		//uint8_t is_remote_frame = can_ram->rx_fifo0.R0.bit.RTR;
+		//uint8_t is_error_passiv = can_ram->rx_fifo0.R0.bit.ESI;
+		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
+		uint32_t length = Can_DlcToLength[dlc];
+		uint8_t *data = (uint8_t*) &can_ram->rx_fifo0[get_index].data.uint8[0];
+
+		char send_buffer[1024] = {
+				0 };
+		sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
+
+		for (uint32_t c = 0; c < length; c++)
+			sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
+
+		Serial_Println(send_buffer);
+
+		//TODO Something with data
+
+		can->RXF0A = get_index & 0x3F;
+	}
+	if (can->RXF1S & FDCAN_RXF1S_F1FL)	//Check FIFO 1
+	{
+		Serial_Print((can == FDCAN1) ? "FDCAN1 Fifo1\n" : "FDCAN2 Fifo1\n");
+
+		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
+
+		uint32_t message_id = can_ram->rx_fifo1[get_index].R0.bit.ID;
+		//uint8_t is_extended = can_ram->rx_fifo0.R0.bit.XTD;
+		//uint8_t is_remote_frame = can_ram->rx_fifo0.R0.bit.RTR;
+		//uint8_t is_error_passiv = can_ram->rx_fifo0.R0.bit.ESI;
+		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
+		uint32_t length = Can_DlcToLength[dlc];
+		uint8_t *data = (uint8_t*) &can_ram->rx_fifo1[get_index].data.uint8[0];
+
+		char send_buffer[1024] = {
+				0 };
+		sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
+
+		for (uint32_t c = 0; c < length; c++)
+			sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
+
+		Serial_Println(send_buffer);
+		//TODO Something with data
+
+		can->RXF1A = get_index & 0x3F;
+	}
+
+}
+
+Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t *data, uint32_t length)
+{
+	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
+	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
+
+	uint8_t index = ((FDCAN_TXFQS_TFQPI_Msk & can->TXFQS) >> FDCAN_TXFQS_TFQPI_Pos) - 1;
+	volatile Can_Tx_Element *packet;
+
+	if ((can->TXFQS & FDCAN_TXFQS_TFFL) < 1)
+		return OOF_CAN_TX_FULL;
+
+	packet = &can_ram->tx_buffer[index];
+	packet->T0.bit.XTD = 0;
+	packet->T0.bit.ID = message_id;
+	packet->T1.bit.FDF = 1;
+//	packet->T1.bit.BRS = 0;
+	packet->T1.bit.BRS = 1;
+	packet->T1.bit.DLC = Can_LengthToDlc[length];
+
+	packet->T1.reg |= FDCAN_DLC_BYTES_64;
+
+	for (uint32_t c = 0; c < length; c++)
+		packet->data.uint8[c] = data[c];
+	for (uint32_t c = length; c < Can_LengthToDlc[length]; c++)
+		packet->data.uint8[c] = 0;
+
+	can->TXBAR = (1 << index);
 
 	return NOICE;
 }
 
-HAL_StatusTypeDef Can_AddStdFilter(FDCAN_GlobalTypeDef *can, uint32_t filter_index, uint32_t mask, uint32_t filter_id, uint32_t target_location)
+Result_t Can_processStandardMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t *data, uint32_t length)
 {
-
-
-
-
-	FDCAN_FilterTypeDef filter;
-	filter.IdType = FDCAN_STANDARD_ID;
-	filter.FilterIndex = filter_index;
-	filter.FilterType = FDCAN_FILTER_MASK;
-	filter.FilterConfig = target_location;
-	filter.FilterID1 = filter_id;
-	filter.FilterID2 = mask;
-
-	uint32_t FilterElementW1;
-	  uint32_t FilterElementW2;
-	  uint32_t *FilterAddress;
-	  HAL_FDCAN_StateTypeDef state = hfdcan->State;
-
-
-	    if (sFilterConfig->IdType == FDCAN_STANDARD_ID)
-	    {
-
-	      // Build filter element
-	      if (sFilterConfig->FilterConfig == FDCAN_FILTER_TO_RXBUFFER)
-	      {
-	        FilterElementW1 = ((FDCAN_FILTER_TO_RXBUFFER << 27U)       |
-	                           (sFilterConfig->FilterID1 << 16U)       |
-	                           (sFilterConfig->IsCalibrationMsg << 8U) |
-	                           sFilterConfig->RxBufferIndex);
-	      }
-	      else
-	      {
-	        FilterElementW1 = ((sFilterConfig->FilterType << 30U)   |
-	                           (sFilterConfig->FilterConfig << 27U) |
-	                           (sFilterConfig->FilterID1 << 16U)    |
-	                           sFilterConfig->FilterID2);
-	      }
-
-	      /* Calculate filter address */
-	      FilterAddress = (uint32_t *)(hfdcan->msgRam.StandardFilterSA + (sFilterConfig->FilterIndex * 4U));
-
-	      /* Write filter element to the message RAM */
-	      *FilterAddress = FilterElementW1;
-	    }
-
-
-	return HAL_FDCAN_ConfigFilter(handle, &filter);
-
-}
-
-
-inline uint32_t Can_GetRxFifoFillLevel(FDCAN_GlobalTypeDef *can, uint32_t RxFifo)
-{
-	return can->Instance->RXF0S & ((RxFifo == FDCAN_RX_FIFO0)? FDCAN_RXF0S_F0FL : FDCAN_RXF1S_F1FL);
-}
-
-void Can_checkFifo(FDCAN_GlobalTypeDef *can)
-{
-	FDCAN_HandleTypeDef *handle = (can == FDCAN1) ? &hfdcan1 : &hfdcan2;
-
-	while (Can_GetRxFifoFillLevel(can, FDCAN_RX_FIFO0) > 0)
-	{
-		Serial_print((can == FDCAN1) ? "FDCAN1\n" : "FDCAN2\n");
-
-		FDCAN_RxHeaderTypeDef canHeader;
-		uint8_t canData[64];
-
-		if (HAL_FDCAN_GetRxMessage(handle, FDCAN_RX_FIFO0, &canHeader, canData) == HAL_OK)
-		{
-			if (canHeader.RxFrameType == FDCAN_REMOTE_FRAME)
-			{
-				Serial_print("REMOTE\n");
-			}
-			else
-			{
-				Can_processStandardMessage(canHeader.Identifier, canData, DLCtoBytes[canHeader.DataLength >> 16]);
-			}
-		}
-	}
-
-}
-
-Result_t Can_processStandardMessage(uint32_t message_id, uint8_t *data, uint32_t length)
-{
-
-	uint8_t buffer = ((data[0] >> 6) & 0x3);
-	uint8_t channel = (data[0] & 0x3F);
-	Serial_println("CAN NOICE\n");
-
-	char send_buffer[1024] =
-	{ 0 };
-	sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
-
-	for (uint32_t c = 0; c < length; c++)
-		sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
-
-	Serial_println(send_buffer);
-
 	Result_t result = OOF;
+	//FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
+	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 
-	if (buffer == 0)
-	{
-		uint8_t cmd_id = data[1];
+	/*
+	 uint8_t buffer = ((data[0] >> 6) & 0x3);
+	 uint8_t channel = (data[0] & 0x3F);
+	 Serial_println("CAN NOICE\n");
 
-		if (channel < CHANNEL_TYPE_LAST && channel_type_array[channel].cmds != 0)
-		{
-			const can_function *channel_cmds_array = channel_type_array[channel].cmds;
-			const uint8_t last_index = channel_type_array[channel].last_index;
-			if (cmd_id < last_index && channel_cmds_array[cmd_id] != NULL)
-				result = channel_cmds_array[cmd_id]((uint32_t*) &data[2]);
+	 char send_buffer[1024] =
+	 { 0 };
+	 sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
 
-		}
-		//TODO else ERROR
-	}
-	else
-	{
-		uint32_t timestamp = (uint32_t) data[1];
-		uint8_t cmd_id = data[5];
+	 for (uint32_t c = 0; c < length; c++)
+	 sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
 
-		timestamp = cmd_id;					//Just here to get rid of warnings
-		cmd_id = timestamp;					//Just here to get rid of warnings
-	}
+	 Serial_println(send_buffer);
+
+
+	 if (buffer == 0)
+	 {
+	 uint8_t cmd_id = data[1];
+
+	 if (channel < CHANNEL_TYPE_LAST && channel_type_array[channel].cmds != 0)
+	 {
+	 const can_function *channel_cmds_array = channel_type_array[channel].cmds;
+	 const uint8_t last_index = channel_type_array[channel].last_index;
+	 if (cmd_id < last_index && channel_cmds_array[cmd_id] != NULL)
+	 result = channel_cmds_array[cmd_id]((uint32_t*) &data[2]);
+
+	 }
+	 //TODO else ERROR
+	 }
+	 else
+	 {
+	 uint32_t timestamp = (uint32_t) data[1];
+	 uint8_t cmd_id = data[5];
+
+	 timestamp = cmd_id;					//Just here to get rid of warnings
+	 cmd_id = timestamp;					//Just here to get rid of warnings
+	 }*/
 	return result;
-}
-
-void Can_sendPacket(uint8_t channel_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
-{
-
-}
-
-Result_t Can_sendMessage(FDCAN_GlobalTypeDef *caninstance, uint32_t message_id, uint8_t *data, uint32_t length)
-{
-	FDCAN_HandleTypeDef *handle = (caninstance == FDCAN1) ? &hfdcan1 : &hfdcan2;
-
-	if (length > 64)
-		return OOF;
-	FDCAN_TxHeaderTypeDef pHeader;
-	pHeader.Identifier = (message_id & 0x07FF);
-	pHeader.IdType = FDCAN_STANDARD_ID;
-	pHeader.TxFrameType = FDCAN_DATA_FRAME;
-	pHeader.DataLength = DLC_table[length];
-	pHeader.ErrorStateIndicator = FDCAN_ESI_PASSIVE;
-	pHeader.BitRateSwitch = FDCAN_BRS_ON;
-	pHeader.FDFormat = FDCAN_FD_CAN;
-	pHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS; //FDCAN_STORE_TX_EVENTS
-	pHeader.MessageMarker = 0;
-	Serial_println("Send CAN MESSAGE");
-	return (HAL_FDCAN_AddMessageToTxFifoQ(handle, &pHeader, data) == HAL_OK) ? NOICE : OOF;
 }
 

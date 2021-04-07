@@ -37,7 +37,8 @@ typedef enum
 {
 	NOICE = 0,
 	OOF,
-	SEND_CAN,
+	OOF_CAN_INIT,
+	OOF_CAN_TX_FULL,
 }Result_t;
 
 typedef Result_t (* can_function)(uint32_t *);

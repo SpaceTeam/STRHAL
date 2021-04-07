@@ -1,5 +1,6 @@
 #include "serial.h"
 #include "main.h"
+#include <stdio.h>
 #include <string.h>
 
 #define QUEUE_SIZE (1UL<<10)
@@ -7,24 +8,24 @@ typedef volatile struct
 {
 	char Array[QUEUE_SIZE];
 	uint16_t QueueOut, QueueIn;
-}Queue;
+} Queue;
 
-Queue rxQueue = {0};
+Queue rxQueue = {
+		0 };
 
-
-void QueueInit(Queue * queue)
+void QueueInit(Queue *queue)
 {
 	queue->QueueIn = queue->QueueOut = 0;
 }
 void QueuePut(Queue *queue, char new)
 {
 	queue->Array[queue->QueueIn] = new;
-	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE-1);
+	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE - 1);
 }
-char QueueGet( Queue *queue )
+char QueueGet(Queue *queue)
 {
 	char return_value = queue->Array[queue->QueueOut];
-	queue->QueueOut = (queue->QueueOut + 1) & (QUEUE_SIZE-1);
+	queue->QueueOut = (queue->QueueOut + 1) & (QUEUE_SIZE - 1);
 	return return_value;
 }
 
@@ -43,7 +44,8 @@ void Serial_Init(void)
 	 PC10   ------> UART4_TX
 	 PC11   ------> UART4_RX
 	 */
-	LL_GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	LL_GPIO_InitTypeDef GPIO_InitStruct = {
+			0 };
 	GPIO_InitStruct.Pin = LL_GPIO_PIN_10 | LL_GPIO_PIN_11;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -56,7 +58,8 @@ void Serial_Init(void)
 	NVIC_SetPriority(UART4_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
 	NVIC_EnableIRQ(UART4_IRQn);
 
-	LL_USART_InitTypeDef UART_InitStruct = { 0 };
+	LL_USART_InitTypeDef UART_InitStruct = {
+			0 };
 	UART_InitStruct.BaudRate = 115200;
 	UART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
 	UART_InitStruct.StopBits = LL_USART_STOPBITS_1;
@@ -109,59 +112,67 @@ void Serial_Send(char *string)
 	LL_USART_ClearFlag_TC(UART4);
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
-
 }
 
 void Serial_Print(char _out[])
 {
-	while (LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2)){};
+	while (LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2))
+	{
+	};
 	strcpy(tx_buffer, _out);
 	Serial_Send(tx_buffer);
 }
 
 void Serial_Println(char _out[])
 {
-	while (LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2)){};
+	while (LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2))
+	{
+	};
 	strcpy(tx_buffer, _out);
 	strcat(tx_buffer, "\r\n");
 	Serial_Send(tx_buffer);
 }
 
+void Serial_PrintInt(uint32_t val)
+{
+	char buffer[100];
+	sprintf(buffer, "%d\r\n", val);
+	strcpy(tx_buffer, buffer);
+	Serial_Send(tx_buffer);
+}
 uint8_t Serial_CheckInput(char *message)
 {
 	static uint32_t receive_index = 0;
 	char new_char;
 
-	while(rxQueue.QueueOut != rxQueue.QueueIn)
+	while (rxQueue.QueueOut != rxQueue.QueueIn)
 	{
 		new_char = QueueGet(&rxQueue);
 
-
-			if(new_char == SERIAL_DELIMITER)				// Carriage return as Delimiter
+		if (new_char == SERIAL_DELIMITER)				// Carriage return as Delimiter
+		{
+			message[receive_index] = 0;	//ADD String Delimiter
+			receive_index = 0;
+			return 1;
+		}
+		else if (new_char != LINE_FEED)
+		{
+			if (receive_index < (RECEIVE_STRING_SIZE - 1))
 			{
-				message[receive_index] = 0;	//ADD String Delimiter
-				receive_index = 0;
-				return 1;
+				message[receive_index] = new_char;
+				receive_index++;
 			}
-			else if (new_char != LINE_FEED)
-			{
-				if (receive_index < (RECEIVE_STRING_SIZE - 1))
-				{
-					message[receive_index] = new_char;
-					receive_index++;
-				}
-			}
+		}
 
 	}
 	return 0;
 }
 
- void UART4_IRQHandler(void)
- {
-	 if(LL_USART_IsActiveFlag_RXNE_RXFNE(UART4))
-	 {
-		 QueuePut(&rxQueue, LL_USART_ReceiveData8(UART4));
-	 }
+void UART4_IRQHandler(void)
+{
+	if (LL_USART_IsActiveFlag_RXNE_RXFNE(UART4))
+	{
+		QueuePut(&rxQueue, LL_USART_ReceiveData8(UART4));
+	}
 
-
- }
+}
