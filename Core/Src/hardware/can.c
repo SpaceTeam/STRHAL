@@ -8,26 +8,11 @@
 #define CAN_MESSAGE_RAM_START_ADDRESS (0x4000AC00)
 #define BIT_2_TO_15_MASK         0x0000fffc //TODO Add to memory mapping
 
-static const uint8_t Can_DlcToLength[] = {
-		0,
-		1,
-		2,
-		3,
-		4,
-		5,
-		6,
-		7,
-		8,
-		12,
-		16,
-		20,
-		24,
-		32,
-		48,
-		64 };
+static const uint8_t Can_DlcToLength[] =
+{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64 };
 
-static const uint32_t Can_LengthToDlc[] = {
-		0,    //  0
+static const uint32_t Can_LengthToDlc[] =
+{ 0,    //  0
 		1,    //  1
 		2,    //  2
 		3,    //  3
@@ -95,20 +80,19 @@ static const uint32_t Can_LengthToDlc[] = {
 
 		};
 
-static const Can_Handle handles[] = {
-		{
-				FDCAN1,
-				(Can_Message_RAM*) CAN_MESSAGE_RAM_START_ADDRESS },
-		{
-				FDCAN2,
-				(Can_Message_RAM*) (CAN_MESSAGE_RAM_START_ADDRESS + sizeof(Can_Message_RAM)) } };
+static const Can_Handle handles[] =
+{
+{
+FDCAN1, (Can_Message_RAM*) CAN_MESSAGE_RAM_START_ADDRESS },
+{
+FDCAN2, (Can_Message_RAM*) (CAN_MESSAGE_RAM_START_ADDRESS + sizeof(Can_Message_RAM)) } };
 
 static Result_t Can_SetRamBlockAddresses(uint32_t can_handle_index)
 {
 	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-
-	/*	uint32_t StartAddress;
+	/*
+	 uint32_t StartAddress;
 
 	 StartAddress = (can_handle_index) ? sizeof(Can_Message_RAM) : 0;
 
@@ -128,10 +112,9 @@ static Result_t Can_SetRamBlockAddresses(uint32_t can_handle_index)
 
 	 StartAddress += (CAN_RX_BUFFER_SIZE * CAN_RX_BUFFER_NUMBER);
 	 MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFSA, (StartAddress << FDCAN_TXEFC_EFSA_Pos));
-
 	 StartAddress += (CAN_TX_EVENT_NUMBER * 2U);
-	 MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, (StartAddress << FDCAN_TXBC_TBSA_Pos));*/
-
+	 MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, (StartAddress << FDCAN_TXBC_TBSA_Pos));
+	 */
 	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, ((uint32_t)can_ram->std_filters - CAN_MESSAGE_RAM_START_ADDRESS));	// Standard filter list start address
 	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_LSS, (CAN_STD_FILTER_NUMBER << FDCAN_SIDFC_LSS_Pos)); // Standard filter elements number
 	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, ((uint32_t)can_ram->ext_filters - CAN_MESSAGE_RAM_START_ADDRESS));	// Extended filter list start address
@@ -159,26 +142,8 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PLL2Q);
 
-	const uint32_t CvtEltSize[] = {
-			0,
-			0,
-			0,
-			0,
-			0,
-			1,
-			2,
-			3,
-			4,
-			0,
-			5,
-			0,
-			0,
-			0,
-			6,
-			0,
-			0,
-			0,
-			7 };
+	const uint32_t CvtEltSize[] =
+	{ 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 5, 0, 0, 0, 6, 0, 0, 0, 7 };
 
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_CSR);
 
@@ -214,10 +179,8 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	//CLEAR_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling Enabled
 	SET_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling  Disabled
 
-	// Set FDCAN Frame Format
-	MODIFY_REG(can->CCCR, FDCAN_CCCR_BRSE, FDCAN_CCCR_BRSE);
+	SET_BIT(can->CCCR, FDCAN_CCCR_BRSE);
 
-	// Reset FDCAN Operation Mode
 	SET_BIT(can->CCCR, FDCAN_CCCR_FDOE);
 	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
 	CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
@@ -279,6 +242,10 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	// Configure global filter to reject everything
 	can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
+	//Accept everything
+	//can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO0 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO0 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
+	//		| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+
 	//Can Start
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_INIT);
 
@@ -289,8 +256,8 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 void Can_InitGPIO(void)
 {
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {
-			0 };
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 
 	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PLL2Q);
 
@@ -354,26 +321,28 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 	if (can->RXF0S & FDCAN_RXF0S_F0FL)	//Check FIFO 0
 	{
-		Serial_Print((can == FDCAN1) ? "FDCAN1 Fifo0\n" : "FDCAN2 Fifo0\n");
+		Serial_PrintString((can == FDCAN1) ? "FDCAN1 Fifo0\n" : "FDCAN2 Fifo0\n");
 
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 
-		uint32_t message_id = can_ram->rx_fifo0[get_index].R0.bit.ID;
-		//uint8_t is_extended = can_ram->rx_fifo0.R0.bit.XTD;
-		//uint8_t is_remote_frame = can_ram->rx_fifo0.R0.bit.RTR;
-		//uint8_t is_error_passiv = can_ram->rx_fifo0.R0.bit.ESI;
+		uint32_t id = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
+		uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
+		uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
+		uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
 		uint32_t length = Can_DlcToLength[dlc];
 		uint8_t *data = (uint8_t*) &can_ram->rx_fifo0[get_index].data.uint8[0];
-
-		char send_buffer[1024] = {
-				0 };
-		sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
+		char send_buffer[1024] =
+		{ 0 };
+		sprintf(send_buffer + strlen(send_buffer), "id:      %ld, 0x%03lx\n", id, id);
+		sprintf(send_buffer + strlen(send_buffer), "is_extended: %d, is_remote_frame: %d, is_error_passiv: %d\n", is_extended, is_remote_frame, is_error_passiv);
+		sprintf(send_buffer + strlen(send_buffer), "dlc:     %ld, 0x%04lx\n", dlc, dlc);
+		sprintf(send_buffer + strlen(send_buffer), "length:  %ld, 0x%04lx\n", length, length);
 
 		for (uint32_t c = 0; c < length; c++)
 			sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
 
-		Serial_Println(send_buffer);
+		Serial_PrintString(send_buffer);
 
 		//TODO Something with data
 
@@ -381,26 +350,29 @@ void Can_checkFifo(uint32_t can_handle_index)
 	}
 	if (can->RXF1S & FDCAN_RXF1S_F1FL)	//Check FIFO 1
 	{
-		Serial_Print((can == FDCAN1) ? "FDCAN1 Fifo1\n" : "FDCAN2 Fifo1\n");
+		Serial_PrintString((can == FDCAN1) ? "FDCAN1 Fifo1" : "FDCAN2 Fifo1");
 
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 
-		uint32_t message_id = can_ram->rx_fifo1[get_index].R0.bit.ID;
-		//uint8_t is_extended = can_ram->rx_fifo0.R0.bit.XTD;
-		//uint8_t is_remote_frame = can_ram->rx_fifo0.R0.bit.RTR;
-		//uint8_t is_error_passiv = can_ram->rx_fifo0.R0.bit.ESI;
+		uint32_t id = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
+		uint8_t is_extended = can_ram->rx_fifo1[get_index].R0.bit.XTD;
+		uint8_t is_remote_frame = can_ram->rx_fifo1[get_index].R0.bit.RTR;
+		uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		uint32_t length = Can_DlcToLength[dlc];
 		uint8_t *data = (uint8_t*) &can_ram->rx_fifo1[get_index].data.uint8[0];
 
-		char send_buffer[1024] = {
-				0 };
-		sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
+		char send_buffer[1024] =
+		{ 0 };
+		sprintf(send_buffer + strlen(send_buffer), "id:      %ld, 0x%03lx\n", id, id);
+		sprintf(send_buffer + strlen(send_buffer), "is_extended: %d, is_remote_frame: %d, is_error_passiv: %d\n", is_extended, is_remote_frame, is_error_passiv);
+		sprintf(send_buffer + strlen(send_buffer), "dlc:     %ld, 0x%04lx\n", dlc, dlc);
+		sprintf(send_buffer + strlen(send_buffer), "length:  %ld, 0x%04lx\n", length, length);
 
 		for (uint32_t c = 0; c < length; c++)
 			sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
 
-		Serial_Println(send_buffer);
+		Serial_PrintString(send_buffer);
 		//TODO Something with data
 
 		can->RXF1A = get_index & 0x3F;
@@ -413,26 +385,22 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 
-	uint8_t index = ((FDCAN_TXFQS_TFQPI_Msk & can->TXFQS) >> FDCAN_TXFQS_TFQPI_Pos) - 1;
-	volatile Can_Tx_Element *packet;
-
+	uint8_t index = ((FDCAN_TXFQS_TFQPI_Msk & can->TXFQS) >> FDCAN_TXFQS_TFQPI_Pos);
 	if ((can->TXFQS & FDCAN_TXFQS_TFFL) < 1)
 		return OOF_CAN_TX_FULL;
+	Can_Tx_Element *packet = &can_ram->tx_fifo[index];
 
-	packet = &can_ram->tx_buffer[index];
 	packet->T0.bit.XTD = 0;
-	packet->T0.bit.ID = message_id;
+	packet->T0.bit.ID = message_id << 18;
 	packet->T1.bit.FDF = 1;
-//	packet->T1.bit.BRS = 0;
 	packet->T1.bit.BRS = 1;
 	packet->T1.bit.DLC = Can_LengthToDlc[length];
 
-	packet->T1.reg |= FDCAN_DLC_BYTES_64;
-
-	for (uint32_t c = 0; c < length; c++)
-		packet->data.uint8[c] = data[c];
-	for (uint32_t c = length; c < Can_LengthToDlc[length]; c++)
-		packet->data.uint8[c] = 0;
+	uint32_t i = 0;
+	for (uint32_t c = 0; c < length; c += 4)
+		packet->data.uint32[i++] = data[c] | data[c + 1] << 8 | data[c + 2] << 16 | data[c + 3] << 24;
+	while (i < Can_LengthToDlc[length] / 4)
+		packet->data.uint32[i++] = 0;
 
 	can->TXBAR = (1 << index);
 
@@ -445,10 +413,10 @@ Result_t Can_processStandardMessage(uint32_t can_handle_index, uint32_t message_
 	//FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
 
-	/*
+
 	 uint8_t buffer = ((data[0] >> 6) & 0x3);
 	 uint8_t channel = (data[0] & 0x3F);
-	 Serial_println("CAN NOICE\n");
+	 Serial_PrintString("CAN NOICE\n");
 
 	 char send_buffer[1024] =
 	 { 0 };
@@ -457,9 +425,9 @@ Result_t Can_processStandardMessage(uint32_t can_handle_index, uint32_t message_
 	 for (uint32_t c = 0; c < length; c++)
 	 sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
 
-	 Serial_println(send_buffer);
+	 Serial_PrintString(send_buffer);
 
-
+/*
 	 if (buffer == 0)
 	 {
 	 uint8_t cmd_id = data[1];
@@ -470,7 +438,6 @@ Result_t Can_processStandardMessage(uint32_t can_handle_index, uint32_t message_
 	 const uint8_t last_index = channel_type_array[channel].last_index;
 	 if (cmd_id < last_index && channel_cmds_array[cmd_id] != NULL)
 	 result = channel_cmds_array[cmd_id]((uint32_t*) &data[2]);
-
 	 }
 	 //TODO else ERROR
 	 }
@@ -481,7 +448,8 @@ Result_t Can_processStandardMessage(uint32_t can_handle_index, uint32_t message_
 
 	 timestamp = cmd_id;					//Just here to get rid of warnings
 	 cmd_id = timestamp;					//Just here to get rid of warnings
-	 }*/
+	 }
+	 */
 	return result;
 }
 

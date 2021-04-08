@@ -32,25 +32,25 @@ int main(void)
 	Flash_Init();
 
 	Can_Init(10);
+	/*
+	 uint8_t data[32] =
+	 { 0 };
+	 for (uint8_t c = 0; c < 32; c++)
+	 {
+	 data[c] = Flash_GetByteFromAddress(c);
 
-	uint8_t data[32] =
-	{ 0 };
-	for (uint8_t c = 0; c < 32; c++)
-	{
-		data[c] = Flash_GetByteFromAddress(c);
+	 }
+	 for (uint8_t c = 0; c < 32; c++)
+	 {
+	 Serial_PutInt(c);
+	 Serial_PutString(": ");
+	 Serial_PutInt(data[c]);
+	 Serial_PrintString("");
+	 }
+	 Flash_SetByteAtAddress(13, 42);
 
-	}
-	for (uint8_t c = 0; c < 32; c++)
-	{
-		Serial_PutInt(c);
-		Serial_PutString(": ");
-		Serial_PutInt(data[c]);
-		Serial_PrintString("");
-	}
-	Flash_SetByteAtAddress(13, 42);
-
-	Flash_SetByteAtAddress(21, data[21] >> 1);
-
+	 Flash_SetByteAtAddress(21, data[21] >> 1);
+	 */
 
 	char send_buffer[256] =
 	{ 0 };
@@ -89,11 +89,11 @@ int main(void)
 			 0xBE,
 			 0xEF };*/
 			uint8_t testdata[64] =
-			{ 0x01, 0x02, 0x03, 0x04, 0x50, 0x60 };
-			testdata[4] = (uint8_t) on;
-			testdata[5] = (uint8_t) off;
+			{ 0x01, 0x02, 0x03, 0x04, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+			//testdata[4] = (uint8_t) on;
+			//testdata[5] = (uint8_t) off;
 
-			if (Can_sendMessage(1, tone, testdata, 6) == NOICE)
+			if (Can_sendMessage(0, tone, testdata, 25) == NOICE)
 				Serial_PrintString("message sent\n");
 			else
 				Serial_PrintString("FOCK\n");

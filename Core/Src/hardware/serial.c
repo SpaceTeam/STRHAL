@@ -20,14 +20,16 @@ void Queue_Init(Queue *queue)
 {
 	queue->QueueIn = queue->QueueOut = 0;
 }
-void Queue_Put(Queue *queue, char new)
-{
-	queue->Array[queue->QueueIn] = new;
-	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE - 1);
-}
 uint32_t Queue_FillState(Queue *queue)
 {
 	return (queue->QueueIn - queue->QueueOut + QUEUE_SIZE) % QUEUE_SIZE;
+}
+void Queue_Put(Queue *queue, char new)
+{
+
+	while(Queue_FillState(queue) == (QUEUE_SIZE - 1)); //TODO ADD TIMEOUT
+	queue->Array[queue->QueueIn] = new;
+	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE - 1);
 }
 char Queue_Get(Queue *queue)
 {

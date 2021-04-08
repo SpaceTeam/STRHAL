@@ -797,7 +797,7 @@ do{                                                              \
 
 typedef union
 {
-	struct
+	struct __attribute__((__packed__))
 	{
 		volatile uint32_t SFID2 :11;		//bit: 0..10   Standard Filter ID 2
 		volatile uint32_t :5;			//bit: 11..15  Reserved
@@ -807,31 +807,31 @@ typedef union
 	} bit;
 	volatile uint32_t reg;
 } CAN_STANDARD_MESSAGE_FILTER_ELEMENT_S0_Type;
-typedef struct
+typedef struct __attribute__((__packed__))
 {
 	volatile CAN_STANDARD_MESSAGE_FILTER_ELEMENT_S0_Type S0;
 } Can_Standard_Filter_Element;
 
 typedef union
 {
-	struct
+	struct __attribute__((__packed__))
 	{
-		volatile uint32_t EFID1 :29;	//bit: 0..28   Extended Filter ID 1
-		volatile uint32_t EFEC :3;	//bit: 29..31  Extended Filter Element Configuration
+		uint32_t EFID1 :29;	//bit: 0..28   Extended Filter ID 1
+		uint32_t EFEC :3;	//bit: 29..31  Extended Filter Element Configuration
 	} bit;
 	volatile uint32_t reg;
 } CAN_EXTENDED_MESSAGE_FILTER_ELEMENT_F0_Type;
 typedef union
 {
-	struct
+	struct __attribute__((__packed__))
 	{
-		volatile uint32_t EFID2 :29;	//bit: 0..28  Extended Filter ID 2
-		volatile uint32_t :1;		//bit: 29     Reserved
-		volatile uint32_t EFT :2;		//bit: 30..31 Extended Filter Type
+		uint32_t EFID2 :29;	//bit: 0..28  Extended Filter ID 2
+		uint32_t :1;		//bit: 29     Reserved
+		uint32_t EFT :2;		//bit: 30..31 Extended Filter Type
 	} bit;
 	volatile uint32_t reg;
 } CAN_EXTENDED_MESSAGE_FILTER_ELEMENT_F1_Type;
-typedef struct
+typedef struct __attribute__((__packed__))
 {
 	volatile CAN_EXTENDED_MESSAGE_FILTER_ELEMENT_F0_Type F0;
 	volatile CAN_EXTENDED_MESSAGE_FILTER_ELEMENT_F1_Type F1;
@@ -841,10 +841,10 @@ typedef union
 {
 	struct
 	{
-		volatile uint32_t ID :29;		//bit:  0..28  Identifier
-		volatile uint32_t RTR :1;		//bit:  29     Remote Transmission Request
-		volatile uint32_t XTD :1;		//bit:  30     Extended Identifier
-		volatile uint32_t ESI :1;		//bit:  31     Error State Indicator
+		uint32_t ID :29;		//bit:  0..28  Identifier
+		uint32_t RTR :1;		//bit:  29     Remote Transmission Request
+		uint32_t XTD :1;		//bit:  30     Extended Identifier
+		uint32_t ESI :1;		//bit:  31     Error State Indicator
 	} bit;
 	uint32_t reg;
 } CAN_RX_ELEMENT_R0_Type;
@@ -852,79 +852,79 @@ typedef union
 {
 	struct
 	{
-		volatile uint32_t RXTS :16;		//bit: 0..15   Rx Timestamp
-		volatile uint32_t DLC :4;		//bit: 16..19  Data Length Code
-		volatile uint32_t BRS :1;		//bit: 20      Bit Rate Switch
-		volatile uint32_t FDF :1;		//bit: 21      FD Format
-		volatile uint32_t :2;			//bit: 22..23  Reserved
-		volatile uint32_t FIDX :7;		//bit: 24..30  Filter Index
-		volatile uint32_t ANMF :1;		//bit: 31      Accepted Non-matching Frame
+		uint32_t RXTS :16;		//bit: 0..15   Rx Timestamp
+		uint32_t DLC :4;		//bit: 16..19  Data Length Code
+		uint32_t BRS :1;		//bit: 20      Bit Rate Switch
+		uint32_t FDF :1;		//bit: 21      FD Format
+		uint32_t :2;			//bit: 22..23  Reserved
+		uint32_t FIDX :7;		//bit: 24..30  Filter Index
+		uint32_t ANMF :1;		//bit: 31      Accepted Non-matching Frame
 	} bit;
-	volatile uint32_t reg;
+	uint32_t reg;
 } CAN_RX_ELEMENT_R1_Type;
 
-typedef union
+typedef union __attribute__((__packed__))
 {
-	volatile uint8_t uint8[CAN_ELMTS_ARRAY_SIZE];
-	volatile uint32_t uint32[CAN_ELMTS_ARRAY_SIZE / 4];
+	uint8_t uint8[CAN_ELMTS_ARRAY_SIZE];
+	uint32_t uint32[CAN_ELMTS_ARRAY_SIZE / 4];
 } CAN_RX_ELEMENT_DATA_Type;
 typedef struct
 {
-	volatile CAN_RX_ELEMENT_R0_Type R0;
-	volatile CAN_RX_ELEMENT_R1_Type R1;
-	volatile CAN_RX_ELEMENT_DATA_Type data;
+	CAN_RX_ELEMENT_R0_Type R0;
+	CAN_RX_ELEMENT_R1_Type R1;
+	CAN_RX_ELEMENT_DATA_Type data;
 } Can_Rx_Element;
 
 typedef union
 {
 	struct
 	{
-		volatile uint32_t ID :29;		//bit:  0..28  Identifier
-		volatile uint32_t RTR :1;		//bit:  29     Remote Transmission Request
-		volatile uint32_t XTD :1;		//bit:  30     Extended Identifier
-		volatile uint32_t :1;		//bit:  31     Reserved
+		uint32_t ID :29;		//bit:  0..28  Identifier
+		uint32_t RTR :1;		//bit:  29     Remote Transmission Request
+		uint32_t XTD :1;		//bit:  30     Extended Identifier
+		uint32_t :1;		//bit:  31     Reserved
 	} bit;
-	volatile uint32_t reg;
+	uint32_t reg;
 } CAN_TX_ELEMENT_T0_Type;
 typedef union
 {
 	struct
 	{
-		volatile uint32_t :16;		//bit: 0..15   Reserved
-		volatile uint32_t DLC :4;		//bit: 16..19  Data Length Code
-		volatile uint32_t BRS :1;		//bit: 20      Bit Rate Switching
-		volatile uint32_t FDF :1;		//bit: 21      FD Format
-		volatile uint32_t :1;		//bit: 22      Reserved
-		volatile uint32_t EFCC :1;	//bit: 23      Event FIFO Control
-		volatile uint32_t MM :8;		//bit: 24..31  Message Marker
+		uint32_t :16;		//bit: 0..15   Reserved
+		uint32_t DLC :4;		//bit: 16..19  Data Length Code
+		uint32_t BRS :1;		//bit: 20      Bit Rate Switching
+		uint32_t FDF :1;		//bit: 21      FD Format
+		uint32_t :1;		//bit: 22      Reserved
+		uint32_t EFCC :1;	//bit: 23      Event FIFO Control
+		uint32_t MM :8;		//bit: 24..31  Message Marker
 	} bit;
-	volatile uint32_t reg;
+	uint32_t reg;
 } CAN_TX_ELEMENT_T1_Type;
 
 
 
 typedef union
 {
-	volatile uint8_t uint8[CAN_ELMTS_ARRAY_SIZE];
-	volatile uint32_t uint32[CAN_ELMTS_ARRAY_SIZE / 4];
+	uint8_t uint8[CAN_ELMTS_ARRAY_SIZE];
+	uint32_t uint32[CAN_ELMTS_ARRAY_SIZE / 4];
 } CAN_TX_ELEMENT_DATA_Type;
 
-typedef struct
+typedef volatile struct
 {
-	volatile CAN_TX_ELEMENT_T0_Type T0;
-	volatile CAN_TX_ELEMENT_T1_Type T1;
-	volatile CAN_TX_ELEMENT_DATA_Type data;
+	CAN_TX_ELEMENT_T0_Type T0;
+	CAN_TX_ELEMENT_T1_Type T1;
+	CAN_TX_ELEMENT_DATA_Type data;
 } Can_Tx_Element;
 
 typedef struct
 {
-	volatile Can_Standard_Filter_Element std_filters[CAN_STD_FILTER_NUMBER];
-	volatile Can_Extended_Filter_Element ext_filters[CAN_EXT_FILTER_NUMBER];
-	volatile Can_Rx_Element rx_buffer[CAN_RX_BUFFER_NUMBER];
-	volatile Can_Rx_Element rx_fifo0[CAN_RX_FIFO0_ELMTS_NUMBER];
-	volatile Can_Rx_Element rx_fifo1[CAN_RX_FIFO1_ELMTS_NUMBER];
-	volatile Can_Tx_Element tx_buffer[CAN_TX_BUFFER_NUMBER];
-	volatile Can_Tx_Element tx_fifo[CAN_TX_FIFO_QUEUE_ELMTS_NUMBER];
+	__attribute__((__aligned__(4))) Can_Standard_Filter_Element std_filters[CAN_STD_FILTER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Extended_Filter_Element ext_filters[CAN_EXT_FILTER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Rx_Element rx_buffer[CAN_RX_BUFFER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Rx_Element rx_fifo0[CAN_RX_FIFO0_ELMTS_NUMBER];
+	__attribute__((__aligned__(4))) Can_Rx_Element rx_fifo1[CAN_RX_FIFO1_ELMTS_NUMBER];
+	__attribute__((__aligned__(4))) Can_Tx_Element tx_buffer[CAN_TX_BUFFER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Tx_Element tx_fifo[CAN_TX_FIFO_QUEUE_ELMTS_NUMBER];
 
 } Can_Message_RAM;
 
