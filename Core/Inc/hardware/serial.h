@@ -9,9 +9,14 @@
 
 
 void Serial_Init(void);
-void Serial_Print(char _out[]);
-void Serial_Println(char _out[]);
+
+void Serial_PutString(char *str);
+void Serial_PutInt( uint32_t val);
+void Serial_PutHex(uint32_t val);
+void Serial_PrintString(char *str);
 void Serial_PrintInt( uint32_t val);
+void Serial_PrintHex(uint32_t val);
+
 uint8_t Serial_CheckInput(char *message);
 
 #endif

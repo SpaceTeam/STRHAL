@@ -16,29 +16,25 @@ Queue rxQueue =
 Queue txQueue =
 { 0 };
 
-void QueueInit(Queue *queue)
+void Queue_Init(Queue *queue)
 {
 	queue->QueueIn = queue->QueueOut = 0;
 }
-void QueuePut(Queue *queue, char new)
+void Queue_Put(Queue *queue, char new)
 {
 	queue->Array[queue->QueueIn] = new;
 	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE - 1);
 }
-uint32_t QueueFillState(Queue *queue)
+uint32_t Queue_FillState(Queue *queue)
 {
 	return (queue->QueueIn - queue->QueueOut + QUEUE_SIZE) % QUEUE_SIZE;
 }
-char QueueGet(Queue *queue)
+char Queue_Get(Queue *queue)
 {
 	char return_value = queue->Array[queue->QueueOut];
 	queue->QueueOut = (queue->QueueOut + 1) & (QUEUE_SIZE - 1);
 	return return_value;
 }
-
-char rxString[128] = "";
-char rxData[128] = "";
-char tx_buffer[2048] = "";
 
 void Serial_Init(void)
 {
@@ -103,17 +99,17 @@ void Serial_Init(void)
 
 	LL_USART_ClearFlag_TC(UART4);
 
-	QueueInit(&rxQueue);
-	QueueInit(&txQueue);
+	Queue_Init(&rxQueue);
+	Queue_Init(&txQueue);
 
 }
 
-void Serial_Send(char *string)
+void Serial_PutString(char *string)
 {
 	char *c = string;
 	while (*c)
 	{
-		QueuePut(&txQueue, *c);
+		Queue_Put(&txQueue, *c);
 		c++;
 	}
 	LL_USART_EnableIT_TXE_TXFNF(UART4);
@@ -132,32 +128,38 @@ void Serial_Send(char *string)
 */
 }
 
-void Serial_Print(char _out[])
+void Serial_PutInt(uint32_t val)
 {
-	while (LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2))
-	{
-	};
-	strcpy(tx_buffer, _out);
-	Serial_Send(tx_buffer);
+	char buffer[100];
+	sprintf(buffer, "%ld", val);
+	Serial_PutString(buffer);
+}
+void Serial_PutHex(uint32_t val)
+{
+	char buffer[100];
+	sprintf(buffer, "0x%lx", val);
+	Serial_PutString(buffer);
 }
 
-void Serial_Println(char _out[])
+void Serial_PrintString(char *str)
 {
-	while (LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2))
-	{
-	};
-	strcpy(tx_buffer, _out);
-	strcat(tx_buffer, "\r\n");
-	Serial_Send(tx_buffer);
+	Serial_PutString(str);
+	Serial_PutString("\r\n");
 }
-
 void Serial_PrintInt(uint32_t val)
 {
 	char buffer[100];
 	sprintf(buffer, "%ld\r\n", val);
-	strcpy(tx_buffer, buffer);
-	Serial_Send(tx_buffer);
+	Serial_PutString(buffer);
 }
+void Serial_PrintHex(uint32_t val)
+{
+	char buffer[100];
+	sprintf(buffer, "0x%lx\r\n", val);
+	Serial_PutString(buffer);
+}
+
+
 uint8_t Serial_CheckInput(char *message)
 {
 	static uint32_t receive_index = 0;
@@ -165,9 +167,9 @@ uint8_t Serial_CheckInput(char *message)
 
 	while (rxQueue.QueueOut != rxQueue.QueueIn)
 	{
-		new_char = QueueGet(&rxQueue);
+		new_char = Queue_Get(&rxQueue);
 
-		if (new_char == SERIAL_DELIMITER)				// Carriage return as Delimiter
+		if (new_char == SERIAL_DELIMITER)	// Carriage return as Delimiter
 		{
 			message[receive_index] = 0;	//ADD String Delimiter
 			receive_index = 0;
@@ -181,7 +183,6 @@ uint8_t Serial_CheckInput(char *message)
 				receive_index++;
 			}
 		}
-
 	}
 	return 0;
 }
@@ -190,14 +191,14 @@ void UART4_IRQHandler(void)
 {
 	if (LL_USART_IsActiveFlag_RXNE_RXFNE(UART4))
 	{
-		QueuePut(&rxQueue, LL_USART_ReceiveData8(UART4));
+		Queue_Put(&rxQueue, LL_USART_ReceiveData8(UART4));
 	}
 
 	if (LL_USART_IsActiveFlag_TXE_TXFNF(UART4))
 	{
-		if (QueueFillState(&txQueue) != 0)
+		if (Queue_FillState(&txQueue) != 0)
 		{
-			UART4->TDR = QueueGet(&txQueue);
+			UART4->TDR = Queue_Get(&txQueue);
 		}
 		else
 		{

@@ -6,6 +6,7 @@
 #include "systick.h"
 #include "serial.h"
 #include "adc.h"
+#include "flash.h"
 #include "speaker.h"
 #include <stdio.h>
 #include <string.h>
@@ -24,14 +25,35 @@ int main(void)
 
 	ADC_Init();
 	Serial_Init();
-	Serial_Println(GIT_COMMIT_HASH);
+	Serial_PrintString("STARTED?");
+	Serial_PrintString(GIT_COMMIT_HASH);
 	Speaker_Init();
 	Speaker_Set(300, 200, 50, 5);
+	Flash_Init();
 
 	Can_Init(10);
 
-	char send_buffer[256] = {
-			0 };
+	uint8_t data[32] =
+	{ 0 };
+	for (uint8_t c = 0; c < 32; c++)
+	{
+		data[c] = Flash_GetByteFromAddress(c);
+
+	}
+	for (uint8_t c = 0; c < 32; c++)
+	{
+		Serial_PutInt(c);
+		Serial_PutString(": ");
+		Serial_PutInt(data[c]);
+		Serial_PrintString("");
+	}
+	Flash_SetByteAtAddress(13, 42);
+
+	Flash_SetByteAtAddress(21, data[21] >> 1);
+
+
+	char send_buffer[256] =
+	{ 0 };
 	char string[RECEIVE_STRING_SIZE] = "";
 
 	while (1)
@@ -56,22 +78,25 @@ int main(void)
 			int32_t on = atoi(array[1]);
 			int32_t off = atoi(array[2]);
 			int32_t number = atoi(array[3]);
-			//sprintf(send_buffer, "Echo: 0x%lx %ld : %ld - %ld  : %ld\n", tone, tone, on, off, number);
-			//Serial_Println(send_buffer);
-			Speaker_Set(tone, on, off, number);
+			sprintf(send_buffer, "Echo: 0x%lx %ld : %ld - %ld  : %ld\n", tone, tone, on, off, number);
+			Serial_PrintString(send_buffer);
 
-			uint8_t testdata[64] = {
-					0xDE,
-					0xAD,
-					0xBE,
-					0xEF };
-			Can_sendMessage(1, tone, testdata, 63);
+			Speaker_Set(tone, on, off, number);
 			/*
-			 if ( == NOICE)
-			 Serial_Println("message sent\n");
-			 else
-			 Serial_Println("FOCK\n");
-			 */
+			 uint8_t testdata[64] = {
+			 0xDE,
+			 0xAD,
+			 0xBE,
+			 0xEF };*/
+			uint8_t testdata[64] =
+			{ 0x01, 0x02, 0x03, 0x04, 0x50, 0x60 };
+			testdata[4] = (uint8_t) on;
+			testdata[5] = (uint8_t) off;
+
+			if (Can_sendMessage(1, tone, testdata, 6) == NOICE)
+				Serial_PrintString("message sent\n");
+			else
+				Serial_PrintString("FOCK\n");
 
 		}
 
