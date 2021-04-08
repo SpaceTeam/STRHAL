@@ -4,11 +4,9 @@
 #include "cmds.h"
 #include "can.h"
 #include "gpio.h"
-#include "spi.h"
 #include "sysclock.h"
 #include "systick.h"
 #include "serial.h"
-#include "tim.h"
 #include "usart.h"
 #include "adc.h"
 #include "speaker.h"
@@ -27,66 +25,28 @@ int main(void)
 	Sysclock_Init();
 	Systick_Init();
 
-	MX_GPIO_Init();
+	GPIO_Init();
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1); //DMA init
 	ADC_Init();
-	MX_SPI1_Init();
-	MX_UART4_Init();
-	MX_TIM4_Init();
-	MX_TIM1_Init();
 
 	Serial_Init();
 
 	Serial_Println(GIT_COMMIT_HASH);
-	ADS131_Init();
+	Result_t result = ADS131_Init();
 	Speaker_Init();
 	Speaker_Set(300, 200, 50, 5);
 
-	//Can_Init(10);
-
 	char send_buffer[1024] = { 0 };
-	//char string[RECEIVE_STRING_SIZE] = "";
+
+	sprintf(send_buffer, "RESULT = %i\n\r", result);
+	Serial_Print(send_buffer);
 
 	while (1)
 	{
 		tick = Systick_GetTick();
 		Speaker_Update(tick);
-		//Can_checkFifo(0);
-		//Can_checkFifo(1);
 
-		/*if (Serial_CheckInput(string))
-		{
-			uint32_t i = 0;
-			char *p = strtok(string, ":");
-			char *array[4];
-
-			while (p != NULL)
-			{
-				array[i++] = p;
-				p = strtok(NULL, ":");
-			}
-			int32_t tone = atoi(array[0]);
-			int32_t on = atoi(array[1]);
-			int32_t off = atoi(array[2]);
-			int32_t number = atoi(array[3]);
-			//sprintf(send_buffer, "Echo: 0x%lx %ld : %ld - %ld  : %ld\n", tone, tone, on, off, number);
-			//Serial_Println(send_buffer);
-			Speaker_Set(tone, on, off, number);
-
-			uint8_t testdata[64] = {
-					0xDE,
-					0xAD,
-					0xBE,
-					0xEF };
-			Can_sendMessage(1, tone, testdata, 63);
-
-			 //if ( == NOICE)
-			 //Serial_Println("message sent\n");
-			 //else
-			 //Serial_Println("FOCK\n");
-
-		}*/
-		ADS131_UpdateData();
+		if(ADS131_UpdateData() != NOICE) Serial_Println("ADS UPDATE OOF");
 
 		if (tick - uart_last_updated >= UART_UPDATE_TIME)
 		{

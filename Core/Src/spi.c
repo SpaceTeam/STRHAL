@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "spi.h"
+#include "systick.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -28,7 +29,7 @@
 //DMA_HandleTypeDef hdma_spi1_rx;
 
 /* SPI1 init function */
-void MX_SPI1_Init(void)
+void SPI1_Init(void)
 {
 
   /* USER CODE BEGIN SPI1_Init 0 */
@@ -172,6 +173,52 @@ void MX_SPI1_Init(void)
 
   //LL_SPI_EnableIT_RXP(SPI1);
 
+}
+
+Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxData[], uint32_t count)
+{
+	uint32_t tickstart = 0;
+
+	LL_SPI_SetTransferSize(SPI, count);
+	LL_SPI_Enable(SPI);
+	LL_SPI_StartMasterTransfer(SPI);
+
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		tickstart = Systick_GetTick();
+		while (LL_SPI_IsActiveFlag_TXP(SPI) == 0)
+		{
+			if ((Systick_GetTick() - tickstart) > SPI_TIMEOUT_VALUE)
+			return OOF_SPI_TXP_FULL;
+		}
+		LL_SPI_TransmitData32(SPI, txData[i]);
+	}
+
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		tickstart = Systick_GetTick();
+		while (LL_SPI_IsActiveFlag_RXP(SPI) == 0)
+		{
+			if ((Systick_GetTick() - tickstart) > SPI_TIMEOUT_VALUE)
+			return OOF_SPI_RXP_FULL;
+		}
+		rxData[i] = LL_SPI_ReceiveData32(SPI);
+	}
+
+	tickstart = Systick_GetTick();
+	while (LL_SPI_IsActiveFlag_EOT(SPI) == 0)
+	{
+		if ((Systick_GetTick() - tickstart) > SPI_TIMEOUT_VALUE)
+		return OOF_SPI_NO_EOT;
+	}
+
+	LL_SPI_ClearFlag_EOT(SPI);
+	LL_SPI_ClearFlag_TXTF(SPI);
+	LL_SPI_SuspendMasterTransfer(SPI);
+	LL_SPI_Disable(SPI);
+
+	//return (LL_SPI_IsActiveFlag_OVR(SPI)) ? OOF : NOICE;
+	return NOICE;
 }
 
 /* USER CODE BEGIN 1 */

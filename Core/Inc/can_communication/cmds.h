@@ -37,6 +37,11 @@ typedef enum
 {
 	NOICE = 0,
 	OOF,
+	OOF_SPI_TXP_FULL,
+	OOF_SPI_RXP_FULL,
+	OOF_SPI_NO_EOT,
+	OOF_ADS_NO_RDY,
+	OOF_ADS_INIT,
 	OOF_CAN_INIT,
 	OOF_CAN_TX_FULL,
 }Result_t;
