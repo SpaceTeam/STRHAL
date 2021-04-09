@@ -103,9 +103,9 @@
                                     									
                                     <listOptionValue builtIn="false" value="../Core/Inc/hardware"/>
                                     									
-                                    <listOptionValue builtIn="false" value="../Core/Inc/can_communication"/>
+                                    <listOptionValue builtIn="false" value="../Core/Inc/can_houbolt"/>
                                     									
-                                    <listOptionValue builtIn="false" value="../Core/Inc/can_communication/channels"/>
+                                    <listOptionValue builtIn="false" value="../Core/Inc/can_houbolt/channels"/>
                                     									
                                     <listOptionValue builtIn="false" value="../Core/Inc"/>
                                     									

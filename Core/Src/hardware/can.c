@@ -1,5 +1,5 @@
 #include "can.h"
-#include "serial.h"
+#include "ui.h"
 #include "systick.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -318,62 +318,37 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-
+	uint32_t id = 0;
+	uint32_t length = 0;
+	uint8_t data[CAN_ELMTS_ARRAY_SIZE] =
+	{ 0 };
+	//TODO Loop over both fifos
 	if (can->RXF0S & FDCAN_RXF0S_F0FL)	//Check FIFO 0
 	{
-		Serial_PrintString((can == FDCAN1) ? "FDCAN1 Fifo0\n" : "FDCAN2 Fifo0\n");
-
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
-
-		uint32_t id = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
-		uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
-		uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
-		uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
+		id = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
+		//uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
+		//uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
+		//uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
-		uint32_t length = Can_DlcToLength[dlc];
-		uint8_t *data = (uint8_t*) &can_ram->rx_fifo0[get_index].data.uint8[0];
-		char send_buffer[1024] =
-		{ 0 };
-		sprintf(send_buffer + strlen(send_buffer), "id:      %ld, 0x%03lx\n", id, id);
-		sprintf(send_buffer + strlen(send_buffer), "is_extended: %d, is_remote_frame: %d, is_error_passiv: %d\n", is_extended, is_remote_frame, is_error_passiv);
-		sprintf(send_buffer + strlen(send_buffer), "dlc:     %ld, 0x%04lx\n", dlc, dlc);
-		sprintf(send_buffer + strlen(send_buffer), "length:  %ld, 0x%04lx\n", length, length);
-
-		for (uint32_t c = 0; c < length; c++)
-			sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
-
-		Serial_PrintString(send_buffer);
-
-		//TODO Something with data
+		length = Can_DlcToLength[dlc];
+		memcpy(data, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+		Ui_processCanMessage(id, data, length);
 
 		can->RXF0A = get_index & 0x3F;
 	}
 	if (can->RXF1S & FDCAN_RXF1S_F1FL)	//Check FIFO 1
 	{
-		Serial_PrintString((can == FDCAN1) ? "FDCAN1 Fifo1" : "FDCAN2 Fifo1");
-
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 
-		uint32_t id = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
-		uint8_t is_extended = can_ram->rx_fifo1[get_index].R0.bit.XTD;
-		uint8_t is_remote_frame = can_ram->rx_fifo1[get_index].R0.bit.RTR;
-		uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
+		id = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
+		//uint8_t is_extended = can_ram->rx_fifo1[get_index].R0.bit.XTD;
+		//uint8_t is_remote_frame = can_ram->rx_fifo1[get_index].R0.bit.RTR;
+		//uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
-		uint32_t length = Can_DlcToLength[dlc];
-		uint8_t *data = (uint8_t*) &can_ram->rx_fifo1[get_index].data.uint8[0];
-
-		char send_buffer[1024] =
-		{ 0 };
-		sprintf(send_buffer + strlen(send_buffer), "id:      %ld, 0x%03lx\n", id, id);
-		sprintf(send_buffer + strlen(send_buffer), "is_extended: %d, is_remote_frame: %d, is_error_passiv: %d\n", is_extended, is_remote_frame, is_error_passiv);
-		sprintf(send_buffer + strlen(send_buffer), "dlc:     %ld, 0x%04lx\n", dlc, dlc);
-		sprintf(send_buffer + strlen(send_buffer), "length:  %ld, 0x%04lx\n", length, length);
-
-		for (uint32_t c = 0; c < length; c++)
-			sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
-
-		Serial_PrintString(send_buffer);
-		//TODO Something with data
+		length = Can_DlcToLength[dlc];
+		memcpy(data, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+		Ui_processCanMessage(id, data, length);
 
 		can->RXF1A = get_index & 0x3F;
 	}
@@ -399,57 +374,11 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 	uint32_t i = 0;
 	for (uint32_t c = 0; c < length; c += 4)
 		packet->data.uint32[i++] = data[c] | data[c + 1] << 8 | data[c + 2] << 16 | data[c + 3] << 24;
-	while (i < Can_LengthToDlc[length] / 4)
+	while (i < Can_DlcToLength[Can_LengthToDlc[length]] / 4)
 		packet->data.uint32[i++] = 0;
 
 	can->TXBAR = (1 << index);
 
 	return NOICE;
-}
-
-Result_t Can_processStandardMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t *data, uint32_t length)
-{
-	Result_t result = OOF;
-	//FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
-	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-
-
-	 uint8_t buffer = ((data[0] >> 6) & 0x3);
-	 uint8_t channel = (data[0] & 0x3F);
-	 Serial_PrintString("CAN NOICE\n");
-
-	 char send_buffer[1024] =
-	 { 0 };
-	 sprintf(send_buffer + strlen(send_buffer), "message id :  %ld, 0x%03lx\n", message_id, message_id);
-
-	 for (uint32_t c = 0; c < length; c++)
-	 sprintf(send_buffer + strlen(send_buffer), "%ld :  0x%02x\n", c, data[c]);
-
-	 Serial_PrintString(send_buffer);
-
-/*
-	 if (buffer == 0)
-	 {
-	 uint8_t cmd_id = data[1];
-
-	 if (channel < CHANNEL_TYPE_LAST && channel_type_array[channel].cmds != 0)
-	 {
-	 const can_function *channel_cmds_array = channel_type_array[channel].cmds;
-	 const uint8_t last_index = channel_type_array[channel].last_index;
-	 if (cmd_id < last_index && channel_cmds_array[cmd_id] != NULL)
-	 result = channel_cmds_array[cmd_id]((uint32_t*) &data[2]);
-	 }
-	 //TODO else ERROR
-	 }
-	 else
-	 {
-	 uint32_t timestamp = (uint32_t) data[1];
-	 uint8_t cmd_id = data[5];
-
-	 timestamp = cmd_id;					//Just here to get rid of warnings
-	 cmd_id = timestamp;					//Just here to get rid of warnings
-	 }
-	 */
-	return result;
 }
 

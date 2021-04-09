@@ -39,7 +39,13 @@ void Error_Handler(void);
 
 
 
-
+typedef enum
+{
+	NOICE = 0,
+	OOF,
+	OOF_CAN_INIT,
+	OOF_CAN_TX_FULL,
+}Result_t;
 
 #ifdef __cplusplus
 }
