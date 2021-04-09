@@ -1,0 +1,3 @@
+[submodule "Core/Inc/can_houbolt"]
+	path = Core/Inc/can_houbolt
+	url = git@github.com:SpaceTeam/can_houbolt
