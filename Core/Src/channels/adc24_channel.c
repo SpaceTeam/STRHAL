@@ -2,11 +2,11 @@
 #include "main.h"
 
 
-Result_t ADC24_ResetSettings(void)
-{
+Result_t ADC24_ResetSettings(void);
+Result_t ADC24_Status(void);
+Result_t ADC24_SetVariable(SetMsg_t SetMessage);
+Result_t ADC24_GetVariable(GetMsg_t GetMessage);
 
-	return OOF;
-}
 
 Result_t ADC24_ResetSettings(void)
 {
@@ -19,25 +19,17 @@ Result_t ADC24_Status(void)
 
 	return OOF;
 }
-Result_t ADC24_SetVariable(Adc16SetMsg_t SetMessage)
+Result_t ADC24_SetVariable(SetMsg_t SetMessage)
 {
 
 	return OOF;
 }
 
-Result_t ADC24_GetVariable(Adc16GetMsg_t GetMessage)
+Result_t ADC24_GetVariable(GetMsg_t GetMessage)
 {
 
 	return OOF;
 }
 
-
-
-
-
-	ADC24_RESET_SETTINGS,		//NO payload
-	ADC24_STATUS,				//NO payload
-	ADC24_SET_VARIABLE,			//Adc24SetMsg_t
-	ADC24_GET_VARIABLE,			//Adc24GetMsg_t
 
 

@@ -1,5 +1,6 @@
 #include "can.h"
 #include "ui.h"
+#include "serial.h"
 #include "systick.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -91,30 +92,6 @@ static Result_t Can_SetRamBlockAddresses(uint32_t can_handle_index)
 {
 	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-	/*
-	 uint32_t StartAddress;
-
-	 StartAddress = (can_handle_index) ? sizeof(Can_Message_RAM) : 0;
-
-	 MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, (StartAddress << FDCAN_SIDFC_FLSSA_Pos));
-
-	 StartAddress += CAN_STD_FILTER_NUMBER;
-	 MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, (StartAddress << FDCAN_XIDFC_FLESA_Pos));
-
-	 StartAddress += (CAN_EXT_FILTER_NUMBER * 2U);
-	 MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0SA, (StartAddress << FDCAN_RXF0C_F0SA_Pos));
-
-	 StartAddress += (CAN_RX_FIFO0_ELMTS_SIZE * CAN_RX_FIFO0_ELMTS_NUMBER);
-	 MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1SA, (StartAddress << FDCAN_RXF1C_F1SA_Pos));
-
-	 StartAddress += (CAN_RX_FIFO1_ELMTS_SIZE * CAN_RX_FIFO1_ELMTS_NUMBER);
-	 MODIFY_REG(can->RXBC, FDCAN_RXBC_RBSA, (StartAddress << FDCAN_RXBC_RBSA_Pos));
-
-	 StartAddress += (CAN_RX_BUFFER_SIZE * CAN_RX_BUFFER_NUMBER);
-	 MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFSA, (StartAddress << FDCAN_TXEFC_EFSA_Pos));
-	 StartAddress += (CAN_TX_EVENT_NUMBER * 2U);
-	 MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, (StartAddress << FDCAN_TXBC_TBSA_Pos));
-	 */
 	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, ((uint32_t)can_ram->std_filters - CAN_MESSAGE_RAM_START_ADDRESS));	// Standard filter list start address
 	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_LSS, (CAN_STD_FILTER_NUMBER << FDCAN_SIDFC_LSS_Pos)); // Standard filter elements number
 	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, ((uint32_t)can_ram->ext_filters - CAN_MESSAGE_RAM_START_ADDRESS));	// Extended filter list start address
@@ -243,7 +220,7 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Accept everything
-	//can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO0 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO0 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
+	//can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
 	//		| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Can Start
@@ -303,12 +280,24 @@ Result_t Can_Init(uint8_t node_id)
 	Result_t result = OOF;
 	Can_InitGPIO();
 
+	Can_MessageId_t mask =
+	{ 0 };
+	mask.info.direction = 0x1;
+	mask.info.node_id = 0x1F;
+	mask.info.special_cmd = 0x3;
+	Can_MessageId_t id =
+	{ 0 };
+	id.info.direction = MASTER2NODE_DIRECTION;
+	id.info.node_id = node_id;
+	id.info.special_cmd = STANDARD_SPECIAL_CMD;
+
 	for (uint32_t i = 0; i < 2; i++)
 	{
 		result = Can_InitFdcan(i);
 		if (result != NOICE)
 			return result;
-		Can_AddStdFilter(i, 0, 0x1FF, ((3 << 7) | (node_id << 1)), FDCAN_FILTER_TO_RXFIFO0);
+
+		Can_AddStdFilter(i, 0, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
 	}
 	return NOICE;
 }
@@ -318,7 +307,8 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-	Can_MessageId_t id = {0};
+	Can_MessageId_t id =
+	{ 0 };
 	uint32_t length = 0;
 	Can_MessageData_t data =
 	{ 0 };
@@ -333,6 +323,10 @@ void Can_checkFifo(uint32_t can_handle_index)
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+
+		Serial_PutString("Node Id 0 ");
+		Serial_PrintInt(id.info.node_id);
+
 		Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF0A = get_index & 0x3F;
@@ -348,6 +342,9 @@ void Can_checkFifo(uint32_t can_handle_index)
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+		Serial_PutString("Node Id 1");
+		Serial_PrintInt(id.info.node_id);
+
 		Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF1A = get_index & 0x3F;

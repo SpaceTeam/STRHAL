@@ -1,3 +1,4 @@
+#include <channel_util.h>
 #include "main.h"
 #include "git_version.h"
 #include "cmds.h"
@@ -31,7 +32,7 @@ int main(void)
 	Speaker_Set(300, 200, 50, 5);
 	Flash_Init();
 
-	Can_Init(10);
+	Can_Init(12);
 	/*
 	 uint8_t data[32] =
 	 { 0 };
@@ -83,13 +84,6 @@ int main(void)
 
 			Speaker_Set(tone, on, off, number);
 
-			uint8_t testdata[64] =
-			{ 0x01, 0x02, 0x03, 0x04, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-
-			if (Can_sendMessage(0, tone, testdata, 25) == NOICE)
-				Serial_PrintString("message sent\n");
-			else
-				Serial_PrintString("FOCK\n");
 
 		}
 

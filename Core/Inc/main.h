@@ -37,7 +37,7 @@ void Error_Handler(void);
                                                                  0 bit  for subpriority */
 #endif
 
-
+#define NODE_ID 12//TODO READ FROM DIPSWITCH
 
 typedef enum
 {
@@ -45,6 +45,7 @@ typedef enum
 	OOF,
 	OOF_CAN_INIT,
 	OOF_CAN_TX_FULL,
+	OOF_UNKNOWN_CMD,
 }Result_t;
 
 #ifdef __cplusplus
