@@ -318,22 +318,22 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 	FDCAN_GlobalTypeDef *can = handles[can_handle_index].can;
 	Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-	uint32_t id = 0;
+	Can_MessageId_t id = {0};
 	uint32_t length = 0;
-	uint8_t data[CAN_ELMTS_ARRAY_SIZE] =
+	Can_MessageData_t data =
 	{ 0 };
 	//TODO Loop over both fifos
 	if (can->RXF0S & FDCAN_RXF0S_F0FL)	//Check FIFO 0
 	{
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
-		id = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
+		id.uint32 = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
 		//uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
 		//uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
 		//uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
-		memcpy(data, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
-		Ui_processCanMessage(id, data, length);
+		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+		Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF0A = get_index & 0x3F;
 	}
@@ -341,14 +341,14 @@ void Can_checkFifo(uint32_t can_handle_index)
 	{
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 
-		id = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
+		id.uint32 = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
 		//uint8_t is_extended = can_ram->rx_fifo1[get_index].R0.bit.XTD;
 		//uint8_t is_remote_frame = can_ram->rx_fifo1[get_index].R0.bit.RTR;
 		//uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
-		memcpy(data, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
-		Ui_processCanMessage(id, data, length);
+		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+		Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF1A = get_index & 0x3F;
 	}

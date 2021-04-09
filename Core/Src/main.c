@@ -82,16 +82,9 @@ int main(void)
 			Serial_PrintString(send_buffer);
 
 			Speaker_Set(tone, on, off, number);
-			/*
-			 uint8_t testdata[64] = {
-			 0xDE,
-			 0xAD,
-			 0xBE,
-			 0xEF };*/
+
 			uint8_t testdata[64] =
 			{ 0x01, 0x02, 0x03, 0x04, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-			//testdata[4] = (uint8_t) on;
-			//testdata[5] = (uint8_t) off;
 
 			if (Can_sendMessage(0, tone, testdata, 25) == NOICE)
 				Serial_PrintString("message sent\n");
