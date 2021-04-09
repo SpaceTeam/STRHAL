@@ -101,6 +101,8 @@
                                     									
                                     <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                                     									
+                                    <listOptionValue builtIn="false" value="../Core/Inc/channels"/>
+                                    									
                                     <listOptionValue builtIn="false" value="../Core/Inc/hardware"/>
                                     									
                                     <listOptionValue builtIn="false" value="../Core/Inc/can_houbolt"/>
