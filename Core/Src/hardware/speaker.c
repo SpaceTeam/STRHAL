@@ -77,9 +77,9 @@ void Speaker_Init(void)
 
 }
 
-void Speaker_Update(uint32_t tick)
+void Speaker_Update(uint64_t tick)
 {
-	static uint32_t old_tick;
+	static uint64_t old_tick;
 
 	if (((tick >= old_tick + speaker.tick_diff[speaker.state]) && speaker.count) || speaker.new_config)
 	{

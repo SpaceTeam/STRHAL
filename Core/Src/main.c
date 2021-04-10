@@ -75,11 +75,11 @@ int main(void)
 				array[i++] = p;
 				p = strtok(NULL, ":");
 			}
-			int32_t tone = atoi(array[0]);
-			int32_t on = atoi(array[1]);
-			int32_t off = atoi(array[2]);
-			int32_t number = atoi(array[3]);
-			sprintf(send_buffer, "Echo: 0x%lx %ld : %ld - %ld  : %ld\n", tone, tone, on, off, number);
+			int16_t tone = atoi(array[0]);
+			int16_t on = atoi(array[1]);
+			int16_t off = atoi(array[2]);
+			int8_t number = atoi(array[3]);
+			sprintf(send_buffer, "Echo: 0x%x %d : %d - %d  : %d\n", tone, tone, on, off, number);
 			Serial_PrintString(send_buffer);
 
 			Speaker_Set(tone, on, off, number);

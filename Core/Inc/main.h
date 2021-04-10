@@ -46,6 +46,8 @@ typedef enum
 	OOF_CAN_INIT,
 	OOF_CAN_TX_FULL,
 	OOF_UNKNOWN_CMD,
+	OOF_WRONG_CHANNEL_TYPE,
+	OOF_NOT_IMPLEMENTED
 }Result_t;
 
 #ifdef __cplusplus

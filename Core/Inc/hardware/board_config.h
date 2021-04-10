@@ -1,8 +1,15 @@
 #ifndef HARDWARE_BOARD_CONFIG_H_
 #define HARDWARE_BOARD_CONFIG_H_
 
+#define BOARD LCB
+
+
 #define ADS_nDRDY_Pin LL_GPIO_PIN_13
 #define ADS_nDRDY_GPIO_Port GPIOC
+#define ADS_nRESET_Pin LL_GPIO_PIN_12
+#define ADS_nRESET_GPIO_Port GPIOC
+
+
 #define PIN_SPEAKER_N_Pin LL_GPIO_PIN_8
 #define PIN_SPEAKER_N_GPIO_Port GPIOE
 #define PIN_SPEAKER_Pin LL_GPIO_PIN_9
@@ -15,7 +22,5 @@
 #define LED_STATUS_2_GPIO_Port GPIOD
 #define LED_DEBUG_Pin LL_GPIO_PIN_10
 #define LED_DEBUG_GPIO_Port GPIOD
-#define ADS_nRESET_Pin LL_GPIO_PIN_12
-#define ADS_nRESET_GPIO_Port GPIOC
 
 #endif
