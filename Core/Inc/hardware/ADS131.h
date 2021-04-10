@@ -1,7 +1,8 @@
 #ifndef ADS131_H_
 #define ADS131_H_
 
-
+#include "main.h"
+#include "cmds.h"
 #include <stdint.h>
 
 
@@ -77,10 +78,10 @@ typedef enum{					 // RESPONSE
 #define ADS131_WREG_OPCODE(n, a) (ADS131_CMD_WREG | ((a & 0x3F) << 7) | (n & 0x7F))
 
 
-void ADS131_Init(void);
-void ADS131_WriteRegister(uint32_t reg, uint32_t value);
-void ADS131_ReadRegisters(uint32_t reg, uint32_t n, uint32_t data[]);
-void ADS131_UpdateData(void);
+Result_t ADS131_Init(void);
+Result_t ADS131_WriteRegister(uint32_t reg, uint32_t value);
+Result_t ADS131_ReadRegisters(uint32_t reg, uint32_t n, int32_t data[]);
+Result_t ADS131_UpdateData(void);
 int32_t ADS131_GetData(uint8_t ch);
 uint32_t ADS131_GetStatus(void);
 

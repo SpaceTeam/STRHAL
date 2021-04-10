@@ -95,7 +95,7 @@ void MX_TIM1_Init(void)
 
 }
 /* TIM4 init function */
-void MX_TIM4_Init(void)
+void TIM4_Init(void)
 {
 
   /* USER CODE BEGIN TIM4_Init 0 */

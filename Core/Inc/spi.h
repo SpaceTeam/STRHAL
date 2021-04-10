@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    tim.h
+  * @file    spi.h
   * @brief   This file contains all the function prototypes for
-  *          the tim.c file
+  *          the spi.c file
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __TIM_H__
-#define __TIM_H__
+#ifndef __SPI_H__
+#define __SPI_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,19 +26,23 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmds.h"
 
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
+//extern SPI_HandleTypeDef hspi1;
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_TIM1_Init(void);
-void TIM4_Init(void);
+void SPI1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+
+Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxData[], uint32_t count);
 
 /* USER CODE END Prototypes */
 
@@ -46,6 +50,6 @@ void TIM4_Init(void);
 }
 #endif
 
-#endif /* __TIM_H__ */
+#endif /* __SPI_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -47,7 +47,7 @@
      PB4 (NJTRST)   ------> SPI1_MISO
      PB5   ------> SPI1_MOSI
 */
-void MX_GPIO_Init(void)
+void GPIO_Init(void)
 {
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
