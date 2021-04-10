@@ -217,11 +217,11 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	SET_BIT(can->DBTP, FDCAN_DBTP_TDC);
 
 	// Configure global filter to reject everything
-	can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+	//can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Accept everything
-	//can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
-	//		| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+	can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
+			| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Can Start
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_INIT);
@@ -288,7 +288,6 @@ Result_t Can_Init(uint8_t node_id)
 	Can_MessageId_t id =
 	{ 0 };
 	id.info.direction = MASTER2NODE_DIRECTION;
-	id.info.node_id = node_id;
 	id.info.special_cmd = STANDARD_SPECIAL_CMD;
 
 	for (uint32_t i = 0; i < 2; i++)
@@ -296,8 +295,11 @@ Result_t Can_Init(uint8_t node_id)
 		result = Can_InitFdcan(i);
 		if (result != NOICE)
 			return result;
-
+		id.info.node_id = node_id;
 		Can_AddStdFilter(i, 0, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
+
+		//id.info.node_id = 0;
+		//Can_AddStdFilter(i, 1, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
 	}
 	return NOICE;
 }
@@ -333,7 +335,7 @@ void Can_checkFifo(uint32_t can_handle_index)
 	}
 	if (can->RXF1S & FDCAN_RXF1S_F1FL)	//Check FIFO 1
 	{
-		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
+		uint8_t get_index = ((can->RXF1S >> 8) & 0x3F);
 
 		id.uint32 = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
 		//uint8_t is_extended = can_ram->rx_fifo1[get_index].R0.bit.XTD;
@@ -341,11 +343,18 @@ void Can_checkFifo(uint32_t can_handle_index)
 		//uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
-		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
-		Serial_PutString("Node Id 1");
+		memcpy(data.uint8, &can_ram->rx_fifo1[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+		Serial_PutString("Node Id 1:  ");
 		Serial_PrintInt(id.info.node_id);
-
-		Ui_ProcessCanMessage(id, &data, length);
+		for(uint32_t c = 0; c < length; c++)
+		{
+			Serial_PutInt(c);
+			Serial_PutString(":  ");
+			Serial_PutInt(data.uint8[c]);
+			Serial_PutString("  ");
+			Serial_PrintHex(data.uint8[c]);
+		}
+		//Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF1A = get_index & 0x3F;
 	}

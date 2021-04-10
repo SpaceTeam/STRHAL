@@ -1,7 +1,7 @@
+#include <ads131.h>
 #include <channel_util.h>
 #include "main.h"
 #include "git_version.h"
-#include "ADS131.h"
 #include "cmds.h"
 #include "can.h"
 #include "gpio.h"
@@ -27,7 +27,6 @@ int main(void)
 
 	GPIO_Init();
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1); //DMA init
-	ADC_Init();
 
 	Serial_Init();
 	Can_Init(12);
@@ -38,7 +37,9 @@ int main(void)
 	Speaker_Set(300, 200, 50, 5);
 	Flash_Init();
 
+#if BOARD == LCB
 	LCB_main();
+#endif
 }
 
 void Error_Handler(void)

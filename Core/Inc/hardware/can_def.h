@@ -1,5 +1,6 @@
-#ifndef FDCAN_DEFINITIONS_H__
-#define FDCAN_DEFINITIONS_H__
+#ifndef CAN_DEF_H__
+#define CAN_DEF_H__
+#include <stdint.h>
 #include "can_config.h"
 
 #define FDCAN_ERROR_NONE            ((uint32_t)0x00000000U) //!< No error

@@ -9,7 +9,7 @@
 
 inline Result_t Ui_SendCanMessage(uint32_t can_index, Can_MessageId_t message_id, Can_MessageData_t *data, uint32_t length)
 {
-	return Can_sendMessage(can_index, message_id.uint32, data->uint8, length);
+	return Can_sendMessage(can_index, message_id.uint32, data->uint8, CAN_MSG_LENGTH(length));
 }
 
 Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *data, uint32_t length)

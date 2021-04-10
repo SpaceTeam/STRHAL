@@ -2,9 +2,9 @@
 #define CAN_H_
 
 #include <stdint.h>
+#include "can_def.h"
 #include "main.h"
 #include "cmds.h"
-#include "fdcan_definitions.h"
 
 typedef struct
 {

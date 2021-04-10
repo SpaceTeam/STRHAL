@@ -3,6 +3,13 @@
 
 #define BOARD LCB
 
+#if BOARD == LCB
+#include "lcb.h"
+#define MAIN_CAN_BUS LCB_MAIN_CAN_BUS
+#endif
+
+
+
 #define SPI_TIMEOUT_VALUE 1000
 #define ADS_TIMEOUT_VALUE SPI_TIMEOUT_VALUE
 

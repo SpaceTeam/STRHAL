@@ -1,12 +1,14 @@
 #if BOARD == LCB
+
 #include "lcb.h"
 #include "main.h"
 #include "channels.h"
-#include "ADS131.h"
+#include "ads131.h"
 #include "speaker.h"
 #include "can.h"
+#include "serial.h"
+#include "generic_channel.h"
 #include "systick.h"
-
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
@@ -28,13 +30,40 @@ Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 void LCB_main(void)
 {
 	uint64_t tick = 0;
-	ADS131_Init();
 
+	Ads131_Init();
+	char serial_str[1000] =
+	{ 0 };
 	while (1)
 	{
+		tick = Systick_GetTick();
 		Speaker_Update(tick);
-		ADS131_UpdateData();
+		Ads131_UpdateData();
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
+		Can_checkFifo(1);
+
+		if (Serial_CheckInput(serial_str))
+		{
+			Serial_PrintString(serial_str);
+
+			uint8_t testdata[64] =
+			{ 0x01, 0x02, 0x03, 0x04, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+
+			if (Can_sendMessage(0, 0x0C, testdata, 25) == NOICE)
+				Serial_PrintString("message sent\n");
+			else
+				Serial_PrintString("FOCK\n");
+
+			/*Result_t result = Generic_NodeInfo();
+
+			if (result == NOICE)
+				Serial_PrintString("Noice");
+			else
+				Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
+
+		*/
+		}
+
 	}
 }
 

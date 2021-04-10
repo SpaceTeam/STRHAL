@@ -9,12 +9,10 @@ typedef struct
 {
 	int32_t offset;
 	int32_t thresholds[2];
-
-	Measurement *measurement;
-
 } Adc24_Channel_t;
 
 Result_t Adc24_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
+Result_t Adc24_GetData(uint8_t ch_id, int32_t *data, uint32_t *length);
 
 #endif
 

@@ -35,9 +35,9 @@ void Sysclock_InitSystemClock(void)
 		LL_RCC_PLL2_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_8_16);
 		LL_RCC_PLL2_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
 		LL_RCC_PLL2_SetM(1);
-		LL_RCC_PLL2_SetN(36);
+		LL_RCC_PLL2_SetN(20);
 		LL_RCC_PLL2_SetP(1);
-		LL_RCC_PLL2_SetQ(4);
+		LL_RCC_PLL2_SetQ(2);
 		LL_RCC_PLL2_SetR(1);
 		LL_RCC_PLL2_Enable();
 

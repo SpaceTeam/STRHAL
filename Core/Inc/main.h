@@ -19,7 +19,7 @@ extern "C" {
 #include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_gpio.h"
 #include "stm32h7xx_ll_spi.h"
-#include <fdcan_definitions.h>
+#include <can_def.h>
 
 #include "board_config.h"
 
@@ -44,6 +44,7 @@ typedef enum
 {
 	NOICE = 0,
 	OOF,
+	OOF_NO_NEW_DATA,
 	OOF_CAN_INIT,
 	OOF_CAN_TX_FULL,
 	OOF_UNKNOWN_CMD,

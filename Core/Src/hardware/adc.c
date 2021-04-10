@@ -3,7 +3,8 @@
 
 volatile uint16_t data[256] =
 { 0 };
-void ADC_Init()
+
+void Adc_Init()
 {
 
 	LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_PLL2P);
@@ -136,7 +137,7 @@ void ADC_Init()
 
 // ADC has to be disabled!
 //TODO: GM Is not in use
-void ADC_Calibrate(void)
+void Adc_Calibrate(void)
 {
 	LL_ADC_StartCalibration(ADC1, LL_ADC_CALIB_OFFSET_LINEARITY,
 	LL_ADC_SINGLE_ENDED);
@@ -144,7 +145,7 @@ void ADC_Calibrate(void)
 		;
 }
 
-volatile uint16_t ADC_GetData(uint8_t index)
+volatile uint16_t Adc_GetData(uint8_t index)
 {
 	return data[index];
 }
