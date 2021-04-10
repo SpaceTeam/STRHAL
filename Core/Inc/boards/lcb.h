@@ -5,6 +5,8 @@
 
 //#define MAX_CHANNELS MAX_LCB_CHANNELS
 
+#define LCB_MAIN_CAN_BUS 0
 
+void LCB_main(void);
 
 #endif

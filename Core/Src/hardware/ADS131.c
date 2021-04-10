@@ -31,11 +31,11 @@ Result_t ADS131_Init(void)
 	int32_t data[4] = { 0 };
 	Result_t result = ADS131_ReadRegisters(ADS131_CLOCK, 3, data);
 	char send_buffer[256] = { 0 };
-	Serial_Println("REGISTER");
+	Serial_PrintString("REGISTER");
 	for (uint32_t i = 0; i < 4; ++i)
 	{
 		sprintf(send_buffer, "result: %i, data[%ld]: %ld\n\r", result, i, data[i]);
-		Serial_Print(send_buffer);
+		Serial_PrintString(send_buffer);
 	}
 
     return NOICE;

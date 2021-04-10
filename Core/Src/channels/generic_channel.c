@@ -100,8 +100,9 @@ Result_t Generic_NodeInfo(void)
 
 	NodeInfoMsg_t *info = (NodeInfoMsg_t*) &data.bit.data;
 
+	info->firmware_version = node.firmware_version;
+
 	info->channel_mask = 0x0000000;
-	info->firmware_version = 0xDEADBEEF;
 	for(uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
 		info->channel_mask |= (node.channels[c].type != CHANNEL_TYPE_UNKNOWN)<<c;

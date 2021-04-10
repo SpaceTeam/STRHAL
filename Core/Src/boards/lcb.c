@@ -2,6 +2,11 @@
 #include "lcb.h"
 #include "main.h"
 #include "channels.h"
+#include "ADS131.h"
+#include "speaker.h"
+#include "can.h"
+#include "systick.h"
+
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
@@ -22,7 +27,15 @@ Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 
 void LCB_main(void)
 {
+	uint64_t tick = 0;
+	ADS131_Init();
 
+	while (1)
+	{
+		Speaker_Update(tick);
+		ADS131_UpdateData();
+		Can_checkFifo(LCB_MAIN_CAN_BUS);
+	}
 }
 
 #endif
