@@ -39,7 +39,10 @@ int main(void)
 
 #if BOARD == LCB
 	LCB_main();
+#elif BOARD == IOB
+	IOB_main();
 #endif
+
 }
 
 void Error_Handler(void)

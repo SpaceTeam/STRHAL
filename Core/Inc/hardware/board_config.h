@@ -1,11 +1,17 @@
 #ifndef HARDWARE_BOARD_CONFIG_H_
 #define HARDWARE_BOARD_CONFIG_H_
 
-#define BOARD LCB
+#define LCB 1
+#define IOB 2
+
+#define BOARD IOB
 
 #if BOARD == LCB
 #include "lcb.h"
 #define MAIN_CAN_BUS LCB_MAIN_CAN_BUS
+#elif BOARD == IOB
+#include "iob.h"
+#define MAIN_CAN_BUS IOB_MAIN_CAN_BUS
 #endif
 
 

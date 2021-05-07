@@ -91,7 +91,6 @@ Result_t Adc24_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 		default:
 			return OOF_UNKNOWN_CMD;
 	}
-
 }
 
 Result_t Adc24_GetData(uint8_t ch_id, int32_t *data, uint32_t *length)

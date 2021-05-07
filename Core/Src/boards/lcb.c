@@ -1,6 +1,5 @@
+#include "board_config.h"
 #if BOARD == LCB
-
-#include "lcb.h"
 #include "main.h"
 #include "channels.h"
 #include "ads131.h"

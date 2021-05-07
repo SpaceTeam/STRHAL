@@ -20,30 +20,16 @@
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "stm32h7xx_ll_gpio.h"
 
-/* Includes ------------------------------------------------------------------*/
-#include "main.h"
+typedef struct
+{
+	GPIO_TypeDef * port;
+	uint32_t pin;
+}GPIO_Pin_t;
 
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
 
 void GPIO_Init(void);
 
-/* USER CODE BEGIN Prototypes */
 
-/* USER CODE END Prototypes */
-
-#ifdef __cplusplus
-}
 #endif
-#endif /*__ GPIO_H__ */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

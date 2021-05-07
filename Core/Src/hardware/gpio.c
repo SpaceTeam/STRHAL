@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
+#include "main.h"
 
 /* USER CODE BEGIN 0 */
 
