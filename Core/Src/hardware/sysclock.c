@@ -6,7 +6,7 @@ void Sysclock_InitSystemClock(void)
 		while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1) {
 		}
 		LL_PWR_ConfigSupply(LL_PWR_LDO_SUPPLY);
-		LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE2);
+		LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE3);
 		LL_RCC_HSE_Enable();
 
 		/* Wait till HSE is ready */

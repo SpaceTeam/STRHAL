@@ -230,6 +230,17 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	return NOICE;
 }
 
+void Can_ClockCalibration(void)
+{
+
+	/* Bypass clock calibration */
+	SET_BIT(FDCAN_CCU->CCFG, FDCANCCU_CCFG_BCC);
+
+	/* Configure clock divider */
+	MODIFY_REG(FDCAN_CCU->CCFG, FDCANCCU_CCFG_CDIV, FDCAN_CLOCK_DIV1);
+
+}
+
 void Can_InitGPIO(void)
 {
 
@@ -278,8 +289,8 @@ void Can_AddStdFilter(uint32_t can_handle_index, uint32_t filter_index, uint32_t
 Result_t Can_Init(uint8_t node_id)
 {
 	Result_t result = OOF;
+	Can_ClockCalibration();
 	Can_InitGPIO();
-
 	Can_MessageId_t mask =
 	{ 0 };
 	mask.info.direction = 0x1;
@@ -320,14 +331,35 @@ void Can_checkFifo(uint32_t can_handle_index)
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 		id.uint32 = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
 		//uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
-		//uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
-		//uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
+		uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
+		uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
 
-		Serial_PutString("Node Id 0 ");
+		Serial_PutString("FDCAN ");
+		Serial_PrintInt(can_handle_index + 1);
+		Serial_PrintString("FIFO 1:  ");
+
+		Serial_PutString("id:  ");
+		Serial_PrintInt(id.uint32);
+		Serial_PutString("id.info.node_id:  ");
 		Serial_PrintInt(id.info.node_id);
+		Serial_PutString("is_remote_frame:  ");
+		Serial_PrintInt(is_remote_frame);
+		Serial_PutString("is_error_passiv:  ");
+		Serial_PrintInt(is_error_passiv);
+		Serial_PutString("dlc:  ");
+		Serial_PrintInt(dlc);
+
+		for (uint32_t c = 0; c < length; c++)
+		{
+			Serial_PutInt(c);
+			Serial_PutString(":  ");
+			Serial_PutInt(data.uint8[c]);
+			Serial_PutString("  ");
+			Serial_PrintHex(data.uint8[c]);
+		}
 
 		Ui_ProcessCanMessage(id, &data, length);
 
@@ -339,14 +371,27 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 		id.uint32 = can_ram->rx_fifo1[get_index].R0.bit.ID >> 18;
 		//uint8_t is_extended = can_ram->rx_fifo1[get_index].R0.bit.XTD;
-		//uint8_t is_remote_frame = can_ram->rx_fifo1[get_index].R0.bit.RTR;
-		//uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
+		uint8_t is_remote_frame = can_ram->rx_fifo1[get_index].R0.bit.RTR;
+		uint8_t is_error_passiv = can_ram->rx_fifo1[get_index].R0.bit.ESI;
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo1[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
-		Serial_PutString("Node Id 1:  ");
+		Serial_PutString("FDCAN ");
+		Serial_PrintInt(can_handle_index + 1);
+		Serial_PrintString("FIFO 1:  ");
+
+		Serial_PutString("id:  ");
+		Serial_PrintInt(id.uint32);
+		Serial_PutString("id.info.node_id:  ");
 		Serial_PrintInt(id.info.node_id);
-		for(uint32_t c = 0; c < length; c++)
+		Serial_PutString("is_remote_frame:  ");
+		Serial_PrintInt(is_remote_frame);
+		Serial_PutString("is_error_passiv:  ");
+		Serial_PrintInt(is_error_passiv);
+		Serial_PutString("dlc:  ");
+		Serial_PrintInt(dlc);
+
+		for (uint32_t c = 0; c < length; c++)
 		{
 			Serial_PutInt(c);
 			Serial_PutString(":  ");
@@ -373,9 +418,12 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 
 	packet->T0.bit.XTD = 0;
 	packet->T0.bit.ID = message_id << 18;
+	packet->T0.bit.RTR = 0;
 	packet->T1.bit.FDF = 1;
 	packet->T1.bit.BRS = 1;
 	packet->T1.bit.DLC = Can_LengthToDlc[length];
+	packet->T1.bit.EFCC = 0;
+	packet->T1.bit.MM = 0;
 
 	uint32_t i = 0;
 	for (uint32_t c = 0; c < length; c += 4)

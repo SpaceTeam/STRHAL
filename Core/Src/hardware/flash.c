@@ -78,6 +78,7 @@ void Flash_ClearBuffer(void)
 	while (QUADSPI->SR & QUADSPI_SR_FTF)
 	{
 		uint32_t unused = QUADSPI->DR;
+
 	}
 }
 void Flash_SendCommand(uint8_t isRead, uint8_t instruction, uint8_t isAddress, uint32_t address, uint8_t isAlternateBytes, uint8_t alternateBytesSize, uint32_t alternateBytes, uint8_t dummyCycles,

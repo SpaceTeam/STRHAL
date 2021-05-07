@@ -49,7 +49,7 @@ Result_t Generic_Status()
 
 Result_t Generic_GenerateDataPayload(uint8_t *data, uint32_t *length)
 {
-	uint32_t * channel_mask = (uint32_t *) data;
+	uint32_t *channel_mask = (uint32_t*) data;
 	*channel_mask = 0;
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
@@ -60,7 +60,7 @@ Result_t Generic_GenerateDataPayload(uint8_t *data, uint32_t *length)
 			case CHANNEL_TYPE_ADC16:
 				break;
 			case CHANNEL_TYPE_ADC24:
-				Adc24_GetData(c, (int32_t *)data, length);
+				Adc24_GetData(c, (int32_t*) data, length);
 				break;
 			case CHANNEL_TYPE_COMPUTED32:
 				break;
@@ -95,7 +95,8 @@ Result_t Generic_Data(void)
 	uint8_t *payload = (uint8_t*) &data.bit.data;
 	uint32_t length = 0;
 	Result_t result = Generic_GenerateDataPayload(payload, &length);
-	if(result != NOICE) return result;
+	if (result != NOICE)
+		return result;
 	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, length);
 }
 Result_t Generic_SetVariable(SetMsg_t *set_msg)
@@ -149,12 +150,17 @@ Result_t Generic_NodeInfo(void)
 	info->firmware_version = node.firmware_version;
 
 	info->channel_mask = 0x0000000;
+	uint32_t length = 0;
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
-		info->channel_mask |= (node.channels[c].type != CHANNEL_TYPE_UNKNOWN) << c;
-		info->channel_type[c] = node.channels[c].type;
+		if (node.channels[c].type != CHANNEL_TYPE_UNKNOWN)
+		{
+			info->channel_mask |= 1 << c;
+			info->channel_type[length++] = node.channels[c].type;
+		}
 	}
-	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, sizeof(NodeInfoMsg_t));
+	length += 2 * sizeof(uint32_t);
+	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, length);
 
 }
 

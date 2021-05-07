@@ -32,7 +32,6 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 		return OOF;
 
 	switch (node.channels[channel].type)
-	//TODO GET CHANNEL TYPE
 	{
 		case CHANNEL_TYPE_NODE_SPECIFIC:
 			break;

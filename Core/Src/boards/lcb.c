@@ -9,6 +9,7 @@
 #include "serial.h"
 #include "generic_channel.h"
 #include "systick.h"
+#include <string.h>
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
@@ -47,21 +48,31 @@ void LCB_main(void)
 			Serial_PrintString(serial_str);
 
 			uint8_t testdata[64] =
-			{ 0x01, 0x02, 0x03, 0x04, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+			{ 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
 
-			if (Can_sendMessage(0, 0x0C, testdata, 25) == NOICE)
-				Serial_PrintString("message sent\n");
+			if (strlen(serial_str) > 4)
+			{
+				if (Can_sendMessage(0, 0x2AA, testdata, 25) == NOICE)
+					Serial_PrintString("message sent\n");
+				else
+					Serial_PrintString("FOCK\n");
+			}
 			else
-				Serial_PrintString("FOCK\n");
+			{
+				if (Can_sendMessage(0, 0x555, testdata, 25) == NOICE)
+					Serial_PrintString("message sent\n");
+				else
+					Serial_PrintString("FOCK\n");
 
+			}
 			/*Result_t result = Generic_NodeInfo();
 
-			if (result == NOICE)
-				Serial_PrintString("Noice");
-			else
-				Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
+			 if (result == NOICE)
+			 Serial_PrintString("Noice");
+			 else
+			 Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
 
-		*/
+			 */
 		}
 
 	}
