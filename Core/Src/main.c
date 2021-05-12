@@ -29,7 +29,7 @@ int main(void)
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1); //DMA init
 
 	Serial_Init();
-	Can_Init(12);
+	Can_Init(NODE_ID);
 
 	Serial_PrintString("STARTED?");
 	Serial_PrintString(GIT_COMMIT_HASH);

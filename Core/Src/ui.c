@@ -18,6 +18,16 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 	uint8_t channel = data->bit.info.channel_id;
 	uint8_t cmd_id = data->bit.cmd_id;
 
+	length -= sizeof(Can_MessageDataInfo_t);
+	length -= sizeof(uint8_t);
+
+	uint8_t *payload = &data->bit.data.uint8[0];
+	Serial_PutString("&data->bit.data.uint8[0]: ");
+	Serial_PrintHex(&data->bit.data.uint8[0]);
+	Serial_PutString("&data->bit.data: ");
+	Serial_PrintHex(&data->bit.data);
+
+
 	Serial_PrintString("CAN NOICE\n");
 	Serial_PutString("buffer: ");
 	Serial_PrintInt(buffer);
@@ -26,8 +36,9 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 	Serial_PutString("cmd_id: ");
 	Serial_PrintInt(cmd_id);
 
+
 	if (channel == GENERIC_CHANNEL_ID)
-		return Generic_ProcessMessage(channel, cmd_id, data->bit.data.uint8, length);
+		return Generic_ProcessMessage(channel, cmd_id, payload, length);
 	if (channel >= MAX_CHANNELS)
 		return OOF;
 
@@ -38,7 +49,7 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 		case CHANNEL_TYPE_ADC16:
 			break;
 		case CHANNEL_TYPE_ADC24:
-			return Adc24_ProcessMessage(channel, cmd_id, data->bit.data.uint8, length);
+			return Adc24_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_COMPUTED32:
 			break;
 		case CHANNEL_TYPE_DIGITAL_OUT:

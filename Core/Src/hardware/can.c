@@ -216,12 +216,12 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	// Enable transmitter delay compensation
 	SET_BIT(can->DBTP, FDCAN_DBTP_TDC);
 
-	// Configure global filter to reject everything
-	//can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+	if (can == FDCAN1)	// Configure global filter to reject everything
+		can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
-	//Accept everything
-	can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
-			| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+	if (can == FDCAN2)	//Accept everything
+		can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
+				| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Can Start
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_INIT);
@@ -301,17 +301,19 @@ Result_t Can_Init(uint8_t node_id)
 	id.info.direction = MASTER2NODE_DIRECTION;
 	id.info.special_cmd = STANDARD_SPECIAL_CMD;
 
-	for (uint32_t i = 0; i < 2; i++)
-	{
-		result = Can_InitFdcan(i);
-		if (result != NOICE)
-			return result;
-		id.info.node_id = node_id;
-		Can_AddStdFilter(i, 0, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
+	result = Can_InitFdcan(MAIN_CAN_BUS);
+	if (result != NOICE)
+		return result;
+	id.info.node_id = node_id;
+	Can_AddStdFilter(MAIN_CAN_BUS, 0, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
+	id.info.node_id = 0;
+	Can_AddStdFilter(MAIN_CAN_BUS, 1, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
 
-		//id.info.node_id = 0;
-		//Can_AddStdFilter(i, 1, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
-	}
+	//TODO: remove for Debugging only
+	result = Can_InitFdcan(1);
+	if (result != NOICE)
+		return result;
+
 	return NOICE;
 }
 

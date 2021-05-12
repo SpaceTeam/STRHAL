@@ -3,6 +3,7 @@
 #include "channel_util.h"
 #include "channels.h"
 #include "ui.h"
+#include "serial.h"
 #include "speaker.h"
 
 int32_t* Generic_VariableSelection(uint8_t var_id)
@@ -160,12 +161,14 @@ Result_t Generic_NodeInfo(void)
 		}
 	}
 	length += 2 * sizeof(uint32_t);
+	Serial_PrintString("Send NodeInfo");
 	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, length);
 
 }
 
 Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {
+	Serial_PrintString("Generic Process");
 	if (ch_id != GENERIC_CHANNEL_ID)
 		return OOF_WRONG_CHANNEL_TYPE;
 	switch (cmd_id)
@@ -199,6 +202,12 @@ Result_t Generic_NodeStatus()
 }
 Result_t Generic_Speaker(SpeakerMsg_t *speaker_msg)
 {
+	Serial_PrintString("Generic Speaker");
+	SpeakerMsg_t *speaker_msg1 = speaker_msg;
+	uint16_t tone = speaker_msg->tone_frequency;
+	uint16_t on_time = speaker_msg->on_time;
+	uint16_t off_time = speaker_msg->off_time;
+	uint16_t count = speaker_msg->count;
 	Speaker_Set(speaker_msg->tone_frequency, speaker_msg->on_time, speaker_msg->off_time, speaker_msg->count);
 	return NOICE;
 }
