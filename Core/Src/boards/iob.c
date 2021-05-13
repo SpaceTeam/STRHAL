@@ -153,26 +153,23 @@ void IOB_pins_init(void)
 	}
 }
 
+const CHANNEL_TYPE channel_lookup[4] =
+{
+		CHANNEL_TYPE_DIGITAL_OUT,
+		CHANNEL_TYPE_ADC16,			//PT100
+		CHANNEL_TYPE_ADC16,
+		CHANNEL_TYPE_ADC16
+};
+
 void Node_init(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
 	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
-		uint32_t select = LL_GPIO_ReadInputPort(iob_channels[i].select.port) & iob_channels[i].select.pin;
-		uint32_t enable = LL_GPIO_ReadInputPort(iob_channels[i].enable.port) & iob_channels[i].enable.pin;
-		if(enable != 0UL)
-		{
-			node.channels[i].type = CHANNEL_TYPE_ADC16;
-		}
-		else if(enable == 0UL && select == 0UL)
-		{
-			node.channels[i].type = CHANNEL_TYPE_DIGITAL_OUT;
-		}
-		else if(enable == 0UL && select != 0UL) //PT100
-		{
-			node.channels[i].type = CHANNEL_TYPE_ADC16;
-		}
+		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
+		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
+		node.channels[i].type = channel_lookup[type_index];
 
 		// set enable pin as output
 		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
