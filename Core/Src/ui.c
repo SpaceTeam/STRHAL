@@ -22,11 +22,6 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 	length -= sizeof(uint8_t);
 
 	uint8_t *payload = &data->bit.data.uint8[0];
-	Serial_PutString("&data->bit.data.uint8[0]: ");
-	Serial_PrintHex(&data->bit.data.uint8[0]);
-	Serial_PutString("&data->bit.data: ");
-	Serial_PrintHex(&data->bit.data);
-
 
 	Serial_PrintString("CAN NOICE\n");
 	Serial_PutString("buffer: ");
@@ -35,7 +30,6 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 	Serial_PrintInt(channel);
 	Serial_PutString("cmd_id: ");
 	Serial_PrintInt(cmd_id);
-
 
 	if (channel == GENERIC_CHANNEL_ID)
 		return Generic_ProcessMessage(channel, cmd_id, payload, length);

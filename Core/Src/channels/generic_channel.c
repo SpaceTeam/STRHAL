@@ -48,10 +48,12 @@ Result_t Generic_Status()
 	return OOF_NOT_IMPLEMENTED;
 }
 
-Result_t Generic_GenerateDataPayload(uint8_t *data, uint32_t *length)
+Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 {
+
 	uint32_t *channel_mask = (uint32_t*) data;
 	*channel_mask = 0;
+	data += sizeof(uint32_t);
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
 		switch (node.channels[c].type)
@@ -93,7 +95,7 @@ Result_t Generic_Data(void)
 	data.bit.info.channel_id = GENERIC_CHANNEL_ID;
 	data.bit.info.buffer = DIRECT_BUFFER;
 
-	uint8_t *payload = (uint8_t*) &data.bit.data;
+	DataMsg_t *payload = (DataMsg_t*) &data.bit.data;
 	uint32_t length = 0;
 	Result_t result = Generic_GenerateDataPayload(payload, &length);
 	if (result != NOICE)
@@ -203,11 +205,6 @@ Result_t Generic_NodeStatus()
 Result_t Generic_Speaker(SpeakerMsg_t *speaker_msg)
 {
 	Serial_PrintString("Generic Speaker");
-	SpeakerMsg_t *speaker_msg1 = speaker_msg;
-	uint16_t tone = speaker_msg->tone_frequency;
-	uint16_t on_time = speaker_msg->on_time;
-	uint16_t off_time = speaker_msg->off_time;
-	uint16_t count = speaker_msg->count;
 	Speaker_Set(speaker_msg->tone_frequency, speaker_msg->on_time, speaker_msg->off_time, speaker_msg->count);
 	return NOICE;
 }
