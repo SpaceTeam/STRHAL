@@ -37,6 +37,7 @@ Result_t Adc24_Status(Channel_t *channel)
 
 	return OOF;
 }
+
 Result_t Adc24_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 {
 

@@ -1,7 +1,7 @@
 #include "adc.h"
 #include "main.h"
 
-volatile uint16_t data[256] =
+volatile uint16_t data[266] =
 { 0 };
 
 void Adc_Init()
@@ -39,7 +39,22 @@ void Adc_Init()
 	 PB0   ------> ADC1_INP9
 	 PB1   ------> ADC1_INP5
 	 */
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_6 | LL_GPIO_PIN_7;
+
+	/**Node input GPIO Configuration
+	 PC0   ------> Node 0 | ADC1_INP10
+	 PC1   ------> Node 1 | ADC1_INP11
+	       ------> Node 2
+	       ------> Node 3
+	 PC4   ------> Node 4 | ADC1_INP4
+	 PC5   ------> Node 5 | ADC1_INP8
+	 PA0   ------> Node 6 | ADC1_INP16
+	 PA1   ------> Node 7 | ADC1_INP17
+	 PA2   ------> Node 8 | ADC1_INP14
+	 PA3   ------> Node 9 | ADC1_INP15
+	 PA4   ------> Node 10 | ADC1_INP18
+	 PA5   ------> Node 11 | ADC1_INP19
+	 */
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_0 | LL_GPIO_PIN_1 | LL_GPIO_PIN_2 | LL_GPIO_PIN_3 | LL_GPIO_PIN_4 | LL_GPIO_PIN_5 | LL_GPIO_PIN_6 | LL_GPIO_PIN_7;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 	LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -49,12 +64,17 @@ void Adc_Init()
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_0 | LL_GPIO_PIN_1 | LL_GPIO_PIN_4 | LL_GPIO_PIN_5;
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
 	//ADC
 	ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_16B;
 	ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
 	LL_ADC_Init(ADC1, &ADC_InitStruct);
 	ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-	ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_ENABLE_4RANKS;
+	ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_ENABLE_14RANKS;
 	ADC_REG_InitStruct.SequencerDiscont = DISABLE;
 	ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
 	ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_OVERWRITTEN;
@@ -107,6 +127,76 @@ void Adc_Init()
 	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_9, LL_ADC_SINGLE_ENDED);
 	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_9);
 
+	// Configure Regular Channel Rank 5 Channel 10
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_5, LL_ADC_CHANNEL_10);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_10);
+
+	// Configure Regular Channel Rank 6 Channel 11
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_6, LL_ADC_CHANNEL_11);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_11,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_11, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_11);
+
+	// Configure Regular Channel Rank 7 Channel 4
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_7, LL_ADC_CHANNEL_4);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_4,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_4, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_4);
+
+	// Configure Regular Channel Rank 8 Channel 8
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_8, LL_ADC_CHANNEL_8);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_8, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_8);
+
+	// Configure Regular Channel Rank 9 Channel 16
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_9, LL_ADC_CHANNEL_16);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_16,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_16, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_16);
+
+	// Configure Regular Channel Rank 10 Channel 17
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_10, LL_ADC_CHANNEL_17);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_17,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_17, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_17);
+
+	// Configure Regular Channel Rank 11 Channel 14
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_11, LL_ADC_CHANNEL_14);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_14,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_14, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_14);
+
+	// Configure Regular Channel Rank 12 Channel 15
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_12, LL_ADC_CHANNEL_15);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_15,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_15, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_15);
+
+	// Configure Regular Channel Rank 13 Channel 18
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_13, LL_ADC_CHANNEL_18);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_18,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_18, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_18);
+
+	// Configure Regular Channel Rank 14 Channel 19
+	LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_14, LL_ADC_CHANNEL_19);
+	LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_19,
+	LL_ADC_SAMPLINGTIME_64CYCLES_5);
+	LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_19, LL_ADC_SINGLE_ENDED);
+	LL_ADC_SetChannelPreSelection(ADC1, LL_ADC_CHANNEL_19);
+
 	LL_ADC_Enable(ADC1);
 
 	//DMA Init
@@ -121,7 +211,7 @@ void Adc_Init()
 
 	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_0, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA));
 	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_0, (uint32_t) data);
-	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, 4);
+	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, 14);
 
 	LL_DMA_SetPeriphRequest(DMA1, LL_DMA_STREAM_0, LL_DMAMUX1_REQ_ADC1);
 

@@ -9,8 +9,7 @@
 #include "generic_channel.h"
 #include "systick.h"
 #include <string.h>
-
-
+#include <stdio.h>
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
@@ -32,6 +31,7 @@ Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 					}
 				};
 
+// {ENABLE},{SELECT},{IN}
 IOB_Pins_t iob_channels[] =
 {
 	[ 0] = {{GPIOE,  LL_GPIO_PIN_3}, {GPIOC,LL_GPIO_PIN_13}, {GPIOC, LL_GPIO_PIN_0}},
@@ -50,21 +50,53 @@ IOB_Pins_t iob_channels[] =
 
 //@formatter:on
 
-
+// TODO Channel type init ausbessern, adc16/dig out über enable pin steuern
 
 void IOB_main(void)
 {
 	uint64_t tick = 0;
 
 	Adc_Init();
+	IOB_pins_init();
+	Node_init();
+
 	char serial_str[1000] =
 	{ 0 };
+
+	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		sprintf(serial_str,"Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
+		Serial_PrintString(serial_str);
+	}
+	uint8_t flag = 0;
+
 	while (1)
 	{
 		tick = Systick_GetTick();
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
+		sprintf(serial_str,"ADC: %d", Adc_GetData(7));
+		Serial_PrintString(serial_str);
+
+		if(tick % 2000 == 0)
+		{
+			SetMsg_t data;
+			if(flag == 0)
+			{
+				data.value = 1;
+				flag = 1;
+				LL_GPIO_SetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
+			}
+			else
+			{
+				data.value = 0;
+				flag = 0;
+				LL_GPIO_ResetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
+			}
+			data.variable_id = DIGITAL_OUT_STATE;
+			//DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &data, 0);
+		}
 
 		if (Serial_CheckInput(serial_str))
 		{
@@ -98,6 +130,57 @@ void IOB_main(void)
 			 */
 		}
 
+	}
+}
+
+void IOB_pins_init(void)
+{
+	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		// set enable pin as input
+		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
+		GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
+
+		// set select pin as input
+		GPIO_InitStruct.Pin = iob_channels[i].select.pin;
+		GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+		LL_GPIO_Init(iob_channels[i].select.port, &GPIO_InitStruct);
+	}
+}
+
+void Node_init(void)
+{
+	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		uint32_t select = LL_GPIO_ReadInputPort(iob_channels[i].select.port) & iob_channels[i].select.pin;
+		uint32_t enable = LL_GPIO_ReadInputPort(iob_channels[i].enable.port) & iob_channels[i].enable.pin;
+		if(enable != 0UL)
+		{
+			node.channels[i].type = CHANNEL_TYPE_ADC16;
+		}
+		else if(enable == 0UL && select == 0UL)
+		{
+			node.channels[i].type = CHANNEL_TYPE_DIGITAL_OUT;
+		}
+		else if(enable == 0UL && select != 0UL) //PT100
+		{
+			node.channels[i].type = CHANNEL_TYPE_ADC16;
+		}
+
+		// set enable pin as output
+		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
+		GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+		GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+		GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
 	}
 }
 
