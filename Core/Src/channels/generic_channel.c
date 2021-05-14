@@ -6,18 +6,24 @@
 #include "serial.h"
 #include "speaker.h"
 
+static int32_t readonly_var = 0;
 int32_t* Generic_VariableSelection(uint8_t var_id)
 {
+	readonly_var = 0;
 	switch (var_id)
 	{
 		case GENERIC_BUS1_VOLTAGE:
-			return &node.generic_channel.bus1_voltage;
+			readonly_var = *node.generic_channel.bus1_voltage;
+			return &readonly_var;
 		case GENERIC_BUS2_VOLTAGE:
-			return &node.generic_channel.bus2_voltage;
+			readonly_var = *node.generic_channel.bus2_voltage;
+			return &readonly_var;
 		case GENERIC_PWR_VOLTAGE:
-			return &node.generic_channel.power_voltage;
+			readonly_var = *node.generic_channel.power_voltage;
+			return &readonly_var;
 		case GENERIC_PWR_CURRENT:
-			return &node.generic_channel.power_current;
+			readonly_var = *node.generic_channel.power_current;
+			return &readonly_var;
 		case GENERIC_REFRESH_DIVIDER:
 			return &node.generic_channel.refresh_divider;
 		case GENERIC_REFRESH_RATE:
@@ -51,9 +57,7 @@ Result_t Generic_Status()
 Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 {
 
-	uint32_t *channel_mask = (uint32_t*) data;
-	*channel_mask = 0;
-	data += sizeof(uint32_t);
+	data->channel_mask = 0;
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
 		switch (node.channels[c].type)
@@ -63,7 +67,7 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 			case CHANNEL_TYPE_ADC16:
 				break;
 			case CHANNEL_TYPE_ADC24:
-				Adc24_GetData(c, (int32_t*) data, length);
+				Adc24_GetData(c, (int32_t*) data->uint8, length);
 				break;
 			case CHANNEL_TYPE_COMPUTED32:
 				break;
@@ -123,7 +127,7 @@ Result_t Generic_GetVariable(GetMsg_t *get_msg, GENERIC_CMDs response_cmd)
 	data.bit.info.channel_id = GENERIC_CHANNEL_ID;
 	data.bit.info.buffer = DIRECT_BUFFER;
 
-	SetMsg_t *set_msg = (SetMsg_t*) &data.bit.data;
+	SetMsg_t *set_msg = (SetMsg_t*) data.bit.data.uint8;
 	int32_t *var = Generic_VariableSelection(get_msg->variable_id);
 	if (var == NULL)
 		return OOF;
@@ -152,7 +156,7 @@ Result_t Generic_NodeInfo(void)
 
 	info->firmware_version = node.firmware_version;
 
-	info->channel_mask = 0x0000000;
+	info->channel_mask = 0x00000000;
 	uint32_t length = 0;
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
@@ -163,14 +167,12 @@ Result_t Generic_NodeInfo(void)
 		}
 	}
 	length += 2 * sizeof(uint32_t);
-	Serial_PrintString("Send NodeInfo");
 	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, length);
 
 }
 
 Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {
-	Serial_PrintString("Generic Process");
 	if (ch_id != GENERIC_CHANNEL_ID)
 		return OOF_WRONG_CHANNEL_TYPE;
 	switch (cmd_id)
@@ -191,8 +193,6 @@ Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, ui
 			return Generic_NodeStatus();
 		case GENERIC_REQ_SPEAKER:
 			return Generic_Speaker((SpeakerMsg_t*) data);
-		case GENERIC_REQ_ENABLE_UART_DEBUGGING:
-			return Generic_EnableUartDebugging();
 		default:
 			return OOF_UNKNOWN_CMD;
 
@@ -204,7 +204,6 @@ Result_t Generic_NodeStatus()
 }
 Result_t Generic_Speaker(SpeakerMsg_t *speaker_msg)
 {
-	Serial_PrintString("Generic Speaker");
 	Speaker_Set(speaker_msg->tone_frequency, speaker_msg->on_time, speaker_msg->off_time, speaker_msg->count);
 	return NOICE;
 }

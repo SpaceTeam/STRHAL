@@ -28,10 +28,22 @@ Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 				};
 //@formatter:on
 
+void LCB_InitAdc(void)
+{
+	Adc_Init();
+	node.generic_channel.bus1_voltage = Adc_AddRegularChannel(PWR_BUS_VOLTAGE_1);
+	node.generic_channel.bus2_voltage = Adc_AddRegularChannel(PWR_BUS_VOLTAGE_2);
+	node.generic_channel.power_voltage = Adc_AddRegularChannel(SUPPLY_VOLTAGE_SENSE);
+	node.generic_channel.power_current = Adc_AddRegularChannel(SUPPLY_CURRENT_SENSE);
+	Adc_Calibrate();
+	Adc_StartAdc();
+}
+
 void LCB_main(void)
 {
 	uint64_t tick = 0;
 
+	LCB_InitAdc();
 	Ads131_Init();
 	char serial_str[1000] =
 	{ 0 };
@@ -71,15 +83,11 @@ void LCB_main(void)
 				data.bit.info.channel_id = GENERIC_CHANNEL_ID;
 				data.bit.info.buffer = DIRECT_BUFFER;
 
-				data.bit.cmd_id = GENERIC_REQ_SPEAKER;
-				uint32_t length = 7;
-				SpeakerMsg_t *speaker = (SpeakerMsg_t*) &data.bit.data;
-				speaker->tone_frequency = 600;
-				speaker->on_time = 500;
-				speaker->off_time = 500;
-				speaker->count = 7;
+				data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
+				GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
+				getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
 
-				Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(SpeakerMsg_t));
+				Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
 				//Result_t result = Generic_NodeInfo();
 
 				if (result == NOICE)

@@ -98,7 +98,7 @@ Result_t Adc24_GetData(uint8_t ch_id, int32_t *data, uint32_t *length)
 	int32_t new_data = Ads131_GetData(ch_id);
 	if (new_data == ADS131_NO_NEW_DATA)
 		return OOF_NO_NEW_DATA;
-	*(data + length) = new_data;
+	*(data + *length) = new_data;
 	*length += ADC24_DATA_N_BYTES;
 	return NOICE;
 }

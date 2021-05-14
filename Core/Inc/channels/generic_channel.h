@@ -3,13 +3,14 @@
 
 #include "generic_channel_def.h"
 #include "main.h"
+#include "adc.h"
 
 typedef struct
 {
-	int32_t bus1_voltage;
-	int32_t bus2_voltage;
-	int32_t power_voltage;
-	int32_t power_current;
+	AdcData_t * bus1_voltage;
+	AdcData_t * bus2_voltage;
+	AdcData_t * power_voltage;
+	AdcData_t * power_current;
 	int32_t refresh_divider;
 	int32_t refresh_rate;
 } Generic_Channel_t;
