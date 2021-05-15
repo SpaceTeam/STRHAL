@@ -4,7 +4,7 @@
 #define LCB 1
 #define IOB 2
 
-#define BOARD IOB
+#define BOARD LCB
 
 #if BOARD == LCB
 #include "lcb.h"
@@ -13,6 +13,7 @@
 #include "iob.h"
 #define MAIN_CAN_BUS IOB_MAIN_CAN_BUS
 #endif
+#define DEBUG_CAN_BUS 1
 
 
 
