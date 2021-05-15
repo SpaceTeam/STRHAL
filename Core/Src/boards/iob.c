@@ -136,19 +136,17 @@ void IOB_main(void)
 void IOB_pins_init(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
 	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		// set enable pin as input
 		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
-		GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
 
 		// set select pin as input
 		GPIO_InitStruct.Pin = iob_channels[i].select.pin;
-		GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 		LL_GPIO_Init(iob_channels[i].select.port, &GPIO_InitStruct);
 	}
 }
@@ -164,21 +162,44 @@ const CHANNEL_TYPE channel_lookup[4] =
 void Node_init(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
 	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
 		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
 		node.channels[i].type = channel_lookup[type_index];
+		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
+		switch(channel_lookup[type_index])
+		{
+			case CHANNEL_TYPE_DIGITAL_OUT:
+				node.channels[i].channel.digital_out.enable_pin = iob_channels[i].enable.pin;
+				break;
+			default:
+				break;
+		}
 
 		// set enable pin as output
 		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
-		GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-		GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-		GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
 	}
+
+	// Read dipswitches and set node id accordingly
+
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+
+	for(int i = 0; i < 8; i++)
+	{
+		// set enable dipswitch pin as input
+		GPIO_InitStruct.Pin = 0x1UL << i;
+		LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+	}
+
+	node.node_id = LL_GPIO_ReadInputPort(GPIOD) & 0xFF;
 }
 
 #endif
