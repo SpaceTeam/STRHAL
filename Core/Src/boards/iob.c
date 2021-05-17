@@ -50,89 +50,6 @@ IOB_Pins_t iob_channels[] =
 
 //@formatter:on
 
-// TODO Channel type init ausbessern, adc16/dig out über enable pin steuern
-
-void IOB_main(void)
-{
-	uint64_t tick = 0;
-
-	Adc_Init();
-	IOB_pins_init();
-	Node_init();
-
-	char serial_str[1000] =
-	{ 0 };
-
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
-	{
-		sprintf(serial_str,"Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
-		Serial_PrintString(serial_str);
-	}
-	uint8_t flag = 0;
-
-	while (1)
-	{
-		tick = Systick_GetTick();
-		Speaker_Update(tick);
-		Can_checkFifo(IOB_MAIN_CAN_BUS);
-		Can_checkFifo(1);
-		sprintf(serial_str,"ADC: %d", Adc_GetData(7));
-		Serial_PrintString(serial_str);
-
-		if(tick % 2000 == 0)
-		{
-			SetMsg_t data;
-			if(flag == 0)
-			{
-				data.value = 1;
-				flag = 1;
-				LL_GPIO_SetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
-			}
-			else
-			{
-				data.value = 0;
-				flag = 0;
-				LL_GPIO_ResetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
-			}
-			data.variable_id = DIGITAL_OUT_STATE;
-			//DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &data, 0);
-		}
-
-		if (Serial_CheckInput(serial_str))
-		{
-			Serial_PrintString(serial_str);
-
-			uint8_t testdata[64] =
-			{ 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
-
-			if (strlen(serial_str) > 4)
-			{
-				if (Can_sendMessage(0, 0x2AA, testdata, 25) == NOICE)
-					Serial_PrintString("message sent\n");
-				else
-					Serial_PrintString("FOCK\n");
-			}
-			else
-			{
-				if (Can_sendMessage(0, 0x555, testdata, 25) == NOICE)
-					Serial_PrintString("message sent\n");
-				else
-					Serial_PrintString("FOCK\n");
-
-			}
-			/*Result_t result = Generic_NodeInfo();
-
-			 if (result == NOICE)
-			 Serial_PrintString("Noice");
-			 else
-			 Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
-
-			 */
-		}
-
-	}
-}
-
 void IOB_pins_init(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -172,11 +89,12 @@ void Node_init(void)
 		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
 		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
 		node.channels[i].type = channel_lookup[type_index];
+
 		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
 		switch(channel_lookup[type_index])
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
-				node.channels[i].channel.digital_out.enable_pin = iob_channels[i].enable.pin;
+				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
 				break;
 			default:
 				break;
@@ -190,7 +108,7 @@ void Node_init(void)
 	// Read dipswitches and set node id accordingly
 
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
 
 	for(int i = 0; i < 8; i++)
 	{
@@ -200,6 +118,133 @@ void Node_init(void)
 	}
 
 	node.node_id = LL_GPIO_ReadInputPort(GPIOD) & 0xFF;
+}
+
+void IOB_InitAdc(void)
+{
+	Adc_Init();
+	// init generic adcs
+	node.generic_channel.bus1_voltage = Adc_AddRegularChannel(PWR_BUS_VOLTAGE_1);
+	node.generic_channel.bus2_voltage = Adc_AddRegularChannel(PWR_BUS_VOLTAGE_2);
+	node.generic_channel.power_voltage = Adc_AddRegularChannel(SUPPLY_VOLTAGE_SENSE);
+	node.generic_channel.power_current = Adc_AddRegularChannel(SUPPLY_CURRENT_SENSE);
+
+	// init channel adcs
+	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		CHANNEL_TYPE type = node.channels[i].type;
+		switch(type)
+		{
+			case CHANNEL_TYPE_DIGITAL_OUT:
+				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i);
+				break;
+			case CHANNEL_TYPE_ADC16:
+				node.channels[i].channel.adc16.analog_in = Adc_AddRegularChannel(i);
+				break;
+			default:
+				break;
+		}
+	}
+	Adc_Calibrate();
+	Adc_StartAdc();
+}
+
+void IOB_main(void)
+{
+	uint64_t tick = 0;
+
+	IOB_pins_init();
+	Node_init();
+	IOB_InitAdc();
+
+	char serial_str[1000] =
+	{ 0 };
+
+	sprintf(serial_str,"Node ID: %ld", node.node_id);
+	Serial_PrintString(serial_str);
+
+	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		sprintf(serial_str,"Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
+		Serial_PrintString(serial_str);
+	}
+	uint8_t flag = 0;
+
+	while (1)
+	{
+		tick = Systick_GetTick();
+		Speaker_Update(tick);
+		Can_checkFifo(IOB_MAIN_CAN_BUS);
+		Can_checkFifo(1);
+
+		GetMsg_t data;
+		if(tick % 500 == 0) {
+			for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+			{
+				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
+				{
+					data.variable_id = DIGITAL_OUT_MEASUREMENT;
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+				}
+				else
+				{
+					data.variable_id = ADC16_MEASUREMENT;
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+				}
+			}
+		}
+		/*if(tick % 2000 == 0)
+		{
+			SetMsg_t data;
+			if(flag == 0)
+			{
+				data.value = 1;
+				flag = 1;
+				LL_GPIO_SetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
+			}
+			else
+			{
+				data.value = 0;
+				flag = 0;
+				LL_GPIO_ResetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
+			}
+			data.variable_id = DIGITAL_OUT_STATE;
+			//DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &data, 0);
+		}*/
+
+		if (Serial_CheckInput(serial_str))
+		{
+			Serial_PrintString(serial_str);
+
+			uint8_t testdata[64] =
+			{ 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+
+			if (strlen(serial_str) > 4)
+			{
+				if (Can_sendMessage(0, 0x2AA, testdata, 25) == NOICE)
+					Serial_PrintString("message sent\n");
+				else
+					Serial_PrintString("FOCK\n");
+			}
+			else
+			{
+				if (Can_sendMessage(0, 0x555, testdata, 25) == NOICE)
+					Serial_PrintString("message sent\n");
+				else
+					Serial_PrintString("FOCK\n");
+
+			}
+			/*Result_t result = Generic_NodeInfo();
+
+			 if (result == NOICE)
+			 Serial_PrintString("Noice");
+			 else
+			 Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
+
+			 */
+		}
+
+	}
 }
 
 #endif

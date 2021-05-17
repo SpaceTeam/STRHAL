@@ -16,7 +16,5 @@ typedef struct
 } IOB_Pins_t;
 
 void IOB_main(void);
-void IOB_pins_init(void);
-void Node_init(void);
 
 #endif

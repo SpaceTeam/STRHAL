@@ -4,7 +4,7 @@
 #define LCB 1
 #define IOB 2
 
-#define BOARD LCB
+#define BOARD IOB
 
 #if BOARD == LCB
 #include "lcb.h"

@@ -5,13 +5,17 @@
 #include "adc.h"
 #include "ui.h"
 
+#include "serial.h"
+#include <string.h>
+#include <stdio.h>
+
 Result_t DigitalOut_ResetSettings(Channel_t *channel);
 Result_t DigitalOut_Status(Channel_t *channel);
 Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_OUT_CMDs response_cmd);
-int32_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id);
+uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id);
 
-int32_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id)
+uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id)
 {
 	switch (var_id)
 	{
@@ -23,7 +27,7 @@ int32_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var
 		case DIGITAL_OUT_FREQUENCY:
 			return &dig_out->frequency;
 		case DIGITAL_OUT_MEASUREMENT:
-			return Adc_GetData(ch_id);
+			return dig_out->analog_in;
 		case DIGITAL_OUT_SENSOR_REFRESH_DIVIDER:
 			return NULL;
 		default:
@@ -67,7 +71,7 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 		}
 	}
 
-	int32_t *var = DigitalOut_VariableSelection(&channel->channel.digital_out, set_msg->variable_id, &channel->id);
+	uint16_t *var = DigitalOut_VariableSelection(&channel->channel.digital_out, set_msg->variable_id, channel->id);
 	if (var == NULL)
 		return OOF;
 	*var = set_msg->value;
@@ -89,11 +93,17 @@ Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_O
 	data.bit.info.buffer = DIRECT_BUFFER;
 
 	SetMsg_t *set_msg = (SetMsg_t*) &data.bit.data;
-	int32_t *var = DigitalOut_VariableSelection(&channel->channel.digital_out, get_msg->variable_id, &channel->id);
+	uint16_t *var = DigitalOut_VariableSelection(&channel->channel.digital_out, get_msg->variable_id, channel->id);
 	if (var == NULL)
 		return OOF;
 	set_msg->variable_id = get_msg->variable_id;
 	set_msg->value = *var;
+	char serial_str[20] =
+	{ 0 };
+
+	sprintf(serial_str,"ADC%d: %d", channel->id, *var);
+	Serial_PrintString(serial_str);
+
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
