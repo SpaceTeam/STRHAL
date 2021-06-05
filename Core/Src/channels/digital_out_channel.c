@@ -15,19 +15,24 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_OUT_CMDs response_cmd);
 uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id);
 
+static uint16_t readonly_var = 0;
 uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id)
 {
+	readonly_var = 0;
 	switch (var_id)
 	{
-
 		case DIGITAL_OUT_STATE:
-			return &dig_out->state;
+			readonly_var = (uint16_t) LL_GPIO_IsOutputPinSet(dig_out->enable_pin->port, dig_out->enable_pin->pin);
+			return &readonly_var;
 		case DIGITAL_OUT_DUTY_CYCLE:
-			return &dig_out->duty_cycle;
+			readonly_var = dig_out->duty_cycle;
+			return &readonly_var;
 		case DIGITAL_OUT_FREQUENCY:
-			return &dig_out->frequency;
+			readonly_var = dig_out->frequency;
+			return &readonly_var;
 		case DIGITAL_OUT_MEASUREMENT:
-			return dig_out->analog_in;
+			readonly_var = *dig_out->analog_in;
+			return &readonly_var;
 		case DIGITAL_OUT_SENSOR_REFRESH_DIVIDER:
 			return NULL;
 		default:
@@ -49,29 +54,41 @@ Result_t DigitalOut_Status(Channel_t *channel)
 
 Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 {
-	if (set_msg->variable_id == DIGITAL_OUT_STATE || set_msg->variable_id == DIGITAL_OUT_MEASUREMENT) //cannot set state, read-only
-		return OOF;
-
-	if (set_msg->variable_id == DIGITAL_OUT_DUTY_CYCLE)
+	uint16_t *var;
+	switch (set_msg->variable_id)
 	{
-		GPIO_Pin_t *enable = channel->channel.digital_out.enable_pin;
-		if (set_msg->value == 0)
+		case DIGITAL_OUT_STATE:
+			var = NULL; //cannot set state, read-only
+			break;
+		case DIGITAL_OUT_DUTY_CYCLE:
 		{
-			channel->channel.digital_out.state = 0;
-			LL_GPIO_ResetOutputPin(enable->port,enable->pin);
+			GPIO_Pin_t *enable = channel->channel.digital_out.enable_pin;
+			if (set_msg->value == 0)
+			{
+				LL_GPIO_ResetOutputPin(enable->port,enable->pin);
+			}
+			else if (set_msg->value == 0xFFFFFFFF)
+			{
+				LL_GPIO_SetOutputPin(enable->port,enable->pin);
+			}
+			else
+			{
+				//TODO: Add PWM
+			}
+			var = &(channel->channel.digital_out.duty_cycle);
+			break;
 		}
-		else if (set_msg->value == 0xFFFFFFFF)
-		{
-			channel->channel.digital_out.state = 1;
-			LL_GPIO_SetOutputPin(enable->port,enable->pin);
-		}
-		else
-		{
-			//TODO: Add PWM
-		}
+		case DIGITAL_OUT_FREQUENCY:
+			var = &(channel->channel.digital_out.frequency);
+			break;
+		case DIGITAL_OUT_MEASUREMENT:
+			var = NULL; //cannot set measurement, read-only
+			break;
+		default:
+			var = NULL;
+			break;
 	}
 
-	uint16_t *var = DigitalOut_VariableSelection(&channel->channel.digital_out, set_msg->variable_id, channel->id);
 	if (var == NULL)
 		return OOF;
 	*var = set_msg->value;
@@ -101,8 +118,8 @@ Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_O
 	char serial_str[20] =
 	{ 0 };
 
-	sprintf(serial_str,"ADC%d: %d", channel->id, *var);
-	Serial_PrintString(serial_str);
+	sprintf(serial_str,"%d, ", *var);
+	Serial_PutString(serial_str);
 
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));

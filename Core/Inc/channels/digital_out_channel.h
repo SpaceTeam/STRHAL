@@ -4,11 +4,11 @@
 #include "digital_out_channel_def.h"
 #include "main.h"
 #include "measurement.h"
+#include "gpio.h"
 #include "adc.h"
 
 typedef struct
 {
-	uint16_t state;
 	uint16_t duty_cycle;
 	uint16_t frequency;
 	GPIO_Pin_t * enable_pin;

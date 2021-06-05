@@ -10,6 +10,8 @@
 #include "systick.h"
 #include <string.h>
 #include <stdio.h>
+#include "ui.h"
+#include "dipswitch.h"
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
@@ -50,7 +52,7 @@ IOB_Pins_t iob_channels[] =
 
 //@formatter:on
 
-void IOB_pins_init(void)
+void IOB_Pins_Init(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
@@ -76,8 +78,10 @@ const CHANNEL_TYPE channel_lookup[4] =
 		CHANNEL_TYPE_ADC16
 };
 
-void Node_init(void)
+void Node_Init(void)
 {
+	IOB_Pins_Init();
+
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -117,7 +121,7 @@ void Node_init(void)
 		LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 	}
 
-	node.node_id = LL_GPIO_ReadInputPort(GPIOD) & 0xFF;
+	node.node_id = NodeID_Get();
 }
 
 void IOB_InitAdc(void)
@@ -145,16 +149,16 @@ void IOB_InitAdc(void)
 				break;
 		}
 	}
+	//node.channels[5].channel.digital_out.analog_in = Adc_AddRegularChannel(ANALOG_IN_6);
 	Adc_Calibrate();
 	Adc_StartAdc();
 }
 
 void IOB_main(void)
 {
-	uint64_t tick = 0;
+	uint64_t tick = 0, old_tick = 0;
 
-	IOB_pins_init();
-	Node_init();
+	Node_Init();
 	IOB_InitAdc();
 
 	char serial_str[1000] =
@@ -170,6 +174,8 @@ void IOB_main(void)
 	}
 	uint8_t flag = 0;
 
+	GetMsg_t getmsg;
+
 	while (1)
 	{
 		tick = Systick_GetTick();
@@ -177,71 +183,80 @@ void IOB_main(void)
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-		GetMsg_t data;
-		if(tick % 500 == 0) {
-			for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+		if (tick-old_tick > 500)
+		{
+			old_tick = tick;
+
+			for(int i = 5; i < 6; i++)
 			{
 				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
 				{
-					data.variable_id = DIGITAL_OUT_MEASUREMENT;
-					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+					getmsg.variable_id = DIGITAL_OUT_MEASUREMENT;
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &getmsg, 0);
 				}
 				else
 				{
-					data.variable_id = ADC16_MEASUREMENT;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+					getmsg.variable_id = ADC16_MEASUREMENT;
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &getmsg, 0);
 				}
 			}
+			Serial_PutString("\n");
 		}
-		/*if(tick % 2000 == 0)
-		{
-			SetMsg_t data;
-			if(flag == 0)
-			{
-				data.value = 1;
-				flag = 1;
-				LL_GPIO_SetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
-			}
-			else
-			{
-				data.value = 0;
-				flag = 0;
-				LL_GPIO_ResetOutputPin(iob_channels[5].enable.port,iob_channels[5].enable.pin);
-			}
-			data.variable_id = DIGITAL_OUT_STATE;
-			//DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &data, 0);
-		}*/
 
 		if (Serial_CheckInput(serial_str))
 		{
 			Serial_PrintString(serial_str);
-
 			uint8_t testdata[64] =
 			{ 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
 
+			SetMsg_t msg;
+			msg.variable_id = DIGITAL_OUT_DUTY_CYCLE;
+
 			if (strlen(serial_str) > 4)
 			{
-				if (Can_sendMessage(0, 0x2AA, testdata, 25) == NOICE)
+				if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
 					Serial_PrintString("message sent\n");
 				else
 					Serial_PrintString("FOCK\n");
+
+			}
+			else if (strlen(serial_str) > 3)
+			{
+				msg.value = 0x0;
+				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &msg, 0);
+			}
+			else if (strlen(serial_str) > 2)
+			{
+				msg.value = 0xFFFFFFFF;
+				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &msg, 0);
 			}
 			else
 			{
-				if (Can_sendMessage(0, 0x555, testdata, 25) == NOICE)
-					Serial_PrintString("message sent\n");
+
+				Can_MessageId_t message_id =
+				{ 0 };
+				message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
+				message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
+				message_id.info.node_id = node.node_id;
+				message_id.info.priority = STANDARD_PRIORITY;
+
+				Can_MessageData_t data =
+				{ 0 };
+				data.bit.info.channel_id = GENERIC_CHANNEL_ID;
+				data.bit.info.buffer = DIRECT_BUFFER;
+
+				data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
+				GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
+				getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
+
+				Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
+				//Result_t result = Generic_NodeInfo();
+
+				if (result == NOICE)
+					Serial_PrintString("Noice");
 				else
-					Serial_PrintString("FOCK\n");
-
+					Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
 			}
-			/*Result_t result = Generic_NodeInfo();
-
-			 if (result == NOICE)
-			 Serial_PrintString("Noice");
-			 else
-			 Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
-
-			 */
 		}
 
 	}

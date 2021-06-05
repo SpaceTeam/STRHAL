@@ -14,12 +14,15 @@ Result_t Adc16_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs response_cmd);
 uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_t ch_id);
 
+static uint16_t readonly_var = 0;
 uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_t ch_id)
 {
+	readonly_var = 0;
 	switch (var_id)
 	{
 		case ADC16_MEASUREMENT:
-			return adc16->analog_in;
+			readonly_var = *adc16->analog_in;
+			return &readonly_var;
 		case ADC16_REFRESH_DIVIDER:
 			return NULL;
 		default:
@@ -74,8 +77,8 @@ Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs res
 	char serial_str[20] =
 	{ 0 };
 
-	sprintf(serial_str,"ADC%d: %d", channel->id, *var);
-	Serial_PrintString(serial_str);
+	sprintf(serial_str,"%d, ", *var);
+	Serial_PutString(serial_str);
 
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));

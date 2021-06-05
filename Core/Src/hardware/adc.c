@@ -68,21 +68,40 @@ LL_ADC_REG_RANK_14,
 LL_ADC_REG_RANK_15,
 LL_ADC_REG_RANK_16 };
 
-static void Adc_InitDMA(uint32_t dma_stream, uint32_t dest, uint32_t src, uint32_t length)
+const static uint32_t adc_seq_ranks[] =
 {
-	LL_DMA_SetDataTransferDirection(DMA1, dma_stream, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-	LL_DMA_SetPeriphIncMode(DMA1, dma_stream, LL_DMA_PERIPH_NOINCREMENT);
-	LL_DMA_SetMemoryIncMode(DMA1, dma_stream, LL_DMA_MEMORY_INCREMENT);
-	LL_DMA_SetPeriphSize(DMA1, dma_stream, LL_DMA_PDATAALIGN_HALFWORD);
-	LL_DMA_SetMemorySize(DMA1, dma_stream, LL_DMA_MDATAALIGN_HALFWORD);
-	LL_DMA_SetPeriphAddress(DMA1, dma_stream, src);
-	LL_DMA_SetMemoryAddress(DMA1, dma_stream, dest);
-	LL_DMA_SetDataLength(DMA1, dma_stream, length);
-	LL_DMA_SetPeriphRequest(DMA1, dma_stream, LL_DMAMUX1_REQ_ADC1);
-	LL_DMA_SetStreamPriorityLevel(DMA1, dma_stream, LL_DMA_PRIORITY_HIGH);
-	LL_DMA_SetMode(DMA1, dma_stream, LL_DMA_MODE_CIRCULAR);
-	LL_DMA_DisableFifoMode(DMA1, dma_stream);
-	LL_DMA_EnableStream(DMA1, dma_stream);
+LL_ADC_REG_SEQ_SCAN_DISABLE,
+LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_3RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_4RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_5RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_6RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_7RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_8RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_9RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_10RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_11RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_12RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_13RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_14RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_15RANKS,
+LL_ADC_REG_SEQ_SCAN_ENABLE_16RANKS };
+
+static void Adc_InitDMA(DMA_TypeDef * dma, uint32_t dma_stream, uint32_t dest, uint32_t src, uint32_t length)
+{
+	LL_DMA_SetDataTransferDirection(dma, dma_stream, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+	LL_DMA_SetPeriphIncMode(dma, dma_stream, LL_DMA_PERIPH_NOINCREMENT);
+	LL_DMA_SetMemoryIncMode(dma, dma_stream, LL_DMA_MEMORY_INCREMENT);
+	LL_DMA_SetPeriphSize(dma, dma_stream, LL_DMA_PDATAALIGN_HALFWORD);
+	LL_DMA_SetMemorySize(dma, dma_stream, LL_DMA_MDATAALIGN_HALFWORD);
+	LL_DMA_SetPeriphAddress(dma, dma_stream, src);
+	LL_DMA_SetMemoryAddress(dma, dma_stream, dest);
+	LL_DMA_SetDataLength(dma, dma_stream, length);
+	LL_DMA_SetPeriphRequest(dma, dma_stream, LL_DMAMUX1_REQ_ADC1);
+	LL_DMA_SetStreamPriorityLevel(dma, dma_stream, LL_DMA_PRIORITY_HIGH);
+	LL_DMA_SetMode(dma, dma_stream, LL_DMA_MODE_CIRCULAR);
+	LL_DMA_DisableFifoMode(dma, dma_stream);
+	LL_DMA_EnableStream(dma, dma_stream);
 }
 
 static void Adc_SetupAdc(ADC_TypeDef *adc)
@@ -95,7 +114,7 @@ static void Adc_SetupAdc(ADC_TypeDef *adc)
 	ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
 	LL_ADC_Init(adc, &ADC_InitStruct);
 	ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-	ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_ENABLE_4RANKS;
+	ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
 	ADC_REG_InitStruct.SequencerDiscont = DISABLE;
 	ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
 	ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_OVERWRITTEN;
@@ -200,10 +219,12 @@ void Adc_Calibrate(void)
 
 void Adc_StartAdc(void)
 {
+	LL_ADC_REG_SetSequencerLength(ADC1, adc_seq_ranks[adc1_length-1]);
+	LL_ADC_REG_SetSequencerLength(ADC3, adc_seq_ranks[adc3_length-1]);
 	LL_ADC_Enable(ADC1);
 	LL_ADC_Enable(ADC3);
-	Adc_InitDMA(LL_DMA_STREAM_0, (uint32_t) adc1_data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), adc1_length);
-	Adc_InitDMA(LL_DMA_STREAM_1, (uint32_t) adc3_data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), adc3_length);
+	Adc_InitDMA(DMA1, LL_DMA_STREAM_0, (uint32_t) adc1_data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), adc1_length);
+	Adc_InitDMA(DMA2, LL_DMA_STREAM_0, (uint32_t) adc3_data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), adc3_length);
 	LL_ADC_REG_StartConversion(ADC1);
 	LL_ADC_REG_StartConversion(ADC3);
 }

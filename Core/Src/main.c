@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "dipswitch.h"
 
 #define UART_UPDATE_TIME 100
 
@@ -26,10 +27,11 @@ int main(void)
 	Systick_Init();
 
 	GPIO_Init();
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1); //DMA init
+	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1); //DMA1 init
+	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2); //DMA2 init
 
 	Serial_Init();
-	Can_Init(NODE_ID);
+	Can_Init(NodeID_Get());
 
 	Serial_PrintString("STARTED?");
 	Serial_PrintString(GIT_COMMIT_HASH);
