@@ -30,6 +30,7 @@ typedef struct
 
 
 void GPIO_Init(void);
+void GPIO_WriteOutput(GPIO_TypeDef *GPIOx, uint32_t PinMask, uint8_t enable);
 
 
 #endif

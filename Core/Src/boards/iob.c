@@ -187,6 +187,7 @@ void IOB_main(void)
 		{
 			old_tick = tick;
 
+			Serial_PrintInt(*node.generic_channel.bus1_voltage);
 			for(int i = 5; i < 6; i++)
 			{
 				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
