@@ -4,10 +4,17 @@
 #include "channels.h"
 #include "speaker.h"
 #include "can.h"
+#include "foc/tmc6200/TMC6200_highLevel.h"
+#include "foc/tmc4671/TMC4671_highLevel.h"
+#include "foc/tmc4671/TMC4671.h"
+#include "foc/swdriver.h"
+#include "foc/as5147.h"
+#include "spi.h"
 #include "serial.h"
 #include "generic_channel.h"
 #include "systick.h"
 #include "ui.h"
+#include "tim.h"
 #include <string.h>
 
 //@formatter:off
@@ -31,11 +38,47 @@ void BLMB_InitAdc(void)
 	Adc_StartAdc();
 }
 
+void BLMB_InitFoc(void)
+{
+
+	TIM4_Init();
+
+	LL_TIM_EnableCounter(TIM4);
+	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH3);
+
+	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
+
+	Systick_BusyWait(100);
+	tmc6200_highLevel_init();
+	Systick_BusyWait(10);
+	swdriver_setEnable(true);
+	Systick_BusyWait(10);
+
+	TMC4671_highLevel_init();
+	Systick_BusyWait(10);
+
+	TMC4671_highLevel_initEncoder();
+
+	Systick_BusyWait(100);
+
+	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t) ((float) as5147_getAngle(BLMB_POSITION_ENCODER) * 32 * 231.1222));
+
+	TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
+
+	TMC4671_highLevel_positionMode2();
+
+	Systick_BusyWait(100);
+
+}
+
 void BLMB_main(void)
 {
 	uint64_t tick = 0;
 
 	BLMB_InitAdc();
+
+	BLMB_InitFoc();
+
 	char serial_str[1000] =
 	{ 0 };
 	while (1)
@@ -45,46 +88,13 @@ void BLMB_main(void)
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
+		TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
+
 		if (Serial_CheckInput(serial_str))
 		{
 			Serial_PrintString(serial_str);
-			uint8_t testdata[64] =
-			{ 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = atoi(serial_str);
 
-			if (strlen(serial_str) > 4)
-			{
-				if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
-					Serial_PrintString("message sent\n");
-				else
-					Serial_PrintString("FOCK\n");
-			}
-			else
-			{
-
-				Can_MessageId_t message_id =
-				{ 0 };
-				message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
-				message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
-				message_id.info.node_id = NODE_ID;
-				message_id.info.priority = STANDARD_PRIORITY;
-
-				Can_MessageData_t data =
-				{ 0 };
-				data.bit.info.channel_id = GENERIC_CHANNEL_ID;
-				data.bit.info.buffer = DIRECT_BUFFER;
-
-				data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
-				GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
-				getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
-
-				Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
-				//Result_t result = Generic_NodeInfo();
-
-				if (result == NOICE)
-					Serial_PrintString("Noice");
-				else
-					Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
-			}
 		}
 
 	}

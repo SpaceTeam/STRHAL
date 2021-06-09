@@ -6,28 +6,16 @@
 
 static void spiMode_set(void)
 {
-/*
-	//TODO FIX
-	swdriver.SPI->Init.CLKPolarity = SPI_POLARITY_LOW;
-	swdriver.SPI->Init.CLKPhase = SPI_PHASE_2EDGE;
+	SPI1_Init(LL_SPI_DATAWIDTH_24BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_LOW, LL_SPI_NSS_HARD_OUTPUT, LL_SPI_BAUDRATEPRESCALER_DIV32);
+	Systick_BusyWait(2);
 
-	if (HAL_SPI_Init(swdriver[drv].SPI) != HAL_OK)
-	{
-		_Error_Handler(__FILE__, __LINE__);
-	}
-	HAL_Delay(2);*/
 }
 
 static void spiMode_reset(void)
 {
-	/*
-	swdriver.SPI->Init.CLKPolarity = SPI_POLARITY_HIGH;
-	swdriver.SPI->Init.CLKPhase = SPI_PHASE_2EDGE;
-	if (HAL_SPI_Init(swdriver.SPI) != HAL_OK)
-	{
-		_Error_Handler(__FILE__, __LINE__);
-	}
-	HAL_Delay(2);*/
+	SPI1_Init(LL_SPI_DATAWIDTH_24BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_HARD_OUTPUT, LL_SPI_BAUDRATEPRESCALER_DIV32);
+	Systick_BusyWait(2);
+
 }
 
 uint16_t as5147_getAngle(uint8_t enc) //returns 11bit value
@@ -39,8 +27,7 @@ uint16_t as5147_getAngle(uint8_t enc) //returns 11bit value
 	txData[1] = 0xFF; // address lower 6 bits
 
 	swdriver_setCsnEncoder(enc, false);
-	//TODO FIX
-//	HAL_SPI_Transmit(swdriver.spi, txData, 2); //TODO FIX
+	SPI_Transmit_Receive(swdriver.spi, txData, txData, 2); //TODO FIX
 	swdriver_setCsnEncoder(enc, true);
 	Systick_BusyWait(2);
 

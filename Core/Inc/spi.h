@@ -38,7 +38,7 @@ extern "C" {
 
 /* USER CODE END Private defines */
 
-void SPI1_Init(void);
+void SPI1_Init(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, uint32_t baudrate);
 
 /* USER CODE BEGIN Prototypes */
 

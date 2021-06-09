@@ -15,7 +15,8 @@ static uint8_t new_data[8] =
 static uint32_t status = 0;
 Result_t Ads131_Init(void)
 {
-	SPI1_Init();
+	SPI1_Init(LL_SPI_DATAWIDTH_24BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_LOW, LL_SPI_NSS_HARD_OUTPUT, LL_SPI_BAUDRATEPRESCALER_DIV32);
+
 	TIM4_Init();
 
 	LL_GPIO_ResetOutputPin(ADS_nRESET_GPIO_Port, ADS_nRESET_Pin);

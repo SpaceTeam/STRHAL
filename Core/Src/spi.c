@@ -1,7 +1,7 @@
 #include "spi.h"
 #include "systick.h"
 
-void SPI1_InitSpi(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, uint32_t baudrate)
+static void SPI1_InitSpi(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, uint32_t baudrate)
 {
 	LL_SPI_InitTypeDef SPI_InitStruct =
 	{ 0 };
@@ -19,7 +19,7 @@ void SPI1_InitSpi(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss
 	LL_SPI_Init(SPI1, &SPI_InitStruct);
 }
 
-void SPI1_Init(void)
+void SPI1_Init(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, uint32_t baudrate)
 {
   LL_RCC_SetSPIClockSource(LL_RCC_SPI123_CLKSOURCE_PLL1Q);
 
@@ -96,7 +96,7 @@ void SPI1_Init(void)
   /* Enable SPI1_IRQn */
   NVIC_EnableIRQ(SPI1_IRQn);
 
-	SPI1_InitSpi(LL_SPI_DATAWIDTH_24BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_LOW, LL_SPI_NSS_HARD_OUTPUT, LL_SPI_BAUDRATEPRESCALER_DIV32);
+  SPI1_InitSpi(datawidth, cpha, cpol, nss, baudrate);
 
   //LL_SPI_SetFIFOThreshold(SPI1,LL_SPI_FIFO_TH_04DATA);
 

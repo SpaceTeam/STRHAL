@@ -54,11 +54,12 @@ IOB_Pins_t iob_channels[] =
 
 void IOB_Pins_Init(void)
 {
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		// set enable pin as input
 		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
@@ -71,31 +72,28 @@ void IOB_Pins_Init(void)
 }
 
 const CHANNEL_TYPE channel_lookup[4] =
-{
-		CHANNEL_TYPE_DIGITAL_OUT,
-		CHANNEL_TYPE_ADC16,			//PT100
-		CHANNEL_TYPE_ADC16,
-		CHANNEL_TYPE_ADC16
-};
+{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16,			//PT100
+		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
 
 void Node_Init(void)
 {
 	IOB_Pins_Init();
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
 		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
 		node.channels[i].type = channel_lookup[type_index];
 
 		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
-		switch(channel_lookup[type_index])
+		switch (channel_lookup[type_index])
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
 				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
@@ -114,7 +112,7 @@ void Node_Init(void)
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
 
-	for(int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		// set enable dipswitch pin as input
 		GPIO_InitStruct.Pin = 0x1UL << i;
@@ -134,10 +132,10 @@ void IOB_InitAdc(void)
 	node.generic_channel.power_current = Adc_AddRegularChannel(SUPPLY_CURRENT_SENSE);
 
 	// init channel adcs
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		CHANNEL_TYPE type = node.channels[i].type;
-		switch(type)
+		switch (type)
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
 				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i);
@@ -164,12 +162,12 @@ void IOB_main(void)
 	char serial_str[1000] =
 	{ 0 };
 
-	sprintf(serial_str,"Node ID: %ld", node.node_id);
+	sprintf(serial_str, "Node ID: %ld", node.node_id);
 	Serial_PrintString(serial_str);
 
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
-		sprintf(serial_str,"Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
+		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
 		Serial_PrintString(serial_str);
 	}
 	uint8_t flag = 0;
@@ -183,25 +181,27 @@ void IOB_main(void)
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-		if (tick-old_tick > 500)
+		if (tick - old_tick > 100)
 		{
 			old_tick = tick;
 
-			Serial_PrintInt(*node.generic_channel.bus1_voltage);
-			for(int i = 5; i < 6; i++)
+			Serial_PutInt(*node.generic_channel.bus2_voltage);
+			Serial_PutString(", ");
+			for (int i = 0; i < 6; i++)
 			{
-				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
+				if (node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
 				{
 					getmsg.variable_id = DIGITAL_OUT_MEASUREMENT;
-					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &getmsg, 0);
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
 				}
 				else
 				{
 					getmsg.variable_id = ADC16_MEASUREMENT;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &getmsg, 0);
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
 				}
 			}
-			Serial_PutString("\n");
+			Serial_PrintString("");
+
 		}
 
 		if (Serial_CheckInput(serial_str))
@@ -212,51 +212,66 @@ void IOB_main(void)
 
 			SetMsg_t msg;
 			msg.variable_id = DIGITAL_OUT_DUTY_CYCLE;
+			uint32_t i = atoi(serial_str);
 
-			if (strlen(serial_str) > 4)
+			switch (i)
 			{
-				if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
-					Serial_PrintString("message sent\n");
-				else
-					Serial_PrintString("FOCK\n");
+				case 1:
+					msg.value = 0x0;
+					DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
+					Serial_PrintString("6 OFF");
+					break;
+				case 2:
+					msg.value = 0xFFFFFFFF;
+					DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
+					Serial_PrintString("6 ON");
+					break;
+				case 3:
+					msg.value = 0x0;
+					DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
+					break;
+				case 4:
+					msg.value = 0xFFFFFFFF;
+					DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
+					break;
+				default:
 
-			}
-			else if (strlen(serial_str) > 3)
-			{
-				msg.value = 0x0;
-				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &msg, 0);
-			}
-			else if (strlen(serial_str) > 2)
-			{
-				msg.value = 0xFFFFFFFF;
-				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &msg, 0);
-			}
-			else
-			{
+					if (strlen(serial_str) > 4)
+					{
+						if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
+							Serial_PrintString("message sent\n");
+						else
+							Serial_PrintString("FOCK\n");
 
-				Can_MessageId_t message_id =
-				{ 0 };
-				message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
-				message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
-				message_id.info.node_id = node.node_id;
-				message_id.info.priority = STANDARD_PRIORITY;
+					}
+					else
+					{
 
-				Can_MessageData_t data =
-				{ 0 };
-				data.bit.info.channel_id = GENERIC_CHANNEL_ID;
-				data.bit.info.buffer = DIRECT_BUFFER;
+						Can_MessageId_t message_id =
+						{ 0 };
+						message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
+						message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
+						message_id.info.node_id = node.node_id;
+						message_id.info.priority = STANDARD_PRIORITY;
 
-				data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
-				GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
-				getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
+						Can_MessageData_t data =
+						{ 0 };
+						data.bit.info.channel_id = GENERIC_CHANNEL_ID;
+						data.bit.info.buffer = DIRECT_BUFFER;
 
-				Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
-				//Result_t result = Generic_NodeInfo();
+						data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
+						GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
+						getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
 
-				if (result == NOICE)
-					Serial_PrintString("Noice");
-				else
-					Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
+						Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
+						//Result_t result = Generic_NodeInfo();
+
+						if (result == NOICE)
+							Serial_PrintString("Noice");
+						else
+							Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
+					}
+					break;
 			}
 		}
 

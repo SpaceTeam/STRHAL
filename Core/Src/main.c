@@ -43,6 +43,8 @@ int main(void)
 	LCB_main();
 #elif BOARD == IOB
 	IOB_main();
+#elif BOARD == BLMB
+	BLMB_main();
 #endif
 
 }
