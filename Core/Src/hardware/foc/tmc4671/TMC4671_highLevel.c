@@ -2,6 +2,9 @@
 #include "foc/tmc4671/TMC4671.h"
 #include "foc/swdriver.h"
 #include "foc/as5147.h"
+#include "systick.h"
+#include "serial.h"
+#include <stdio.h>
 
 //TODO: use functions from TMC4671.c, use masking
 void TMC4671_highLevel_init(void)
@@ -32,7 +35,7 @@ void TMC4671_highLevel_init(void)
 	{
 		adcOffs0 += TMC4671_getAdcRaw0();
 		adcOffs1 += TMC4671_getAdcRaw1();
-		HAL_Delay(1);
+		Systick_BusyWait(1);
 	}
 	adcOffs0 /= 256;
 	adcOffs1 /= 256;
@@ -159,11 +162,11 @@ void TMC4671_highLevel_setPosition(int32_t position)
 {
 	tmc4671_writeInt( TMC4671_PID_POSITION_TARGET, position); // position target
 }
-
+/*
 void TMC4671_highLevel_setPosition_nonBlocking(int32_t position)
 {
 	tmc4671_writeInt_nonBlocking( TMC4671_PID_POSITION_TARGET, position); // position target
-}
+}*/
 
 void TMC4671_highLevel_printOffsetAngle(void)
 {
@@ -172,13 +175,13 @@ void TMC4671_highLevel_printOffsetAngle(void)
 	tmc4671_writeInt( TMC4671_PHI_E_SELECTION, 1);  // phi_e_ext
 	tmc4671_writeInt( TMC4671_PHI_E_EXT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (2000 << TMC4671_UD_EXT_SHIFT)); // uq=0, ud=2000
-	HAL_Delay(1000);
+	Systick_BusyWait(1000);
 
 	char string[64];
 	// uint16_t angle = as5147_getAngle(drv); // will be printed as int16!!!
 	// uint16_t len = snprintf(string, 64, "\n\rdriver %d encoder zero angle: %d (11bit) %d (16bit)\n\r",  angle, (int16_t)(angle << 5));
 	uint16_t angle = as5147_getAngle(0); // will be printed as int16!!!
-	uint16_t len = snprintf(string, 64, "\n\rdriver %d encoder zero angle: %d (16bit)\n\r", angle);
+	snprintf(string, 64, "\n\rencoder zero angle: %d (16bit)\n\r", angle);
 	Serial_PutString(string);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (0 << TMC4671_UD_EXT_SHIFT)); // ud=0 uq=0
 }
@@ -202,7 +205,7 @@ void TMC4671_highLevel_initEncoder(void)
 	tmc4671_writeInt( TMC4671_PHI_E_SELECTION, 1);  // phi_e_ext
 	tmc4671_writeInt( TMC4671_PHI_E_EXT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (2000 << TMC4671_UD_EXT_SHIFT)); // uq=0, ud=2000
-	HAL_Delay(1000);
+	Systick_BusyWait(1000);
 	tmc4671_writeInt( TMC4671_ABN_DECODER_COUNT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (0 << TMC4671_UD_EXT_SHIFT)); // ud=0 uq=0
 	tmc4671_writeInt( TMC4671_MODE_RAMP_MODE_MOTION, 0); // off
@@ -216,7 +219,7 @@ void TMC4671_highLevel_initEncoder_new(void)
 	tmc4671_writeInt( TMC4671_PHI_E_SELECTION, 1);
 	tmc4671_writeInt( TMC4671_PHI_E_EXT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (2500 << TMC4671_UD_EXT_SHIFT));
-	HAL_Delay(2000);
+	Systick_BusyWait(2000);
 	uint16_t angle = as5147_getAngle(0);
 	tmc4671_writeInt( TMC4671_ABN_DECODER_COUNT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (0 << TMC4671_UD_EXT_SHIFT)); // ud=0 uq=0
@@ -245,7 +248,7 @@ void TMC4671_highLevel_positionMode_fluxTorqueRamp(void) // TODO read actual pos
 	{
 		torque_flux = (uint16_t) ((float) i / 100.0 * (float) torque_flux_limit);
 		tmc4671_writeInt( TMC4671_PID_TORQUE_FLUX_LIMITS, torque_flux);
-		HAL_Delay(1);
+		Systick_BusyWait(1);
 	}
 	tmc4671_writeInt( TMC4671_PID_TORQUE_FLUX_LIMITS, torque_flux_limit);
 }
@@ -261,7 +264,7 @@ void TMC4671_highLevel_positionMode_rampToZero(void)
 	{
 		//TMC4671_highLevel_setPosition( position);
 		tmc4671_writeInt( TMC4671_PID_POSITION_TARGET, (int32_t) ((float) position * (float) i / 100.0));
-		HAL_Delay(10);
+		Systick_BusyWait(10);
 	}
 	tmc4671_writeInt( TMC4671_PID_POSITION_TARGET, 0);
 }
@@ -329,8 +332,7 @@ char* TMC4671_highLevel_getStatus(void)
 	bool enabled = (bool) tmc4671_readInt( TMC4671_CONFIG_DATA);
 	uint16_t torque_flux_limit = tmc4671_readRegister16BitValue( TMC4671_PID_TORQUE_FLUX_LIMITS, BIT_0_TO_15);
 	uint16_t position_i = tmc4671_readRegister16BitValue( TMC4671_PID_POSITION_P_POSITION_I, BIT_0_TO_15);
-	snprintf(&string[0], 200, "Drive %d\n\r"
-			"Position-Filter [f]: %s\r\n"
+	snprintf(&string[0], 200, "Position-Filter [f]: %s\r\n"
 			"Torque-Limit    [c]: %d\r\n"
 			"Position-I:     [i]: %d\r\n"
 			"I0:                  %d\n\r"
@@ -351,9 +353,9 @@ void TMC4671_highLevel_positionTest(void)
 	for (i = 0; i < 4; i++)
 	{
 		tmc4671_writeInt( TMC4671_PID_POSITION_TARGET, 65535); // position target 65535
-		HAL_Delay(2000);
+		Systick_BusyWait(2000);
 		tmc4671_writeInt( TMC4671_PID_POSITION_TARGET, 0); // position target 0
-		HAL_Delay(2000);
+		Systick_BusyWait(2000);
 	}
 
 	// Stop
@@ -368,11 +370,11 @@ void TMC4671_highLevel_velocityTest(void)
 
 	// Rotate right
 	tmc4671_writeInt( TMC4671_PID_VELOCITY_TARGET, (60 << TMC4671_PID_VELOCITY_TARGET_SHIFT)); // velocity target
-	HAL_Delay(5000);
+	Systick_BusyWait(5000);
 
 	// Rotate left
 	tmc4671_writeInt( TMC4671_PID_VELOCITY_TARGET, (-60 << TMC4671_PID_VELOCITY_TARGET_SHIFT)); // velocity target
-	HAL_Delay(5000);
+	Systick_BusyWait(5000);
 
 	// Stop
 	tmc4671_writeInt( TMC4671_PID_VELOCITY_TARGET, (0 << TMC4671_PID_VELOCITY_TARGET_SHIFT)); // velocity target 0
@@ -418,7 +420,7 @@ void TMC4671_highLevel_openLoopTest(void)
 
 	// Rotate left
 	//tmc4671_writeInt( TMC4671_OPENLOOP_VELOCITY_TARGET, -1); // velocity target -1
-	//HAL_Delay(5000);
+	//Systick_BusyWait(5000);
 
 	// Stop
 	tmc4671_writeInt( TMC4671_OPENLOOP_VELOCITY_TARGET, 0); // velocity target 0

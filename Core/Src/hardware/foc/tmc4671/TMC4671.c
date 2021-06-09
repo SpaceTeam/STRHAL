@@ -16,18 +16,18 @@
 // spi access
 int32_t tmc4671_readInt(uint8_t address)
 {
-	uint8_t txData[5] = {0};
+	int32_t txData[5] = {0};
 	txData[0] = TMC_ADDRESS(address);
 	txData[1] = 0;
 	txData[2] = 0;
 	txData[3] = 0;
 	txData[4] = 0;
 
-	uint8_t rxData[5] = {0};
+	int32_t rxData[5] = {0};
 
 	swdriver_setCsnController( false);
 	//TODO FIX
-	//HAL_SPI_TransmitReceive(swdriver.SPI, txData, rxData, 5, HAL_MAX_DELAY);
+	SPI_Transmit_Receive(swdriver.spi, txData, rxData, 5);
 	swdriver_setCsnController(true);
 
 	return (int) ((rxData[1] << 24) | (rxData[2] << 16) | (rxData[3] << 8) | (rxData[4] << 0));
@@ -35,7 +35,7 @@ int32_t tmc4671_readInt(uint8_t address)
 
 void tmc4671_writeInt(uint8_t address, int32_t value)
 {
-	uint8_t data[5] = {0};
+	int32_t data[5] = {0};
 	data[0] = address | 0x80;
 	data[1] = 0xFF & (value >> 24);
 	data[2] = 0xFF & (value >> 16);
@@ -44,13 +44,15 @@ void tmc4671_writeInt(uint8_t address, int32_t value)
 
 	swdriver_setCsnController(false);
 	//TODO FIX
-	//HAL_SPI_Transmit(swdriverSPI, data, 5, HAL_MAX_DELAY);
+	SPI_Transmit_Receive(swdriver.spi, data, data, 5);
 	swdriver_setCsnController(true);
 }
 
+/*
 void tmc4671_writeInt_nonBlocking(uint8_t address, int32_t value) //TODO: make every write non blocking and just wait for previous transaction done?
 {
-	uint8_t data[5] = {0};
+
+	int32_t data[5] = {0};
 	data[0] = address | 0x80;
 	data[1] = 0xFF & (value >> 24);
 	data[2] = 0xFF & (value >> 16);
@@ -60,7 +62,9 @@ void tmc4671_writeInt_nonBlocking(uint8_t address, int32_t value) //TODO: make e
 	swdriver_setCsnController(false);
 
 	//TODO FIX HAL_SPI_Transmit_IT(swdriver.SPI, data, 5);
+
 }
+*/
 //TODO FIX
 /*
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) //FIXME: pfusch

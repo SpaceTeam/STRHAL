@@ -1,73 +1,26 @@
-/**
-  ******************************************************************************
-  * @file    spi.c
-  * @brief   This file provides code for the configuration
-  *          of the SPI instances.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "spi.h"
 #include "systick.h"
 
-/* USER CODE BEGIN 0 */
+void SPI1_InitSpi(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, uint32_t baudrate)
+{
+	LL_SPI_InitTypeDef SPI_InitStruct =
+	{ 0 };
+	//LL_SPI_StructInit(SPI_InitStruct);
+	SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
+	SPI_InitStruct.Mode = LL_SPI_MODE_MASTER;
+	SPI_InitStruct.DataWidth = datawidth;
+	SPI_InitStruct.ClockPolarity = cpol;
+	SPI_InitStruct.ClockPhase = cpha;
+	SPI_InitStruct.NSS = nss;
+	SPI_InitStruct.BaudRate = baudrate;
+	SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
+	SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
+	SPI_InitStruct.CRCPoly = 7UL;
+	LL_SPI_Init(SPI1, &SPI_InitStruct);
+}
 
-/* USER CODE END 0 */
-
-//SPI_HandleTypeDef hspi1;
-//DMA_HandleTypeDef hdma_spi1_rx;
-
-/* SPI1 init function */
 void SPI1_Init(void)
 {
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_24BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 0x0;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-  hspi1.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
-  hspi1.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
-  hspi1.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-  hspi1.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-  hspi1.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
-  hspi1.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
-  hspi1.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
-  hspi1.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
-  hspi1.Init.IOSwap = SPI_IO_SWAP_DISABLE;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }*/
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
   LL_RCC_SetSPIClockSource(LL_RCC_SPI123_CLKSOURCE_PLL1Q);
 
   /* SPI1 clock enable */
@@ -143,20 +96,7 @@ void SPI1_Init(void)
   /* Enable SPI1_IRQn */
   NVIC_EnableIRQ(SPI1_IRQn);
 
-  LL_SPI_InitTypeDef SPI_InitStruct = { 0 };
-  //LL_SPI_StructInit(SPI_InitStruct);
-  SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
-  SPI_InitStruct.Mode              = LL_SPI_MODE_MASTER;
-  SPI_InitStruct.DataWidth         = LL_SPI_DATAWIDTH_24BIT;
-  SPI_InitStruct.ClockPolarity     = LL_SPI_POLARITY_LOW;
-  SPI_InitStruct.ClockPhase        = LL_SPI_PHASE_2EDGE;
-  SPI_InitStruct.NSS               = LL_SPI_NSS_HARD_OUTPUT;
-  SPI_InitStruct.BaudRate          = LL_SPI_BAUDRATEPRESCALER_DIV32;
-  SPI_InitStruct.BitOrder          = LL_SPI_MSB_FIRST;
-  SPI_InitStruct.CRCCalculation    = LL_SPI_CRCCALCULATION_DISABLE;
-  SPI_InitStruct.CRCPoly           = 0UL;
-
-  LL_SPI_Init(SPI1, &SPI_InitStruct);
+	SPI1_InitSpi(LL_SPI_DATAWIDTH_24BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_LOW, LL_SPI_NSS_HARD_OUTPUT, LL_SPI_BAUDRATEPRESCALER_DIV32);
 
   //LL_SPI_SetFIFOThreshold(SPI1,LL_SPI_FIFO_TH_04DATA);
 
@@ -220,9 +160,3 @@ Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxDat
 	//return (LL_SPI_IsActiveFlag_OVR(SPI)) ? OOF : NOICE;
 	return NOICE;
 }
-
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -25,7 +25,7 @@
 
 int32_t tmc4671_readInt(uint8_t address);
 void tmc4671_writeInt(uint8_t address, int32_t value);
-void tmc4671_writeInt_nonBlocking(uint8_t address, int32_t value);
+//void tmc4671_writeInt_nonBlocking(uint8_t address, int32_t value);
 uint16_t tmc4671_readRegister16BitValue(uint8_t address, uint8_t channel);
 void tmc4671_writeRegister16BitValue(uint8_t address, uint8_t channel, uint16_t value);
 

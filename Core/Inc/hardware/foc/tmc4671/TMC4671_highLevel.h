@@ -17,7 +17,7 @@ void TMC4671_highLevel_positionMode();
 void TMC4671_highLevel_positionMode_fluxTorqueRamp();
 
 void TMC4671_highLevel_setPosition(int32_t position);
-void TMC4671_highLevel_setPosition_nonBlocking(int32_t position);
+//void TMC4671_highLevel_setPosition_nonBlocking(int32_t position);
 
 void TMC4671_highLevel_printOffsetAngle();
 uint16_t TMC4671_getAdcRaw0();

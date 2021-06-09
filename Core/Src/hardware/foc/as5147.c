@@ -1,6 +1,7 @@
 #include "foc/as5147.h"
 #include "foc/swdriver.h"
 #include "spi.h"
+#include "systick.h"
 
 
 static void spiMode_set(void)
@@ -33,23 +34,22 @@ uint16_t as5147_getAngle(uint8_t enc) //returns 11bit value
 {
 	spiMode_set();
 
-	uint8_t txData[2];
+	int32_t txData[2];
 	txData[0] = (1 << 7) | (1 << 6) | 0x3F; // parity 1, read, address upper 6 bits
 	txData[1] = 0xFF; // address lower 6 bits
 
 	swdriver_setCsnEncoder(enc, false);
 	//TODO FIX
-//	HAL_SPI_Transmit(swdriver.SPI, txData, 2, HAL_MAX_DELAY); //TODO FIX
+//	HAL_SPI_Transmit(swdriver.spi, txData, 2); //TODO FIX
 	swdriver_setCsnEncoder(enc, true);
 	Systick_BusyWait(2);
 
 	txData[0] = 0;
 	txData[1] = 0;
-	uint8_t rxData[2];
+	int32_t rxData[2];
 
 	swdriver_setCsnEncoder(enc, false);
-//TODO FIX
-	//HAL_SPI_TransmitReceive(swdriver.SPI, txData, rxData, 2, HAL_MAX_DELAY);
+	SPI_Transmit_Receive(swdriver.spi, txData, rxData, 2);
 	swdriver_setCsnEncoder(enc, true);
 
 	spiMode_reset();
