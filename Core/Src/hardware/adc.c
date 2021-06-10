@@ -1,6 +1,9 @@
 #include "adc.h"
 #include "main.h"
 
+uint32_t adc_samples_count = 0;
+
+
 static uint32_t adc1_length = 0;
 static AdcData_t adc1_data[14] =
 { 0 };
@@ -102,6 +105,9 @@ static void Adc_InitDMA(DMA_TypeDef * dma, uint32_t dma_stream, uint32_t dest, u
 	LL_DMA_SetMode(dma, dma_stream, LL_DMA_MODE_CIRCULAR);
 	LL_DMA_DisableFifoMode(dma, dma_stream);
 	LL_DMA_EnableStream(dma, dma_stream);
+
+
+
 }
 
 static void Adc_SetupAdc(ADC_TypeDef *adc)

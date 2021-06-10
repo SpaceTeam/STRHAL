@@ -52,13 +52,17 @@ IOB_Pins_t iob_channels[] =
 
 //@formatter:on
 
+uint8_t adc16_single_channel_ids[12] =
+{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+
 void IOB_Pins_Init(void)
 {
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		// set enable pin as input
 		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
@@ -71,34 +75,41 @@ void IOB_Pins_Init(void)
 }
 
 const CHANNEL_TYPE channel_lookup[4] =
-{
-		CHANNEL_TYPE_DIGITAL_OUT,
-		CHANNEL_TYPE_ADC16,			//PT100
-		CHANNEL_TYPE_ADC16,
-		CHANNEL_TYPE_ADC16
-};
+{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16,			//PT100
+		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
 
 void Node_Init(void)
 {
 	IOB_Pins_Init();
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	uint8_t c = 0;
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
 		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
 		node.channels[i].type = channel_lookup[type_index];
 
 		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
-		switch(channel_lookup[type_index])
+		switch (channel_lookup[type_index])
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
 				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
+				break;
+			case CHANNEL_TYPE_ADC16:
+				if (type_index == 1) //TODO  Change to ADC16_single
+				{
+					adc16_single_channel_ids[c++] = i;
+					node.channels[i].channel.adc16.enable_pin = &iob_channels[i].enable;
+					node.channels[i].channel.adc16.is_single = 1;
+					node.channels[i].channel.adc16.data = 0xF7;
+				}
 				break;
 			default:
 				break;
@@ -114,7 +125,7 @@ void Node_Init(void)
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
 
-	for(int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		// set enable dipswitch pin as input
 		GPIO_InitStruct.Pin = 0x1UL << i;
@@ -124,6 +135,48 @@ void Node_Init(void)
 	node.node_id = NodeID_Get();
 }
 
+void IOB_UpdateAdcSingle(void)
+{
+	static uint32_t counter = 0;
+	static uint32_t state = 0;
+	uint32_t id = adc16_single_channel_ids[counter];
+	switch (state)
+	{
+		case 0:
+			state++;
+			//Serial_PrintString("OFF");
+
+			for (uint8_t c = 0; c < MAX_IOB_CHANNELS; c++)
+			{
+				id = adc16_single_channel_ids[c];
+				if (id == 0xFF)
+					break;
+				LL_GPIO_ResetOutputPin(iob_channels[id].enable.port, iob_channels[id].enable.pin);
+			}
+			break;
+		case 1:
+			state++;
+			//Serial_PutString("ON ");
+			//Serial_PrintInt(id);
+			LL_GPIO_SetOutputPin(iob_channels[id].enable.port, iob_channels[id].enable.pin);
+			break;
+		case 2:
+			state = 0;
+			node.channels[id].channel.adc16.data = *node.channels[id].channel.adc16.analog_in;
+			Serial_PutInt(*node.channels[id].channel.adc16.analog_in);
+			Serial_PutString(", ");
+			counter++;
+			id = adc16_single_channel_ids[counter];
+			if (id == 0xFF)
+			{
+				Serial_PrintString("");
+				counter = 0;
+			}
+			break;
+
+	}
+
+}
 void IOB_InitAdc(void)
 {
 	Adc_Init();
@@ -134,10 +187,10 @@ void IOB_InitAdc(void)
 	node.generic_channel.power_current = Adc_AddRegularChannel(SUPPLY_CURRENT_SENSE);
 
 	// init channel adcs
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		CHANNEL_TYPE type = node.channels[i].type;
-		switch(type)
+		switch (type)
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
 				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i);
@@ -161,15 +214,19 @@ void IOB_main(void)
 	Node_Init();
 	IOB_InitAdc();
 
+	LL_GPIO_ResetOutputPin(iob_channels[9].enable.port, iob_channels[9].enable.pin);
+
+	LL_GPIO_SetOutputPin(iob_channels[3].enable.port, iob_channels[3].enable.pin);
+
 	char serial_str[1000] =
 	{ 0 };
 
-	sprintf(serial_str,"Node ID: %ld", node.node_id);
+	sprintf(serial_str, "Node ID: %ld", node.node_id);
 	Serial_PrintString(serial_str);
 
-	for(int i = 0; i < MAX_IOB_CHANNELS; i++)
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
-		sprintf(serial_str,"Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
+		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
 		Serial_PrintString(serial_str);
 	}
 	uint8_t flag = 0;
@@ -183,21 +240,23 @@ void IOB_main(void)
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-		if (tick-old_tick > 500)
+		if (tick - old_tick > 1000)
 		{
 			old_tick = tick;
 
-			for(int i = 5; i < 6; i++)
+			//IOB_UpdateAdcSingle();
+
+			for (int i = 0; i < 12; i++)
 			{
-				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
+				if (node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
 				{
 					getmsg.variable_id = DIGITAL_OUT_MEASUREMENT;
-					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &getmsg, 0);
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
 				}
 				else
 				{
 					getmsg.variable_id = ADC16_MEASUREMENT;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &getmsg, 0);
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
 				}
 			}
 			Serial_PutString("\n");
@@ -223,12 +282,12 @@ void IOB_main(void)
 			else if (strlen(serial_str) > 3)
 			{
 				msg.value = 0x0;
-				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &msg, 0);
+				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
 			}
 			else if (strlen(serial_str) > 2)
 			{
 				msg.value = 0xFFFFFFFF;
-				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t *) &msg, 0);
+				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
 			}
 			else
 			{
