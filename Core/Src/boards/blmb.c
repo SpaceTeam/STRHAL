@@ -47,7 +47,7 @@ void BLMB_InitFoc(void)
 	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH3);
 
 	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
-
+	swdriver_setEnable(true);
 	Systick_BusyWait(100);
 	tmc6200_highLevel_init();
 	Systick_BusyWait(10);
