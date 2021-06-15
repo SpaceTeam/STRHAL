@@ -5,6 +5,7 @@
 #include "speaker.h"
 #include "can.h"
 #include "foc/tmc6200/TMC6200_highLevel.h"
+#include "foc/tmc6200/TMC6200.h"
 #include "foc/tmc4671/TMC4671_highLevel.h"
 #include "foc/tmc4671/TMC4671.h"
 #include "foc/swdriver.h"
@@ -47,13 +48,13 @@ void BLMB_InitFoc(void)
 	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH3);
 
 	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
-	swdriver_setEnable(true);
+
 	Systick_BusyWait(100);
 	tmc6200_highLevel_init();
 	Systick_BusyWait(10);
 	swdriver_setEnable(true);
 	Systick_BusyWait(10);
-
+/*
 	TMC4671_highLevel_init();
 	Systick_BusyWait(10);
 
@@ -66,7 +67,7 @@ void BLMB_InitFoc(void)
 	TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
 
 	TMC4671_highLevel_positionMode2();
-
+*/
 	Systick_BusyWait(100);
 
 }
@@ -74,6 +75,7 @@ void BLMB_InitFoc(void)
 void BLMB_main(void)
 {
 	uint64_t tick = 0;
+	uint64_t old_tick = 0;
 
 	BLMB_InitAdc();
 
@@ -88,8 +90,13 @@ void BLMB_main(void)
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-		TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
-
+	//	TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
+		if (tick - old_tick >= 1000)
+		{
+			old_tick = tick;
+			Serial_PrintHex(tmc6200_readInt(TMC6200_GSTAT));
+			Serial_PrintInt(tick);
+		}
 		if (Serial_CheckInput(serial_str))
 		{
 			Serial_PrintString(serial_str);

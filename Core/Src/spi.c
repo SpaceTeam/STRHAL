@@ -131,7 +131,7 @@ Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxDat
 			if ((Systick_GetTick() - tickstart) > SPI_TIMEOUT_VALUE)
 			return OOF_SPI_TXP_FULL;
 		}
-		LL_SPI_TransmitData32(SPI, txData[i]);
+		LL_SPI_TransmitData8(SPI, txData[i]);
 	}
 
 	for (uint32_t i = 0; i < count; ++i)
@@ -142,7 +142,7 @@ Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxDat
 			if ((Systick_GetTick() - tickstart) > SPI_TIMEOUT_VALUE)
 			return OOF_SPI_RXP_FULL;
 		}
-		rxData[i] = LL_SPI_ReceiveData32(SPI);
+		rxData[i] = LL_SPI_ReceiveData8(SPI);
 	}
 
 	tickstart = Systick_GetTick();
@@ -155,7 +155,7 @@ Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxDat
 	LL_SPI_ClearFlag_EOT(SPI);
 	LL_SPI_ClearFlag_TXTF(SPI);
 	LL_SPI_SuspendMasterTransfer(SPI);
-	LL_SPI_Disable(SPI);
+//todo fix	LL_SPI_Disable(SPI);
 
 	//return (LL_SPI_IsActiveFlag_OVR(SPI)) ? OOF : NOICE;
 	return NOICE;
