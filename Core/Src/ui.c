@@ -41,16 +41,17 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 		case CHANNEL_TYPE_NODE_SPECIFIC:
 			break;
 		case CHANNEL_TYPE_ADC16:
-			break;
+			return Adc16_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_ADC24:
 			return Adc24_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_COMPUTED32:
 			break;
 		case CHANNEL_TYPE_DIGITAL_OUT:
-			break;
+			return DigitalOut_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_SERVO:
 			break;
 		case CHANNEL_TYPE_NODE_GENERIC:
+			return Generic_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_LAST:
 		case CHANNEL_TYPE_UNKNOWN:
 		default:

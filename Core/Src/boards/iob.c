@@ -161,6 +161,9 @@ void IOB_UpdateAdcSingle(void)
 			LL_GPIO_SetOutputPin(iob_channels[id].enable.port, iob_channels[id].enable.pin);
 			break;
 		case 2:
+			//wait for new conversion
+			break;
+		case 3:
 			state = 0;
 			node.channels[id].channel.adc16.data = *node.channels[id].channel.adc16.analog_in;
 			Serial_PutInt(*node.channels[id].channel.adc16.analog_in);
@@ -173,7 +176,8 @@ void IOB_UpdateAdcSingle(void)
 				counter = 0;
 			}
 			break;
-
+		default:
+			break;
 	}
 
 }
@@ -239,13 +243,13 @@ void IOB_main(void)
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
+		//IOB_UpdateAdcSingle();
 
 		if (tick - old_tick > 1000)
 		{
 			old_tick = tick;
 
-			//IOB_UpdateAdcSingle();
-
+/*
 			for (int i = 0; i < 12; i++)
 			{
 				if (node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
@@ -260,6 +264,7 @@ void IOB_main(void)
 				}
 			}
 			Serial_PutString("\n");
+			*/
 		}
 
 		if (Serial_CheckInput(serial_str))
