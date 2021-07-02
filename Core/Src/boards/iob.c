@@ -191,31 +191,11 @@ void IOB_main(void)
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
+		//IOB_UpdateAdcSingle();
 
 		if (tick - old_tick > 1000)
 		{
 			old_tick = tick;
-
-			for (int i = 0; i < 12; i++)
-			{
-				if (node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
-				{
-					getmsg.variable_id = DIGITAL_OUT_MEASUREMENT;
-					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
-				}
-				else if (node.channels[i].type == CHANNEL_TYPE_ADC16)
-				{
-					getmsg.variable_id = ADC16_MEASUREMENT;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
-				}
-				else
-				{
-					getmsg.variable_id = ADC16_SINGLE_DATA;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
-				}
-			}
-			Serial_PutString("\n");
-			printCounts();
 		}
 
 		if (Serial_CheckInput(serial_str))
