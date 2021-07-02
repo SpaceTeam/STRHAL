@@ -78,7 +78,7 @@ Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs res
 	char serial_str[20] =
 	{ 0 };
 
-	sprintf(serial_str,"%d, ", *var);
+	sprintf(serial_str,"%d: %d, ",channel->id, *var);
 	Serial_PutString(serial_str);
 
 

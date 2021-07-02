@@ -1,8 +1,14 @@
 #include "adc.h"
 #include "main.h"
+#include "tim.h"
+#include "iob.h"
 
-uint32_t adc_samples_count = 0;
+#include "serial.h"
+#include <string.h>
+#include <stdio.h>
 
+volatile uint32_t adc1_samples_count = 0;
+volatile uint32_t adc3_samples_count = 0;
 
 static uint32_t adc1_length = 0;
 static AdcData_t adc1_data[14] =
@@ -11,6 +17,12 @@ static AdcData_t adc1_data[14] =
 static uint32_t adc3_length = 0;
 static AdcData_t adc3_data[2] =
 { 0 };
+
+static uint32_t adc_single_length = 0;
+static ADC_CHANNEL_ID adc_single_id[14] =
+{ 0 };
+
+volatile uint8_t adc_state = 0;
 
 /*
  PC0   ------> Channel  0  | ADC1_INP10
@@ -100,14 +112,18 @@ static void Adc_InitDMA(DMA_TypeDef * dma, uint32_t dma_stream, uint32_t dest, u
 	LL_DMA_SetPeriphAddress(dma, dma_stream, src);
 	LL_DMA_SetMemoryAddress(dma, dma_stream, dest);
 	LL_DMA_SetDataLength(dma, dma_stream, length);
-	LL_DMA_SetPeriphRequest(dma, dma_stream, LL_DMAMUX1_REQ_ADC1);
+	if(dma == DMA1)
+	{
+		LL_DMA_SetPeriphRequest(dma, dma_stream, LL_DMAMUX1_REQ_ADC1);
+	}
+	else
+	{
+		LL_DMA_SetPeriphRequest(dma, dma_stream, LL_DMAMUX1_REQ_ADC3);
+	}
 	LL_DMA_SetStreamPriorityLevel(dma, dma_stream, LL_DMA_PRIORITY_HIGH);
 	LL_DMA_SetMode(dma, dma_stream, LL_DMA_MODE_CIRCULAR);
 	LL_DMA_DisableFifoMode(dma, dma_stream);
 	LL_DMA_EnableStream(dma, dma_stream);
-
-
-
 }
 
 static void Adc_SetupAdc(ADC_TypeDef *adc)
@@ -119,16 +135,19 @@ static void Adc_SetupAdc(ADC_TypeDef *adc)
 	ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_16B;
 	ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
 	LL_ADC_Init(adc, &ADC_InitStruct);
-	ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
+	//ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
+	ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_EXT_TIM3_TRGO;
 	ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
 	ADC_REG_InitStruct.SequencerDiscont = DISABLE;
-	ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
+	//ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
+	ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_SINGLE;
 	ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_OVERWRITTEN;
 	ADC_REG_InitStruct.DataTransferMode = LL_ADC_REG_DMA_TRANSFER_UNLIMITED;
 	LL_ADC_REG_Init(adc, &ADC_REG_InitStruct);
 	LL_ADC_SetOverSamplingScope(adc, LL_ADC_OVS_DISABLE);
 	LL_ADC_DisableDeepPowerDown(adc);
 	LL_ADC_EnableInternalRegulator(adc);
+	LL_ADC_EnableIT_EOS(adc);
 }
 
 static void Adc_SetupAdcChannel(ADC_CHANNEL_ID id)
@@ -136,6 +155,15 @@ static void Adc_SetupAdcChannel(ADC_CHANNEL_ID id)
 	LL_ADC_SetChannelSamplingTime(adc_channel_list[id].adc, adc_channel_list[id].channel, LL_ADC_SAMPLINGTIME_387CYCLES_5);
 	LL_ADC_SetChannelSingleDiff(adc_channel_list[id].adc, adc_channel_list[id].channel, LL_ADC_SINGLE_ENDED);
 	LL_ADC_SetChannelPreSelection(adc_channel_list[id].adc, adc_channel_list[id].channel);
+}
+
+void printCounts()
+{
+	char serial_str[50] =
+	{ 0 };
+
+	sprintf(serial_str,"%ld %ld\n",adc1_samples_count, adc3_samples_count);
+	Serial_PutString(serial_str);
 }
 
 void Adc_Init()
@@ -172,6 +200,7 @@ void Adc_Init()
 
 	Adc_SetupAdc(ADC1);
 	Adc_SetupAdc(ADC3);
+	TIM3_Init();
 
 	// Delay for ADC internal voltage regulator stabilization.
 	uint32_t wait_loop_index;
@@ -190,7 +219,7 @@ void Adc_Init()
 		Adc_SetupAdcChannel(c);
 }
 
-AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id)
+AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id, int single)
 {
 	AdcData_t *data_ptr = NULL;
 	uint32_t *length_ptr = NULL;
@@ -206,6 +235,12 @@ AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id)
 		data_ptr = adc3_data;
 		length_ptr = &adc3_length;
 	}
+	if(single != 0)
+	{
+		adc_single_id[adc_single_length];
+		adc_single_length++;
+	}
+
 	LL_ADC_REG_SetSequencerRanks(adc, adc_ranks[*length_ptr], adc_channel_list[id].channel);
 	uint32_t length = *length_ptr;
 	(*length_ptr)++;
@@ -225,42 +260,56 @@ void Adc_Calibrate(void)
 
 void Adc_StartAdc(void)
 {
+	NVIC_EnableIRQ(ADC_IRQn);
+	NVIC_EnableIRQ(ADC3_IRQn);
 	LL_ADC_REG_SetSequencerLength(ADC1, adc_seq_ranks[adc1_length-1]);
 	LL_ADC_REG_SetSequencerLength(ADC3, adc_seq_ranks[adc3_length-1]);
 	LL_ADC_Enable(ADC1);
 	LL_ADC_Enable(ADC3);
 	Adc_InitDMA(DMA1, LL_DMA_STREAM_0, (uint32_t) adc1_data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), adc1_length);
 	Adc_InitDMA(DMA2, LL_DMA_STREAM_0, (uint32_t) adc3_data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), adc3_length);
+
+	LL_TIM_EnableCounter(TIM3);
 	LL_ADC_REG_StartConversion(ADC1);
-	LL_ADC_REG_StartConversion(ADC3);
 }
 
-//	|
-//	|	Not tested
-//	v
-
-static ADC_CHANNEL_ID latest_injected_id = ADC_CHANNEL_ID_LAST;
-void Adc_StartInjectedChannel(ADC_CHANNEL_ID id)
+void ADC_IRQHandler(void)
 {
-	latest_injected_id = id;
-	LL_ADC_INJ_InitTypeDef *ADC_INJ_InitStruct = { 0 };
-	LL_ADC_INJ_StructInit(ADC_INJ_InitStruct);
-	LL_ADC_INJ_Init(adc_channel_list[id].adc, ADC_INJ_InitStruct);
-	LL_ADC_INJ_SetSequencerRanks(adc_channel_list[id].adc, LL_ADC_INJ_RANK_1, adc_channel_list[id].channel);
-	LL_ADC_INJ_SetSequencerLength(adc_channel_list[id].adc, 1);
-	LL_ADC_INJ_StartConversion(adc_channel_list[id].adc);
+	if(LL_ADC_IsActiveFlag_EOS(ADC1) != 0)
+	{
+		adc1_samples_count++;
+		LL_ADC_REG_StartConversion(ADC3);
+		LL_ADC_ClearFlag_EOS(ADC1);
+	}
 }
 
-uint8_t Adc_IsInjectedChannelFinished(void)
+void ADC3_IRQHandler(void)
 {
-	if(latest_injected_id == ADC_CHANNEL_ID_LAST) return 0;
-	return !LL_ADC_INJ_IsConversionOngoing(adc_channel_list[latest_injected_id].adc);
-}
+	if(LL_ADC_IsActiveFlag_EOS(ADC3) != 0)
+	{
+		adc3_samples_count++;
 
-uint16_t Adc_GetInjectedChannelData(void)
-{
-	uint16_t data = LL_ADC_INJ_ReadConversionData16(adc_channel_list[latest_injected_id].adc, LL_ADC_INJ_RANK_1);
-	latest_injected_id = ADC_CHANNEL_ID_LAST;
-	return data;
-}
+		if(adc_state < adc_single_length)
+		{
+			// enable next single channel
+			IOB_Pins_t next_single = iob_channels[adc_single_id[adc_state]];
+			LL_GPIO_SetOutputPin(next_single.enable.port, next_single.enable.pin);
+			// after first single channel measurement - disable previous channel
+			if(adc_state > 0)
+			{
+				IOB_Pins_t prev_single = iob_channels[adc_single_id[adc_state-1]];
+				LL_GPIO_ResetOutputPin(prev_single.enable.port, prev_single.enable.pin);
+			}
+			adc_state++;
+		}
+		else
+		{
+			// prepare for normal adc scan - make sure all single channels are off - disable last single channel
+			IOB_Pins_t last_single = iob_channels[adc_single_id[adc_state]];
+			LL_GPIO_ResetOutputPin(last_single.enable.port, last_single.enable.pin);
+			adc_state = 0;
+		}
 
+		LL_ADC_ClearFlag_EOS(ADC3);
+	}
+}

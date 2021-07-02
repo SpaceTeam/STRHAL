@@ -145,6 +145,23 @@ void TIM4_Init(void)
 
 }
 
+void TIM3_Init(void)
+{
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
+
+  // 120MHz base, 10kHz after presc -> 100Hz
+  TIM_InitStruct.Prescaler = 12000-1;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = 100-1;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  LL_TIM_Init(TIM3, &TIM_InitStruct);
+  LL_TIM_SetTriggerOutput2(TIM3, LL_TIM_TRGO_UPDATE);
+  LL_TIM_GenerateEvent_UPDATE(TIM3);
+
+}
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

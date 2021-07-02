@@ -52,9 +52,6 @@ IOB_Pins_t iob_channels[] =
 
 //@formatter:on
 
-uint8_t adc16_single_channel_ids[12] =
-{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-
 void IOB_Pins_Init(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
@@ -75,7 +72,7 @@ void IOB_Pins_Init(void)
 }
 
 const CHANNEL_TYPE channel_lookup[4] =
-{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16,			//PT100
+{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16_SINGLE,			//PT100
 		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
 
 void Node_Init(void)
@@ -102,14 +99,9 @@ void Node_Init(void)
 			case CHANNEL_TYPE_DIGITAL_OUT:
 				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
 				break;
-			case CHANNEL_TYPE_ADC16:
-				if (type_index == 1) //TODO  Change to ADC16_single
-				{
-					adc16_single_channel_ids[c++] = i;
-					node.channels[i].channel.adc16.enable_pin = &iob_channels[i].enable;
-					node.channels[i].channel.adc16.is_single = 1;
-					node.channels[i].channel.adc16.data = 0xF7;
-				}
+			case CHANNEL_TYPE_ADC16_SINGLE:
+				node.channels[i].channel.adc16single.enable_pin = &iob_channels[i].enable;
+				node.channels[i].channel.adc16single.data = 0xF7;
 				break;
 			default:
 				break;
@@ -135,48 +127,6 @@ void Node_Init(void)
 	node.node_id = NodeID_Get();
 }
 
-void IOB_UpdateAdcSingle(void)
-{
-	static uint32_t counter = 0;
-	static uint32_t state = 0;
-	uint32_t id = adc16_single_channel_ids[counter];
-	switch (state)
-	{
-		case 0:
-			state++;
-			//Serial_PrintString("OFF");
-
-			for (uint8_t c = 0; c < MAX_IOB_CHANNELS; c++)
-			{
-				id = adc16_single_channel_ids[c];
-				if (id == 0xFF)
-					break;
-				LL_GPIO_ResetOutputPin(iob_channels[id].enable.port, iob_channels[id].enable.pin);
-			}
-			break;
-		case 1:
-			state++;
-			//Serial_PutString("ON ");
-			//Serial_PrintInt(id);
-			LL_GPIO_SetOutputPin(iob_channels[id].enable.port, iob_channels[id].enable.pin);
-			break;
-		case 2:
-			state = 0;
-			node.channels[id].channel.adc16.data = *node.channels[id].channel.adc16.analog_in;
-			Serial_PutInt(*node.channels[id].channel.adc16.analog_in);
-			Serial_PutString(", ");
-			counter++;
-			id = adc16_single_channel_ids[counter];
-			if (id == 0xFF)
-			{
-				Serial_PrintString("");
-				counter = 0;
-			}
-			break;
-
-	}
-
-}
 void IOB_InitAdc(void)
 {
 	Adc_Init();
@@ -193,16 +143,18 @@ void IOB_InitAdc(void)
 		switch (type)
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
-				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i);
+				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i,0);
 				break;
 			case CHANNEL_TYPE_ADC16:
-				node.channels[i].channel.adc16.analog_in = Adc_AddRegularChannel(i);
+				node.channels[i].channel.adc16.analog_in = Adc_AddRegularChannel(i,0);
+				break;
+			case CHANNEL_TYPE_ADC16_SINGLE:
+				node.channels[i].channel.adc16single.analog_in = Adc_AddRegularChannel(i,1);
 				break;
 			default:
 				break;
 		}
 	}
-	//node.channels[5].channel.digital_out.analog_in = Adc_AddRegularChannel(ANALOG_IN_6);
 	Adc_Calibrate();
 	Adc_StartAdc();
 }
@@ -214,9 +166,9 @@ void IOB_main(void)
 	Node_Init();
 	IOB_InitAdc();
 
-	LL_GPIO_ResetOutputPin(iob_channels[9].enable.port, iob_channels[9].enable.pin);
+	//LL_GPIO_ResetOutputPin(iob_channels[9].enable.port, iob_channels[9].enable.pin);
 
-	LL_GPIO_SetOutputPin(iob_channels[3].enable.port, iob_channels[3].enable.pin);
+	//LL_GPIO_SetOutputPin(iob_channels[3].enable.port, iob_channels[3].enable.pin);
 
 	char serial_str[1000] =
 	{ 0 };
@@ -244,8 +196,6 @@ void IOB_main(void)
 		{
 			old_tick = tick;
 
-			//IOB_UpdateAdcSingle();
-
 			for (int i = 0; i < 12; i++)
 			{
 				if (node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
@@ -253,13 +203,19 @@ void IOB_main(void)
 					getmsg.variable_id = DIGITAL_OUT_MEASUREMENT;
 					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
 				}
-				else
+				else if (node.channels[i].type == CHANNEL_TYPE_ADC16)
 				{
 					getmsg.variable_id = ADC16_MEASUREMENT;
 					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
 				}
+				else
+				{
+					getmsg.variable_id = ADC16_SINGLE_DATA;
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
+				}
 			}
 			Serial_PutString("\n");
+			printCounts();
 		}
 
 		if (Serial_CheckInput(serial_str))

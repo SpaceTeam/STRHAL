@@ -5,6 +5,7 @@
 
 #include "generic_channel.h"
 #include "adc16_channel.h"
+#include "adc16_single_channel.h"
 #include "adc24_channel.h"
 #include "digital_out_channel.h"
 #include "servo_channel.h"
@@ -16,6 +17,7 @@ typedef struct
 	union
 	{
 		Adc16_Channel_t adc16;
+		Adc16Single_Channel_t adc16single;
 		Adc24_Channel_t adc24;
 		DigitalOut_Channel_t digital_out;
 		Servo_Channel_t servo;

@@ -35,9 +35,10 @@ typedef struct
 typedef volatile uint16_t AdcData_t;
 
 void Adc_Init(void);
-AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id);
+AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id, int single);
 void Adc_Calibrate(void);
 void Adc_StartAdc(void);
+void printCounts();
 
 void Adc_StartInjectedChannel(ADC_CHANNEL_ID id);
 uint8_t Adc_IsInjectedChannelFinished(void);

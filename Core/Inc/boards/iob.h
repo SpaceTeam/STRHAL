@@ -15,6 +15,8 @@ typedef struct
 	GPIO_Pin_t input;
 } IOB_Pins_t;
 
+IOB_Pins_t iob_channels[12];
+
 void IOB_main(void);
 
 #endif

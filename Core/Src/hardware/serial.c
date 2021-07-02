@@ -27,6 +27,7 @@ uint32_t Queue_FillState(Queue *queue)
 void Queue_Put(Queue *queue, char new)
 {
 
+	//LL_USART_EnableDirectionTx(UART4);
 	while(Queue_FillState(queue) == (QUEUE_SIZE - 1)); //TODO ADD TIMEOUT
 	queue->Array[queue->QueueIn] = new;
 	queue->QueueIn = (queue->QueueIn + 1) & (QUEUE_SIZE - 1);
