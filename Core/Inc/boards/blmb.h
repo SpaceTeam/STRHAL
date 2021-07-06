@@ -41,6 +41,16 @@
 #define CSN_ENC3_GPIO_Port	GPIOE
 #define CSN_ENC3_Pin		LL_GPIO_PIN_7
 
+//blmb manual control buttons
+#define BLMB_CW_Button_GPIO_Port 	GPIOC
+#define BLMB_CW_Button_Pin			LL_GPIO_PIN_8
+
+#define BLMB_Sel_Button_GPIO_Port 	GPIOC
+#define BLMB_Sel_Button_Pin			LL_GPIO_PIN_9
+
+#define BLMB_CCW_Button_GPIO_Port 	GPIOD
+#define BLMB_CCW_Button_Pin			LL_GPIO_PIN_15
+
 
 void BLMB_main(void);
 
