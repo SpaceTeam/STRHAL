@@ -34,6 +34,6 @@ void tmc6200_writeInt(uint8_t address, int value)
 
 	swdriver_setCsnDriver(false);
 	//TODO FIX
-	SPI_Transmit_Receive(swdriver.spi, data, data, 5);
+	SPI_Transmit(swdriver.spi, data, 5);
 	swdriver_setCsnDriver(true);
 }

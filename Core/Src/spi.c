@@ -160,3 +160,31 @@ Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxDat
 	//return (LL_SPI_IsActiveFlag_OVR(SPI)) ? OOF : NOICE;
 	return NOICE;
 }
+
+/**
+  * @brief  Transmit an amount of data in blocking mode.
+  * @param  hspi pointer to a SPI_HandleTypeDef structure that contains
+  *               the configuration information for SPI module.
+  * @param  pData pointer to data buffer
+  * @param  Size amount of data to be sent
+  * @param  Timeout Timeout duration
+  * @retval HAL status
+  */
+Result_t SPI_Transmit(SPI_TypeDef * SPIx, uint8_t *pData, uint16_t size)
+{
+	uint32_t tickstart = 0;
+
+	for (uint32_t i = 0; i < size; ++i)
+	{
+		tickstart = Systick_GetTick();
+		while (LL_SPI_IsActiveFlag_TXP(SPIx) == 0)
+		{
+			if ((Systick_GetTick() - tickstart) > SPI_TIMEOUT_VALUE)
+			return OOF_SPI_TXP_FULL;
+		}
+		LL_SPI_TransmitData8(SPIx, pData[i]);
+	}
+
+
+	return NOICE;
+}

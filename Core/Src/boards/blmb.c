@@ -54,20 +54,21 @@ void BLMB_InitFoc(void)
 	Systick_BusyWait(10);
 	swdriver_setEnable(true);
 	Systick_BusyWait(10);
-/*
+
 	TMC4671_highLevel_init();
 	Systick_BusyWait(10);
 
 	TMC4671_highLevel_initEncoder();
 
-	Systick_BusyWait(100);
+	Systick_BusyWait(100)
+	;
 
 	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t) ((float) as5147_getAngle(BLMB_POSITION_ENCODER) * 32 * 231.1222));
 
 	TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
 
 	TMC4671_highLevel_positionMode2();
-*/
+
 	Systick_BusyWait(100);
 
 }
