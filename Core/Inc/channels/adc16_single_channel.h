@@ -11,7 +11,7 @@ typedef struct
 	int32_t offset;
 	int32_t thresholds[2];
 	AdcData_t * analog_in;
-	uint16_t data;
+	AdcData_t * last_measurement;
 	GPIO_Pin_t * enable_pin;
 } Adc16Single_Channel_t;
 

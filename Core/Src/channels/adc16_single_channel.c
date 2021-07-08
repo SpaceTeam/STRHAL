@@ -22,11 +22,9 @@ uint16_t* Adc16Single_VariableSelection(Adc16Single_Channel_t *adc16_single, uin
 	{
 		case ADC16_SINGLE_MEASUREMENT:
 			readonly_var = *adc16_single->analog_in;
-			///readonly_var = (adc16->is_single) ? adc16->data : *adc16->analog_in;
 			return &readonly_var;
 		case ADC16_SINGLE_DATA:
-			readonly_var = adc16_single->data;
-			///readonly_var = (adc16->is_single) ? adc16->data : *adc16->analog_in;
+			readonly_var = *adc16_single->last_measurement;
 			return &readonly_var;
 		case ADC16_SINGLE_REFRESH_DIVIDER:
 			return NULL;

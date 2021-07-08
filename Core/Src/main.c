@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "dipswitch.h"
+#include "channels.h"
 
 #define UART_UPDATE_TIME 100
 
@@ -31,9 +32,8 @@ int main(void)
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2); //DMA2 init
 
 	Serial_Init();
-	Can_Init(NODE_ID);
+	Can_Init(NodeID_Get());
 
-//	Serial_PrintInt(node.node_id);
 	Serial_PrintString("STARTED?");
 	Serial_PrintString(GIT_COMMIT_HASH);
 	Speaker_Init();

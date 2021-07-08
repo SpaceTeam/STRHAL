@@ -153,6 +153,17 @@ void GPIO_Init(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  // pins for dipswitches
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+
+  for (int i = 0; i < 8; i++)
+  {
+    // set enable dipswitch pin as input
+	GPIO_InitStruct.Pin = 0x1UL << i;
+	LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  }
+
 }
 
 /* USER CODE BEGIN 2 */

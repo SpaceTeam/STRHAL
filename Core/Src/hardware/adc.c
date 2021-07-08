@@ -21,8 +21,10 @@ static AdcData_t adc3_data[2] =
 static uint32_t adc_single_length = 0;
 static ADC_CHANNEL_ID adc_single_id[14] =
 { 0 };
+static AdcData_t adc_single_data[14] =
+{ 0 };
 
-volatile uint8_t adc_state = 0;
+volatile uint8_t adc_state = 0, adc1_state = 0, adc3_state = 0;
 
 /*
  PC0   ------> Channel  0  | ADC1_INP10
@@ -219,7 +221,7 @@ void Adc_Init()
 		Adc_SetupAdcChannel(c);
 }
 
-AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id, int single)
+AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id)
 {
 	AdcData_t *data_ptr = NULL;
 	uint32_t *length_ptr = NULL;
@@ -235,16 +237,24 @@ AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id, int single)
 		data_ptr = adc3_data;
 		length_ptr = &adc3_length;
 	}
-	if(single != 0)
-	{
-		adc_single_id[adc_single_length];
-		adc_single_length++;
-	}
 
 	LL_ADC_REG_SetSequencerRanks(adc, adc_ranks[*length_ptr], adc_channel_list[id].channel);
 	uint32_t length = *length_ptr;
 	(*length_ptr)++;
 	return &data_ptr[length];
+}
+
+AdcSingleData_t* Adc_AddSingleChannel(ADC_CHANNEL_ID id)
+{
+	AdcSingleData_t *single_data = NULL;
+
+	single_data->data = Adc_AddRegularChannel(id);
+	single_data->last_measurement = &adc_single_data[adc_single_length];
+
+	adc_single_id[adc_single_length] = id;
+	adc_single_length++;
+
+	return single_data;
 }
 
 // ADC has to be disabled!
@@ -299,6 +309,21 @@ void ADC3_IRQHandler(void)
 			{
 				IOB_Pins_t prev_single = iob_channels[adc_single_id[adc_state-1]];
 				LL_GPIO_ResetOutputPin(prev_single.enable.port, prev_single.enable.pin);
+
+				// transfer last single measurement to corresponding measurement array
+				ADC_CHANNEL_ID id = adc_single_id[adc_state-1];
+				ADC_TypeDef *adc = adc_channel_list[id].adc;
+
+				if (adc == ADC1)
+				{
+					adc_single_data[adc_state-1] = adc1_data[adc1_state];
+					adc1_state++;
+				}
+				else
+				{
+					adc_single_data[adc_state-1] = adc3_data[adc3_state];
+					adc3_state++;
+				}
 			}
 			adc_state++;
 		}
@@ -307,7 +332,21 @@ void ADC3_IRQHandler(void)
 			// prepare for normal adc scan - make sure all single channels are off - disable last single channel
 			IOB_Pins_t last_single = iob_channels[adc_single_id[adc_state]];
 			LL_GPIO_ResetOutputPin(last_single.enable.port, last_single.enable.pin);
+			// transfer last single measurement to corresponding measurement array
+			ADC_CHANNEL_ID id = adc_single_id[adc_state-1];
+			ADC_TypeDef *adc = adc_channel_list[id].adc;
+
+			if (adc == ADC1)
+			{
+				adc_single_data[adc_state-1] = adc1_data[adc1_state];
+			}
+			else
+			{
+				adc_single_data[adc_state-1] = adc3_data[adc3_state];
+			}
 			adc_state = 0;
+			adc1_state = 0;
+			adc3_state = 0;
 		}
 
 		LL_ADC_ClearFlag_EOS(ADC3);

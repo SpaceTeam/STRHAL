@@ -38,8 +38,6 @@ void Error_Handler(void);
                                                                  0 bit  for subpriority */
 #endif
 
-#define NODE_ID 12//TODO READ FROM DIPSWITCH
-
 typedef enum
 {
 	NOICE = 0,

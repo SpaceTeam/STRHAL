@@ -34,8 +34,17 @@ typedef struct
 
 typedef volatile uint16_t AdcData_t;
 
+
+typedef struct
+{
+	AdcData_t *data;
+	AdcData_t *last_measurement;
+} AdcSingleData_t;
+
 void Adc_Init(void);
-AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id, int single);
+AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id);
+AdcSingleData_t* Adc_AddSingleChannel(ADC_CHANNEL_ID id);
+
 void Adc_Calibrate(void);
 void Adc_StartAdc(void);
 void printCounts();

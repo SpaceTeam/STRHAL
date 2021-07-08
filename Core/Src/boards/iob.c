@@ -86,7 +86,6 @@ void Node_Init(void)
 	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 
-	uint8_t c = 0;
 	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
@@ -101,7 +100,6 @@ void Node_Init(void)
 				break;
 			case CHANNEL_TYPE_ADC16_SINGLE:
 				node.channels[i].channel.adc16single.enable_pin = &iob_channels[i].enable;
-				node.channels[i].channel.adc16single.data = 0xF7;
 				break;
 			default:
 				break;
@@ -110,18 +108,6 @@ void Node_Init(void)
 		// set enable pin as output
 		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
 		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
-	}
-
-	// Read dipswitches and set node id accordingly
-
-	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-
-	for (int i = 0; i < 8; i++)
-	{
-		// set enable dipswitch pin as input
-		GPIO_InitStruct.Pin = 0x1UL << i;
-		LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 	}
 
 	node.node_id = NodeID_Get();
@@ -143,14 +129,18 @@ void IOB_InitAdc(void)
 		switch (type)
 		{
 			case CHANNEL_TYPE_DIGITAL_OUT:
-				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i,0);
+				node.channels[i].channel.digital_out.analog_in = Adc_AddRegularChannel(i);
 				break;
 			case CHANNEL_TYPE_ADC16:
-				node.channels[i].channel.adc16.analog_in = Adc_AddRegularChannel(i,0);
+				node.channels[i].channel.adc16.analog_in = Adc_AddRegularChannel(i);
 				break;
 			case CHANNEL_TYPE_ADC16_SINGLE:
-				node.channels[i].channel.adc16single.analog_in = Adc_AddRegularChannel(i,1);
+			{
+				AdcSingleData_t *single_data = Adc_AddSingleChannel(i);
+				node.channels[i].channel.adc16single.analog_in = single_data->data;
+				node.channels[i].channel.adc16single.last_measurement = single_data->last_measurement;
 				break;
+			}
 			default:
 				break;
 		}
@@ -181,9 +171,8 @@ void IOB_main(void)
 		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
 		Serial_PrintString(serial_str);
 	}
-	uint8_t flag = 0;
 
-	GetMsg_t getmsg;
+	GetMsg_t data;
 
 	while (1)
 	{
@@ -196,6 +185,25 @@ void IOB_main(void)
 		if (tick - old_tick > 1000)
 		{
 			old_tick = tick;
+			for(int i = 0; i < 12; i++)
+			{
+				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
+				{
+					data.variable_id = DIGITAL_OUT_MEASUREMENT;
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+				}
+				else if(node.channels[i].type == CHANNEL_TYPE_ADC16_SINGLE)
+				{
+					data.variable_id = ADC16_SINGLE_DATA;
+					Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+				}
+				else
+				{
+					data.variable_id = ADC16_MEASUREMENT;
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+				}
+			}
+			Serial_PutString("\n");
 		}
 
 		if (Serial_CheckInput(serial_str))
