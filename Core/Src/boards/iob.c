@@ -46,7 +46,7 @@ IOB_Pins_t iob_channels[] =
 	[ 7] = {{GPIOA, LL_GPIO_PIN_15}, {GPIOC,LL_GPIO_PIN_12}, {GPIOA, LL_GPIO_PIN_1}},
 	[ 8] = {{GPIOE, LL_GPIO_PIN_13}, {GPIOB,LL_GPIO_PIN_15}, {GPIOA, LL_GPIO_PIN_2}},
 	[ 9] = {{GPIOC,  LL_GPIO_PIN_6}, {GPIOD,LL_GPIO_PIN_15}, {GPIOA, LL_GPIO_PIN_3}},
-	[10] = {{GPIOC,  LL_GPIO_PIN_8}, {GPIOC, LL_GPIO_PIN_8}, {GPIOA, LL_GPIO_PIN_4}},
+	[10] = {{GPIOC,  LL_GPIO_PIN_8}, {GPIOC, LL_GPIO_PIN_7}, {GPIOA, LL_GPIO_PIN_4}},
 	[11] = {{GPIOC,  LL_GPIO_PIN_9}, {GPIOA, LL_GPIO_PIN_9}, {GPIOA, LL_GPIO_PIN_5}}
 };
 
@@ -156,10 +156,6 @@ void IOB_main(void)
 	Node_Init();
 	IOB_InitAdc();
 
-	//LL_GPIO_ResetOutputPin(iob_channels[9].enable.port, iob_channels[9].enable.pin);
-
-	//LL_GPIO_SetOutputPin(iob_channels[3].enable.port, iob_channels[3].enable.pin);
-
 	char serial_str[1000] =
 	{ 0 };
 
@@ -180,9 +176,8 @@ void IOB_main(void)
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
-		//IOB_UpdateAdcSingle();
 
-		if (tick - old_tick > 1000)
+		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
 			for(int i = 0; i < 12; i++)

@@ -116,7 +116,7 @@ void Speaker_SetPwmFrequency(uint16_t time)
 	uint32_t arr = 40000 / time;
 
 	LL_TIM_SetAutoReload(TIM1, arr - 1);
-	LL_TIM_OC_SetCompareCH1(TIM1, arr >> 2);
+	LL_TIM_OC_SetCompareCH1(TIM1, arr >> 1);
 
 	//TODO SET PWM Frequency
 	//LL_TIM_Enab

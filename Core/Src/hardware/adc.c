@@ -138,7 +138,15 @@ static void Adc_SetupAdc(ADC_TypeDef *adc)
 	ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
 	LL_ADC_Init(adc, &ADC_InitStruct);
 	//ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-	ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_EXT_TIM3_TRGO;
+	if(adc == ADC1)
+	{
+		ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_EXT_TIM3_TRGO;
+		//ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
+	}
+	else
+	{
+		ADC_REG_InitStruct.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
+	}
 	ADC_REG_InitStruct.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
 	ADC_REG_InitStruct.SequencerDiscont = DISABLE;
 	//ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
@@ -272,6 +280,7 @@ void Adc_StartAdc(void)
 {
 	NVIC_EnableIRQ(ADC_IRQn);
 	NVIC_EnableIRQ(ADC3_IRQn);
+	//NVIC_EnableIRQ(TIM3_IRQn);
 	LL_ADC_REG_SetSequencerLength(ADC1, adc_seq_ranks[adc1_length-1]);
 	LL_ADC_REG_SetSequencerLength(ADC3, adc_seq_ranks[adc3_length-1]);
 	LL_ADC_Enable(ADC1);
@@ -279,9 +288,21 @@ void Adc_StartAdc(void)
 	Adc_InitDMA(DMA1, LL_DMA_STREAM_0, (uint32_t) adc1_data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), adc1_length);
 	Adc_InitDMA(DMA2, LL_DMA_STREAM_0, (uint32_t) adc3_data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), adc3_length);
 
-	LL_TIM_EnableCounter(TIM3);
 	LL_ADC_REG_StartConversion(ADC1);
+	LL_TIM_EnableCounter(TIM3);
 }
+
+/*
+void TIM3_IRQHandler(void)
+{
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM3))
+	{
+		printCounts();
+		LL_ADC_REG_StartConversion(ADC1);
+		LL_TIM_ClearFlag_UPDATE(TIM3);
+	}
+}
+*/
 
 void ADC_IRQHandler(void)
 {
@@ -326,11 +347,12 @@ void ADC3_IRQHandler(void)
 				}
 			}
 			adc_state++;
+			//LL_ADC_REG_StartConversion(ADC1);
 		}
 		else
 		{
 			// prepare for normal adc scan - make sure all single channels are off - disable last single channel
-			IOB_Pins_t last_single = iob_channels[adc_single_id[adc_state]];
+			IOB_Pins_t last_single = iob_channels[adc_single_id[adc_state-1]];
 			LL_GPIO_ResetOutputPin(last_single.enable.port, last_single.enable.pin);
 			// transfer last single measurement to corresponding measurement array
 			ADC_CHANNEL_ID id = adc_single_id[adc_state-1];

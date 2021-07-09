@@ -80,7 +80,8 @@ Result_t Adc16Single_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_SI
 	char serial_str[20] =
 	{ 0 };
 
-	sprintf(serial_str,"%d: %d, ",channel->id, *var);
+	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
+	sprintf(serial_str,"%d,", *var);
 	Serial_PutString(serial_str);
 
 
