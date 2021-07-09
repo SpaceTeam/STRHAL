@@ -75,9 +75,10 @@ Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs res
 		return OOF;
 	set_msg->variable_id = get_msg->variable_id;
 	set_msg->value = *var;
-	char serial_str[20] =
-	{ 0 };
 
+
+	//TODO @ANDI Move to Debug_PrintInt or something like that
+	char serial_str[20] = { 0 };
 	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
 	sprintf(serial_str,"%d,", *var);
 	Serial_PutString(serial_str);
@@ -110,7 +111,20 @@ Result_t Adc16_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 	}
 }
 
-/*Result_t Adc16_GetData(uint8_t ch_id, int32_t *data, uint32_t *length)
+Result_t Adc_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	return OOF;
-}*/
+	*data = node.channels[channel_id].channel.adc16.analog_in;
+	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
+	return NOICE;
+}
+
+Result_t Adc16_GetData(uint8_t ch_id, int8_t *data, uint32_t *length)
+{
+	uint16_t *out = (uint16_t *)(data + *length);
+	uint16_t new_data;
+	Result_t result = Adc_GetRawData(ch_id, &new_data);
+	if(result == OOF_NO_NEW_DATA) return result;
+	*out = new_data;
+	(*length) += ADC16_DATA_N_BYTES;
+	return NOICE;
+}

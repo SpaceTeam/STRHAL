@@ -52,7 +52,7 @@ IOB_Pins_t iob_channels[] =
 
 //@formatter:on
 
-void IOB_Pins_Init(void)
+void IOB_InitPins(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
 	{ 0 };
@@ -69,48 +69,6 @@ void IOB_Pins_Init(void)
 		GPIO_InitStruct.Pin = iob_channels[i].select.pin;
 		LL_GPIO_Init(iob_channels[i].select.port, &GPIO_InitStruct);
 	}
-}
-
-const CHANNEL_TYPE channel_lookup[4] =
-{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16_SINGLE,			//PT100
-		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
-
-void Node_Init(void)
-{
-	IOB_Pins_Init();
-
-	LL_GPIO_InitTypeDef GPIO_InitStruct =
-	{ 0 };
-	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-
-	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-	{
-		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
-		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
-		node.channels[i].type = channel_lookup[type_index];
-
-		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
-		switch (channel_lookup[type_index])
-		{
-			case CHANNEL_TYPE_DIGITAL_OUT:
-				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
-				break;
-			case CHANNEL_TYPE_ADC16_SINGLE:
-				node.channels[i].channel.adc16single.enable_pin = &iob_channels[i].enable;
-				break;
-			default:
-				break;
-		}
-
-		// set enable pin as output
-		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
-		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
-	}
-
-	node.node_id = NodeID_Get();
 }
 
 void IOB_InitAdc(void)
@@ -148,16 +106,59 @@ void IOB_InitAdc(void)
 	Adc_Calibrate();
 	Adc_StartAdc();
 }
+const CHANNEL_TYPE channel_lookup[4] =
+{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16_SINGLE,			//PT100
+		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
+
+void IOB_Init(void)
+{
+	IOB_InitPins();
+
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
+		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
+		node.channels[i].type = channel_lookup[type_index];
+
+		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
+		switch (channel_lookup[type_index])
+		{
+			case CHANNEL_TYPE_DIGITAL_OUT:
+				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
+				break;
+			case CHANNEL_TYPE_ADC16_SINGLE:
+				node.channels[i].channel.adc16single.enable_pin = &iob_channels[i].enable;
+				break;
+			default:
+				break;
+		}
+
+		// set enable pin as output
+		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
+		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
+	}
+	IOB_InitAdc();
+}
+
 
 void IOB_main(void)
 {
 	uint64_t tick = 0, old_tick = 0;
 
-	Node_Init();
-	IOB_InitAdc();
 
-	char serial_str[1000] =
-	{ 0 };
+	IOB_Init();
+
+	char serial_str[1000] =	{ 0 };
+
+	/*
+	//TODO @ANDI DEBUG ....
 
 	sprintf(serial_str, "Node ID: %ld", node.node_id);
 	Serial_PrintString(serial_str);
@@ -167,38 +168,51 @@ void IOB_main(void)
 		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
 		Serial_PrintString(serial_str);
 	}
-
-	GetMsg_t data;
+*/
+//	GetMsg_t data;
 
 	while (1)
 	{
 		tick = Systick_GetTick();
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
-		Can_checkFifo(1);
+		Can_checkFifo(DEBUG_CAN_BUS);
+
 
 		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
-			for(int i = 0; i < 12; i++)
+
+			Result_t result = Generic_Data();
+
+			if(result != NOICE) Serial_PrintInt(result); //TODO @ANDI Change TO Debug_PrintResult (and implement it)
+			else Serial_PutString("0x1234567");
+		 Serial_PutString(", ");
+
+			/*
+			for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 			{
-				if(node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
+				switch (node.channels[i].type)
 				{
-					data.variable_id = DIGITAL_OUT_MEASUREMENT;
-					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
-				}
-				else if(node.channels[i].type == CHANNEL_TYPE_ADC16_SINGLE)
-				{
-					data.variable_id = ADC16_SINGLE_DATA;
-					Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
-				}
-				else
-				{
-					data.variable_id = ADC16_MEASUREMENT;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t *) &data, 0);
+					case CHANNEL_TYPE_DIGITAL_OUT:
+						data.variable_id = DIGITAL_OUT_MEASUREMENT;
+						DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+						break;
+					case CHANNEL_TYPE_ADC16_SINGLE:
+						data.variable_id = ADC16_SINGLE_DATA;
+						Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+						break;
+					case CHANNEL_TYPE_ADC16:
+						data.variable_id = ADC16_MEASUREMENT;
+						Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+						break;
+					default:
+						break;
 				}
 			}
-			Serial_PutString("\n");
+*/
+			Serial_PrintString(" ");
+
 		}
 
 		if (Serial_CheckInput(serial_str))

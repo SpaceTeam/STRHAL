@@ -307,7 +307,7 @@ Result_t Can_Init(uint8_t node_id)
 	Can_AddStdFilter(MAIN_CAN_BUS, 1, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
 
 	//TODO: remove for Debugging only
-	result = Can_InitFdcan(1);
+	result = Can_InitFdcan(DEBUG_CAN_BUS);
 	if (result != NOICE)
 		return result;
 
@@ -336,6 +336,8 @@ void Can_checkFifo(uint32_t can_handle_index)
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
 
+
+		//TODO @ANDI Add Debug thingi
 		Serial_PutString("FDCAN ");
 		Serial_PrintInt(can_handle_index + 1);
 		Serial_PrintString("FIFO 0:  ");
@@ -375,6 +377,10 @@ void Can_checkFifo(uint32_t can_handle_index)
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo1[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+
+
+		/*
+		//TODO @ANDI Add Debug thingi
 		Serial_PutString("FDCAN ");
 		Serial_PrintInt(can_handle_index + 1);
 		Serial_PrintString("FIFO 1:  ");
@@ -398,6 +404,9 @@ void Can_checkFifo(uint32_t can_handle_index)
 			Serial_PutString("  ");
 			Serial_PrintHex(data.uint8[c]);
 		}
+		*/
+
+
 		//Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF1A = get_index & 0x3F;
@@ -430,6 +439,9 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 	while (i < Can_DlcToLength[Can_LengthToDlc[length]] / 4)
 		packet->data.uint32[i++] = 0;
 
+
+
+	//TODO @ANDI Move to Debug_Print or something like that
 	Serial_PrintString("CAN SEND MESSAGE");
 	Serial_PutString("message_id: ");
 	Serial_PrintInt(message_id);

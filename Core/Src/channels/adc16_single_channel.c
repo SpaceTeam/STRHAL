@@ -77,13 +77,14 @@ Result_t Adc16Single_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_SI
 		return OOF;
 	set_msg->variable_id = get_msg->variable_id;
 	set_msg->value = *var;
+	/*
+	//TODO @ANDI Move to Debug_PrintInt or something like that
 	char serial_str[20] =
 	{ 0 };
-
 	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
 	sprintf(serial_str,"%d,", *var);
 	Serial_PutString(serial_str);
-
+*/
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
@@ -114,5 +115,6 @@ Result_t Adc16Single_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data
 
 /*Result_t Adc16_GetData(uint8_t ch_id, int32_t *data, uint32_t *length)
 {
+//TODO @ANDI
 	return OOF;
 }*/

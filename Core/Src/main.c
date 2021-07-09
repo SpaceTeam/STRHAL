@@ -32,9 +32,13 @@ int main(void)
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2); //DMA2 init
 
 	Serial_Init();
-	Can_Init(NodeID_Get());
 
-	Serial_PrintString("STARTED?");
+	//@ANDI So hätt ich es gemeint gehabt.
+	node.node_id = NodeID_Get();
+	Can_Init(node.node_id);
+
+	Serial_PrintInt(node.node_id);
+	Serial_PrintString("STARTED");
 	Serial_PrintString(GIT_COMMIT_HASH);
 	Speaker_Init();
 	Speaker_Set(300, 200, 50, 5);
