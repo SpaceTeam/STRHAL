@@ -147,6 +147,10 @@ void IOB_Init(void)
 	IOB_InitAdc();
 }
 
+void IOB_TIM2_IRQHandler(void)
+{
+
+}
 
 void IOB_main(void)
 {

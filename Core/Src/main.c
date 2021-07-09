@@ -5,6 +5,7 @@
 #include "cmds.h"
 #include "can.h"
 #include "gpio.h"
+#include "tim.h"
 #include "sysclock.h"
 #include "systick.h"
 #include "serial.h"
@@ -40,6 +41,7 @@ int main(void)
 	Serial_PrintInt(node.node_id);
 	Serial_PrintString("STARTED");
 	Serial_PrintString(GIT_COMMIT_HASH);
+	TIM2_Init();
 	Speaker_Init();
 	Speaker_Set(300, 200, 50, 5);
 	Flash_Init();
@@ -50,6 +52,19 @@ int main(void)
 	IOB_main();
 #endif
 
+}
+
+void TIM2_IRQHandler(void)
+{
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM2))
+	{
+#if BOARD == LCB
+		LCB_TIM2_IRQHandler();
+#elif BOARD == IOB
+		IOB_TIM2_IRQHandler();
+#endif
+		LL_TIM_ClearFlag_UPDATE(TIM2);
+	}
 }
 
 void Error_Handler(void)

@@ -7,6 +7,7 @@
 
 #define LCB_MAIN_CAN_BUS 0
 
+void LCB_TIM2_IRQHandler(void);
 void LCB_main(void);
 
 #endif

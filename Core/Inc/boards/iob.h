@@ -17,6 +17,7 @@ typedef struct
 
 IOB_Pins_t iob_channels[12];
 
+void IOB_TIM2_IRQHandler(void);
 void IOB_main(void);
 
 #endif

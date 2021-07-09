@@ -39,6 +39,11 @@ void LCB_InitAdc(void)
 	Adc_StartAdc();
 }
 
+void LCB_TIM2_IRQHandler(void)
+{
+
+}
+
 void LCB_main(void)
 {
 	uint64_t tick = 0;

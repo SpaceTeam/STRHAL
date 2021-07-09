@@ -38,6 +38,7 @@ extern "C" {
 void MX_TIM1_Init(void);
 void TIM4_Init(void);
 void TIM3_Init(void);
+void TIM2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
