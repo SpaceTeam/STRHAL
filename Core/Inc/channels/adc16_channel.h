@@ -15,6 +15,6 @@ typedef struct
 } Adc16_Channel_t;
 
 Result_t Adc16_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
-//Result_t Adc16_GetData(uint8_t ch_id, int32_t *data, uint32_t *length);
+Result_t Adc16_GetData(uint8_t ch_id, int16_t *data, uint32_t *length);
 
 #endif

@@ -67,7 +67,7 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 			{
 				LL_GPIO_ResetOutputPin(enable->port,enable->pin);
 			}
-			else if (set_msg->value == 0xFFFFFFFF)
+			else if (set_msg->value == 0xFFFF)
 			{
 				LL_GPIO_SetOutputPin(enable->port,enable->pin);
 			}
