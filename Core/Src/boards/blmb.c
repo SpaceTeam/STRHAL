@@ -186,7 +186,7 @@ void BLMB_main(void)
 
 
 //IRQHandlers
-#define COOLDOWN_TICKS (10) //10 ms cooldown
+#define COOLDOWN_TICKS (100) //10 ms cooldown
 volatile uint64_t cooldown_start_CW_button = 0;
 volatile uint64_t cooldown_start_Sel_button = 0;
 volatile uint64_t cooldown_start_CCW_button = 0;
@@ -265,6 +265,8 @@ void EXTI9_5_IRQHandler(void)
 						case BLMB_SPEED_FAST:
 							blmb_speed_state = BLMB_SPEED_SLOW;
 							Speaker_Set(659, 160, 40, 3);
+							break;
+						default:
 							break;
 					}
 				}
@@ -351,12 +353,14 @@ void TIM6_DAC_IRQHandler(void)
 				&& LL_GPIO_IsInputPinSet(BLMB_CCW_Button_GPIO_Port, BLMB_CCW_Button_Pin) == RESET)
 		{
 			//set bl motor position cw with blmb_speed_state
+			Speaker_Set(1000, 100, 100, 1);
 		}
 		else if (LL_GPIO_IsInputPinSet(BLMB_CW_Button_GPIO_Port, BLMB_CW_Button_Pin) == RESET
 				&& LL_GPIO_IsInputPinSet(BLMB_Sel_Button_GPIO_Port, BLMB_Sel_Button_Pin) == RESET
 				&& LL_GPIO_IsInputPinSet(BLMB_CCW_Button_GPIO_Port, BLMB_CCW_Button_Pin) == SET)
 		{
 			//set bl motor position ccw with blmb_speed_state
+			Speaker_Set(1000, 100, 100, 2);
 		}
 		LL_TIM_ClearFlag_UPDATE(TIM5);
 	}

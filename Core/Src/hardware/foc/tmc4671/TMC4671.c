@@ -16,14 +16,14 @@
 // spi access
 int32_t tmc4671_readInt(uint8_t address)
 {
-	int32_t txData[5] = {0};
+	uint8_t txData[5] = {0};
 	txData[0] = TMC_ADDRESS(address);
 	txData[1] = 0;
 	txData[2] = 0;
 	txData[3] = 0;
 	txData[4] = 0;
 
-	int32_t rxData[5] = {0};
+	uint8_t rxData[5] = {0};
 
 	swdriver_setCsnController( false);
 	//TODO FIX
@@ -35,7 +35,7 @@ int32_t tmc4671_readInt(uint8_t address)
 
 void tmc4671_writeInt(uint8_t address, int32_t value)
 {
-	int32_t data[5] = {0};
+	uint8_t data[5] = {0};
 	data[0] = address | 0x80;
 	data[1] = 0xFF & (value >> 24);
 	data[2] = 0xFF & (value >> 16);

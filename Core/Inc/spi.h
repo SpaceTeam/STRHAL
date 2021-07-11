@@ -42,7 +42,9 @@ void SPI1_Init(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, u
 
 /* USER CODE BEGIN Prototypes */
 
-Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxData[], uint32_t count);
+Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, uint8_t *txData, uint8_t *rxData, uint32_t count);
+
+Result_t SPI_Transmit(SPI_TypeDef * SPIx, uint8_t *pData, uint16_t size);
 
 /* USER CODE END Prototypes */
 
