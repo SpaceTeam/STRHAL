@@ -65,17 +65,18 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 			case CHANNEL_TYPE_NODE_SPECIFIC:
 				break;
 			case CHANNEL_TYPE_ADC16:
-				Adc16_GetData(c, (int16_t*) data->uint8, length);
+				Adc16_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_ADC16_SINGLE:
 				//TODO @ANDI Add it and make it work
 				break;
 			case CHANNEL_TYPE_ADC24:
-				Adc24_GetData(c, (int32_t*) data->uint8, length);
+				Adc24_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_COMPUTED32:
 				break;
 			case CHANNEL_TYPE_DIGITAL_OUT:
+				DigitalOut_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_SERVO:
 				break;

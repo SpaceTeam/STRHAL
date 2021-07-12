@@ -147,3 +147,22 @@ Result_t DigitalOut_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data,
 			return OOF_UNKNOWN_CMD;
 	}
 }
+
+
+static Result_t DigitalOut_GetRawData(uint8_t channel_id, uint16_t *data)
+{
+	*data = (uint16_t)*node.channels[channel_id].channel.digital_out.analog_in;
+	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
+	return NOICE;
+}
+
+Result_t DigitalOut_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
+{
+	uint16_t *out = (uint16_t *)(data + *length);
+	uint16_t new_data;
+	Result_t result = DigitalOut_GetRawData(ch_id, &new_data);
+	if(result != NOICE) return result;
+	*out = new_data;
+	(*length) += DIGITAL_OUT_DATA_N_BYTES;
+	return NOICE;
+}

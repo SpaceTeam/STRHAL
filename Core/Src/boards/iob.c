@@ -15,7 +15,7 @@
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
-				.generic_channel = { 0 },
+				.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 					{
 							{ 0, CHANNEL_TYPE_UNKNOWN, {{0}} },
@@ -156,25 +156,24 @@ void IOB_main(void)
 {
 	uint64_t tick = 0, old_tick = 0;
 
-
 	IOB_Init();
 
-	char serial_str[1000] =	{ 0 };
+	char serial_str[1000] =
+	{ 0 };
 
 	/*
-	//TODO @ANDI DEBUG ....
+	 //TODO @ANDI DEBUG ....
 
-	sprintf(serial_str, "Node ID: %ld", node.node_id);
-	Serial_PrintString(serial_str);
+	 sprintf(serial_str, "Node ID: %ld", node.node_id);
+	 Serial_PrintString(serial_str);
 
-	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-	{
-		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
-		Serial_PrintString(serial_str);
-	}
-*/
+	 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+	 {
+	 sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
+	 Serial_PrintString(serial_str);
+	 }
+	 */
 //	GetMsg_t data;
-
 	while (1)
 	{
 		tick = Systick_GetTick();
@@ -182,39 +181,34 @@ void IOB_main(void)
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(DEBUG_CAN_BUS);
 
-
 		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
 
-			Result_t result = Generic_Data();
 
-			if(result != NOICE) Serial_PrintInt(result); //TODO @ANDI Change TO Debug_PrintResult (and implement it)
-			else Serial_PutString("0x1234567");
-		 Serial_PutString(", ");
 
 			/*
-			for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-			{
-				switch (node.channels[i].type)
-				{
-					case CHANNEL_TYPE_DIGITAL_OUT:
-						data.variable_id = DIGITAL_OUT_MEASUREMENT;
-						DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-						break;
-					case CHANNEL_TYPE_ADC16_SINGLE:
-						data.variable_id = ADC16_SINGLE_DATA;
-						Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-						break;
-					case CHANNEL_TYPE_ADC16:
-						data.variable_id = ADC16_MEASUREMENT;
-						Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-						break;
-					default:
-						break;
-				}
-			}
-*/
+			 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+			 {
+			 switch (node.channels[i].type)
+			 {
+			 case CHANNEL_TYPE_DIGITAL_OUT:
+			 data.variable_id = DIGITAL_OUT_MEASUREMENT;
+			 DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+			 break;
+			 case CHANNEL_TYPE_ADC16_SINGLE:
+			 data.variable_id = ADC16_SINGLE_DATA;
+			 Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+			 break;
+			 case CHANNEL_TYPE_ADC16:
+			 data.variable_id = ADC16_MEASUREMENT;
+			 Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+			 break;
+			 default:
+			 break;
+			 }
+			 }
+			 */
 			Serial_PrintString(" ");
 
 		}

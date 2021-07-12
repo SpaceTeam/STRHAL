@@ -20,6 +20,7 @@ extern "C" {
 #include "stm32h7xx_ll_gpio.h"
 #include "stm32h7xx_ll_spi.h"
 #include <can_def.h>
+#include "git_version.h"
 
 #include "board_config.h"
 

@@ -211,7 +211,7 @@ void Adc_Init()
 
 	Adc_SetupAdc(ADC1);
 	Adc_SetupAdc(ADC3);
-	TIM3_Init();
+	TIM3_Init(100);
 
 	// Delay for ADC internal voltage regulator stabilization.
 	uint32_t wait_loop_index;
@@ -267,7 +267,7 @@ AdcSingleData_t* Adc_AddSingleChannel(ADC_CHANNEL_ID id)
 }
 
 // ADC has to be disabled!
-//TODO: GM Is not in use
+//TODO: GM Currently not used, should be done
 void Adc_Calibrate(void)
 {
 	LL_ADC_StartCalibration(ADC1, LL_ADC_CALIB_OFFSET_LINEARITY, LL_ADC_SINGLE_ENDED);

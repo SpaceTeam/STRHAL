@@ -1,49 +1,17 @@
-/**
-  ******************************************************************************
-  * @file    tim.c
-  * @brief   This file provides code for the configuration
-  *          of the TIM instances.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "tim.h"
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/* TIM1 init function */
-void MX_TIM1_Init(void)
+#include "math.h"
+void TIM1_Init(void)
 {
-
-  /* USER CODE BEGIN TIM1_Init 0 */
-
-  /* USER CODE END TIM1_Init 0 */
 
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
   LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
   LL_TIM_BDTR_InitTypeDef TIM_BDTRInitStruct = {0};
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* Peripheral clock enable */
+
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 
-  /* USER CODE BEGIN TIM1_Init 1 */
-
-  /* USER CODE END TIM1_Init 1 */
-  TIM_InitStruct.Prescaler = 1499;
+    TIM_InitStruct.Prescaler = 1499;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
   TIM_InitStruct.Autoreload = 65535;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV2;
@@ -77,14 +45,12 @@ void MX_TIM1_Init(void)
   TIM_BDTRInitStruct.Break2Filter = LL_TIM_BREAK2_FILTER_FDIV1;
   TIM_BDTRInitStruct.AutomaticOutput = LL_TIM_AUTOMATICOUTPUT_DISABLE;
   LL_TIM_BDTR_Init(TIM1, &TIM_BDTRInitStruct);
-  /* USER CODE BEGIN TIM1_Init 2 */
 
-  /* USER CODE END TIM1_Init 2 */
   LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOE);
-    /**TIM1 GPIO Configuration
-    PE8     ------> TIM1_CH1N
-    PE9     ------> TIM1_CH1
-    */
+    //TIM1 GPIO Configuration
+    //PE8     ------> TIM1_CH1N
+    //PE9     ------> TIM1_CH1
+
   GPIO_InitStruct.Pin = PIN_SPEAKER_N_Pin|PIN_SPEAKER_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -94,24 +60,73 @@ void MX_TIM1_Init(void)
   LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }
-/* TIM4 init function */
+
+
+static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload)
+{
+	double divider = (double)SystemCoreClock / rate;
+
+	uint16_t n = (uint16_t)divider;
+	uint16_t i = (uint16_t) sqrt(divider) + 0.5;
+
+	while(n % i) i--;
+
+	*prescaler = i;
+	*autoreload = n/i;
+}
+void TIM2_Init(uint16_t rate)//TODO TEST
+{
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+
+  uint16_t prescaler = 0;
+  uint16_t autoreload = 0;
+  CalculatePRESandARR(rate, &prescaler, &autoreload);
+  TIM_InitStruct.Prescaler = prescaler-1;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = autoreload-1;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  LL_TIM_Init(TIM2, &TIM_InitStruct);
+  LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_UPDATE);
+  LL_TIM_GenerateEvent_UPDATE(TIM2);
+
+  LL_TIM_EnableIT_UPDATE(TIM2);
+  NVIC_EnableIRQ(TIM2_IRQn);
+}
+
+void TIM3_Init(uint16_t rate) //TODO TEST
+{
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
+  uint16_t prescaler = 0;
+  uint16_t autoreload = 0;
+  CalculatePRESandARR(rate, &prescaler, &autoreload);
+  TIM_InitStruct.Prescaler = prescaler-1;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = autoreload-1;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  LL_TIM_Init(TIM3, &TIM_InitStruct);
+  LL_TIM_SetTriggerOutput2(TIM3, LL_TIM_TRGO_UPDATE);
+  LL_TIM_GenerateEvent_UPDATE(TIM3);
+
+  LL_TIM_EnableIT_UPDATE(TIM3);
+  NVIC_EnableIRQ(TIM3_IRQn);
+
+}
+
 void TIM4_Init(void)
 {
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
 
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
   LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* Peripheral clock enable */
+
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
 
-  /* USER CODE BEGIN TIM4_Init 1 */
-
-  /* USER CODE END TIM4_Init 1 */
   TIM_InitStruct.Prescaler = 0;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
   TIM_InitStruct.Autoreload = 14;
@@ -128,13 +143,11 @@ void TIM4_Init(void)
   LL_TIM_OC_DisableFast(TIM4, LL_TIM_CHANNEL_CH3);
   LL_TIM_SetTriggerOutput(TIM4, LL_TIM_TRGO_RESET);
   LL_TIM_DisableMasterSlaveMode(TIM4);
-  /* USER CODE BEGIN TIM4_Init 2 */
 
-  /* USER CODE END TIM4_Init 2 */
   LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
-    /**TIM4 GPIO Configuration
-    PB8     ------> TIM4_CH3
-    */
+    //TIM4 GPIO Configuration
+    //PB8     ------> TIM4_CH3
+
   GPIO_InitStruct.Pin = LL_GPIO_PIN_8;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -145,47 +158,3 @@ void TIM4_Init(void)
 
 }
 
-void TIM3_Init(void)
-{
-  LL_TIM_InitTypeDef TIM_InitStruct = {0};
-
-  /* Peripheral clock enable */
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
-
-  // 120MHz base, 10kHz after presc -> 100Hz
-  TIM_InitStruct.Prescaler = 12000-1;
-  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 10000-1;
-  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-  LL_TIM_Init(TIM3, &TIM_InitStruct);
-  LL_TIM_SetTriggerOutput2(TIM3, LL_TIM_TRGO_UPDATE);
-  LL_TIM_GenerateEvent_UPDATE(TIM3);
-
-  //LL_TIM_EnableIT_UPDATE(TIM3);
-
-}
-
-void TIM2_Init(void)
-{
-  LL_TIM_InitTypeDef TIM_InitStruct = {0};
-
-  /* Peripheral clock enable */
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
-
-  // 120MHz base, 10kHz after presc -> 100Hz
-  TIM_InitStruct.Prescaler = 12000-1;
-  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 10000-1;
-  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-  LL_TIM_Init(TIM2, &TIM_InitStruct);
-  LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_UPDATE);
-  LL_TIM_GenerateEvent_UPDATE(TIM2);
-
-  LL_TIM_EnableIT_UPDATE(TIM2);
-  NVIC_EnableIRQ(TIM2_IRQn);
-}
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -16,8 +16,7 @@ void Systick_BusyWait(uint32_t ticks)
 	while (systick_count < end);
 }
 
-inline uint32_t Systick_TimeToTicks(uint16_t h, uint8_t m, uint8_t s,
-		uint16_t ms)
+inline uint32_t Systick_TimeToTicks(uint16_t h, uint8_t m, uint8_t s, uint16_t ms)
 {
 	return (uint32_t) (3600000 * h + 60000 * m + 1000 * s + ms);
 }

@@ -94,7 +94,7 @@ Result_t Adc24_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 	}
 }
 
-Result_t Adc24_GetData(uint8_t ch_id, int8_t *data, uint32_t *length)
+Result_t Adc24_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 {
 	uint32_t *out = (uint32_t *)(data + *length);
 	int32_t new_data = Ads131_GetData(ch_id);

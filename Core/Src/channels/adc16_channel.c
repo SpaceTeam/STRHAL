@@ -111,19 +111,19 @@ Result_t Adc16_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 	}
 }
 
-Result_t Adc_GetRawData(uint8_t channel_id, uint16_t *data)
+static Result_t Adc16_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	data = node.channels[channel_id].channel.adc16.analog_in;
-	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
+	*data = (uint16_t)*node.channels[channel_id].channel.adc16.analog_in;
+	//TODO @ANDI if (No new data and/or refresh divider count)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }
 
-Result_t Adc16_GetData(uint8_t ch_id, int16_t *data, uint32_t *length)
+Result_t Adc16_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 {
 	uint16_t *out = (uint16_t *)(data + *length);
 	uint16_t new_data;
-	Result_t result = Adc_GetRawData(ch_id, &new_data);
-	if(result == OOF_NO_NEW_DATA) return result;
+	Result_t result = Adc16_GetRawData(ch_id, &new_data);
+	if(result != NOICE) return result;
 	*out = new_data;
 	(*length) += ADC16_DATA_N_BYTES;
 	return NOICE;
