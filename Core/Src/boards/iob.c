@@ -161,19 +161,17 @@ void IOB_main(void)
 	char serial_str[1000] =
 	{ 0 };
 
-	/*
 	 //TODO @ANDI DEBUG ....
 
 	 sprintf(serial_str, "Node ID: %ld", node.node_id);
 	 Serial_PrintString(serial_str);
 
-	 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-	 {
-	 sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
-	 Serial_PrintString(serial_str);
-	 }
-	 */
-//	GetMsg_t data;
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
+		Serial_PrintString(serial_str);
+	}
+	GetMsg_t data;
 	while (1)
 	{
 		tick = Systick_GetTick();
@@ -184,33 +182,30 @@ void IOB_main(void)
 		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
+/*
+			for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+			{
+				switch (node.channels[i].type)
+				{
+				case CHANNEL_TYPE_DIGITAL_OUT:
+					data.variable_id = DIGITAL_OUT_MEASUREMENT;
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+					break;
+				case CHANNEL_TYPE_ADC16_SINGLE:
+					data.variable_id = ADC16_SINGLE_DATA;
+					Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+					break;
+				case CHANNEL_TYPE_ADC16:
+					data.variable_id = ADC16_MEASUREMENT;
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+					break;
+				default:
+					break;
+				}
+			}
 
-
-
-			/*
-			 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-			 {
-			 switch (node.channels[i].type)
-			 {
-			 case CHANNEL_TYPE_DIGITAL_OUT:
-			 data.variable_id = DIGITAL_OUT_MEASUREMENT;
-			 DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-			 break;
-			 case CHANNEL_TYPE_ADC16_SINGLE:
-			 data.variable_id = ADC16_SINGLE_DATA;
-			 Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-			 break;
-			 case CHANNEL_TYPE_ADC16:
-			 data.variable_id = ADC16_MEASUREMENT;
-			 Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-			 break;
-			 default:
-			 break;
-			 }
-			 }
-			 */
 			Serial_PrintString(" ");
-
+*/
 		}
 
 		if (Serial_CheckInput(serial_str))

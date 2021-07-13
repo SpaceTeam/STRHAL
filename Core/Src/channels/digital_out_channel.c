@@ -69,6 +69,8 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 			}
 			else if (set_msg->value == 0xFFFF)
 			{
+				Serial_PrintString("SUCCESS");
+				Serial_PrintInt(channel->id);
 				LL_GPIO_SetOutputPin(enable->port,enable->pin);
 			}
 			else

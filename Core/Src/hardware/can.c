@@ -338,6 +338,7 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 
 		//TODO @ANDI Add Debug thingi
+#ifdef CAN_DEBUG
 		Serial_PutString("FDCAN ");
 		Serial_PrintInt(can_handle_index + 1);
 		Serial_PrintString("FIFO 0:  ");
@@ -361,6 +362,7 @@ void Can_checkFifo(uint32_t can_handle_index)
 			Serial_PutString("  ");
 			Serial_PrintHex(data.uint8[c]);
 		}
+#endif
 
 		Ui_ProcessCanMessage(id, &data, length);
 
@@ -442,6 +444,7 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 
 
 	//TODO @ANDI Move to Debug_Print or something like that
+#ifdef CAN_DEBUG
 	Serial_PrintString("CAN SEND MESSAGE");
 	Serial_PutString("message_id: ");
 	Serial_PrintInt(message_id);
@@ -454,6 +457,7 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 		Serial_PutString("  ");
 		Serial_PrintHex(packet->data.uint8[c]);
 	}
+#endif
 
 	can->TXBAR = (1 << index);
 

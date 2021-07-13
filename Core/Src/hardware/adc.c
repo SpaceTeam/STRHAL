@@ -7,9 +7,6 @@
 #include <string.h>
 #include <stdio.h>
 
-volatile uint32_t adc1_samples_count = 0;
-volatile uint32_t adc3_samples_count = 0;
-
 static uint32_t adc1_length = 0;
 static AdcData_t adc1_data[14] =
 { 0 };
@@ -21,10 +18,11 @@ static AdcData_t adc3_data[2] =
 static uint32_t adc_single_length = 0;
 static ADC_CHANNEL_ID adc_single_id[14] =
 { 0 };
-static AdcData_t adc_single_data[14] =
+volatile AdcData_t adc_single_data[14] =
 { 0 };
-
-volatile uint8_t adc_state = 0, adc1_state = 0, adc3_state = 0;
+static uint8_t single_to_data[12] =
+{ 0 };
+volatile uint8_t adc_state = 0;
 
 /*
  PC0   ------> Channel  0  | ADC1_INP10
@@ -167,15 +165,6 @@ static void Adc_SetupAdcChannel(ADC_CHANNEL_ID id)
 	LL_ADC_SetChannelPreSelection(adc_channel_list[id].adc, adc_channel_list[id].channel);
 }
 
-void printCounts()
-{
-	char serial_str[50] =
-	{ 0 };
-
-	sprintf(serial_str,"%ld %ld\n",adc1_samples_count, adc3_samples_count);
-	Serial_PutString(serial_str);
-}
-
 void Adc_Init()
 {
 	LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_PLL2P);
@@ -211,7 +200,7 @@ void Adc_Init()
 
 	Adc_SetupAdc(ADC1);
 	Adc_SetupAdc(ADC3);
-	TIM3_Init(100);
+	TIM3_Init(ADC_REFRESH_RATE);
 
 	// Delay for ADC internal voltage regulator stabilization.
 	uint32_t wait_loop_index;
@@ -256,6 +245,16 @@ AdcData_t* Adc_AddRegularChannel(ADC_CHANNEL_ID id)
 AdcSingleData_t* Adc_AddSingleChannel(ADC_CHANNEL_ID id)
 {
 	AdcSingleData_t *single_data = NULL;
+	ADC_TypeDef *adc = adc_channel_list[id].adc;
+
+	if (adc == ADC1)
+	{
+		single_to_data[id] = adc1_length;
+	}
+	else
+	{
+		single_to_data[id] = adc3_length;
+	}
 
 	single_data->data = Adc_AddRegularChannel(id);
 	single_data->last_measurement = &adc_single_data[adc_single_length];
@@ -311,7 +310,6 @@ void ADC_IRQHandler(void)
 {
 	if(LL_ADC_IsActiveFlag_EOS(ADC1) != 0)
 	{
-		adc1_samples_count++;
 		LL_ADC_REG_StartConversion(ADC3);
 		LL_ADC_ClearFlag_EOS(ADC1);
 	}
@@ -321,8 +319,6 @@ void ADC3_IRQHandler(void)
 {
 	if(LL_ADC_IsActiveFlag_EOS(ADC3) != 0)
 	{
-		adc3_samples_count++;
-
 		if(adc_state < adc_single_length)
 		{
 			// enable next single channel
@@ -340,13 +336,11 @@ void ADC3_IRQHandler(void)
 
 				if (adc == ADC1)
 				{
-					adc_single_data[adc_state-1] = adc1_data[adc1_state];
-					adc1_state++;
+					adc_single_data[adc_state-1] = adc1_data[single_to_data[id]];
 				}
 				else
 				{
-					adc_single_data[adc_state-1] = adc3_data[adc3_state];
-					adc3_state++;
+					adc_single_data[adc_state-1] = adc3_data[single_to_data[id]];
 				}
 			}
 			adc_state++;
@@ -363,15 +357,13 @@ void ADC3_IRQHandler(void)
 
 			if (adc == ADC1)
 			{
-				adc_single_data[adc_state-1] = adc1_data[adc1_state];
+				adc_single_data[adc_state-1] = adc1_data[single_to_data[id]];
 			}
 			else
 			{
-				adc_single_data[adc_state-1] = adc3_data[adc3_state];
+				adc_single_data[adc_state-1] = adc3_data[single_to_data[id]];
 			}
 			adc_state = 0;
-			adc1_state = 0;
-			adc3_state = 0;
 		}
 
 		LL_ADC_ClearFlag_EOS(ADC3);

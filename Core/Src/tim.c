@@ -62,7 +62,7 @@ void TIM1_Init(void)
 }
 
 
-static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload)
+static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload) //TODO @Andi fix this!!
 {
 	double divider = (double)SystemCoreClock / rate;
 
@@ -81,9 +81,9 @@ void TIM2_Init(uint16_t rate)//TODO TEST
   /* Peripheral clock enable */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 
-  uint16_t prescaler = 0;
-  uint16_t autoreload = 0;
-  CalculatePRESandARR(rate, &prescaler, &autoreload);
+  uint16_t prescaler = 24000;
+  uint16_t autoreload = 1000;
+  //CalculatePRESandARR(rate, &prescaler, &autoreload);
   TIM_InitStruct.Prescaler = prescaler-1;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
   TIM_InitStruct.Autoreload = autoreload-1;
@@ -101,9 +101,9 @@ void TIM3_Init(uint16_t rate) //TODO TEST
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
-  uint16_t prescaler = 0;
-  uint16_t autoreload = 0;
-  CalculatePRESandARR(rate, &prescaler, &autoreload);
+  uint16_t prescaler = 24000;
+  uint16_t autoreload = 100;
+  //CalculatePRESandARR(rate, &prescaler, &autoreload);
   TIM_InitStruct.Prescaler = prescaler-1;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
   TIM_InitStruct.Autoreload = autoreload-1;
@@ -112,8 +112,8 @@ void TIM3_Init(uint16_t rate) //TODO TEST
   LL_TIM_SetTriggerOutput2(TIM3, LL_TIM_TRGO_UPDATE);
   LL_TIM_GenerateEvent_UPDATE(TIM3);
 
-  LL_TIM_EnableIT_UPDATE(TIM3);
-  NVIC_EnableIRQ(TIM3_IRQn);
+  //LL_TIM_EnableIT_UPDATE(TIM3);
+  //NVIC_EnableIRQ(TIM3_IRQn);
 
 }
 

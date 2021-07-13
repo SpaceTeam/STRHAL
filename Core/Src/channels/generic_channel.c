@@ -68,6 +68,7 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 				Adc16_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_ADC16_SINGLE:
+				Adc16Single_GetData(c, data->uint8, length);
 				//TODO @ANDI Add it and make it work
 				break;
 			case CHANNEL_TYPE_ADC24:

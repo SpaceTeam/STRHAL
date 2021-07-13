@@ -26,7 +26,6 @@ int main(void)
 	GPIO_Init();
 	Serial_Init();
 
-	//@ANDI So hätt ich es gemeint gehabt.
 	node.node_id = NodeID_Get();
 
 	Speaker_Init();
@@ -41,6 +40,8 @@ int main(void)
 	TIM2_Init(node.generic_channel.refresh_rate);
 	Flash_Init();
 
+	LL_TIM_EnableCounter(TIM2);
+
 #if BOARD == LCB
 	LCB_main();
 #elif BOARD == IOB
@@ -48,6 +49,7 @@ int main(void)
 #endif
 
 }
+
 static void SendGenericData(void)
 {
 	Result_t result = Generic_Data();
@@ -56,9 +58,10 @@ static void SendGenericData(void)
 	if (result != NOICE)
 		Serial_PrintInt(result); //TODO @ANDI Change TO Debug_PrintResult (and implement it)
 	else
-		Serial_PutString("0x1234567");
+		//Serial_PutString("0x1234567");
 	Serial_PutString(", ");
 }
+
 void main_TIM2_IRQHandler(void)
 {
 	static int32_t refresh_counter = 0;
@@ -72,7 +75,7 @@ void main_TIM2_IRQHandler(void)
 
 void TIM2_IRQHandler(void)
 {
-	if (LL_TIM_IsActiveFlag_UPDATE(TIM2))
+	if (LL_TIM_IsActiveFlag_UPDATE(TIM2) != 0)
 	{
 		main_TIM2_IRQHandler();
 #if BOARD == LCB
