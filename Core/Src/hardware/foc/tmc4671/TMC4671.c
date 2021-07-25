@@ -7,6 +7,7 @@
 #include "foc/tmc4671/TMC4671.h"
 #include "foc/swdriver.h"
 #include "spi.h"
+#include "serial.h"
 
 #define STATE_NOTHING_TO_DO    0
 #define STATE_START_INIT       1
@@ -26,11 +27,10 @@ int32_t tmc4671_readInt(uint8_t address)
 	uint8_t rxData[5] = {0};
 
 	swdriver_setCsnController( false);
-	//TODO FIX
-	SPI_Transmit_Receive(swdriver.spi, txData, rxData, 5);
+	if(SPI_Transmit_Receive(swdriver.spi, txData, rxData, 5) != NOICE) Serial_PrintString("fack");
 	swdriver_setCsnController(true);
 
-	return (int) ((rxData[1] << 24) | (rxData[2] << 16) | (rxData[3] << 8) | (rxData[4] << 0));
+	return (int)((rxData[1] << 24) | (rxData[2] << 16) | (rxData[3] << 8) | (rxData[4] << 0));
 }
 
 void tmc4671_writeInt(uint8_t address, int32_t value)
@@ -43,8 +43,7 @@ void tmc4671_writeInt(uint8_t address, int32_t value)
 	data[4] = 0xFF & (value >> 0);
 
 	swdriver_setCsnController(false);
-	//TODO FIX
-	SPI_Transmit(swdriver.spi, data, 5);
+	if(SPI_Transmit_Receive(swdriver.spi, data, 0, 5) != NOICE) Serial_PrintString("fack");
 	swdriver_setCsnController(true);
 }
 

@@ -52,10 +52,8 @@ Result_t Ads131_Init(void)
 
 Result_t Ads131_WriteRegister(uint32_t reg, uint32_t value)
 {
-	int32_t txData[2] =
-	{ (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
-	int32_t rxData[2] =
-	{ 0 };
+	uint8_t txData[2] = { (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
+	uint8_t rxData[2] = { 0 };
 	uint32_t tickstart = 0;
 
 	Result_t result = SPI_Transmit_Receive(SPI1, txData, rxData, 2);

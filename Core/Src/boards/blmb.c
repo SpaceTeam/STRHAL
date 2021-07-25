@@ -6,6 +6,7 @@
 #include "can.h"
 #include "foc/tmc6200/TMC6200_highLevel.h"
 #include "foc/tmc6200/TMC6200.h"
+#include "foc/tmc6200/TMC6200_Register.h"
 #include "foc/tmc4671/TMC4671_highLevel.h"
 #include "foc/tmc4671/TMC4671.h"
 #include "foc/swdriver.h"
@@ -22,9 +23,9 @@
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 				.generic_channel = { 0 },
 				.channels =
-					{
-							{ 0, CHANNEL_TYPE_SERVO, {{0}} }
-					}
+				{
+					{ 0, CHANNEL_TYPE_SERVO, {{0}} }
+				}
 				};
 //@formatter:on
 
@@ -41,9 +42,8 @@ void BLMB_InitAdc(void)
 
 void BLMB_InitFoc(void)
 {
-
+	// 25MHz clock for foc controller and gate driver FIXME currently 24MHz
 	TIM4_Init();
-
 	LL_TIM_EnableCounter(TIM4);
 	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH3);
 
@@ -58,19 +58,19 @@ void BLMB_InitFoc(void)
 	TMC4671_highLevel_init();
 	Systick_BusyWait(10);
 
+	Serial_PrintString("motor encoder init");
 	TMC4671_highLevel_initEncoder();
+	Serial_PrintString("motor encoder init done");
 
-	Systick_BusyWait(100)
-	;
+	Systick_BusyWait(100);
 
-	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t) ((float) as5147_getAngle(BLMB_POSITION_ENCODER) * 32 * 231.1222));
-
-	TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
+	uint16_t pos = as5147_getAngle(BLMB_POSITION_ENCODER);
+	Serial_PrintInt(pos);
+	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t)((float)(pos << 5) * BLMB_REDUCTION));
 
 	TMC4671_highLevel_positionMode2();
 
 	Systick_BusyWait(100);
-
 }
 
 void BLMB_InitTIM(void)
@@ -105,16 +105,10 @@ void BLMB_InitTIM(void)
 void BLMB_InitGPIO(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct = { 0 };
-	LL_EXTI_InitTypeDef EXTI_InitStruct = { 0 };
 
-	/* GPIO Ports Clock Enable */
-	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOC);
-	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOD);
-
+	// button inputs
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP; //TODO: pull up?
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
 
 	GPIO_InitStruct.Pin = BLMB_CW_Button_Pin;
 	LL_GPIO_Init(BLMB_CW_Button_GPIO_Port, &GPIO_InitStruct);
@@ -125,7 +119,55 @@ void BLMB_InitGPIO(void)
 	GPIO_InitStruct.Pin = BLMB_CCW_Button_Pin;
 	LL_GPIO_Init(BLMB_CCW_Button_GPIO_Port, &GPIO_InitStruct);
 
-	//EXTI
+	//status inputs
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+
+	GPIO_InitStruct.Pin = STATUS_Pin;
+	LL_GPIO_Init(STATUS_GPIO_Port, &GPIO_InitStruct);
+
+	GPIO_InitStruct.Pin = FAULT_Pin;
+	LL_GPIO_Init(FAULT_GPIO_Port, &GPIO_InitStruct);
+
+	//enable and chip select outputs
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+
+	GPIO_InitStruct.Pin = EN_Pin;
+	LL_GPIO_Init(EN_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_ResetOutputPin(EN_GPIO_Port, EN_Pin);
+
+	GPIO_InitStruct.Pin = CSN_CTR_Pin;
+	LL_GPIO_Init(CSN_CTR_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(CSN_CTR_GPIO_Port, CSN_CTR_Pin);
+
+	GPIO_InitStruct.Pin = CSN_DRV_Pin;
+	LL_GPIO_Init(CSN_DRV_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(CSN_DRV_GPIO_Port, CSN_DRV_Pin);
+
+	GPIO_InitStruct.Pin = CSN_ENC0_Pin;
+	LL_GPIO_Init(CSN_ENC0_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(CSN_ENC0_GPIO_Port, CSN_ENC0_Pin);
+
+	GPIO_InitStruct.Pin = CSN_ENC1_Pin;
+	LL_GPIO_Init(CSN_ENC1_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(CSN_ENC1_GPIO_Port, CSN_ENC1_Pin);
+
+	GPIO_InitStruct.Pin = CSN_ENC2_Pin;
+	LL_GPIO_Init(CSN_ENC2_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(CSN_ENC2_GPIO_Port, CSN_ENC2_Pin);
+
+	GPIO_InitStruct.Pin = CSN_ENC3_Pin;
+	LL_GPIO_Init(CSN_ENC3_GPIO_Port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(CSN_ENC3_GPIO_Port, CSN_ENC3_Pin);
+}
+
+void BLMB_InitEXTI(void)
+{
+	LL_EXTI_InitTypeDef EXTI_InitStruct = { 0 };
+
 	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE8);
 	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE9);
 	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTD, LL_SYSCFG_EXTI_LINE15);
@@ -136,11 +178,9 @@ void BLMB_InitGPIO(void)
 	EXTI_InitStruct.LineCommand = ENABLE;
 	LL_EXTI_Init(&EXTI_InitStruct);
 
-
 	//enable exti interrupts
 	NVIC_SetPriority(EXTI9_5_IRQn, 3);
 	NVIC_EnableIRQ(EXTI9_5_IRQn);
-
 	NVIC_SetPriority(EXTI15_10_IRQn, 3);
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
@@ -150,16 +190,18 @@ void BLMB_main(void)
 	uint64_t tick = 0;
 	uint64_t old_tick = 0;
 
-	BLMB_InitAdc();
+	BLMB_InitGPIO(); // button inputs, status inputs, chip select outputs
 
-	BLMB_InitFoc();
+	BLMB_InitAdc(); // power supply monitoring TODO why here and not in main.c?
 
-	BLMB_InitTIM();
+	BLMB_InitFoc(); // motor control
 
-	BLMB_InitGPIO();
+	BLMB_InitEXTI(); // button interrupts
 
-	char serial_str[1000] =
-	{ 0 };
+	BLMB_InitTIM(); // button handling timers
+
+	char serial_str[1000] = { 0 };
+
 	while (1)
 	{
 		tick = Systick_GetTick();
@@ -167,20 +209,22 @@ void BLMB_main(void)
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-	//	TMC4671_highLevel_setPosition(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set);
+		TMC4671_highLevel_setPosition((int32_t)(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set * BLMB_REDUCTION));
+
 		if (tick - old_tick >= 1000)
 		{
 			old_tick = tick;
-			Serial_PrintHex(tmc6200_readInt(TMC6200_GSTAT));
+			Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
+			Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));
 			Serial_PrintInt(tick);
+			Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
+			Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
 		}
 		if (Serial_CheckInput(serial_str))
 		{
 			Serial_PrintString(serial_str);
 			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = atoi(serial_str);
-
 		}
-
 	}
 }
 

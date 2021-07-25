@@ -17,7 +17,6 @@ void TMC4671_highLevel_init(void)
 	tmc4671_writeInt(TMC4671_PWM_MAXCNT, 3999); // 3999 --> 25kHz PWM
 	tmc4671_writeInt(TMC4671_PWM_BBM_H_BBM_L, (30 << TMC4671_PWM_BBM_H_SHIFT) | (30 << TMC4671_PWM_BBM_L_SHIFT)); // LS and HS 300ns BBM
 	tmc4671_writeInt(TMC4671_PWM_SV_CHOP, (0 << TMC4671_PWM_SV_SHIFT) | (7 << TMC4671_PWM_CHOP_SHIFT)); // Space Vector PWM disabled, centered PWM for FOC
-
 	// ADC configuration
 	tmc4671_writeInt(TMC4671_ADC_I_SELECT, 0x24000100); // adcs for current measurement, default assignment (ux=0 v=1 wy=2)
 //	tmc4671_writeInt(TMC4671_dsADC_MCFG_B_MCFG_A, 0); // internal ds-modulator, MCLK for both groups FIXME make this work
@@ -201,7 +200,7 @@ uint16_t TMC4671_getAdcRaw1(void)
 void TMC4671_highLevel_initEncoder(void)
 {
 	tmc4671_writeInt( TMC4671_MODE_RAMP_MODE_MOTION, 8); // uq_ud_ext
-	tmc4671_writeInt( TMC4671_ABN_DECODER_PHI_E_PHI_M_OFFSET, 0x00000000);
+	tmc4671_writeInt( TMC4671_ABN_DECODER_PHI_E_PHI_M_OFFSET, 0);
 	tmc4671_writeInt( TMC4671_PHI_E_SELECTION, 1);  // phi_e_ext
 	tmc4671_writeInt( TMC4671_PHI_E_EXT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (2000 << TMC4671_UD_EXT_SHIFT)); // uq=0, ud=2000
