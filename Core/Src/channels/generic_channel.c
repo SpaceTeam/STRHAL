@@ -57,6 +57,7 @@ Result_t Generic_Status()
 Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 {
 
+	Result_t result = OOF;
 	data->channel_mask = 0;
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)
 	{
@@ -65,19 +66,19 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 			case CHANNEL_TYPE_NODE_SPECIFIC:
 				break;
 			case CHANNEL_TYPE_ADC16:
-				Adc16_GetData(c, data->uint8, length);
+				result = Adc16_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_ADC16_SINGLE:
-				Adc16Single_GetData(c, data->uint8, length);
+				result = Adc16Single_GetData(c, data->uint8, length);
 				//TODO @ANDI Add it and make it work
 				break;
 			case CHANNEL_TYPE_ADC24:
-				Adc24_GetData(c, data->uint8, length);
+				result = Adc24_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_COMPUTED32:
 				break;
 			case CHANNEL_TYPE_DIGITAL_OUT:
-				DigitalOut_GetData(c, data->uint8, length);
+				result = DigitalOut_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_SERVO:
 				break;
@@ -85,10 +86,13 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 			case CHANNEL_TYPE_LAST:
 			case CHANNEL_TYPE_UNKNOWN:
 			default:
+				result = OOF_NOT_IMPLEMENTED;
 				break;
 		}
+		if(result == NOICE) data->channel_mask |= 1<<c;
+
 	}
-	return NOICE;
+	return NOICE;//TODO
 }
 
 Result_t Generic_Data(void)

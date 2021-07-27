@@ -338,7 +338,7 @@ void Can_checkFifo(uint32_t can_handle_index)
 
 
 		//TODO @ANDI Add Debug thingi
-#ifdef CAN_DEBUG
+#ifdef CAN_DEBUG_RECEIVE
 		Serial_PutString("FDCAN ");
 		Serial_PrintInt(can_handle_index + 1);
 		Serial_PrintString("FIFO 0:  ");
@@ -444,7 +444,7 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 
 
 	//TODO @ANDI Move to Debug_Print or something like that
-#ifdef CAN_DEBUG
+#ifdef CAN_DEBUG_SEND
 	Serial_PrintString("CAN SEND MESSAGE");
 	Serial_PutString("message_id: ");
 	Serial_PrintInt(message_id);

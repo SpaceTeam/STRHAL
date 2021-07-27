@@ -14,7 +14,9 @@
 #define MAIN_CAN_BUS IOB_MAIN_CAN_BUS
 #endif
 #define DEBUG_CAN_BUS 1
-//#define CAN_DEBUG
+
+#define CAN_DEBUG_SEND
+//#define CAN_DEBUG_RECEIVE
 
 //#define DEFAULT_REFRESH_DIVIDER		100
 #define DEFAULT_REFRESH_DIVIDER		1
