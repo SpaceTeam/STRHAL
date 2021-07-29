@@ -92,6 +92,10 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 		if(result == NOICE) data->channel_mask |= 1<<c;
 
 	}
+#ifdef DEBUG_DATA
+	Serial_PrintString(" ");
+	Serial_PutString("0");
+#endif
 	return NOICE;//TODO
 }
 

@@ -96,11 +96,15 @@ Result_t Adc24_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 
 Result_t Adc24_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 {
-	uint32_t *out = (uint32_t *)(data + *length);
+	uint32_t *out = (uint32_t*) (data + *length);
 	int32_t new_data = Ads131_GetData(ch_id);
 	if (new_data == ADS131_NO_NEW_DATA)
 		return OOF_NO_NEW_DATA;
 	*out = new_data;
+#ifdef DEBUG_DATA
+	Serial_PutInt(new_data);
+	Serial_PutString(", ");
+#endif
 	*length += ADC24_DATA_N_BYTES;
 	return NOICE;
 }
