@@ -45,13 +45,7 @@ void TMC4671_highLevel_init(void)
 	// ABN encoder settings
 	tmc4671_writeInt(TMC4671_ABN_DECODER_MODE, 0); // standard polarity and count direction, don't clear at n pulse
 	tmc4671_writeInt(TMC4671_ABN_DECODER_PPR, 2048); // decoder pulses per revolution
-	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, 0); // decoder angle 0 FIXME: writing anything else doesn't work but writing current angle would allow for more elegant solution. 3 lines below could be deleted, see git history
-	//uint16_t angle_current = (as5147_getAngle(drv) << 5);  // current decoder angle
-	//swdriver[drv].ofs_enc_phim += angle_current;
-	//tmc4671_writeInt(TMC4671_ABN_DECODER_PHI_E_PHI_M_OFFSET, ((swdriver[drv].ofs_phim_phie << TMC4671_ABN_DECODER_PHI_E_OFFSET_SHIFT) & 0xFFFF0000) | ((swdriver[drv].ofs_enc_phim << TMC4671_ABN_DECODER_PHI_M_OFFSET_SHIFT) & 0x0000FFFF));
-	//tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (int32_t)swdriver[drv].ofs_enc_phim); // set position to current position
-	//tmc4671_writeInt(TMC4671_ABN_DECODER_PHI_E_PHI_M_OFFSET, ((0 << TMC4671_ABN_DECODER_PHI_E_OFFSET_SHIFT) & 0xFFFF0000) | ((0 << TMC4671_ABN_DECODER_PHI_M_OFFSET_SHIFT) & 0x0000FFFF));
-	//tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (int32_t)0); // set position to current position
+	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, 0); // decoder angle 0 FIXME: writing anything else doesn't work
 	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, 0);
 
 	// Feedback selection
@@ -63,16 +57,16 @@ void TMC4671_highLevel_init(void)
 	tmc4671_writeInt(TMC4671_PIDOUT_UQ_UD_LIMITS, 23169); // UQ/UD limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_TORQUE_FLUX_TARGET_DDT_LIMITS, 32767); // torque/flux ddt limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_TORQUE_FLUX_LIMITS, 10000); // torque/flux limit 20A TODO optimize
-	tmc4671_writeInt(TMC4671_PID_ACCELERATION_LIMIT, 10000); // acceleration limit TODO optimize
-	tmc4671_writeInt(TMC4671_PID_VELOCITY_LIMIT, 10000); // velocity limit TODO optimize
-	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_LOW, -655335); // position lower limit -1 turn TODO optimize
-	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_HIGH, 2359260); // position upper limit, 36 turns  TODO optimize
+	tmc4671_writeInt(TMC4671_PID_ACCELERATION_LIMIT, 1000); // acceleration limit TODO optimize
+	tmc4671_writeInt(TMC4671_PID_VELOCITY_LIMIT, 5000); // velocity limit TODO optimize
+	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_LOW, INT32_MIN); // position lower limit
+	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_HIGH, INT32_MAX); // position upper limit
 
 	// PI settings
 	tmc4671_writeInt(TMC4671_PID_FLUX_P_FLUX_I, (100 << TMC4671_PID_FLUX_P_SHIFT) | (1000 << TMC4671_PID_FLUX_I_SHIFT)); // flux PI TODO optimize
 	tmc4671_writeInt(TMC4671_PID_TORQUE_P_TORQUE_I, (100 << TMC4671_PID_TORQUE_P_SHIFT) | (1000 << TMC4671_PID_TORQUE_I_SHIFT)); // torque PI TODO optimize
-	tmc4671_writeInt(TMC4671_PID_VELOCITY_P_VELOCITY_I, (5000 << TMC4671_PID_VELOCITY_P_SHIFT) | (10000 << TMC4671_PID_VELOCITY_I_SHIFT)); // velocity PI TODO optimize
-	tmc4671_writeInt(TMC4671_PID_POSITION_P_POSITION_I, (500 << TMC4671_PID_POSITION_P_SHIFT) | (0 << TMC4671_PID_POSITION_I_SHIFT)); // position PI TODO optimize
+	tmc4671_writeInt(TMC4671_PID_VELOCITY_P_VELOCITY_I, (2000 << TMC4671_PID_VELOCITY_P_SHIFT) | (4000 << TMC4671_PID_VELOCITY_I_SHIFT)); // velocity PI TODO optimize
+	tmc4671_writeInt(TMC4671_PID_POSITION_P_POSITION_I, (200 << TMC4671_PID_POSITION_P_SHIFT) | (0 << TMC4671_PID_POSITION_I_SHIFT)); // position PI TODO optimize
 
 	// // Actual Velocity Biquad settings (lowpass 2nd order, f=500, d=1.0)
 	// tmc4671_writeInt(TMC4671_CONFIG_ADDR, 9); // biquad_v_a_1
@@ -133,6 +127,9 @@ void TMC4671_highLevel_init(void)
 	tmc4671_writeInt( TMC4671_CONFIG_ADDR, 7); // biquad_x_enable
 	tmc4671_writeInt( TMC4671_CONFIG_DATA, 1);
 	tmc4671_writeInt( TMC4671_CONFIG_ADDR, 0); //none
+
+	//brake chopper
+	tmc4671_writeInt(TMC4671_ADC_VM_LIMITS, (0 << 16) | (0)); // TODO
 }
 
 void TMC4671_highLevel_pwmOff(void)
@@ -195,6 +192,12 @@ uint16_t TMC4671_getAdcRaw1(void)
 {
 	tmc4671_writeInt( TMC4671_ADC_RAW_ADDR, 0);
 	return (tmc4671_readInt( TMC4671_ADC_RAW_DATA) >> 16) & 0xFFFF;
+}
+
+uint16_t TMC4671_getVmRaw(void)
+{
+	tmc4671_writeInt( TMC4671_ADC_RAW_ADDR, 1);
+	return tmc4671_readInt(TMC4671_ADC_RAW_DATA) & 0xFFFF;
 }
 
 void TMC4671_highLevel_initEncoder(void)

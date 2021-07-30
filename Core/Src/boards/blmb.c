@@ -214,6 +214,7 @@ void BLMB_main(void)
 		if (tick - old_tick >= 1000)
 		{
 			old_tick = tick;
+			Serial_PrintHex(TMC4671_getVmRaw());
 			Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
 			Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));
 			Serial_PrintInt(tick);

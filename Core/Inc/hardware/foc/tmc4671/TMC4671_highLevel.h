@@ -22,6 +22,8 @@ void TMC4671_highLevel_setPosition(int32_t position);
 void TMC4671_highLevel_printOffsetAngle();
 uint16_t TMC4671_getAdcRaw0();
 uint16_t TMC4671_getAdcRaw1();
+uint16_t TMC4671_getVmRaw(void);
+
 void TMC4671_highLevel_initEncoder();
 
 void TMC4671_highLevel_initEncoder_new();
