@@ -65,11 +65,13 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 			GPIO_Pin_t *enable = channel->channel.digital_out.enable_pin;
 			if (set_msg->value == 0)
 			{
-				LL_GPIO_ResetOutputPin(enable->port,enable->pin);
+				LL_GPIO_ResetOutputPin(enable->port, enable->pin);
 			}
-			else if (set_msg->value == 0xFFFFFFFF)
+			else if (set_msg->value == 0xFFFF)
 			{
-				LL_GPIO_SetOutputPin(enable->port,enable->pin);
+				Serial_PrintString("SUCCESS");
+				Serial_PrintInt(channel->id);
+				LL_GPIO_SetOutputPin(enable->port, enable->pin);
 			}
 			else
 			{
@@ -118,13 +120,12 @@ Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_O
 	char serial_str[20] =
 	{ 0 };
 
-	sprintf(serial_str,"%d, ", *var);
+	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
+	sprintf(serial_str, "%d,", *var);
 	Serial_PutString(serial_str);
-
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
-
 
 Result_t DigitalOut_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {
@@ -145,4 +146,27 @@ Result_t DigitalOut_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data,
 		default:
 			return OOF_UNKNOWN_CMD;
 	}
+}
+
+static Result_t DigitalOut_GetRawData(uint8_t channel_id, uint16_t *data)
+{
+	*data = (uint16_t) *node.channels[channel_id].channel.digital_out.analog_in;
+	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
+	return NOICE;
+}
+
+Result_t DigitalOut_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
+{
+	uint16_t *out = (uint16_t*) (data + *length);
+	uint16_t new_data;
+	Result_t result = DigitalOut_GetRawData(ch_id, &new_data);
+	if (result != NOICE)
+		return result;
+	*out = new_data;
+#ifdef DEBUG_DATA
+	Serial_PutInt(new_data);
+	Serial_PutString(", ");
+#endif
+	(*length) += DIGITAL_OUT_DATA_N_BYTES;
+	return NOICE;
 }

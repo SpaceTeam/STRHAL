@@ -20,6 +20,7 @@ extern "C" {
 #include "stm32h7xx_ll_gpio.h"
 #include "stm32h7xx_ll_spi.h"
 #include <can_def.h>
+#include "git_version.h"
 
 #include "board_config.h"
 
@@ -37,8 +38,6 @@ void Error_Handler(void);
 #define NVIC_PRIORITYGROUP_4         ((uint32_t)0x00000003) /*!< 4 bits for pre-emption priority,
                                                                  0 bit  for subpriority */
 #endif
-
-#define NODE_ID 12//TODO READ FROM DIPSWITCH
 
 typedef enum
 {

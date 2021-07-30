@@ -15,7 +15,7 @@
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
-				.generic_channel = { 0 },
+				.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 					{
 							{ 0, CHANNEL_TYPE_UNKNOWN, {{0}} },
@@ -46,13 +46,13 @@ IOB_Pins_t iob_channels[] =
 	[ 7] = {{GPIOA, LL_GPIO_PIN_15}, {GPIOC,LL_GPIO_PIN_12}, {GPIOA, LL_GPIO_PIN_1}},
 	[ 8] = {{GPIOE, LL_GPIO_PIN_13}, {GPIOB,LL_GPIO_PIN_15}, {GPIOA, LL_GPIO_PIN_2}},
 	[ 9] = {{GPIOC,  LL_GPIO_PIN_6}, {GPIOD,LL_GPIO_PIN_15}, {GPIOA, LL_GPIO_PIN_3}},
-	[10] = {{GPIOC,  LL_GPIO_PIN_8}, {GPIOC, LL_GPIO_PIN_8}, {GPIOA, LL_GPIO_PIN_4}},
+	[10] = {{GPIOC,  LL_GPIO_PIN_8}, {GPIOC, LL_GPIO_PIN_7}, {GPIOA, LL_GPIO_PIN_4}},
 	[11] = {{GPIOC,  LL_GPIO_PIN_9}, {GPIOA, LL_GPIO_PIN_9}, {GPIOA, LL_GPIO_PIN_5}}
 };
 
 //@formatter:on
 
-void IOB_Pins_Init(void)
+void IOB_InitPins(void)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
 	{ 0 };
@@ -69,57 +69,6 @@ void IOB_Pins_Init(void)
 		GPIO_InitStruct.Pin = iob_channels[i].select.pin;
 		LL_GPIO_Init(iob_channels[i].select.port, &GPIO_InitStruct);
 	}
-}
-
-const CHANNEL_TYPE channel_lookup[4] =
-{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16,			//PT100
-		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
-
-void Node_Init(void)
-{
-	IOB_Pins_Init();
-
-	LL_GPIO_InitTypeDef GPIO_InitStruct =
-	{ 0 };
-	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-
-	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-	{
-		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
-		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
-		node.channels[i].type = channel_lookup[type_index];
-
-		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
-		switch (channel_lookup[type_index])
-		{
-			case CHANNEL_TYPE_DIGITAL_OUT:
-				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
-				break;
-			default:
-				break;
-		}
-
-		// set enable pin as output
-		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
-		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
-	}
-
-	// Read dipswitches and set node id accordingly
-
-	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-
-	for (int i = 0; i < 8; i++)
-	{
-		// set enable dipswitch pin as input
-		GPIO_InitStruct.Pin = 0x1UL << i;
-		LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-	}
-
-	node.node_id = NodeID_Get();
 }
 
 void IOB_InitAdc(void)
@@ -143,65 +92,120 @@ void IOB_InitAdc(void)
 			case CHANNEL_TYPE_ADC16:
 				node.channels[i].channel.adc16.analog_in = Adc_AddRegularChannel(i);
 				break;
+			case CHANNEL_TYPE_ADC16_SINGLE:
+			{
+				AdcSingleData_t *single_data = Adc_AddSingleChannel(i);
+				node.channels[i].channel.adc16single.analog_in = single_data->data;
+				node.channels[i].channel.adc16single.last_measurement = single_data->last_measurement;
+				break;
+			}
 			default:
 				break;
 		}
 	}
-	//node.channels[5].channel.digital_out.analog_in = Adc_AddRegularChannel(ANALOG_IN_6);
 	Adc_Calibrate();
 	Adc_StartAdc();
+}
+const CHANNEL_TYPE channel_lookup[4] =
+{ CHANNEL_TYPE_DIGITAL_OUT, CHANNEL_TYPE_ADC16_SINGLE,			//PT100
+		CHANNEL_TYPE_ADC16, CHANNEL_TYPE_ADC16 };
+
+void IOB_Init(void)
+{
+	IOB_InitPins();
+
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+
+	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+	{
+		uint8_t type_index = LL_GPIO_IsInputPinSet(iob_channels[i].select.port, iob_channels[i].select.pin);
+		type_index |= LL_GPIO_IsInputPinSet(iob_channels[i].enable.port, iob_channels[i].enable.pin) << 1;
+		node.channels[i].type = channel_lookup[type_index];
+
+		// assign enable pin that is needed within the channel, switch is used in case other channels also need such assignments
+		switch (channel_lookup[type_index])
+		{
+			case CHANNEL_TYPE_DIGITAL_OUT:
+				node.channels[i].channel.digital_out.enable_pin = &iob_channels[i].enable;
+				break;
+			case CHANNEL_TYPE_ADC16_SINGLE:
+				node.channels[i].channel.adc16single.enable_pin = &iob_channels[i].enable;
+				break;
+			default:
+				break;
+		}
+
+		// set enable pin as output
+		GPIO_InitStruct.Pin = iob_channels[i].enable.pin;
+		LL_GPIO_Init(iob_channels[i].enable.port, &GPIO_InitStruct);
+	}
+	IOB_InitAdc();
+}
+
+void IOB_TIM2_IRQHandler(void)
+{
+
 }
 
 void IOB_main(void)
 {
 	uint64_t tick = 0, old_tick = 0;
 
-	Node_Init();
-	IOB_InitAdc();
+	IOB_Init();
 
 	char serial_str[1000] =
 	{ 0 };
 
-	sprintf(serial_str, "Node ID: %ld", node.node_id);
-	Serial_PrintString(serial_str);
+	 //TODO @ANDI DEBUG ....
+
+	 sprintf(serial_str, "Node ID: %ld", node.node_id);
+	 Serial_PrintString(serial_str);
 
 	for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 	{
 		sprintf(serial_str, "Channel: %d -> %d", node.channels[i].id, node.channels[i].type);
 		Serial_PrintString(serial_str);
 	}
-	uint8_t flag = 0;
-
-	GetMsg_t getmsg;
-
+	GetMsg_t data;
 	while (1)
 	{
 		tick = Systick_GetTick();
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
-		Can_checkFifo(1);
+		Can_checkFifo(DEBUG_CAN_BUS);
 
-		if (tick - old_tick > 100)
+		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
-
-			Serial_PutInt(*node.generic_channel.bus2_voltage);
-			Serial_PutString(", ");
-			for (int i = 0; i < 6; i++)
+/*
+			for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 			{
-				if (node.channels[i].type == CHANNEL_TYPE_DIGITAL_OUT)
+				switch (node.channels[i].type)
 				{
-					getmsg.variable_id = DIGITAL_OUT_MEASUREMENT;
-					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
-				}
-				else
-				{
-					getmsg.variable_id = ADC16_MEASUREMENT;
-					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &getmsg, 0);
+				case CHANNEL_TYPE_DIGITAL_OUT:
+					data.variable_id = DIGITAL_OUT_MEASUREMENT;
+					DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+					break;
+				case CHANNEL_TYPE_ADC16_SINGLE:
+					data.variable_id = ADC16_SINGLE_DATA;
+					Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+					break;
+				case CHANNEL_TYPE_ADC16:
+					data.variable_id = ADC16_MEASUREMENT;
+					Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+					break;
+				default:
+					break;
 				}
 			}
-			Serial_PrintString("");
 
+			Serial_PrintString(" ");
+*/
 		}
 
 		if (Serial_CheckInput(serial_str))
@@ -214,34 +218,42 @@ void IOB_main(void)
 			msg.variable_id = DIGITAL_OUT_DUTY_CYCLE;
 			uint32_t i = atoi(serial_str);
 
-			switch (i)
+			if (strlen(serial_str) > 4)
 			{
-				case 1:
-					msg.value = 0x0;
-					DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
-					Serial_PrintString("6 OFF");
-					break;
-				case 2:
-					msg.value = 0xFFFFFFFF;
-					DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
-					Serial_PrintString("6 ON");
-					break;
-				case 3:
-					msg.value = 0x0;
-					DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
-					break;
-				case 4:
-					msg.value = 0xFFFFFFFF;
-					DigitalOut_ProcessMessage(2, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
-					break;
-				default:
+				if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
+					Serial_PrintString("message sent\n");
+				else
+					Serial_PrintString("FOCK\n");
 
-					if (strlen(serial_str) > 4)
-					{
-						if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
-							Serial_PrintString("message sent\n");
-						else
-							Serial_PrintString("FOCK\n");
+			}
+			else if (strlen(serial_str) > 3)
+			{
+				msg.value = 0x0;
+				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
+			}
+			else if (strlen(serial_str) > 2)
+			{
+				msg.value = 0xFFFFFFFF;
+				DigitalOut_ProcessMessage(5, DIGITAL_OUT_REQ_SET_VARIABLE, (uint8_t*) &msg, 0);
+			}
+			else
+			{
+
+				Can_MessageId_t message_id =
+				{ 0 };
+				message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
+				message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
+				message_id.info.node_id = node.node_id;
+				message_id.info.priority = STANDARD_PRIORITY;
+
+				Can_MessageData_t data =
+				{ 0 };
+				data.bit.info.channel_id = GENERIC_CHANNEL_ID;
+				data.bit.info.buffer = DIRECT_BUFFER;
+
+				data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
+				GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
+				getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
 
 					}
 					else

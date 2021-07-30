@@ -22,6 +22,7 @@ uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_
 	{
 		case ADC16_MEASUREMENT:
 			readonly_var = *adc16->analog_in;
+			///readonly_var = (adc16->is_single) ? adc16->data : *adc16->analog_in;
 			return &readonly_var;
 		case ADC16_REFRESH_DIVIDER:
 			return NULL;
@@ -74,12 +75,13 @@ Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs res
 		return OOF;
 	set_msg->variable_id = get_msg->variable_id;
 	set_msg->value = *var;
+
+	//TODO @ANDI Move to Debug_PrintInt or something like that
 	char serial_str[20] =
 	{ 0 };
-
-	sprintf(serial_str,"%d, ", *var);
+	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
+	sprintf(serial_str, "%d,", *var);
 	Serial_PutString(serial_str);
-
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
@@ -108,7 +110,26 @@ Result_t Adc16_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 	}
 }
 
-/*Result_t Adc16_GetData(uint8_t ch_id, int32_t *data, uint32_t *length)
+static Result_t Adc16_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	return OOF;
-}*/
+	*data = (uint16_t) *node.channels[channel_id].channel.adc16.analog_in;
+	//TODO @ANDI if (No new data and/or refresh divider count)  return OOF_NO_NEW_DATA;
+	return NOICE;
+}
+
+Result_t Adc16_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
+{
+	uint16_t *out = (uint16_t*) (data + *length);
+	uint16_t new_data;
+	Result_t result = Adc16_GetRawData(ch_id, &new_data);
+
+	if (result != NOICE)
+		return result;
+	*out = new_data;
+#ifdef DEBUG_DATA
+	Serial_PutInt(new_data);
+	Serial_PutString(", ");
+#endif
+	(*length) += ADC16_DATA_N_BYTES;
+	return NOICE;
+}

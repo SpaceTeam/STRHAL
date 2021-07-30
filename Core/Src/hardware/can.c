@@ -171,12 +171,10 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	// CCCR.ASM  |   0    |     1      |     0      |    0     |    0
 
 	// Set the nominal bit timing register
-	can->NBTP = ((((uint32_t) CAN_NOMINAL_SYNC_JUMP_WIDTH - 1U) << FDCAN_NBTP_NSJW_Pos) | (((uint32_t) CAN_NOMINAL_TIMESEG_1 - 1U) << FDCAN_NBTP_NTSEG1_Pos)
-			| (((uint32_t) CAN_NOMINAL_TIMESEG_2 - 1U) << FDCAN_NBTP_NTSEG2_Pos) | (((uint32_t) CAN_NOMINAL_PRESCALER - 1U) << FDCAN_NBTP_NBRP_Pos));
+	can->NBTP = ((((uint32_t) CAN_NOMINAL_SYNC_JUMP_WIDTH - 1U) << FDCAN_NBTP_NSJW_Pos) | (((uint32_t) CAN_NOMINAL_TIMESEG_1 - 1U) << FDCAN_NBTP_NTSEG1_Pos) | (((uint32_t) CAN_NOMINAL_TIMESEG_2 - 1U) << FDCAN_NBTP_NTSEG2_Pos) | (((uint32_t) CAN_NOMINAL_PRESCALER - 1U) << FDCAN_NBTP_NBRP_Pos));
 
 	// Bit Rate Switching Enable
-	can->DBTP = ((((uint32_t) CAN_DATA_SYNC_JUMP_WIDTH - 1U) << FDCAN_DBTP_DSJW_Pos) | (((uint32_t) CAN_DATA_TIMESEG_1 - 1U) << FDCAN_DBTP_DTSEG1_Pos)
-			| (((uint32_t) CAN_DATA_TIMESEG_2 - 1U) << FDCAN_DBTP_DTSEG2_Pos) | (((uint32_t) CAN_DATA_PRESCALER - 1U) << FDCAN_DBTP_DBRP_Pos));
+	can->DBTP = ((((uint32_t) CAN_DATA_SYNC_JUMP_WIDTH - 1U) << FDCAN_DBTP_DSJW_Pos) | (((uint32_t) CAN_DATA_TIMESEG_1 - 1U) << FDCAN_DBTP_DTSEG1_Pos) | (((uint32_t) CAN_DATA_TIMESEG_2 - 1U) << FDCAN_DBTP_DTSEG2_Pos) | (((uint32_t) CAN_DATA_PRESCALER - 1U) << FDCAN_DBTP_DBRP_Pos));
 
 	if (CAN_TX_FIFO_QUEUE_ELMTS_NUMBER > 0U)	// Select between Tx FIFO and Tx Queue operation modes
 		SET_BIT(can->TXBC, CAN_TX_FIFO_QUEUE_MODE);
@@ -220,8 +218,7 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 		can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	if (can == FDCAN2)	//Accept everything
-		can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)
-				| (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+		can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
 
 	//Can Start
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_INIT);
@@ -310,7 +307,7 @@ Result_t Can_Init(uint8_t node_id)
 	Can_AddStdFilter(MAIN_CAN_BUS, 1, mask.uint32, id.uint32, FDCAN_FILTER_TO_RXFIFO0);
 
 	//TODO: remove for Debugging only
-	result = Can_InitFdcan(1);
+	result = Can_InitFdcan(DEBUG_CAN_BUS);
 	if (result != NOICE)
 		return result;
 
@@ -339,9 +336,12 @@ void Can_checkFifo(uint32_t can_handle_index)
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
 
+
+		//TODO @ANDI Add Debug thingi
+#ifdef CAN_DEBUG_RECEIVE
 		Serial_PutString("FDCAN ");
 		Serial_PrintInt(can_handle_index + 1);
-		Serial_PrintString("FIFO 1:  ");
+		Serial_PrintString("FIFO 0:  ");
 
 		Serial_PutString("id:  ");
 		Serial_PrintInt(id.uint32);
@@ -362,6 +362,7 @@ void Can_checkFifo(uint32_t can_handle_index)
 			Serial_PutString("  ");
 			Serial_PrintHex(data.uint8[c]);
 		}
+#endif
 
 		Ui_ProcessCanMessage(id, &data, length);
 
@@ -378,6 +379,10 @@ void Can_checkFifo(uint32_t can_handle_index)
 		uint32_t dlc = can_ram->rx_fifo1[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo1[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
+
+
+		/*
+		//TODO @ANDI Add Debug thingi
 		Serial_PutString("FDCAN ");
 		Serial_PrintInt(can_handle_index + 1);
 		Serial_PrintString("FIFO 1:  ");
@@ -401,6 +406,9 @@ void Can_checkFifo(uint32_t can_handle_index)
 			Serial_PutString("  ");
 			Serial_PrintHex(data.uint8[c]);
 		}
+		*/
+
+
 		//Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF1A = get_index & 0x3F;
@@ -432,6 +440,24 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 		packet->data.uint32[i++] = data[c] | data[c + 1] << 8 | data[c + 2] << 16 | data[c + 3] << 24;
 	while (i < Can_DlcToLength[Can_LengthToDlc[length]] / 4)
 		packet->data.uint32[i++] = 0;
+
+
+
+	//TODO @ANDI Move to Debug_Print or something like that
+#ifdef CAN_DEBUG_SEND
+	Serial_PrintString("CAN SEND MESSAGE");
+	Serial_PutString("message_id: ");
+	Serial_PrintInt(message_id);
+
+	for (uint32_t c = 0; c < length; c++)
+	{
+		Serial_PutInt(c);
+		Serial_PutString(":  ");
+		Serial_PutInt(packet->data.uint8[c]);
+		Serial_PutString("  ");
+		Serial_PrintHex(packet->data.uint8[c]);
+	}
+#endif
 
 	can->TXBAR = (1 << index);
 

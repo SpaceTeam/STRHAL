@@ -16,5 +16,6 @@ typedef struct
 } DigitalOut_Channel_t;
 
 Result_t DigitalOut_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
+Result_t DigitalOut_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length);
 
 #endif

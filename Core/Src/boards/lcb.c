@@ -13,7 +13,7 @@
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
-				.generic_channel = { 0 },
+				.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 					{
 							{ 0, CHANNEL_TYPE_ADC24, {{0}} },
@@ -37,6 +37,11 @@ void LCB_InitAdc(void)
 	node.generic_channel.power_current = Adc_AddRegularChannel(SUPPLY_CURRENT_SENSE);
 	Adc_Calibrate();
 	Adc_StartAdc();
+}
+
+void LCB_TIM2_IRQHandler(void)
+{
+
 }
 
 void LCB_main(void)
