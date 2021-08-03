@@ -206,8 +206,8 @@ void BLMB_main(void)
 	{
 		tick = Systick_GetTick();
 		Speaker_Update(tick);
-		Can_checkFifo(LCB_MAIN_CAN_BUS);
-		Can_checkFifo(1);
+		Can_checkFifo(BLMB_MAIN_CAN_BUS);
+		Can_checkFifo(DEBUG_CAN_BUS);
 
 		TMC4671_highLevel_setPosition((int32_t)(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set * BLMB_REDUCTION));
 
