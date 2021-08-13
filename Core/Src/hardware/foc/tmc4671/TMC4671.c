@@ -15,7 +15,7 @@
 #define STATE_ESTIMATE_OFFSET  3
 
 // spi access
-int32_t tmc4671_readInt(uint8_t address)
+uint32_t tmc4671_readInt(uint8_t address)
 {
 	uint8_t txData[5] = {0};
 	txData[0] = TMC_ADDRESS(address);
@@ -30,7 +30,7 @@ int32_t tmc4671_readInt(uint8_t address)
 	if(SPI_Transmit_Receive(swdriver.spi, txData, rxData, 5) != NOICE) Serial_PrintString("fack");
 	swdriver_setCsnController(true);
 
-	return (int)((rxData[1] << 24) | (rxData[2] << 16) | (rxData[3] << 8) | (rxData[4] << 0));
+	return (uint32_t)((rxData[1] << 24) | (rxData[2] << 16) | (rxData[3] << 8) | (rxData[4] << 0));
 }
 
 void tmc4671_writeInt(uint8_t address, int32_t value)

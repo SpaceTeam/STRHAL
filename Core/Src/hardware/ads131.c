@@ -87,8 +87,8 @@ Result_t Ads131_ReadRegisters(uint32_t reg, uint32_t n, int32_t data[])
 	{ 0 };
 	uint32_t tickstart = 0;
 
-	Result_t result = SPI_Transmit_Receive(SPI1, txData1, rxData, 1);
-	Result_t result2 = SPI_Transmit_Receive(SPI1, txData2, data, n + 1);
+	Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t *) txData1, (uint8_t *) rxData, 1);
+	Result_t result2 = SPI_Transmit_Receive(SPI1, (uint8_t *) txData2, (uint8_t *) data, n + 1);
 
 	tickstart = Systick_GetTick();
 	while ((LL_GPIO_ReadInputPort(ADS_nDRDY_GPIO_Port) & ADS_nDRDY_Pin) == 0UL)
@@ -122,7 +122,7 @@ Result_t Ads131_UpdateData(void)
 		int32_t rxData[9] =
 		{ 0 };
 
-		Result_t result = SPI_Transmit_Receive(SPI1, txData, rxData, 9);
+		Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t *) txData, (uint8_t *) rxData, 9);
 
 		status = rxData[0];
 		for (uint8_t ch = 0; ch < 8; ch++)

@@ -47,7 +47,8 @@ void BLMB_InitFoc(void)
 	LL_TIM_EnableCounter(TIM4);
 	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH3);
 
-	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
+	//SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
+	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV256);
 
 	Systick_BusyWait(100);
 	tmc6200_highLevel_init();
@@ -185,6 +186,7 @@ void BLMB_InitEXTI(void)
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
+
 void BLMB_main(void)
 {
 	uint64_t tick = 0;
@@ -192,12 +194,11 @@ void BLMB_main(void)
 
 	BLMB_InitGPIO(); // button inputs, status inputs, chip select outputs
 
-	BLMB_InitAdc(); // power supply monitoring TODO why here and not in main.c?
+	BLMB_InitAdc();
+	BLMB_InitFoc();
 
-	BLMB_InitFoc(); // motor control
 
 	BLMB_InitEXTI(); // button interrupts
-
 	BLMB_InitTIM(); // button handling timers
 
 	char serial_str[1000] = { 0 };
@@ -214,17 +215,29 @@ void BLMB_main(void)
 		if (tick - old_tick >= 1000)
 		{
 			old_tick = tick;
-			Serial_PrintHex(TMC4671_getVmRaw());
-			Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
-			Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));
-			Serial_PrintInt(tick);
-			Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
-			Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
+			Serial_PutString(", ");
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
+			Serial_PutString(", ");
+			Serial_PrintInt(TMC4671_getVmRaw());
+
+
+
+			//Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
+			//Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));
+			//Serial_PrintInt(tick);
+			//Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
+			//Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
 		}
 		if (Serial_CheckInput(serial_str))
 		{
 			Serial_PrintString(serial_str);
-			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = atoi(serial_str);
+			uint32_t input = atoi(serial_str);
+/*			if(input == 0)
+				TMC4671_highLevel_pwmOff();
+			else
+				TMC4671_highLevel_positionMode2();*/
+			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = input;
 		}
 	}
 }
