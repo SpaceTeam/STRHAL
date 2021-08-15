@@ -4,5 +4,6 @@
 
 void PWM_InitPwmIn(void);
 
+uint16_t PWM_GetPWM(void);
 
 #endif

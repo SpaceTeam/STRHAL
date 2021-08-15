@@ -45,7 +45,7 @@ void TMC4671_highLevel_init(void)
 	// ABN encoder settings
 	tmc4671_writeInt(TMC4671_ABN_DECODER_MODE, 0); // standard polarity and count direction, don't clear at n pulse
 	tmc4671_writeInt(TMC4671_ABN_DECODER_PPR, 2048); // decoder pulses per revolution
-	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, 0); // decoder angle 0 FIXME: writing anything else doesn't work
+	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT_N, 0); // decoder angle 0 FIXME: writing anything else doesn't work
 	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, 0);
 
 	// Feedback selection
@@ -57,7 +57,7 @@ void TMC4671_highLevel_init(void)
 	tmc4671_writeInt(TMC4671_PIDOUT_UQ_UD_LIMITS, 23169); // UQ/UD limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_TORQUE_FLUX_TARGET_DDT_LIMITS, 32767); // torque/flux ddt limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_TORQUE_FLUX_LIMITS, 10000); // torque/flux limit 20A TODO optimize
-	tmc4671_writeInt(TMC4671_PID_ACCELERATION_LIMIT, 1000); // acceleration limit TODO optimize
+	tmc4671_writeInt(TMC4671_PID_ACCELERATION_LIMIT, 100); // acceleration limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_VELOCITY_LIMIT, 5000); // velocity limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_LOW, INT32_MIN); // position lower limit
 	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_HIGH, INT32_MAX); // position upper limit
@@ -176,7 +176,7 @@ void TMC4671_highLevel_printOffsetAngle(void)
 	char string[64];
 	// uint16_t angle = as5147_getAngle(drv); // will be printed as int16!!!
 	// uint16_t len = snprintf(string, 64, "\n\rdriver %d encoder zero angle: %d (11bit) %d (16bit)\n\r",  angle, (int16_t)(angle << 5));
-	uint16_t angle = as5147_getAngle(0); // will be printed as int16!!!
+	uint16_t angle = AS5x47_GetAngle(0); // will be printed as int16!!!
 	snprintf(string, 64, "\n\rencoder zero angle: %d (16bit)\n\r", angle);
 	Serial_PutString(string);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (0 << TMC4671_UD_EXT_SHIFT)); // ud=0 uq=0
@@ -222,7 +222,7 @@ void TMC4671_highLevel_initEncoder_new(void)
 	tmc4671_writeInt( TMC4671_PHI_E_EXT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (2500 << TMC4671_UD_EXT_SHIFT));
 	Systick_BusyWait(2000);
-	uint16_t angle = as5147_getAngle(0);
+	uint16_t angle = AS5x47_GetAngle(0);
 	tmc4671_writeInt( TMC4671_ABN_DECODER_COUNT, 0);
 	tmc4671_writeInt( TMC4671_UQ_UD_EXT, (0 << TMC4671_UQ_EXT_SHIFT) | (0 << TMC4671_UD_EXT_SHIFT)); // ud=0 uq=0
 	tmc4671_writeInt( TMC4671_MODE_RAMP_MODE_MOTION, 0);

@@ -4,8 +4,16 @@
 
 #include <stdint.h>
 
+#include "foc/as5147.h"
+#include "foc/swdriver.h"
+#include "spi.h"
+#include "systick.h"
 
-uint16_t as5147_getAngle(uint8_t drv);
+void AS5x47_SendWord(uint8_t enc, uint16_t address, uint16_t data);
+uint16_t AS5x47_ReceiveWord(uint8_t enc, uint16_t address);
+
+void AS5x47_Init(uint8_t enc);
+uint16_t AS5x47_GetAngle(uint8_t enc);
 
 
 #endif /* AS5147_H_ */

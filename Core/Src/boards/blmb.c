@@ -16,6 +16,7 @@
 #include "generic_channel.h"
 #include "systick.h"
 #include "ui.h"
+#include "pwm.h"
 #include "tim.h"
 #include <string.h>
 
@@ -50,6 +51,9 @@ void BLMB_InitFoc(void)
 	//SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
 	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV256);
 
+	//AS5x47_Init(BLMB_POSITION_ENCODER);
+	AS5x47_Init(BLMB_MOTOR_ENCODER);
+
 	Systick_BusyWait(100);
 	tmc6200_highLevel_init();
 	Systick_BusyWait(10);
@@ -65,9 +69,10 @@ void BLMB_InitFoc(void)
 
 	Systick_BusyWait(100);
 
-	uint16_t pos = as5147_getAngle(BLMB_POSITION_ENCODER);
-	Serial_PrintInt(pos);
-	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t)((float)(pos << 5) * BLMB_REDUCTION));
+	uint16_t pos = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
+	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, (uint32_t)pos);
+	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t)((double)(pos * BLMB_REDUCTION)));
+	tmc4671_writeInt(TMC4671_PID_POSITION_TARGET, (uint32_t)((double)(pos * BLMB_REDUCTION)));
 
 	TMC4671_highLevel_positionMode2();
 
@@ -186,7 +191,19 @@ void BLMB_InitEXTI(void)
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
+void BLMB_disableMotor(void)
+{
+	static uint16_t angle_correct_counter = 0;
+	if((abs((int32_t)TMC4671_highLevel_getPositionActual() - (int32_t)TMC4671_highLevel_getPositionTarget()) < 65535) && angle_correct_counter < 65535)
+		angle_correct_counter++;
+	else
+		angle_correct_counter = 0;
 
+	if(angle_correct_counter > 500)
+		swdriver_setEnable(false);
+	else
+		swdriver_setEnable(true);
+}
 void BLMB_main(void)
 {
 	uint64_t tick = 0;
@@ -197,7 +214,7 @@ void BLMB_main(void)
 	BLMB_InitAdc();
 	BLMB_InitFoc();
 
-
+	PWM_InitPwmIn();
 	BLMB_InitEXTI(); // button interrupts
 	BLMB_InitTIM(); // button handling timers
 
@@ -206,22 +223,34 @@ void BLMB_main(void)
 	while (1)
 	{
 		tick = Systick_GetTick();
-		Speaker_Update(tick);
+		//Speaker_Update(tick);
 		Can_checkFifo(BLMB_MAIN_CAN_BUS);
 		Can_checkFifo(DEBUG_CAN_BUS);
+		node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = PWM_GetPWM();
 
+//		TMC4671_highLevel_setPosition((int32_t)(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set * BLMB_REDUCTION));
 		TMC4671_highLevel_setPosition((int32_t)(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set * BLMB_REDUCTION));
-
-		if (tick - old_tick >= 1000)
+		BLMB_disableMotor();
+		if (tick - old_tick >= 250)
 		{
 			old_tick = tick;
+			/*
 			Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
 			Serial_PutString(", ");
-			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
+			Serial_PrintInt(PWM_GetPWM());
+			*/
+
+			Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			Serial_PutString(", ");
-			Serial_PrintInt(TMC4671_getVmRaw());
-
-
+			Serial_PutInt(PWM_GetPWM());
+			Serial_PutString(", ");
+			Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
+			Serial_PutString(", ");
+			Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
+			Serial_PutString(", ");
+			Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT_N));
+			Serial_PutString(", ");
+			Serial_PrintInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
 
 			//Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
 			//Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));

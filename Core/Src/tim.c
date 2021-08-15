@@ -1,5 +1,6 @@
 #include "tim.h"
 #include "math.h"
+/*
 void TIM1_Init(void)
 {
 
@@ -60,7 +61,7 @@ void TIM1_Init(void)
   LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }
-
+*/
 
 static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload) //TODO @Andi fix this!!
 {
