@@ -18,6 +18,16 @@ static void spiMode_reset(void)
 	Systick_BusyWait(2);
 }
 
+uint16_t AS5x47_GenEvenParity(uint16_t data)
+{
+    uint8_t xorCarry = 0;
+    for (uint8_t i = 0; i < 15; i++)
+    {
+        xorCarry = ((data >> i) & 1) ^ xorCarry;
+    }
+    return data | (xorCarry << 15);
+}
+
 void AS5x47_SendWord(uint8_t enc, uint16_t address, uint16_t data) //returns 11bit value
 {
 	spiMode_set();
