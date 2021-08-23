@@ -1,7 +1,7 @@
+#include <foc/as5x47.h>
 #include "foc/tmc4671/TMC4671_highLevel.h"
 #include "foc/tmc4671/TMC4671.h"
 #include "foc/swdriver.h"
-#include "foc/as5147.h"
 #include "systick.h"
 #include "serial.h"
 #include <stdio.h>
@@ -44,7 +44,7 @@ void TMC4671_highLevel_init(void)
 
 	// ABN encoder settings
 	tmc4671_writeInt(TMC4671_ABN_DECODER_MODE, 0); // standard polarity and count direction, don't clear at n pulse
-	tmc4671_writeInt(TMC4671_ABN_DECODER_PPR, 2048); // decoder pulses per revolution
+	tmc4671_writeInt(TMC4671_ABN_DECODER_PPR, 4096); // decoder pulses per revolution
 	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT_N, 0); // decoder angle 0 FIXME: writing anything else doesn't work
 	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, 0);
 
@@ -61,6 +61,8 @@ void TMC4671_highLevel_init(void)
 	tmc4671_writeInt(TMC4671_PID_VELOCITY_LIMIT, 5000); // velocity limit TODO optimize
 	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_LOW, INT32_MIN); // position lower limit
 	tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_HIGH, INT32_MAX); // position upper limit
+	//tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_LOW, 0); // position lower limit
+	//tmc4671_writeInt(TMC4671_PID_POSITION_LIMIT_HIGH, ((1<<14) -1) * BLMB_REDUCTION); // position upper limit
 
 	// PI settings
 	tmc4671_writeInt(TMC4671_PID_FLUX_P_FLUX_I, (100 << TMC4671_PID_FLUX_P_SHIFT) | (1000 << TMC4671_PID_FLUX_I_SHIFT)); // flux PI TODO optimize

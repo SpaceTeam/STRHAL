@@ -10,7 +10,7 @@
 #include "foc/tmc4671/TMC4671_highLevel.h"
 #include "foc/tmc4671/TMC4671.h"
 #include "foc/swdriver.h"
-#include "foc/as5147.h"
+#include <foc/as5x47.h>
 #include "spi.h"
 #include "serial.h"
 #include "generic_channel.h"
@@ -29,7 +29,10 @@ Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 				}
 				};
 //@formatter:on
-
+uint32_t BLMB_CalcMotorPos(uint32_t var)
+{
+	return (uint32_t) (BLMB_REDUCTION * (var << 2));
+}
 void BLMB_InitAdc(void)
 {
 	Adc_Init();
@@ -48,10 +51,9 @@ void BLMB_InitFoc(void)
 	LL_TIM_EnableCounter(TIM4);
 	LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH3);
 
-	//SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV128);
 	SPI1_Init(LL_SPI_DATAWIDTH_8BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_HIGH, LL_SPI_NSS_SOFT, LL_SPI_BAUDRATEPRESCALER_DIV256);
 
-	//AS5x47_Init(BLMB_POSITION_ENCODER);
+	AS5x47_Init(BLMB_POSITION_ENCODER);
 	AS5x47_Init(BLMB_MOTOR_ENCODER);
 
 	Systick_BusyWait(100);
@@ -70,9 +72,13 @@ void BLMB_InitFoc(void)
 	Systick_BusyWait(100);
 
 	uint16_t pos = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
-	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, (uint32_t)pos);
-	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, (uint32_t)((double)(pos * BLMB_REDUCTION)));
-	tmc4671_writeInt(TMC4671_PID_POSITION_TARGET, (uint32_t)((double)(pos * BLMB_REDUCTION)));
+//	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, (uint32_t) pos >> 2);
+	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, 0);
+	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, BLMB_CalcMotorPos(pos));
+	tmc4671_writeInt(TMC4671_PID_POSITION_TARGET, BLMB_CalcMotorPos(pos));
+//	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, pos);
+//	tmc4671_writeInt(TMC4671_PID_POSITION_TARGET, 0);
+
 
 	TMC4671_highLevel_positionMode2();
 
@@ -81,7 +87,8 @@ void BLMB_InitFoc(void)
 
 void BLMB_InitTIM(void)
 {
-	LL_TIM_InitTypeDef TIM_InitStruct = {0};
+	LL_TIM_InitTypeDef TIM_InitStruct =
+	{ 0 };
 
 	//TIM 5 change config mode timer
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM5);
@@ -110,7 +117,8 @@ void BLMB_InitTIM(void)
 
 void BLMB_InitGPIO(void)
 {
-	LL_GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
 
 	// button inputs
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
@@ -172,7 +180,8 @@ void BLMB_InitGPIO(void)
 
 void BLMB_InitEXTI(void)
 {
-	LL_EXTI_InitTypeDef EXTI_InitStruct = { 0 };
+	LL_EXTI_InitTypeDef EXTI_InitStruct =
+	{ 0 };
 
 	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE8);
 	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE9);
@@ -194,16 +203,17 @@ void BLMB_InitEXTI(void)
 void BLMB_disableMotor(void)
 {
 	static uint16_t angle_correct_counter = 0;
-	if((abs((int32_t)TMC4671_highLevel_getPositionActual() - (int32_t)TMC4671_highLevel_getPositionTarget()) < 65535) && angle_correct_counter < 65535)
+	if ((abs((int32_t) TMC4671_highLevel_getPositionActual() - (int32_t) TMC4671_highLevel_getPositionTarget()) < 65535) && angle_correct_counter < 65535)
 		angle_correct_counter++;
 	else
 		angle_correct_counter = 0;
 
-	if(angle_correct_counter > 500)
+	if (angle_correct_counter > 500)
 		swdriver_setEnable(false);
 	else
 		swdriver_setEnable(true);
 }
+
 void BLMB_main(void)
 {
 	uint64_t tick = 0;
@@ -218,7 +228,8 @@ void BLMB_main(void)
 	BLMB_InitEXTI(); // button interrupts
 	BLMB_InitTIM(); // button handling timers
 
-	char serial_str[1000] = { 0 };
+	char serial_str[1000] =
+	{ 0 };
 
 	while (1)
 	{
@@ -228,32 +239,35 @@ void BLMB_main(void)
 		Can_checkFifo(DEBUG_CAN_BUS);
 		node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = PWM_GetPWM();
 
-//		TMC4671_highLevel_setPosition((int32_t)(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set * BLMB_REDUCTION));
-		TMC4671_highLevel_setPosition((int32_t)(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set * BLMB_REDUCTION));
+		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set));
 		BLMB_disableMotor();
 		if (tick - old_tick >= 250)
 		{
 			old_tick = tick;
 			/*
+			 Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
+			 Serial_PutString(", ");
+			 Serial_PrintInt(PWM_GetPWM());
+
+
 			Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
 			Serial_PutString(", ");
-			Serial_PrintInt(PWM_GetPWM());
-			*/
-
-			Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
 			Serial_PutString(", ");
 			Serial_PutInt(PWM_GetPWM());
+			Serial_PutString(", ");*/
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
 			Serial_PutString(", ");
 			Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
 			Serial_PutString(", ");
-			Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
+			Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			Serial_PutString(", ");
-			Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT_N));
-			Serial_PutString(", ");
-			Serial_PrintInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
+//			Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
+//			Serial_PutString(", ");
+			//Serial_PrintInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
 
 			//Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
-			//Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));
+			Serial_PrintHex(tmc6200_readRegister(TMC6200_GSTAT));
 			//Serial_PrintInt(tick);
 			//Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
 			//Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
@@ -262,15 +276,14 @@ void BLMB_main(void)
 		{
 			Serial_PrintString(serial_str);
 			uint32_t input = atoi(serial_str);
-/*			if(input == 0)
-				TMC4671_highLevel_pwmOff();
-			else
-				TMC4671_highLevel_positionMode2();*/
+			/*			if(input == 0)
+			 TMC4671_highLevel_pwmOff();
+			 else
+			 TMC4671_highLevel_positionMode2();*/
 			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = input;
 		}
 	}
 }
-
 
 //IRQHandlers
 #define COOLDOWN_TICKS (100) //10 ms cooldown
@@ -320,7 +333,6 @@ void EXTI9_5_IRQHandler(void)
 			LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
 		}
 
-
 	}
 
 	//Select button edge detected
@@ -364,7 +376,6 @@ void EXTI9_5_IRQHandler(void)
 			LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
 		}
 
-
 	}
 }
 
@@ -391,7 +402,6 @@ void EXTI15_10_IRQHandler(void)
 
 			LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
 		}
-
 
 	}
 }
@@ -435,16 +445,12 @@ void TIM6_DAC_IRQHandler(void)
 {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM6))
 	{
-		if (LL_GPIO_IsInputPinSet(BLMB_CW_Button_GPIO_Port, BLMB_CW_Button_Pin) == SET
-				&& LL_GPIO_IsInputPinSet(BLMB_Sel_Button_GPIO_Port, BLMB_Sel_Button_Pin) == RESET
-				&& LL_GPIO_IsInputPinSet(BLMB_CCW_Button_GPIO_Port, BLMB_CCW_Button_Pin) == RESET)
+		if (LL_GPIO_IsInputPinSet(BLMB_CW_Button_GPIO_Port, BLMB_CW_Button_Pin) == SET && LL_GPIO_IsInputPinSet(BLMB_Sel_Button_GPIO_Port, BLMB_Sel_Button_Pin) == RESET && LL_GPIO_IsInputPinSet(BLMB_CCW_Button_GPIO_Port, BLMB_CCW_Button_Pin) == RESET)
 		{
 			//set bl motor position cw with blmb_speed_state
 			Speaker_Set(1000, 100, 100, 1);
 		}
-		else if (LL_GPIO_IsInputPinSet(BLMB_CW_Button_GPIO_Port, BLMB_CW_Button_Pin) == RESET
-				&& LL_GPIO_IsInputPinSet(BLMB_Sel_Button_GPIO_Port, BLMB_Sel_Button_Pin) == RESET
-				&& LL_GPIO_IsInputPinSet(BLMB_CCW_Button_GPIO_Port, BLMB_CCW_Button_Pin) == SET)
+		else if (LL_GPIO_IsInputPinSet(BLMB_CW_Button_GPIO_Port, BLMB_CW_Button_Pin) == RESET && LL_GPIO_IsInputPinSet(BLMB_Sel_Button_GPIO_Port, BLMB_Sel_Button_Pin) == RESET && LL_GPIO_IsInputPinSet(BLMB_CCW_Button_GPIO_Port, BLMB_CCW_Button_Pin) == SET)
 		{
 			//set bl motor position ccw with blmb_speed_state
 			Speaker_Set(1000, 100, 100, 2);

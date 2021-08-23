@@ -55,12 +55,21 @@ void PWM_InitPwmIn(void)
 }
 
 
-#define PWM_MIN 54440
-#define PWM_MAX 58260
+#define PWM_MIN 3675
+#define PWM_MAX 7480
+
+//50Hz
+//#define PWM_MIN 850
+//#define PWM_MAX 4500
+
+//60Hz
+//#define PWM_MIN 54440
+//#define PWM_MAX 58260
+
 #define UINT14_MAX ((1<<14) - 1)
 uint16_t PWM_GetPWM(void)
 {
-	uint32_t position = LL_TIM_IC_GetCaptureCH1(TIM1);
+	uint32_t position = LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1);
 	static double prev_pos = 0;
 	if (position < PWM_MIN)
 		position = PWM_MIN;
