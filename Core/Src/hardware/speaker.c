@@ -16,10 +16,11 @@ void Speaker_Init(void)
 {
 	LL_TIM_InitTypeDef TIM_InitStruct = {
 			0 };
+	/*
 	LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {
 			0 };
 	LL_TIM_BDTR_InitTypeDef TIM_BDTRInitStruct = {
-			0 };
+			0 };*/
 
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {
 			0 };
@@ -65,7 +66,7 @@ void Speaker_Init(void)
 	LL_TIM_BDTR_Init(TIM1, &TIM_BDTRInitStruct);
 
 */
-	/*
+
 	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOE);
 	 //TIM1 GPIO Configuration
 	 //PE8     ------> TIM1_CH1N
@@ -78,9 +79,10 @@ void Speaker_Init(void)
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 	GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
 	LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-	LL_TIM_EnableAllOutputs(TIM1);
-	*/
-	LL_TIM_EnableCounter(TIM1);
+
+	//LL_TIM_EnableAllOutputs(TIM1);
+
+//	LL_TIM_EnableCounter(TIM1);
 
 }
 

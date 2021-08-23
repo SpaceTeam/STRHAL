@@ -63,7 +63,7 @@ void TIM1_Init(void)
 }
 */
 
-static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload) //TODO @Andi fix this!!
+/*static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload) //TODO @Andi fix this!!
 {
 	double divider = (double)SystemCoreClock / rate;
 
@@ -74,7 +74,7 @@ static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *a
 
 	*prescaler = i;
 	*autoreload = n/i;
-}
+}*/
 void TIM2_Init(uint16_t rate)//TODO TEST
 {
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
