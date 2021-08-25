@@ -448,6 +448,8 @@ Result_t Can_sendMessage(uint32_t can_handle_index, uint32_t message_id, uint8_t
 	Serial_PrintString("CAN SEND MESSAGE");
 	Serial_PutString("message_id: ");
 	Serial_PrintInt(message_id);
+	Serial_PutString("dlc: ");
+	Serial_PrintInt(packet->T1.bit.DLC);
 
 	for (uint32_t c = 0; c < length; c++)
 	{

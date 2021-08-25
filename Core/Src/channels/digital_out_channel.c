@@ -58,31 +58,26 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 	switch (set_msg->variable_id)
 	{
 		case DIGITAL_OUT_STATE:
-			var = NULL; //cannot set state, read-only
-			break;
-		case DIGITAL_OUT_DUTY_CYCLE:
 		{
 			GPIO_Pin_t *enable = channel->channel.digital_out.enable_pin;
 			if (set_msg->value == 0)
 			{
 				LL_GPIO_ResetOutputPin(enable->port, enable->pin);
 			}
-			else if (set_msg->value == 0xFFFF)
+			else
 			{
 				Serial_PrintString("SUCCESS");
 				Serial_PrintInt(channel->id);
 				LL_GPIO_SetOutputPin(enable->port, enable->pin);
 			}
-			else
-			{
-				//TODO: Add PWM
-			}
-			var = &(channel->channel.digital_out.duty_cycle);
+			var = NULL;
+
 			break;
 		}
 		case DIGITAL_OUT_FREQUENCY:
 			var = &(channel->channel.digital_out.frequency);
 			break;
+		case DIGITAL_OUT_DUTY_CYCLE:
 		case DIGITAL_OUT_MEASUREMENT:
 			var = NULL; //cannot set measurement, read-only
 			break;

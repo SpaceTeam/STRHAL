@@ -114,18 +114,24 @@ Result_t Adc16Single_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data
 
 static Result_t Adc16Single_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	*data = (uint16_t)*node.channels[channel_id].channel.adc16single.last_measurement;
+	*data = (uint16_t) *node.channels[channel_id].channel.adc16single.last_measurement;
 	//TODO @ANDI if (No new data and/or refresh divider count)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }
 
 Result_t Adc16Single_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 {
-	uint16_t *out = (uint16_t *)(data + *length);
+	uint16_t *out = (uint16_t*) (data + *length);
 	uint16_t new_data;
 	Result_t result = Adc16Single_GetRawData(ch_id, &new_data);
-	if(result != NOICE) return result;
+	if (result != NOICE)
+		return result;
 	*out = new_data;
+
+#ifdef DEBUG_DATA
+	Serial_PutInt(new_data);
+	Serial_PutString(", ");
+#endif
 	(*length) += ADC16_DATA_N_BYTES;
 	return NOICE;
 }

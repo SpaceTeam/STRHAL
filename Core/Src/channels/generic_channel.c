@@ -89,14 +89,14 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 				result = OOF_NOT_IMPLEMENTED;
 				break;
 		}
-		if(result == NOICE) data->channel_mask |= 1<<c;
-
+		if (result == NOICE)
+			data->channel_mask |= 1 << c;
 	}
 #ifdef DEBUG_DATA
 	Serial_PrintString(" ");
 	Serial_PutString("0");
 #endif
-	return NOICE;//TODO
+	return NOICE; //TODO
 }
 
 Result_t Generic_Data(void)
@@ -118,6 +118,8 @@ Result_t Generic_Data(void)
 	Result_t result = Generic_GenerateDataPayload(payload, &length);
 	if (result != NOICE)
 		return result;
+	length += sizeof(uint32_t);
+
 	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, length);
 }
 Result_t Generic_SetVariable(SetMsg_t *set_msg)
