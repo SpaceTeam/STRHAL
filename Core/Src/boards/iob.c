@@ -178,11 +178,11 @@ void IOB_main(void)
 		Speaker_Update(tick);
 		Can_checkFifo(IOB_MAIN_CAN_BUS);
 		Can_checkFifo(DEBUG_CAN_BUS);
-
+/*
 		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
-/*
+
 			for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 			{
 				switch (node.channels[i].type)
@@ -205,9 +205,11 @@ void IOB_main(void)
 			}
 
 			Serial_PrintString(" ");
-*/
-		}
 
+		}
+*/
+
+		/*
 		if (Serial_CheckInput(serial_str))
 		{
 			Serial_PrintString(serial_str);
@@ -262,7 +264,7 @@ void IOB_main(void)
 				else
 					Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
 			}
-		}
+		}*/
 
 	}
 }
