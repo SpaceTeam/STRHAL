@@ -61,12 +61,12 @@ void PWM_InitPwmIn(void)
 #define PWM_MAX 7480
 
 //50Hz
-#define PWM_PERIOD_MIN 8250
-#define PWM_PERIOD_MAX 8400
+#define PWM_PERIOD_MIN50 8250
+#define PWM_PERIOD_MAX50 8400
 
 //60Hz
-//#define PWM_PERIOD_MIN 51000
-//#define PWM_PERIOD_MAX 62000
+#define PWM_PERIOD_MIN60 51000
+#define PWM_PERIOD_MAX60 62000
 //50Hz
 //#define PWM_MIN 850
 //#define PWM_MAX 4500
@@ -88,8 +88,9 @@ Result_t PWM_GetPWM(uint16_t *return_var)
 		return OOF_NO_NEW_DATA;
 
 	uint32_t period = LL_TIM_IC_GetCaptureCH2(TIM1);
-	if (period > PWM_PERIOD_MAX || period < PWM_PERIOD_MIN)
-		return OOF_NO_NEW_DATA;
+	if (period > PWM_PERIOD_MAX50 || period < PWM_PERIOD_MIN50)
+		if(period > PWM_PERIOD_MAX60 || period < PWM_PERIOD_MIN60)
+			return OOF_NO_NEW_DATA;
 
 	uint32_t position = period - LL_TIM_IC_GetCaptureCH1(TIM1);
 
