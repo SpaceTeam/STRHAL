@@ -9,6 +9,7 @@
 #include "adc24_channel.h"
 #include "digital_out_channel.h"
 #include "servo_channel.h"
+#include "pneumatic_valve_channel.h"
 
 typedef struct
 {
@@ -21,6 +22,7 @@ typedef struct
 		Adc24_Channel_t adc24;
 		DigitalOut_Channel_t digital_out;
 		Servo_Channel_t servo;
+		PneumaticValve_Channel_t pneumatic_valve;
 	} channel;
 } Channel_t;
 

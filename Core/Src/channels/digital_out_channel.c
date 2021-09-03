@@ -112,12 +112,16 @@ Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_O
 		return OOF;
 	set_msg->variable_id = get_msg->variable_id;
 	set_msg->value = *var;
+
+#ifdef DEBUG_DATA
+
 	char serial_str[20] =
 	{ 0 };
 
 	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
 	sprintf(serial_str, "%d,", *var);
 	Serial_PutString(serial_str);
+#endif
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
