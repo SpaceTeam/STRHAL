@@ -54,6 +54,8 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 			return DigitalOut_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_SERVO:
 			break;
+		case CHANNEL_TYPE_PNEUMATIC_VALVE:
+			return PneumaticValve_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_NODE_GENERIC:
 			return Generic_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_LAST:

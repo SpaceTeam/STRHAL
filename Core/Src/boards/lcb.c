@@ -10,9 +10,10 @@
 #include "systick.h"
 #include "ui.h"
 #include <string.h>
+#include "git_version.h"
 
 //@formatter:off
-Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
+Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
 				.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 					{

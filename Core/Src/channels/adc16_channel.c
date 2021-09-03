@@ -110,7 +110,7 @@ Result_t Adc16_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 	}
 }
 
-static Result_t Adc16_GetRawData(uint8_t channel_id, uint16_t *data)
+Result_t Adc16_GetRawData(uint8_t channel_id, uint16_t *data)
 {
 	*data = (uint16_t) *node.channels[channel_id].channel.adc16.analog_in;
 	//TODO @ANDI if (No new data and/or refresh divider count)  return OOF_NO_NEW_DATA;

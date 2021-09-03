@@ -1,5 +1,4 @@
 #include "pneumatic_valve_channel.h"
-#include "main.h"
 #include "channel_util.h"
 #include "channels.h"
 #include "ui.h"
@@ -13,23 +12,44 @@ Result_t PneumaticValve_Status(Channel_t *channel);
 Result_t PneumaticValve_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t PneumaticValve_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd);
 
+Result_t PneumaticValve_InitChannel(PneumaticValve_Channel_t *pneumatic_valve, uint32_t on_channel_id, uint32_t off_channel_id, uint32_t pos_channel_id)
+{
+	pneumatic_valve->enable = (pos_channel_id == 5);
+	pneumatic_valve->on_channel_id = on_channel_id;
+	pneumatic_valve->off_channel_id = off_channel_id;
+	pneumatic_valve->pos_channel_id = pos_channel_id;
+	pneumatic_valve->target_position = 40000;
+	pneumatic_valve->refresh_divider = 0;
+	pneumatic_valve->threshold = PNEUMATIC_VALVE_DEFAULT_THRESHOLD; //TODO LOAD CONFIG
+	pneumatic_valve->hysteresis = PNEUMATIC_VALVE_DEFAULT_HYSTERESIS; //TODO LOAD CONFIG
+
+	if (node.channels[on_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
+		return OOF;
+	if (node.channels[off_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
+		return OOF;
+	if (node.channels[pos_channel_id].type != CHANNEL_TYPE_ADC16)
+		return OOF;
+
+	return NOICE;
+}
+
 static uint32_t readonly_var = 0;
 uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_valve, uint8_t var_id, uint8_t ch_id)
 {
 	readonly_var = 0;
 	switch (var_id)
 	{
+		case PNEUMATIC_VALVE_ENABLE:
+			return &pneumatic_valve->enable;
 		case PNEUMATIC_VALVE_POSITION:
 			readonly_var = *node.channels[pneumatic_valve->pos_channel_id].channel.adc16.analog_in;
 			return &readonly_var;
 		case PNEUMATIC_VALVE_TARGET_POSITION:
 			return &pneumatic_valve->target_position;
-		case PNEUMATIC_VALVE_P_PARAM:
-			return &pneumatic_valve->p_param;
-		case PNEUMATIC_VALVE_I_PARAM:
-			return &pneumatic_valve->i_param;
-		case PNEUMATIC_VALVE_D_PARAM:
-			return &pneumatic_valve->d_param;
+		case PNEUMATIC_VALVE_THRESHOLD:
+			return &pneumatic_valve->threshold;
+		case PNEUMATIC_VALVE_HYSTERISIS:
+			return &pneumatic_valve->hysteresis;
 		case PNEUMATIC_VALVE_ON_CHANNEL_ID:
 			return &pneumatic_valve->on_channel_id;
 		case PNEUMATIC_VALVE_OFF_CHANNEL_ID:
@@ -45,13 +65,13 @@ uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_v
 
 Result_t PneumaticValve_ResetSettings(Channel_t *channel)
 {
-
+	Serial_PrintString("ResetSettings");
 	return OOF_NOT_IMPLEMENTED;
 }
 
 Result_t PneumaticValve_Status(Channel_t *channel)
 {
-
+	Serial_PrintString("Status");
 	return OOF_NOT_IMPLEMENTED;
 }
 
@@ -98,16 +118,19 @@ Result_t PneumaticValve_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUM
 }
 Result_t PneumaticValve_Move(Channel_t *channel, PneumaticValveMoveMsg_t *move_msg)
 {
+	Serial_PutString("Move: position: ");
+	Serial_PutInt(move_msg->position);
 
-
+	Serial_PutString(", interval: ");
+	Serial_PrintInt(move_msg->interval);
 	return OOF_NOT_IMPLEMENTED;
 }
 Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {
-	if (node.channels[ch_id].type != CHANNEL_TYPE_DIGITAL_OUT)
+	if (node.channels[ch_id].type != CHANNEL_TYPE_PNEUMATIC_VALVE)
 		return OOF_WRONG_CHANNEL_TYPE;
 	Channel_t *channel = &node.channels[ch_id];
-
+Serial_PrintString("PneumaticValve ProcessMessage");
 	switch (cmd_id)
 	{
 		case PNEUMATIC_VALVE_REQ_RESET_SETTINGS:
@@ -145,6 +168,25 @@ Result_t PneumaticValve_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 	Serial_PutString(", ");
 #endif
 	(*length) += DIGITAL_OUT_DATA_N_BYTES;
+	return NOICE;
+}
+
+Result_t PneumaticValve_Update(PneumaticValve_Channel_t *valve)
+{
+	if(valve->enable)
+	{
+		uint16_t position = 0;
+		Result_t result = Adc16_GetRawData(valve->pos_channel_id, &position);
+		if(result != NOICE) return result;
+
+		int32_t error = valve->target_position - position;
+
+		int32_t upper_threshold = (valve->threshold + DigitalOut_GetState(valve->off_channel_id) * valve->hysteresis);
+		int32_t lower_threshold = -(valve->threshold + DigitalOut_GetState(valve->on_channel_id) * valve->hysteresis);
+
+		DigitalOut_SetState(&node.channels[valve->off_channel_id].channel.digital_out, (error > upper_threshold));
+		DigitalOut_SetState(&node.channels[valve->on_channel_id].channel.digital_out, (error < lower_threshold));
+	}
 	return NOICE;
 }
 

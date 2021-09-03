@@ -51,6 +51,21 @@ Result_t DigitalOut_Status(Channel_t *channel)
 
 	return OOF;
 }
+uint8_t DigitalOut_GetState(uint8_t channel_id)
+{
+	DigitalOut_Channel_t *dig_out = &node.channels[channel_id].channel.digital_out;
+	return (uint32_t) LL_GPIO_IsOutputPinSet(dig_out->enable_pin->port, dig_out->enable_pin->pin);
+}
+void DigitalOut_SetState(DigitalOut_Channel_t *digital_out, uint32_t state)
+{
+	GPIO_Pin_t *enable = digital_out->enable_pin;
+
+	if (state == 0)
+		LL_GPIO_ResetOutputPin(enable->port, enable->pin);
+	else
+		LL_GPIO_SetOutputPin(enable->port, enable->pin);
+
+}
 
 Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 {
@@ -59,19 +74,8 @@ Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 	{
 		case DIGITAL_OUT_STATE:
 		{
-			GPIO_Pin_t *enable = channel->channel.digital_out.enable_pin;
-			if (set_msg->value == 0)
-			{
-				LL_GPIO_ResetOutputPin(enable->port, enable->pin);
-			}
-			else
-			{
-				Serial_PrintString("SUCCESS");
-				Serial_PrintInt(channel->id);
-				LL_GPIO_SetOutputPin(enable->port, enable->pin);
-			}
+			DigitalOut_SetState(&channel->channel.digital_out, set_msg->value);
 			var = NULL;
-
 			break;
 		}
 		case DIGITAL_OUT_FREQUENCY:
