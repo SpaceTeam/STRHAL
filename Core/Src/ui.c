@@ -14,7 +14,7 @@ inline Result_t Ui_SendCanMessage(uint32_t can_index, Can_MessageId_t message_id
 
 Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *data, uint32_t length)
 {
-	uint8_t buffer = data->bit.info.buffer;
+	//uint8_t buffer = data->bit.info.buffer;
 	uint8_t channel = data->bit.info.channel_id;
 	uint8_t cmd_id = data->bit.cmd_id;
 

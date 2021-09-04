@@ -15,7 +15,8 @@ static uint8_t new_data[8] =
 static uint32_t status = 0;
 Result_t Ads131_Init(void)
 {
-	SPI1_Init();
+	SPI1_Init(LL_SPI_DATAWIDTH_24BIT, LL_SPI_PHASE_2EDGE, LL_SPI_POLARITY_LOW, LL_SPI_NSS_HARD_OUTPUT, LL_SPI_BAUDRATEPRESCALER_DIV32);
+
 	TIM4_Init();
 
 	LL_GPIO_ResetOutputPin(ADS_nRESET_GPIO_Port, ADS_nRESET_Pin);
@@ -51,10 +52,8 @@ Result_t Ads131_Init(void)
 
 Result_t Ads131_WriteRegister(uint32_t reg, uint32_t value)
 {
-	int32_t txData[2] =
-	{ (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
-	int32_t rxData[2] =
-	{ 0 };
+	uint8_t txData[2] = { (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
+	uint8_t rxData[2] = { 0 };
 	uint32_t tickstart = 0;
 
 	Result_t result = SPI_Transmit_Receive(SPI1, txData, rxData, 2);
@@ -88,8 +87,8 @@ Result_t Ads131_ReadRegisters(uint32_t reg, uint32_t n, int32_t data[])
 	{ 0 };
 	uint32_t tickstart = 0;
 
-	Result_t result = SPI_Transmit_Receive(SPI1, txData1, rxData, 1);
-	Result_t result2 = SPI_Transmit_Receive(SPI1, txData2, data, n + 1);
+	Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t *) txData1, (uint8_t *) rxData, 1);
+	Result_t result2 = SPI_Transmit_Receive(SPI1, (uint8_t *) txData2, (uint8_t *) data, n + 1);
 
 	tickstart = Systick_GetTick();
 	while ((LL_GPIO_ReadInputPort(ADS_nDRDY_GPIO_Port) & ADS_nDRDY_Pin) == 0UL)
@@ -123,7 +122,7 @@ Result_t Ads131_UpdateData(void)
 		int32_t rxData[9] =
 		{ 0 };
 
-		Result_t result = SPI_Transmit_Receive(SPI1, txData, rxData, 9);
+		Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t *) txData, (uint8_t *) rxData, 9);
 
 		status = rxData[0];
 		for (uint8_t ch = 0; ch < 8; ch++)

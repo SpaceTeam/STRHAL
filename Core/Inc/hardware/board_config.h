@@ -1,17 +1,24 @@
 #ifndef HARDWARE_BOARD_CONFIG_H_
 #define HARDWARE_BOARD_CONFIG_H_
 
-#define LCB 1
-#define IOB 2
+#define LCB  1
+#define IOB  2
+#define BLMB 3
 
-#define BOARD IOB
+#define BOARD BLMB
+
+
+#define SPI_TIMEOUT_VALUE 1000
+#include "lcb.h"
+#include "iob.h"
+#include "blmb.h"
 
 #if BOARD == LCB
-#include "lcb.h"
 #define MAIN_CAN_BUS LCB_MAIN_CAN_BUS
 #elif BOARD == IOB
-#include "iob.h"
 #define MAIN_CAN_BUS IOB_MAIN_CAN_BUS
+#elif BOARD == BLMB
+#define MAIN_CAN_BUS BLMB_MAIN_CAN_BUS
 #endif
 #define DEBUG_CAN_BUS 1
 
@@ -22,7 +29,7 @@
 //#define DEFAULT_REFRESH_DIVIDER		100
 #define DEFAULT_REFRESH_DIVIDER		1
 #define DEFAULT_REFRESH_RATE		100
-#define ADC_REFRESH_RATE		1000
+#define ADC_REFRESH_RATE			1000
 
 #define SPI_TIMEOUT_VALUE 1000
 #define ADS_TIMEOUT_VALUE SPI_TIMEOUT_VALUE

@@ -5,8 +5,8 @@
 
 typedef struct
 {
-	uint16_t position_fb;
-	uint16_t position_set;
+	uint32_t position_fb;
+	uint32_t position_set;
 	//other servo stuff
 }Servo_Channel_t;
 

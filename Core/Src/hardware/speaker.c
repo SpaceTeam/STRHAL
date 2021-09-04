@@ -16,24 +16,28 @@ void Speaker_Init(void)
 {
 	LL_TIM_InitTypeDef TIM_InitStruct = {
 			0 };
+	/*
 	LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {
 			0 };
 	LL_TIM_BDTR_InitTypeDef TIM_BDTRInitStruct = {
-			0 };
+			0 };*/
 
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {
 			0 };
 	/* Peripheral clock enable */
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 
-	TIM_InitStruct.Prescaler = 1499;
+	TIM_InitStruct.Prescaler = 63;
+
 	TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-	TIM_InitStruct.Autoreload = 9;
+	TIM_InitStruct.Autoreload = 0xFFFF;
 	TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV2;
 	TIM_InitStruct.RepetitionCounter = 0;
 	LL_TIM_Init(TIM1, &TIM_InitStruct);
+
 	LL_TIM_DisableARRPreload(TIM1);
 	LL_TIM_SetClockSource(TIM1, LL_TIM_CLOCKSOURCE_INTERNAL);
+	/*
 	LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH1);
 	TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
 	TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
@@ -60,11 +64,14 @@ void Speaker_Init(void)
 	TIM_BDTRInitStruct.Break2Filter = LL_TIM_BREAK2_FILTER_FDIV1;
 	TIM_BDTRInitStruct.AutomaticOutput = LL_TIM_AUTOMATICOUTPUT_DISABLE;
 	LL_TIM_BDTR_Init(TIM1, &TIM_BDTRInitStruct);
+
+*/
+
 	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOE);
-	/**TIM1 GPIO Configuration
-	 PE8     ------> TIM1_CH1N
-	 PE9     ------> TIM1_CH1
-	 */
+	 //TIM1 GPIO Configuration
+	 //PE8     ------> TIM1_CH1N
+	 //PE9     ------> TIM1_CH1
+
 	GPIO_InitStruct.Pin = PIN_SPEAKER_N_Pin | PIN_SPEAKER_Pin;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -72,8 +79,10 @@ void Speaker_Init(void)
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 	GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
 	LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-	LL_TIM_EnableAllOutputs(TIM1);
-	LL_TIM_EnableCounter(TIM1);
+
+	//LL_TIM_EnableAllOutputs(TIM1);
+
+//	LL_TIM_EnableCounter(TIM1);
 
 }
 

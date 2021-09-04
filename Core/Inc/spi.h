@@ -38,11 +38,11 @@ extern "C" {
 
 /* USER CODE END Private defines */
 
-void SPI1_Init(void);
+void SPI1_Init(uint32_t datawidth, uint32_t cpha, uint32_t cpol, uint32_t nss, uint32_t baudrate);
 
 /* USER CODE BEGIN Prototypes */
 
-Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, int32_t txData[], int32_t rxData[], uint32_t count);
+Result_t SPI_Transmit_Receive(SPI_TypeDef * SPI, uint8_t *txData, uint8_t *rxData, uint32_t count);
 
 /* USER CODE END Prototypes */
 

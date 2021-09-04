@@ -28,8 +28,8 @@ int main(void)
 
 	node.node_id = NodeID_Get();
 
-	Speaker_Init();
-	Speaker_Set(300, 2000 / node.node_id, 100 / node.node_id, node.node_id);
+//	Speaker_Init();
+//	Speaker_Set(300, 2000 / node.node_id, 100 / node.node_id, node.node_id);
 
 	Can_Init(node.node_id);
 	Serial_PrintInt(node.node_id);
@@ -46,6 +46,8 @@ int main(void)
 	LCB_main();
 #elif BOARD == IOB
 	IOB_main();
+#elif BOARD == BLMB
+	BLMB_main();
 #endif
 
 }

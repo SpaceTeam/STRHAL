@@ -1,5 +1,6 @@
 #include "tim.h"
 #include "math.h"
+/*
 void TIM1_Init(void)
 {
 
@@ -60,9 +61,9 @@ void TIM1_Init(void)
   LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }
+*/
 
-
-static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload) //TODO @Andi fix this!!
+/*static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *autoreload) //TODO @Andi fix this!!
 {
 	double divider = (double)SystemCoreClock / rate;
 
@@ -73,7 +74,7 @@ static void CalculatePRESandARR(uint16_t rate, uint16_t * prescaler, uint16_t *a
 
 	*prescaler = i;
 	*autoreload = n/i;
-}
+}*/
 void TIM2_Init(uint16_t rate)//TODO TEST
 {
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
@@ -129,7 +130,7 @@ void TIM4_Init(void)
 
   TIM_InitStruct.Prescaler = 0;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 14;
+  TIM_InitStruct.Autoreload = 4;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   LL_TIM_Init(TIM4, &TIM_InitStruct);
   LL_TIM_DisableARRPreload(TIM4);
@@ -137,7 +138,7 @@ void TIM4_Init(void)
   TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
   TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
   TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-  TIM_OC_InitStruct.CompareValue = 7;
+  TIM_OC_InitStruct.CompareValue = 2;
   TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
   LL_TIM_OC_Init(TIM4, LL_TIM_CHANNEL_CH3, &TIM_OC_InitStruct);
   LL_TIM_OC_DisableFast(TIM4, LL_TIM_CHANNEL_CH3);
