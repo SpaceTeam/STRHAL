@@ -14,22 +14,24 @@ Result_t PneumaticValve_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUM
 
 Result_t PneumaticValve_InitChannel(PneumaticValve_Channel_t *pneumatic_valve, uint32_t on_channel_id, uint32_t off_channel_id, uint32_t pos_channel_id)
 {
-	pneumatic_valve->enable = (pos_channel_id == 5);
-	pneumatic_valve->on_channel_id = on_channel_id;
-	pneumatic_valve->off_channel_id = off_channel_id;
-	pneumatic_valve->pos_channel_id = pos_channel_id;
-	pneumatic_valve->target_position = 40000;
-	pneumatic_valve->refresh_divider = 0;
-	pneumatic_valve->threshold = PNEUMATIC_VALVE_DEFAULT_THRESHOLD; //TODO LOAD CONFIG
-	pneumatic_valve->hysteresis = PNEUMATIC_VALVE_DEFAULT_HYSTERESIS; //TODO LOAD CONFIG
+	if (node.node_id == 5) //TODO STORE IN FLASH
+	{
+		pneumatic_valve->enable = (pos_channel_id == 5);
+		pneumatic_valve->on_channel_id = on_channel_id;
+		pneumatic_valve->off_channel_id = off_channel_id;
+		pneumatic_valve->pos_channel_id = pos_channel_id;
+		pneumatic_valve->target_position = 40000;
+		pneumatic_valve->refresh_divider = 0;
+		pneumatic_valve->threshold = PNEUMATIC_VALVE_DEFAULT_THRESHOLD; //TODO LOAD CONFIG
+		pneumatic_valve->hysteresis = PNEUMATIC_VALVE_DEFAULT_HYSTERESIS; //TODO LOAD CONFIG
 
-	if (node.channels[on_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
-		return OOF;
-	if (node.channels[off_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
-		return OOF;
-	if (node.channels[pos_channel_id].type != CHANNEL_TYPE_ADC16)
-		return OOF;
-
+		if (node.channels[on_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
+			return OOF;
+		if (node.channels[off_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
+			return OOF;
+		if (node.channels[pos_channel_id].type != CHANNEL_TYPE_ADC16)
+			return OOF;
+	}
 	return NOICE;
 }
 
@@ -116,21 +118,12 @@ Result_t PneumaticValve_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUM
 #endif
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
-Result_t PneumaticValve_Move(Channel_t *channel, PneumaticValveMoveMsg_t *move_msg)
-{
-	Serial_PutString("Move: position: ");
-	Serial_PutInt(move_msg->position);
-
-	Serial_PutString(", interval: ");
-	Serial_PrintInt(move_msg->interval);
-	return OOF_NOT_IMPLEMENTED;
-}
 Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {
 	if (node.channels[ch_id].type != CHANNEL_TYPE_PNEUMATIC_VALVE)
 		return OOF_WRONG_CHANNEL_TYPE;
 	Channel_t *channel = &node.channels[ch_id];
-Serial_PrintString("PneumaticValve ProcessMessage");
+	Serial_PrintString("PneumaticValve ProcessMessage");
 	switch (cmd_id)
 	{
 		case PNEUMATIC_VALVE_REQ_RESET_SETTINGS:
@@ -141,8 +134,6 @@ Serial_PrintString("PneumaticValve ProcessMessage");
 			return PneumaticValve_SetVariable(channel, (SetMsg_t*) data);
 		case PNEUMATIC_VALVE_REQ_GET_VARIABLE:
 			return PneumaticValve_GetVariable(channel, (GetMsg_t*) data, DIGITAL_OUT_RES_GET_VARIABLE);
-		case PNEUMATIC_VALVE_REQ_MOVE:
-			return PneumaticValve_Move(channel, (PneumaticValveMoveMsg_t*) data);
 		default:
 			return OOF_UNKNOWN_CMD;
 	}
@@ -150,7 +141,7 @@ Serial_PrintString("PneumaticValve ProcessMessage");
 
 static Result_t PneumaticValve_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	*data = (uint16_t) *node.channels[channel_id].channel.digital_out.analog_in;
+	*data = (uint16_t) node.channels[channel_id].channel.pneumatic_valve.target_position;
 	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }
@@ -167,17 +158,18 @@ Result_t PneumaticValve_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 	Serial_PutInt(new_data);
 	Serial_PutString(", ");
 #endif
-	(*length) += DIGITAL_OUT_DATA_N_BYTES;
+	(*length) += PNEUMATIC_VALVE_DATA_N_BYTES;
 	return NOICE;
 }
 
 Result_t PneumaticValve_Update(PneumaticValve_Channel_t *valve)
 {
-	if(valve->enable)
+	if (valve->enable)
 	{
 		uint16_t position = 0;
 		Result_t result = Adc16_GetRawData(valve->pos_channel_id, &position);
-		if(result != NOICE) return result;
+		if (result != NOICE)
+			return result;
 
 		int32_t error = valve->target_position - position;
 

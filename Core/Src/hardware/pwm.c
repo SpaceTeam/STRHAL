@@ -14,7 +14,7 @@ void PWM_InitPwmIn(void)
 	{ 0 };
 	GPIO_InitStruct.Pin = LL_GPIO_PIN_11;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_DOWN;
 	GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
 	LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
@@ -75,7 +75,6 @@ void PWM_InitPwmIn(void)
 //#define PWM_MIN 54440
 //#define PWM_MAX 58260
 
-#define UINT14_MAX ((1<<14) - 1)
 Result_t PWM_GetPWM(uint16_t *return_var)
 {
 	static uint64_t old_pwm_read_tick = 0;
@@ -106,7 +105,7 @@ Result_t PWM_GetPWM(uint16_t *return_var)
 	pos = (pos > UINT14_MAX) ? UINT14_MAX : pos;
 	pos = (pos < 0) ? 0 : pos;
 	prev_pos = pos;
-	*return_var = (uint16_t) pos;
+	*return_var = (uint16_t) pos<<2;
 	return NOICE;
 
 }

@@ -5,7 +5,7 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD BLMB
+#define BOARD LCB
 
 
 #define SPI_TIMEOUT_VALUE 1000

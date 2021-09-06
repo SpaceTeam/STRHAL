@@ -20,10 +20,11 @@
 #include "ui.h"
 #include "pwm.h"
 #include "tim.h"
+#include "git_version.h"
 #include <string.h>
 
 //@formatter:off
-Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
+Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
 				.generic_channel = { 0 },
 				.channels =
 				{
@@ -33,7 +34,7 @@ Node_t node = { .node_id = 0, .firmware_version = 0xDEADBEEF,
 //@formatter:on
 uint32_t BLMB_CalcMotorPos(uint32_t var)
 {
-	return (uint32_t) (BLMB_REDUCTION * (var << 2));
+	return (uint32_t) (BLMB_REDUCTION * var);
 }
 void BLMB_InitAdc(void)
 {
@@ -151,12 +152,12 @@ void BLMB_InitGPIO(void)
 void BLMB_disableMotor(void)
 {
 	static uint16_t angle_correct_counter = 0;
-	if ((abs((int32_t) TMC4671_highLevel_getPositionActual() - (int32_t) TMC4671_highLevel_getPositionTarget()) < 65535) && angle_correct_counter < 65535)
+	if ((abs((int32_t) TMC4671_highLevel_getPositionActual() - (int32_t) TMC4671_highLevel_getPositionTarget()) < BLMB_ERROR_THRESHOLD) && angle_correct_counter < 65535)
 		angle_correct_counter++;
 	else
 		angle_correct_counter = 0;
 
-	if (angle_correct_counter > 500)
+	if (angle_correct_counter > BLMB_ERROR_TIMER)
 		swdriver_setEnable(false);
 	else
 		swdriver_setEnable(true);
@@ -178,6 +179,7 @@ void BLMB_main(void)
 
 	//BlmbUi_InitTIM(); // button handling timers
 	BlmbUi_InitEXTI(); // button interrupts
+	Servo_InitChannel(&node.channels[BLMB_SERVO_CHANNEL].channel.servo);
 
 	char serial_str[1000] =
 	{ 0 };
@@ -191,22 +193,21 @@ void BLMB_main(void)
 
 		uint16_t position = 0;
 		Result_t result = BlmbUi_CheckInput(&position);
-		if(result == OOF_NO_NEW_DATA)
+		if (result == OOF_NO_NEW_DATA)
 			result = PWM_GetPWM(&position);
 		if (result == NOICE)
-		{
-			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = position;
-		}
+			Servo_SetPosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, position);
 
-		Dac_SetValue(AS5x47_GetAngle(BLMB_POSITION_ENCODER) >> 2);
-		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set));
+		node.channels[BLMB_SERVO_CHANNEL].channel.servo.position = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
+		Dac_SetValue(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position >> 2);
+		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position));
 
 		BLMB_disableMotor();
 
 		if (tick - old_tick >= 250)
 		{
 			old_tick = tick;
-/*
+			/*
 			 Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
 			 Serial_PutString(" ");
 			 Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
@@ -222,7 +223,7 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			 Serial_PutString(", ");
-*/
+
 			 //Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
 			 Serial_PrintInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
 			 Serial_PutString(", ");
@@ -234,17 +235,34 @@ void BLMB_main(void)
 			 //Serial_PrintInt(tick);
 			 //Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
 			 Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
-
+			 */
+			/*
+			 Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
+			 Serial_PutString(", ");
+			 Serial_PutInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
+			 Serial_PutString(", ");
+			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
+			 Serial_PutString(", ");*/
+			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.startpoint);
+			Serial_PutString(", ");
+			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.endpoint);
+			Serial_PutString(", ");
+			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position);
+			Serial_PutString(", ");
+			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_percentage);
+			Serial_PutString(", ");
+			Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);
 		}
 		if (Serial_CheckInput(serial_str))
 		{
-			Serial_PrintString(serial_str);
+			//Serial_PrintString(serial_str);
 			uint32_t input = atoi(serial_str);
 			/*			if(input == 0)
 			 TMC4671_highLevel_pwmOff();
 			 else
 			 TMC4671_highLevel_positionMode2();*/
-			node.channels[BLMB_SERVO_CHANNEL].channel.servo.position_set = input;
+			Servo_SetPosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, input);
+
 		}
 	}
 }

@@ -2,8 +2,13 @@
 #define BLMB_H_
 
 
+
+#define BLMB_ERROR_THRESHOLD (1<<14)
+#define BLMB_ERROR_TIMER 50
 #define BLMB_REDUCTION 231.1222
 #define MAX_BLMB_CHANNELS 1
+
+
 
 #define BLMB_SERVO_CHANNEL 0
 #define BLMB_SENSOR_CHANNEL 1

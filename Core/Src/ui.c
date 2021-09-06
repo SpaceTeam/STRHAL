@@ -23,16 +23,16 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 
 	uint8_t *payload = &data->bit.data.uint8[0];
 
-/*
-	//TODO @ANDI DEBUG...
-	Serial_PrintString("CAN NOICE\n");
-	Serial_PutString("buffer: ");
-	Serial_PrintInt(buffer);
-	Serial_PutString("channel: ");
-	Serial_PrintInt(channel);
-	Serial_PutString("cmd_id: ");
-	Serial_PrintInt(cmd_id);
-*/
+	/*
+	 //TODO @ANDI DEBUG...
+	 Serial_PrintString("CAN NOICE\n");
+	 Serial_PutString("buffer: ");
+	 Serial_PrintInt(buffer);
+	 Serial_PutString("channel: ");
+	 Serial_PrintInt(channel);
+	 Serial_PutString("cmd_id: ");
+	 Serial_PrintInt(cmd_id);
+	 */
 	if (channel == GENERIC_CHANNEL_ID)
 		return Generic_ProcessMessage(channel, cmd_id, payload, length);
 	if (channel >= MAX_CHANNELS)
@@ -53,7 +53,7 @@ Result_t Ui_ProcessCanMessage(Can_MessageId_t message_id, Can_MessageData_t *dat
 		case CHANNEL_TYPE_DIGITAL_OUT:
 			return DigitalOut_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_SERVO:
-			break;
+			return Servo_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_PNEUMATIC_VALVE:
 			return PneumaticValve_ProcessMessage(channel, cmd_id, payload, length);
 		case CHANNEL_TYPE_NODE_GENERIC:

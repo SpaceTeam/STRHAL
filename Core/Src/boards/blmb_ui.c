@@ -1,8 +1,10 @@
 #include "blmb_ui.h"
 #include "main.h"
 #include "systick.h"
+#include "channels.h"
 #include "serial.h"
 
+const int32_t speed_settings[BLMB_UI_LAST_SPEED] = {10, 100, 400};
 void BlmbUi_InitEXTI(void)
 {
 	LL_EXTI_InitTypeDef EXTI_InitStruct =
@@ -81,9 +83,51 @@ void EXTI15_10_IRQHandler(void)
 static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 {
 
+	if (select_button_state == BLMB_UI_LONG_PRESSED)
+	{
+		mode = (mode + 1) % BLMB_UI_LAST_MODE;
+		Servo_Channel_t * servo = &node.channels[BLMB_SERVO_CHANNEL].channel.servo;
+		switch (mode)
+		{
+			case BLMB_UI_MODE_CALIBRATE_OPEN:
+				Servo_SetPosition(servo, 0);
+				break;
+			case BLMB_UI_MODE_CALIBRATE_CLOSE:
+				servo->startpoint = servo->target_position;
+				Servo_SetPosition(servo, UINT16_MAX);
+				break;
+			case BLMB_UI_MODE_NORMAL:
+			default:
+				servo->endpoint = servo->target_position;
+				//TODO SAVE SETTING
+				Servo_SetPosition(servo, servo->target_percentage);
+				break;
 
+		}
+	}
+
+	if (mode != BLMB_UI_MODE_NORMAL)
+	{
+		if (cw_button_state == BLMB_UI_PRESSED)
+			Servo_SetRelativePosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, speed_settings[speed]);
+		else if (ccw_button_state == BLMB_UI_PRESSED)
+			Servo_SetRelativePosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, -speed_settings[speed]);
+		else if (select_button_state == BLMB_UI_PRESSED)
+			speed = (speed + 1) % BLMB_UI_LAST_SPEED;
+	}
+/*
+	Serial_PutInt(cw_button_state);
+	Serial_PutString(", ");
+	Serial_PutInt(select_button_state);
+	Serial_PutString(", ");
+	Serial_PutInt(ccw_button_state);
+	Serial_PutString(", ");
+	Serial_PutInt(mode);
+	Serial_PutString(", ");
+	Serial_PrintInt(speed);
+	*/
+	return OOF_NOT_IMPLEMENTED;
 }
-
 
 Result_t BlmbUi_CheckInput(uint16_t *return_var)
 {
@@ -103,7 +147,6 @@ Result_t BlmbUi_CheckInput(uint16_t *return_var)
 		cw_button_state = (cw_button_state == BLMB_UI_PRESSED) ? BLMB_UI_PRESSED_IDLE : cw_button_state;
 		select_button_state = (select_button_state == BLMB_UI_PRESSED) ? BLMB_UI_PRESSED_IDLE : select_button_state;
 		ccw_button_state = (ccw_button_state == BLMB_UI_PRESSED) ? BLMB_UI_PRESSED_IDLE : ccw_button_state;
-
 
 		cw_button_state = (cw_button_state == BLMB_UI_LONG_PRESSED) ? BLMB_UI_IDLE : cw_button_state;
 		select_button_state = (select_button_state == BLMB_UI_LONG_PRESSED) ? BLMB_UI_IDLE : select_button_state;

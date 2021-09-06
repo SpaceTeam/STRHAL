@@ -191,45 +191,45 @@ void IOB_main(void)
 		PneumaticValve_Update(&node.channels[PNEUMATIC_VALVE_1_CHANNEL_ID].channel.pneumatic_valve);
 		PneumaticValve_Update(&node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve);
 
-
-		 if (tick - old_tick > 500)
-		 {
-		 old_tick = tick;
-		 uint16_t position = 0;
-			Result_t result = Adc16_GetRawData(5, &position);
-			Serial_PutString("Position: ");
-			Serial_PutInt(position);
-			Serial_PutString("  target: ");
-			Serial_PutInt(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.target_position);
-			Serial_PutString("  off: ");
-			Serial_PutInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.off_channel_id));
-			Serial_PutString("  on: ");
-			Serial_PrintInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.on_channel_id));
-
+		if (tick - old_tick > 500)
+		{
+			old_tick = tick;
 			/*
-		 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
-		 {
-		 switch (node.channels[i].type)
-		 {
-		 case CHANNEL_TYPE_DIGITAL_OUT:
-		 data.variable_id = DIGITAL_OUT_MEASUREMENT;
-		 DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-		 break;
-		 case CHANNEL_TYPE_ADC16_SINGLE:
-		 data.variable_id = ADC16_SINGLE_DATA;
-		 Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-		 break;
-		 case CHANNEL_TYPE_ADC16:
-		 data.variable_id = ADC16_MEASUREMENT;
-		 Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
-		 break;
-		 default:
-		 break;
-		 }
-		 }
-		 Serial_PrintString(" ");*/
-		 }
+			 uint16_t position = 0;
 
+			 Result_t result = Adc16_GetRawData(5, &position);
+			 Serial_PutString("Position: ");
+			 Serial_PutInt(position);
+			 Serial_PutString("  target: ");
+			 Serial_PutInt(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.target_position);
+			 Serial_PutString("  off: ");
+			 Serial_PutInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.off_channel_id));
+			 Serial_PutString("  on: ");
+			 Serial_PrintInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.on_channel_id));
+			 */
+			/*
+			 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
+			 {
+			 switch (node.channels[i].type)
+			 {
+			 case CHANNEL_TYPE_DIGITAL_OUT:
+			 data.variable_id = DIGITAL_OUT_MEASUREMENT;
+			 DigitalOut_ProcessMessage(i, DIGITAL_OUT_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+			 break;
+			 case CHANNEL_TYPE_ADC16_SINGLE:
+			 data.variable_id = ADC16_SINGLE_DATA;
+			 Adc16Single_ProcessMessage(i, ADC16_SINGLE_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+			 break;
+			 case CHANNEL_TYPE_ADC16:
+			 data.variable_id = ADC16_MEASUREMENT;
+			 Adc16_ProcessMessage(i, ADC16_REQ_GET_VARIABLE, (uint8_t*) &data, 0);
+			 break;
+			 default:
+			 break;
+			 }
+			 }
+			 Serial_PrintString(" ");*/
+		}
 
 		if (Serial_CheckInput(serial_str))
 		{

@@ -81,7 +81,7 @@ void LCB_main(void)
 				{ 0 };
 				message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
 				message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
-				message_id.info.node_id = NODE_ID;
+				message_id.info.node_id = node.node_id;
 				message_id.info.priority = STANDARD_PRIORITY;
 
 				Can_MessageData_t data =

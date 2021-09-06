@@ -23,6 +23,7 @@ extern "C" {
 #include "git_version.h"
 
 #include "board_config.h"
+#define UINT14_MAX ((1<<14) - 1)
 
 void Error_Handler(void);
 

@@ -11,7 +11,7 @@
 #define BLMB_CCW_Button_GPIO_Port 	GPIOD
 #define BLMB_CCW_Button_Pin			LL_GPIO_PIN_15
 
-#define BLMB_UI_STEP_SIZE 100
+#define BLMB_UI_STEP_SIZE 50
 #define COOLDOWN_TICKS (100)
 #define LONGPRESS_TICKS (2000)
 
@@ -20,13 +20,17 @@ typedef enum
 	BLMB_UI_MODE_NORMAL = 0,
 	BLMB_UI_MODE_CALIBRATE_OPEN,
 	BLMB_UI_MODE_CALIBRATE_CLOSE,
+
+	BLMB_UI_LAST_MODE
+
 } BlmbUi_Mode_t;
 
 typedef enum
 {
-	BLMB_UI_SPEED_SLOW = 1,
+	BLMB_UI_SPEED_SLOW = 0,
 	BLMB_UI_SPEED_MEDIUM,
 	BLMB_UI_SPEED_FAST,
+	BLMB_UI_LAST_SPEED
 } BlmbUi_Speed_t;
 
 typedef enum
