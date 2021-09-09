@@ -67,7 +67,7 @@ CHANNEL_STATUS CheckThresholds(uint8_t channel_id)
 	for( int i = 0; i < MAX_THRESHOLDS; i++)
 	{
 		Threshold_t threshold_struct = channel_thresholds[channel_id][i];
-		if( threshold_struct.enabled >= 0 )
+		if( threshold_struct.enabled > 0 )
 		{
 			CHANNEL_STATUS result = CheckThreshold(channel_id, i);
 			if( result != CHANNEL_STATUS_NOICE)
