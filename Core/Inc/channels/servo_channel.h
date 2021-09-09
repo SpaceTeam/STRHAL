@@ -30,6 +30,6 @@ Result_t Servo_SetPosition(Servo_Channel_t *servo, uint32_t input);
 Result_t Servo_SetRelativePosition(Servo_Channel_t *servo, int16_t distance);
 Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
 Result_t Servo_Update(Servo_Channel_t *servo);
-
+uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_t ch_id);
 
 #endif

@@ -41,7 +41,7 @@ uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_v
 	readonly_var = 0;
 	switch (var_id)
 	{
-		case PNEUMATIC_VALVE_ENABLE:
+		case PNEUMATIC_VALVE_ENABLED:
 			return &pneumatic_valve->enable;
 		case PNEUMATIC_VALVE_POSITION:
 			readonly_var = *node.channels[pneumatic_valve->pos_channel_id].channel.adc16.analog_in;
@@ -50,7 +50,7 @@ uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_v
 			return &pneumatic_valve->target_position;
 		case PNEUMATIC_VALVE_THRESHOLD:
 			return &pneumatic_valve->threshold;
-		case PNEUMATIC_VALVE_HYSTERISIS:
+		case PNEUMATIC_VALVE_HYSTERESIS:
 			return &pneumatic_valve->hysteresis;
 		case PNEUMATIC_VALVE_ON_CHANNEL_ID:
 			return &pneumatic_valve->on_channel_id;
@@ -88,36 +88,9 @@ Result_t PneumaticValve_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 
 Result_t PneumaticValve_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd)
 {
-
-	Can_MessageId_t message_id =
-	{ 0 };
-	ChannelUtil_DefaultMessageId(&message_id);
-
-	Can_MessageData_t data =
-	{ 0 };
-
-	data.bit.cmd_id = response_cmd;
-	data.bit.info.channel_id = channel->id;
-	data.bit.info.buffer = DIRECT_BUFFER;
-
-	SetMsg_t *set_msg = (SetMsg_t*) &data.bit.data;
-	uint32_t *var = PneumaticValve_VariableSelection(&channel->channel.pneumatic_valve, get_msg->variable_id, channel->id);
-	if (var == NULL)
-		return OOF;
-	set_msg->variable_id = get_msg->variable_id;
-	set_msg->value = *var;
-
-#ifdef DEBUG_DATA
-
-	char serial_str[20] =
-	{ 0 };
-
-	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
-	sprintf(serial_str, "%d,", *var);
-	Serial_PutString(serial_str);
-#endif
-	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
+	return ChannelUtil_GetVariable(channel, get_msg, response_cmd);
 }
+
 Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {
 	if (node.channels[ch_id].type != CHANNEL_TYPE_PNEUMATIC_VALVE)

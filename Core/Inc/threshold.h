@@ -2,7 +2,6 @@
 #define THRESHOLD_H_
 
 #include "main.h"
-#include "channels.h"
 
 #define MAX_THRESHOLDS	8
 

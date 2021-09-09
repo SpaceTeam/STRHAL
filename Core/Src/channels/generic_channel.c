@@ -43,7 +43,7 @@ Result_t Generic_SyncClock();
 Result_t Generic_NodeStatus();
 Result_t Generic_Speaker();
 Result_t Generic_EnableUartDebugging();
-Result_t Generic_ModifyThreshold(uint8_t ch_id, uint8_t threshold_id, uint8_t enabled, uint8_t var_id, uint8_t compare_id, int32_t threshold, Result_t result, uint8_t or_threshold_id, uint8_t and_threshold_id);
+Result_t Generic_ModifyThreshold(ThresholdMsg_t *treshold_msg);
 
 Result_t Generic_ResetAllSettings()
 {
@@ -134,25 +134,7 @@ Result_t Generic_SetVariable(SetMsg_t *set_msg)
 }
 Result_t Generic_GetVariable(GetMsg_t *get_msg, GENERIC_CMDs response_cmd)
 {
-	Can_MessageId_t message_id =
-	{ 0 };
-	ChannelUtil_DefaultMessageId(&message_id);
-
-	Can_MessageData_t data =
-	{ 0 };
-
-	data.bit.cmd_id = response_cmd;
-	data.bit.info.channel_id = GENERIC_CHANNEL_ID;
-	data.bit.info.buffer = DIRECT_BUFFER;
-
-	SetMsg_t *set_msg = (SetMsg_t*) data.bit.data.uint8;
-	int32_t *var = Generic_VariableSelection(get_msg->variable_id);
-	if (var == NULL)
-		return OOF;
-	set_msg->variable_id = get_msg->variable_id;
-	set_msg->value = *var;
-
-	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
+	return ChannelUtil_GetVariable(NULL, get_msg, response_cmd);
 }
 Result_t Generic_SyncClock()
 {
@@ -195,7 +177,7 @@ Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, ui
 		return OOF_WRONG_CHANNEL_TYPE;
 	switch (cmd_id)
 	{
-		case GENERIC_REQ_RESET_ALL_SETTINGS:
+		case GENERIC_REQ_RESET_SETTINGS:
 			return Generic_ResetAllSettings();
 		case GENERIC_REQ_DATA:
 			return Generic_Data();
