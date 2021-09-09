@@ -91,9 +91,17 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 				result = OOF_NOT_IMPLEMENTED;
 				break;
 		}
+		if(c == 8)
+		{
+			CHANNEL_STATUS stat = CheckThresholds(c);
+			Serial_PutString("TH RETURN: ");
+			Serial_PrintInt(stat);
+			Serial_PutString("\r\n");
+		}
 		if (result == NOICE)
 			data->channel_mask |= 1 << c;
 	}
+
 #ifdef DEBUG_DATA
 	Serial_PrintString(" ");
 	Serial_PutString("0");
@@ -177,7 +185,7 @@ Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, ui
 		return OOF_WRONG_CHANNEL_TYPE;
 	switch (cmd_id)
 	{
-		case GENERIC_REQ_RESET_SETTINGS:
+		case GENERIC_REQ_RESET_ALL_SETTINGS:
 			return Generic_ResetAllSettings();
 		case GENERIC_REQ_DATA:
 			return Generic_Data();

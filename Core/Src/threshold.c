@@ -1,9 +1,11 @@
 #include "threshold.h"
 #include "channels.h"
+#include "channel_util.h"
 
-Result_t CheckThresholdComparison(uint8_t channel_id, Threshold_t *threshold_ptr)
+CHANNEL_STATUS CheckThresholdComparison(uint8_t channel_id, Threshold_t *threshold_ptr)
 {
 	uint32_t value = 0;
+
 	switch(node.channels[channel_id].type)
 	{
 		case CHANNEL_TYPE_ADC16:
@@ -25,50 +27,50 @@ Result_t CheckThresholdComparison(uint8_t channel_id, Threshold_t *threshold_ptr
 			value = *Servo_VariableSelection(&node.channels[channel_id].channel.servo, threshold_ptr->var_id, channel_id);
 			break;
 		case CHANNEL_TYPE_NODE_GENERIC:
-			return OOF_NO_OP;
+			return CHANNEL_STATUS_ERROR;
 		default:
-			return OOF_NO_OP;
+			return CHANNEL_STATUS_ERROR;
 	}
 	switch(threshold_ptr->compare_id)
 	{
 		case EQUALS:
-			return (value == threshold_ptr->threshold) ? threshold_ptr->result : NOICE;
+			return (value == threshold_ptr->threshold) ? threshold_ptr->result : CHANNEL_STATUS_NOICE;
 		case LESS_THAN:
-			return (value < threshold_ptr->threshold) ? threshold_ptr->result : NOICE;
+			return (value < threshold_ptr->threshold) ? threshold_ptr->result : CHANNEL_STATUS_NOICE;
 		case GREATER_THAN:
-			return (value > threshold_ptr->threshold) ? threshold_ptr->result : NOICE;
+			return (value > threshold_ptr->threshold) ? threshold_ptr->result : CHANNEL_STATUS_NOICE;
 		default:
-			return OOF_NO_OP;
+			return CHANNEL_STATUS_ERROR;
 	}
 }
 
 
-Result_t CheckThreshold(uint8_t channel_id, uint8_t threshold_id)
+CHANNEL_STATUS CheckThreshold(uint8_t channel_id, uint8_t threshold_id)
 {
 
 	Threshold_t * threshold_ptr = &channel_thresholds[channel_id][threshold_id];
 
-	Result_t result = CheckThresholdComparison(channel_id, threshold_ptr);
+	CHANNEL_STATUS result = CheckThresholdComparison(channel_id, threshold_ptr);
 
 	uint8_t temp_result = 1;
 	if( channel_id != threshold_ptr->or_threshold_id )
-		temp_result = CheckThreshold(channel_id, threshold_ptr->or_threshold_id) == NOICE;
+		temp_result = CheckThreshold(channel_id, threshold_ptr->or_threshold_id) == CHANNEL_STATUS_NOICE;
 
 	if( channel_id != threshold_ptr->and_threshold_id )
-		temp_result = temp_result && (CheckThreshold(channel_id, threshold_ptr->and_threshold_id) == NOICE);
+		temp_result = temp_result && (CheckThreshold(channel_id, threshold_ptr->and_threshold_id) == CHANNEL_STATUS_NOICE);
 
-	return (temp_result) ? result : OOF;
+	return (temp_result) ? result : CHANNEL_STATUS_ERROR;
 }
 
-Result_t CheckThresholds(uint8_t channel_id)
+CHANNEL_STATUS CheckThresholds(uint8_t channel_id)
 {
 	for( int i = 0; i < MAX_THRESHOLDS; i++)
 	{
 		Threshold_t threshold_struct = channel_thresholds[channel_id][i];
 		if( threshold_struct.enabled >= 0 )
 		{
-			Result_t result = CheckThreshold(channel_id, i);
-			if( result != NOICE)
+			CHANNEL_STATUS result = CheckThreshold(channel_id, i);
+			if( result != CHANNEL_STATUS_NOICE)
 				return result;
 
 		}
