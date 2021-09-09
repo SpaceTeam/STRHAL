@@ -15,7 +15,6 @@ Result_t Servo_Status(Channel_t *channel);
 Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Servo_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd);
 
-
 #define BLMB_DEFAULT_STARTPOINT		1200
 #define BLMB_DEFAULT_ENDPOINT 		57956
 Result_t Servo_InitChannel(Servo_Channel_t *servo)
@@ -49,7 +48,8 @@ uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_
 	switch (var_id)
 	{
 		case SERVO_POSITION:
-			return &servo->position;
+			readonly_var = servo->position;
+			return &readonly_var;
 		case SERVO_TARGET_POSITION:
 			return &servo->target_position;
 		case SERVO_TARGET_PRESSURE:
@@ -88,8 +88,14 @@ Result_t Servo_ResetSettings(Channel_t *channel)
 }
 Result_t Servo_SetPosition(Servo_Channel_t *servo, uint32_t input)
 {
-	int32_t position = (int64_t)input * ((int32_t)servo->endpoint - (int32_t)servo->startpoint) / UINT16_MAX;
-	position += (int32_t)servo->startpoint;
+	int32_t position = (int64_t) input * ((int32_t) servo->endpoint - (int32_t) servo->startpoint) / UINT16_MAX;
+	position += (int32_t) servo->startpoint;
+
+	/*int32_t position = (int64_t) input * ((int32_t) servo->endpoint - (int32_t) servo->startpoint) / ((int32_t) UINT16_MAX);
+	position += position >> 1;
+	position += (int32_t) servo->startpoint;
+	position -= (int32_t) (servo->endpoint - servo->startpoint) / 4;
+	*/
 	servo->target_percentage = input;
 	servo->target_position = position;
 	return NOICE;
@@ -111,10 +117,18 @@ Result_t Servo_Status(Channel_t *channel)
 
 Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 {
-	uint32_t *var = Servo_VariableSelection(&channel->channel.servo, set_msg->variable_id, channel->id);
-	if (var == NULL)
-		return OOF;
-	*var = set_msg->value;
+
+	if (set_msg->variable_id == SERVO_TARGET_POSITION)
+	{
+		Servo_SetPosition(&channel->channel.servo, set_msg->value);
+	}
+	else
+	{
+		uint32_t *var = Servo_VariableSelection(&channel->channel.servo, set_msg->variable_id, channel->id);
+		if (var == NULL)
+			return OOF;
+		*var = set_msg->value;
+	}
 	return Servo_GetVariable(channel, (GetMsg_t*) set_msg, SERVO_RES_SET_VARIABLE);
 }
 
@@ -159,7 +173,6 @@ Result_t Servo_Move(Channel_t *channel, ServoMoveMsg_t *move_msg)
 	Serial_PrintInt(move_msg->interval);
 	return OOF_NOT_IMPLEMENTED;
 }
-
 
 Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
 {

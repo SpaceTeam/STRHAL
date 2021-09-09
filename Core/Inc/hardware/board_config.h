@@ -5,7 +5,7 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD LCB
+#define BOARD BLMB
 
 
 #define SPI_TIMEOUT_VALUE 1000
@@ -23,8 +23,8 @@
 #define DEBUG_CAN_BUS 1
 
 //#define DEBUG_DATA
-//#define CAN_DEBUG_SEND
-//#define CAN_DEBUG_RECEIVE
+#define CAN_DEBUG_SEND
+#define CAN_DEBUG_RECEIVE
 
 //#define DEFAULT_REFRESH_DIVIDER		100
 #define DEFAULT_REFRESH_DIVIDER		1

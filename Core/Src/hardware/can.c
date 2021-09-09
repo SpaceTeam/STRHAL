@@ -329,9 +329,11 @@ void Can_checkFifo(uint32_t can_handle_index)
 	{
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 		id.uint32 = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
-		//uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
-		//uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
-		//uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
+#ifdef CAN_DEBUG_RECEIVE
+//		uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
+		uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
+		uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
+#endif
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
 		length = Can_DlcToLength[dlc];
 		memcpy(data.uint8, &can_ram->rx_fifo0[get_index].data.uint8[0], CAN_ELMTS_ARRAY_SIZE);
