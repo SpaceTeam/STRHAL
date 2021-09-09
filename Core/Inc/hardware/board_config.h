@@ -5,8 +5,7 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD LCB
-
+#define BOARD IOB
 
 #define SPI_TIMEOUT_VALUE 1000
 #include "lcb.h"

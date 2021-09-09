@@ -12,7 +12,6 @@ Result_t Adc16_ResetSettings(Channel_t *channel);
 Result_t Adc16_Status(Channel_t *channel);
 Result_t Adc16_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs response_cmd);
-uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_t ch_id);
 
 static uint16_t readonly_var = 0;
 uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_t ch_id)

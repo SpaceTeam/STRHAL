@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "serial.h"
 #include "speaker.h"
+#include "threshold.h"
 
 static int32_t readonly_var = 0;
 int32_t* Generic_VariableSelection(uint8_t var_id)
@@ -42,6 +43,7 @@ Result_t Generic_SyncClock();
 Result_t Generic_NodeStatus();
 Result_t Generic_Speaker();
 Result_t Generic_EnableUartDebugging();
+Result_t Generic_ModifyThreshold(uint8_t ch_id, uint8_t threshold_id, uint8_t enabled, uint8_t var_id, uint8_t compare_id, int32_t threshold, Result_t result, uint8_t or_threshold_id, uint8_t and_threshold_id);
 
 Result_t Generic_ResetAllSettings()
 {
@@ -209,6 +211,8 @@ Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, ui
 			return Generic_NodeStatus();
 		case GENERIC_REQ_SPEAKER:
 			return Generic_Speaker((SpeakerMsg_t*) data);
+		case GENERIC_REQ_THRESHOLD:
+			return Generic_ModifyThreshold((ThresholdMsg_t*) data);
 		default:
 			return OOF_UNKNOWN_CMD;
 
@@ -228,3 +232,19 @@ Result_t Generic_EnableUartDebugging()
 	return OOF_NOT_IMPLEMENTED;
 }
 
+Result_t Generic_ModifyThreshold(ThresholdMsg_t *treshold_msg)
+{
+	Threshold_t threshold_struct =
+	{0};
+
+	threshold_struct.enabled = treshold_msg->enabled;
+	threshold_struct.var_id = treshold_msg->var_id;
+	threshold_struct.compare_id = treshold_msg->compare_id;
+	threshold_struct.result = treshold_msg->result;
+	threshold_struct.threshold = treshold_msg->threshold;
+	threshold_struct.or_threshold_id = treshold_msg->or_threshold_id;
+	threshold_struct.and_threshold_id = treshold_msg->and_threshold_id;
+
+	channel_thresholds[treshold_msg->channel_id][treshold_msg->threshold_id] = threshold_struct;
+	return NOICE;
+}

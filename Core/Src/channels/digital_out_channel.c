@@ -13,7 +13,6 @@ Result_t DigitalOut_ResetSettings(Channel_t *channel);
 Result_t DigitalOut_Status(Channel_t *channel);
 Result_t DigitalOut_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t DigitalOut_GetVariable(Channel_t *channel, GetMsg_t *get_msg, DIGITAL_OUT_CMDs response_cmd);
-uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id);
 
 static uint16_t readonly_var = 0;
 uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id)
