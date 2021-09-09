@@ -16,7 +16,7 @@ Result_t PneumaticValve_InitChannel(PneumaticValve_Channel_t *pneumatic_valve, u
 {
 	if (node.node_id == 5) //TODO STORE IN FLASH
 	{
-		pneumatic_valve->enable = (pos_channel_id == 5);
+		pneumatic_valve->enable = 1;
 		pneumatic_valve->on_channel_id = on_channel_id;
 		pneumatic_valve->off_channel_id = off_channel_id;
 		pneumatic_valve->pos_channel_id = pos_channel_id;

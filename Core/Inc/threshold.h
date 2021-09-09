@@ -17,7 +17,7 @@ typedef struct
 	uint8_t and_threshold_id;
 } Threshold_t;
 
-Threshold_t channel_thresholds[MAX_STANDARD_IOB_CHANNELS][MAX_THRESHOLDS];
+extern Threshold_t channel_thresholds[MAX_STANDARD_IOB_CHANNELS][MAX_THRESHOLDS]; //TODO REMOVE extern and add SetThreshold function
 
 CHANNEL_STATUS CheckThreshold(uint8_t channel_id, uint8_t threshold_id);
 CHANNEL_STATUS CheckThresholds(uint8_t channel_id);

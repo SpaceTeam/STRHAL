@@ -91,13 +91,13 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 				result = OOF_NOT_IMPLEMENTED;
 				break;
 		}
+#ifdef DEBUG_THRESHOLDS
 		if(c == 8)
 		{
 			CHANNEL_STATUS stat = CheckThresholds(c);
-			Serial_PutString("TH RETURN: ");
 			Serial_PrintInt(stat);
-			Serial_PutString("\r\n");
 		}
+#endif
 		if (result == NOICE)
 			data->channel_mask |= 1 << c;
 	}

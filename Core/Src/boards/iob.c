@@ -14,6 +14,8 @@
 #include "dipswitch.h"
 #include "git_version.h"
 #include "threshold.h"
+#include <stdlib.h>
+#include <string.h>
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
@@ -182,17 +184,14 @@ void IOB_main(void)
 		Serial_PrintString(serial_str);
 	}
 
-	Threshold_t thresh_test =
-	{ 0 };
-	thresh_test.enabled = 1;
-	thresh_test.compare_id = LESS_THAN;
-	thresh_test.var_id = ADC16_MEASUREMENT;
-	thresh_test.threshold = 12000;
-	thresh_test.result = CHANNEL_STATUS_SENSOR_NOT_CONNECTED;
-	thresh_test.or_threshold_id = 0;
-	thresh_test.and_threshold_id = 0;
+	channel_thresholds[8][0].enabled = 1;
+	channel_thresholds[8][0].compare_id = LESS_THAN;
+	channel_thresholds[8][0].var_id = ADC16_MEASUREMENT;
+	channel_thresholds[8][0].threshold = 12000;
+	channel_thresholds[8][0].result = CHANNEL_STATUS_SENSOR_NOT_CONNECTED;
+	channel_thresholds[8][0].or_threshold_id = 8;
+	channel_thresholds[8][0].and_threshold_id = 8;
 
-	channel_thresholds[8][0] = thresh_test;
 	//GetMsg_t data;
 	while (1)
 	{
