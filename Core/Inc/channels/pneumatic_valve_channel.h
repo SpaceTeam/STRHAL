@@ -4,7 +4,6 @@
 #include "pneumatic_valve_channel_def.h"
 #include "main.h"
 
-#define PNEUMATIC_VALVE_ENABLED            1
 #define PNEUMATIC_VALVE_DEFAULT_THRESHOLD  1000
 #define PNEUMATIC_VALVE_DEFAULT_HYSTERESIS 100
 typedef struct

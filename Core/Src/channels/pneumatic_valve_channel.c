@@ -41,7 +41,7 @@ uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_v
 	readonly_var = 0;
 	switch (var_id)
 	{
-		case PNEUMATIC_VALVE_ENABLE:
+		case PNEUMATIC_VALVE_ENABLED:
 			return &pneumatic_valve->enable;
 		case PNEUMATIC_VALVE_POSITION:
 			readonly_var = *node.channels[pneumatic_valve->pos_channel_id].channel.adc16.analog_in;
@@ -50,8 +50,8 @@ uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_v
 			return &pneumatic_valve->target_position;
 		case PNEUMATIC_VALVE_THRESHOLD:
 			return &pneumatic_valve->threshold;
-		case PNEUMATIC_VALVE_HYSTERISIS:
-			return &pneumatic_valve->hysteresis;
+		case PNEUMATIC_VALVE_HYSTERESIS:
+		return &pneumatic_valve->hysteresis;
 		case PNEUMATIC_VALVE_ON_CHANNEL_ID:
 			return &pneumatic_valve->on_channel_id;
 		case PNEUMATIC_VALVE_OFF_CHANNEL_ID:
