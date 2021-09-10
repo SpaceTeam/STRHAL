@@ -54,7 +54,11 @@ typedef enum
 	OOF_SPI_RXP_FULL,
 	OOF_SPI_NO_EOT,
 	OOF_ADS_NO_RDY,
-	OOF_ADS_INIT
+	OOF_ADS_INIT,
+	OOF_TOO_LITTLE,
+	OOF_TOO_MUCH,
+	OOF_NOT_EQUAL,
+	OOF_NO_OP
 }Result_t;
 
 #ifdef __cplusplus

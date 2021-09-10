@@ -5,8 +5,7 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD BLMB
-
+#define BOARD IOB
 
 #define SPI_TIMEOUT_VALUE 1000
 #include "lcb.h"
@@ -22,11 +21,13 @@
 #endif
 #define DEBUG_CAN_BUS 1
 
+//#define DEBUG_THRESHOLDS
 //#define DEBUG_DATA
 #define CAN_DEBUG_SEND
 #define CAN_DEBUG_RECEIVE
 
 //#define DEFAULT_REFRESH_DIVIDER		100
+
 #define DEFAULT_REFRESH_DIVIDER		1
 #define DEFAULT_REFRESH_RATE		100
 #define ADC_REFRESH_RATE			1000

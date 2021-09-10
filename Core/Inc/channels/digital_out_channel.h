@@ -15,6 +15,7 @@ typedef struct
 	AdcData_t * analog_in;
 } DigitalOut_Channel_t;
 
+uint16_t* DigitalOut_VariableSelection(DigitalOut_Channel_t *dig_out, uint8_t var_id, uint8_t ch_id);
 Result_t DigitalOut_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
 uint8_t DigitalOut_GetState(uint8_t channel_id);
 void DigitalOut_SetState(DigitalOut_Channel_t *digital_out, uint32_t state);

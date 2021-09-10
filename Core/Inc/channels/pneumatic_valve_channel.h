@@ -18,7 +18,9 @@ typedef struct
 		uint32_t pos_channel_id;
 }PneumaticValve_Channel_t;
 
+
 Result_t PneumaticValve_InitChannel(PneumaticValve_Channel_t *valve, uint32_t on_channel_id, uint32_t off_channel_id, uint32_t pos_channel_id);
+uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_valve, uint8_t var_id, uint8_t ch_id);
 Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
 
 Result_t PneumaticValve_Update(PneumaticValve_Channel_t *valve);

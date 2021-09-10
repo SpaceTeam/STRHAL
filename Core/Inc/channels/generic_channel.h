@@ -19,5 +19,6 @@ Result_t Generic_Data(void);
 Result_t Generic_NodeInfo();
 
 Result_t Generic_ProcessMessage(uint8_t channel, uint8_t cmd_id, uint8_t *data, uint32_t length);
+int32_t* Generic_VariableSelection(uint8_t var_id);
 
 #endif

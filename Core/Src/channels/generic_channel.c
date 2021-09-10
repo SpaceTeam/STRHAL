@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "serial.h"
 #include "speaker.h"
+#include "threshold.h"
 
 static int32_t readonly_var = 0;
 int32_t* Generic_VariableSelection(uint8_t var_id)
@@ -42,6 +43,7 @@ Result_t Generic_SyncClock();
 Result_t Generic_NodeStatus();
 Result_t Generic_Speaker();
 Result_t Generic_EnableUartDebugging();
+Result_t Generic_ModifyThreshold(ThresholdMsg_t *treshold_msg);
 
 Result_t Generic_ResetAllSettings()
 {
@@ -89,9 +91,17 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 				result = OOF_NOT_IMPLEMENTED;
 				break;
 		}
+#ifdef DEBUG_THRESHOLDS
+		if(c == 8)
+		{
+			CHANNEL_STATUS stat = CheckThresholds(c);
+			Serial_PrintInt(stat);
+		}
+#endif
 		if (result == NOICE)
 			data->channel_mask |= 1 << c;
 	}
+
 #ifdef DEBUG_DATA
 	Serial_PrintString(" ");
 	Serial_PutString("0");
@@ -132,25 +142,7 @@ Result_t Generic_SetVariable(SetMsg_t *set_msg)
 }
 Result_t Generic_GetVariable(GetMsg_t *get_msg, GENERIC_CMDs response_cmd)
 {
-	Can_MessageId_t message_id =
-	{ 0 };
-	ChannelUtil_DefaultMessageId(&message_id);
-
-	Can_MessageData_t data =
-	{ 0 };
-
-	data.bit.cmd_id = response_cmd;
-	data.bit.info.channel_id = GENERIC_CHANNEL_ID;
-	data.bit.info.buffer = DIRECT_BUFFER;
-
-	SetMsg_t *set_msg = (SetMsg_t*) data.bit.data.uint8;
-	int32_t *var = Generic_VariableSelection(get_msg->variable_id);
-	if (var == NULL)
-		return OOF;
-	set_msg->variable_id = get_msg->variable_id;
-	set_msg->value = *var;
-
-	return Ui_SendCanMessage(MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
+	return ChannelUtil_GetVariable(NULL, get_msg, response_cmd);
 }
 Result_t Generic_SyncClock()
 {
@@ -209,6 +201,8 @@ Result_t Generic_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, ui
 			return Generic_NodeStatus();
 		case GENERIC_REQ_SPEAKER:
 			return Generic_Speaker((SpeakerMsg_t*) data);
+		case GENERIC_REQ_THRESHOLD:
+			return Generic_ModifyThreshold((ThresholdMsg_t*) data);
 		default:
 			return OOF_UNKNOWN_CMD;
 
@@ -228,3 +222,19 @@ Result_t Generic_EnableUartDebugging()
 	return OOF_NOT_IMPLEMENTED;
 }
 
+Result_t Generic_ModifyThreshold(ThresholdMsg_t *treshold_msg)
+{
+	Threshold_t threshold_struct =
+	{0};
+
+	threshold_struct.enabled = treshold_msg->enabled;
+	threshold_struct.var_id = treshold_msg->var_id;
+	threshold_struct.compare_id = treshold_msg->compare_id;
+	threshold_struct.result = treshold_msg->result;
+	threshold_struct.threshold = treshold_msg->threshold;
+	threshold_struct.or_threshold_id = treshold_msg->or_threshold_id;
+	threshold_struct.and_threshold_id = treshold_msg->and_threshold_id;
+
+	channel_thresholds[treshold_msg->channel_id][treshold_msg->threshold_id] = threshold_struct;
+	return NOICE;
+}

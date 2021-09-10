@@ -134,36 +134,9 @@ Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 
 Result_t Servo_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd)
 {
-
-	Can_MessageId_t message_id =
-	{ 0 };
-	ChannelUtil_DefaultMessageId(&message_id);
-
-	Can_MessageData_t data =
-	{ 0 };
-
-	data.bit.cmd_id = response_cmd;
-	data.bit.info.channel_id = channel->id;
-	data.bit.info.buffer = DIRECT_BUFFER;
-
-	SetMsg_t *set_msg = (SetMsg_t*) &data.bit.data;
-	uint32_t *var = Servo_VariableSelection(&channel->channel.servo, get_msg->variable_id, channel->id);
-	if (var == NULL)
-		return OOF;
-	set_msg->variable_id = get_msg->variable_id;
-	set_msg->value = *var;
-
-#ifdef DEBUG_DATA
-
-	char serial_str[20] =
-	{ 0 };
-
-	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
-	sprintf(serial_str, "%d,", *var);
-	Serial_PutString(serial_str);
-#endif
-	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
+	return ChannelUtil_GetVariable(channel, get_msg, response_cmd);
 }
+
 Result_t Servo_Move(Channel_t *channel, ServoMoveMsg_t *move_msg)
 {
 	Serial_PutString("Move: position: ");

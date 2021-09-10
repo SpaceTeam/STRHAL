@@ -12,7 +12,6 @@ Result_t Adc16_ResetSettings(Channel_t *channel);
 Result_t Adc16_Status(Channel_t *channel);
 Result_t Adc16_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs response_cmd);
-uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_t ch_id);
 
 static uint16_t readonly_var = 0;
 uint16_t* Adc16_VariableSelection(Adc16_Channel_t *adc16, uint8_t var_id, uint8_t ch_id)
@@ -57,33 +56,7 @@ Result_t Adc16_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 
 Result_t Adc16_GetVariable(Channel_t *channel, GetMsg_t *get_msg, ADC16_CMDs response_cmd)
 {
-
-	Can_MessageId_t message_id =
-	{ 0 };
-	ChannelUtil_DefaultMessageId(&message_id);
-
-	Can_MessageData_t data =
-	{ 0 };
-
-	data.bit.cmd_id = response_cmd;
-	data.bit.info.channel_id = channel->id;
-	data.bit.info.buffer = DIRECT_BUFFER;
-
-	SetMsg_t *set_msg = (SetMsg_t*) &data.bit.data;
-	uint16_t *var = Adc16_VariableSelection(&channel->channel.adc16, get_msg->variable_id, channel->id);
-	if (var == NULL)
-		return OOF;
-	set_msg->variable_id = get_msg->variable_id;
-	set_msg->value = *var;
-
-	//TODO @ANDI Move to Debug_PrintInt or something like that
-	char serial_str[20] =
-	{ 0 };
-	//sprintf(serial_str,"%d: %d, ",channel->id, *var);
-	sprintf(serial_str, "%d,", *var);
-	Serial_PutString(serial_str);
-
-	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
+	return ChannelUtil_GetVariable(channel, get_msg, response_cmd);
 }
 
 Result_t Adc16_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length)
