@@ -172,7 +172,7 @@ Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 
 static Result_t Servo_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	*data = (uint16_t) *node.channels[channel_id].channel.digital_out.analog_in;
+	*data = (uint16_t) node.channels[channel_id].channel.servo.position;
 	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }

@@ -114,7 +114,7 @@ Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *d
 
 static Result_t PneumaticValve_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	*data = (uint16_t) node.channels[channel_id].channel.pneumatic_valve.target_position;
+	*data = (uint16_t) node.channels[channel_id].channel.pneumatic_valve.position_percentage;
 	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }

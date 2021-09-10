@@ -83,6 +83,10 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 				result = DigitalOut_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_SERVO:
+				result = Servo_GetData(c, data->uint8, length);
+				break;
+			case CHANNEL_TYPE_PNEUMATIC_VALVE:
+				result = PneumaticValve_GetData(c, data->uint8, length);
 				break;
 			case CHANNEL_TYPE_NODE_GENERIC:
 			case CHANNEL_TYPE_LAST:
@@ -225,7 +229,7 @@ Result_t Generic_EnableUartDebugging()
 Result_t Generic_ModifyThreshold(ThresholdMsg_t *treshold_msg)
 {
 	Threshold_t threshold_struct =
-	{0};
+	{ 0 };
 
 	threshold_struct.enabled = treshold_msg->enabled;
 	threshold_struct.var_id = treshold_msg->var_id;

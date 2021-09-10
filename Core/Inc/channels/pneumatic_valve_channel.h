@@ -6,16 +6,21 @@
 
 #define PNEUMATIC_VALVE_DEFAULT_THRESHOLD  1000
 #define PNEUMATIC_VALVE_DEFAULT_HYSTERESIS 100
+
 typedef struct
 {
 		uint32_t enable;
+		uint32_t target_percentage;
 		uint32_t target_position;
+		uint32_t position_percentage;
 		uint32_t threshold;
 		uint32_t hysteresis;
 		uint32_t refresh_divider;
 		uint32_t on_channel_id;
 		uint32_t off_channel_id;
 		uint32_t pos_channel_id;
+		uint32_t startpoint;
+		uint32_t endpoint;
 }PneumaticValve_Channel_t;
 
 
