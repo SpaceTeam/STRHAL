@@ -9,8 +9,8 @@ static void BlmbSettings_StoreDefault(void)
 {
 	BLMB_Settings_t default_settings =
 	{ 0 };
-	default_settings.startpoint = 0;
-	default_settings.endpoint = UINT16_MAX;
+	default_settings.startpoint = BLMB_DEFAULT_STARTPOINT;
+	default_settings.endpoint = BLMB_DEFAULT_ENDPOINT;
 	default_settings.max_accel = UINT16_MAX;
 	default_settings.max_speed = UINT16_MAX;
 	default_settings.max_torque = UINT16_MAX;

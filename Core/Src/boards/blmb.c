@@ -86,9 +86,9 @@ void BLMB_InitFoc(void)
 	TMC4671_highLevel_init();
 	Systick_BusyWait(10);
 
-	Serial_PutString("motor encoder init:");
+//	Serial_PutString("motor encoder init:");
 	TMC4671_highLevel_initEncoder();
-	Serial_PrintString(" done");
+//	Serial_PrintString(" done");
 
 	Systick_BusyWait(100);
 
@@ -98,9 +98,9 @@ void BLMB_InitFoc(void)
 	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, BLMB_CalcMotorPos(pos));
 	tmc4671_writeInt(TMC4671_PID_POSITION_TARGET, BLMB_CalcMotorPos(pos));
 
-	Serial_PutString("position mode:");
+	//Serial_PutString("position mode:");
 	TMC4671_highLevel_positionMode2();
-	Serial_PrintString(" done");
+	//Serial_PrintString(" done");
 
 	Systick_BusyWait(100);
 }
@@ -188,6 +188,7 @@ void BLMB_main(void)
 	uint64_t old_tick = 0;
 
 	BLMB_InitGPIO(); // button inputs, status inputs, chip select outputs
+	Servo_InitChannel(&node.channels[BLMB_SERVO_CHANNEL].channel.servo);
 
 	BLMB_LoadSettings();
 	BLMB_InitAdc();
@@ -195,11 +196,10 @@ void BLMB_main(void)
 
 	Dac_Init();
 	PWM_InitPwmIn();
-	Serial_PrintString("pwm in done");
+	//Serial_PrintString("pwm in done");
 
 	//BlmbUi_InitTIM(); // button handling timers
 	BlmbUi_InitEXTI(); // button interrupts
-	Servo_InitChannel(&node.channels[BLMB_SERVO_CHANNEL].channel.servo);
 
 	char serial_str[1000] =
 	{ 0 };
@@ -238,29 +238,25 @@ void BLMB_main(void)
 			 Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
 			 Serial_PutString(" ");
 			 Serial_PrintInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
-
-
-			 Serial_PutInt(PWM_GetPWM());
-			 Serial_PutString(", ");
-			 Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
-			 Serial_PutString(", ");
-			 Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
-			 Serial_PutString(", ");
-			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
-			 Serial_PutString(", ");
-
-			 //Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
-			 Serial_PrintInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
-			 Serial_PutString(", ");
-
-			 //Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
-			 Serial_PutHex(tmc6200_readRegister(TMC6200_GSTAT));
-			 Serial_PutString(", ");
-
-			 //Serial_PrintInt(tick);
-			 //Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
-			 Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
 			 */
+
+			//Serial_PutInt(position);
+			//Serial_PutString(", ");
+			//Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
+			//Serial_PutString(", ");
+			//Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
+			//Serial_PutString(", ");
+			//Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
+			//Serial_PutString(", ");
+			//Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
+			//Serial_PrintInt(tmc4671_readInt(TMC4671_PID_POSITION_ACTUAL));
+			//Serial_PutString(", ");
+			//Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
+			//Serial_PutHex(tmc6200_readRegister(TMC6200_GSTAT));
+			//Serial_PutString(", ");
+			//Serial_PrintInt(tick);
+			//Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
+			// Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
 			/*
 			 Serial_PutInt(tmc4671_readInt(TMC4671_ABN_DECODER_COUNT));
 			 Serial_PutString(", ");
@@ -268,7 +264,7 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			 Serial_PutString(", ");*/
-			/*
+
 			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.startpoint);
 			 Serial_PutString(", ");
 			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.endpoint);
@@ -277,7 +273,7 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_percentage);
 			 Serial_PutString(", ");
-			 Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);*/
+			 Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);
 		}
 		if (Serial_CheckInput(serial_str))
 		{

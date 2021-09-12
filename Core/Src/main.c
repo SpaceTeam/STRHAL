@@ -42,7 +42,17 @@ int main(void)
 	Flash_Init();
 
 	LL_TIM_EnableCounter(TIM2);
+//	Flash_EraseSector(0);
+/*
+	uint8_t testdata[40] =
+	{ 0 };
 
+	Flash_GetBlockStartingFromAddress(0, testdata, 40);
+
+	Serial_PrintString("ABC");
+	for(uint32_t c = 0; c < 40; c++)
+		Serial_PrintHex(testdata[c]);
+*/
 
 #if BOARD == LCB
 	LCB_main();

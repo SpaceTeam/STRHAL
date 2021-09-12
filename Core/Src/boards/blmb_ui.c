@@ -90,10 +90,10 @@ static void BlmbUi_StoreServoEndpoints(uint32_t startpoint, uint32_t endpoint)
 	settings.startpoint = startpoint;
 	settings.endpoint = endpoint;
 
-	Serial_PutString("\r\nStartpoint: ");
+/*	Serial_PutString("\r\nStartpoint: ");
 	Serial_PutInt(startpoint);
 	Serial_PutString("\r\nEndpoint: ");
-	Serial_PrintInt(endpoint);
+	Serial_PrintInt(endpoint);*/
 	BlmbSettings_Store(&settings);
 }
 BlmbUi_Mode_t BlmbUi_GetUiMode(void)
@@ -137,7 +137,7 @@ static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 		else if (select_button_state == BLMB_UI_PRESSED)
 			speed = (speed + 1) % BLMB_UI_LAST_SPEED;
 	}
-
+/*
 	 Serial_PutInt(cw_button_state);
 	 Serial_PutString(", ");
 	 Serial_PutInt(select_button_state);
@@ -147,7 +147,7 @@ static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 	 Serial_PutInt(mode);
 	 Serial_PutString(", ");
 	 Serial_PrintInt(speed);
-
+*/
 	return OOF_NOT_IMPLEMENTED;
 }
 

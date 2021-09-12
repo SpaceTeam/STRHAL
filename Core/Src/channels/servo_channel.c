@@ -15,14 +15,14 @@ Result_t Servo_Status(Channel_t *channel);
 Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Servo_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd);
 
-#define BLMB_DEFAULT_STARTPOINT		1200
-#define BLMB_DEFAULT_ENDPOINT 		57956
+#define BLMB_DEFAULT_STARTPOINT		0
+#define BLMB_DEFAULT_ENDPOINT 		UINT16_MAX
 Result_t Servo_InitChannel(Servo_Channel_t *servo)
 {
 
 	servo->position = 0;
 	servo->target_percentage = 0;
-	servo->target_position = BLMB_DEFAULT_ENDPOINT >> 2;
+	servo->target_position = 0;
 	servo->target_pressure = 0;
 	servo->max_speed = 0;
 	servo->max_accel = 0;
@@ -30,8 +30,8 @@ Result_t Servo_InitChannel(Servo_Channel_t *servo)
 	servo->p_param = 0;
 	servo->i_param = 0;
 	servo->d_param = 0;
-	servo->startpoint = BLMB_DEFAULT_STARTPOINT;
-	servo->endpoint = BLMB_DEFAULT_ENDPOINT;
+	servo->startpoint = 0;
+	servo->endpoint = 0;
 	servo->pwm_in_enabled = 0;
 	servo->refresh_divider = 0;
 
