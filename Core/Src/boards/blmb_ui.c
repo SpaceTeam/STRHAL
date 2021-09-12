@@ -1,10 +1,12 @@
 #include "blmb_ui.h"
+#include "blmb_settings.h"
 #include "main.h"
 #include "systick.h"
 #include "channels.h"
 #include "serial.h"
 
-const int32_t speed_settings[BLMB_UI_LAST_SPEED] = {10, 100, 400};
+const int32_t speed_settings[BLMB_UI_LAST_SPEED] =
+{ 100, 400, 1000 };
 void BlmbUi_InitEXTI(void)
 {
 	LL_EXTI_InitTypeDef EXTI_InitStruct =
@@ -31,7 +33,7 @@ static volatile uint32_t cw_button_old_tick = 0;
 static volatile uint32_t select_button_old_tick = 0;
 static volatile uint32_t ccw_button_old_tick = 0;
 
-static volatile BlmbUi_Mode_t mode = BLMB_UI_MODE_NORMAL;
+volatile BlmbUi_Mode_t mode = BLMB_UI_MODE_NORMAL;
 static volatile BlmbUi_Speed_t speed = BLMB_UI_SPEED_MEDIUM;
 static volatile BlmbUi_Button_State_t ccw_button_state = BLMB_UI_IDLE;
 static volatile BlmbUi_Button_State_t select_button_state = BLMB_UI_IDLE;
@@ -80,13 +82,33 @@ void EXTI15_10_IRQHandler(void)
 	}
 
 }
+static void BlmbUi_StoreServoEndpoints(uint32_t startpoint, uint32_t endpoint)
+{
+	BLMB_Settings_t settings =
+	{ 0 };
+	BlmbSettings_Load(&settings);
+	settings.startpoint = startpoint;
+	settings.endpoint = endpoint;
+
+	Serial_PutString("\r\nStartpoint: ");
+	Serial_PutInt(startpoint);
+	Serial_PutString("\r\nEndpoint: ");
+	Serial_PrintInt(endpoint);
+	BlmbSettings_Store(&settings);
+}
+BlmbUi_Mode_t BlmbUi_GetUiMode(void)
+{
+	return mode;
+}
+
 static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 {
 
 	if (select_button_state == BLMB_UI_LONG_PRESSED)
 	{
+		speed = (speed + 2) % BLMB_UI_LAST_SPEED;
 		mode = (mode + 1) % BLMB_UI_LAST_MODE;
-		Servo_Channel_t * servo = &node.channels[BLMB_SERVO_CHANNEL].channel.servo;
+		Servo_Channel_t *servo = &node.channels[BLMB_SERVO_CHANNEL].channel.servo;
 		switch (mode)
 		{
 			case BLMB_UI_MODE_CALIBRATE_OPEN:
@@ -99,7 +121,7 @@ static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 			case BLMB_UI_MODE_NORMAL:
 			default:
 				servo->endpoint = servo->target_position;
-				//TODO SAVE SETTING
+				BlmbUi_StoreServoEndpoints(servo->startpoint, servo->endpoint);
 				Servo_SetPosition(servo, servo->target_percentage);
 				break;
 
@@ -115,17 +137,17 @@ static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 		else if (select_button_state == BLMB_UI_PRESSED)
 			speed = (speed + 1) % BLMB_UI_LAST_SPEED;
 	}
-/*
-	Serial_PutInt(cw_button_state);
-	Serial_PutString(", ");
-	Serial_PutInt(select_button_state);
-	Serial_PutString(", ");
-	Serial_PutInt(ccw_button_state);
-	Serial_PutString(", ");
-	Serial_PutInt(mode);
-	Serial_PutString(", ");
-	Serial_PrintInt(speed);
-	*/
+
+	 Serial_PutInt(cw_button_state);
+	 Serial_PutString(", ");
+	 Serial_PutInt(select_button_state);
+	 Serial_PutString(", ");
+	 Serial_PutInt(ccw_button_state);
+	 Serial_PutString(", ");
+	 Serial_PutInt(mode);
+	 Serial_PutString(", ");
+	 Serial_PrintInt(speed);
+
 	return OOF_NOT_IMPLEMENTED;
 }
 
@@ -159,3 +181,4 @@ Result_t BlmbUi_CheckInput(uint16_t *return_var)
 	}
 	return OOF_NO_NEW_DATA;
 }
+

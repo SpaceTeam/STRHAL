@@ -43,6 +43,8 @@ typedef enum
 } BlmbUi_Button_State_t;
 
 void BlmbUi_InitEXTI(void);
+BlmbUi_Mode_t BlmbUi_GetUiMode(void);
+
 Result_t BlmbUi_CheckInput(uint16_t *return_var);
 
 

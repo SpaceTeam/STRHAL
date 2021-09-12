@@ -43,6 +43,7 @@ int main(void)
 
 	LL_TIM_EnableCounter(TIM2);
 
+
 #if BOARD == LCB
 	LCB_main();
 #elif BOARD == IOB
@@ -65,7 +66,7 @@ static void SendGenericData(void)
 	}
 	else
 		//Serial_PutString("0x1234567");
-	Serial_PutString(", ");
+		Serial_PutString(", ");
 }
 
 void main_TIM2_IRQHandler(void)

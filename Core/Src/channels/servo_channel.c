@@ -104,7 +104,7 @@ Result_t Servo_SetPosition(Servo_Channel_t *servo, uint32_t input)
 Result_t Servo_SetRelativePosition(Servo_Channel_t *servo, int16_t distance)
 {
 	Serial_PutString("Move: ");
-	Serial_PrintInt(distance);
+	Serial_PrintInt(servo->target_position);
 	servo->target_position += distance;
 	return NOICE;
 }

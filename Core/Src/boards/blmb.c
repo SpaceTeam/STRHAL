@@ -2,6 +2,7 @@
 #if BOARD == BLMB
 #include "main.h"
 #include "blmb_ui.h"
+#include "blmb_settings.h"
 #include "channels.h"
 #include "speaker.h"
 #include "can.h"
@@ -36,6 +37,24 @@ uint32_t BLMB_CalcMotorPos(uint32_t var)
 {
 	return (uint32_t) (BLMB_REDUCTION * var);
 }
+
+void BLMB_LoadSettings(void)
+{
+	BLMB_Settings_t settings =
+	{ 0 };
+	BlmbSettings_Load(&settings);
+	Servo_Channel_t *servo = &node.channels[BLMB_SERVO_CHANNEL].channel.servo;
+	servo->startpoint = settings.startpoint;
+	servo->endpoint = settings.endpoint;
+	servo->max_accel = settings.max_accel;
+	servo->max_speed = settings.max_speed;
+	servo->max_torque = settings.max_torque;
+	Serial_PutString("\r\nLoadSettings\r\nStartpoint: ");
+	Serial_PutInt(servo->startpoint);
+	Serial_PutString("\r\nEndpoint: ");
+	Serial_PrintInt(servo->endpoint);
+}
+
 void BLMB_InitAdc(void)
 {
 	Adc_Init();
@@ -170,6 +189,7 @@ void BLMB_main(void)
 
 	BLMB_InitGPIO(); // button inputs, status inputs, chip select outputs
 
+	BLMB_LoadSettings();
 	BLMB_InitAdc();
 	BLMB_InitFoc();
 
@@ -191,15 +211,20 @@ void BLMB_main(void)
 		Can_checkFifo(BLMB_MAIN_CAN_BUS);
 		Can_checkFifo(DEBUG_CAN_BUS);
 
+		node.channels[BLMB_SERVO_CHANNEL].channel.servo.position = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
+		Dac_SetValue(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position >> 2);
+
 		uint16_t position = 0;
 		Result_t result = BlmbUi_CheckInput(&position);
-		if (result == OOF_NO_NEW_DATA)
-			result = PWM_GetPWM(&position);
+
+		if (BlmbUi_GetUiMode() == BLMB_UI_MODE_NORMAL)
+		{
+			if (result == OOF_NO_NEW_DATA)
+				result = PWM_GetPWM(&position);
+		}
 		if (result == NOICE)
 			Servo_SetPosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, position);
 
-		node.channels[BLMB_SERVO_CHANNEL].channel.servo.position = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
-		Dac_SetValue(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position >> 2);
 		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position));
 
 		BLMB_disableMotor();
@@ -243,15 +268,16 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			 Serial_PutString(", ");*/
-			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.startpoint);
-			Serial_PutString(", ");
-			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.endpoint);
-			Serial_PutString(", ");
-			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position);
-			Serial_PutString(", ");
-			Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_percentage);
-			Serial_PutString(", ");
-			Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);
+			/*
+			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.startpoint);
+			 Serial_PutString(", ");
+			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.endpoint);
+			 Serial_PutString(", ");
+			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position);
+			 Serial_PutString(", ");
+			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_percentage);
+			 Serial_PutString(", ");
+			 Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);*/
 		}
 		if (Serial_CheckInput(serial_str))
 		{

@@ -75,6 +75,12 @@ uint8_t Flash_GetByteFromAddress(uint32_t);
 
 void Flash_SetByteAtAddress(uint32_t, uint8_t);
 
+void Flash_GetBlockStartingFromAddress(uint32_t address, uint8_t *data, uint32_t length);
+void Flash_SetBlockStartingAtAddress(uint32_t address, uint8_t *data, uint32_t length);
+
+void Flash_ChipErase(void);
+void Flash_EraseSector(uint32_t address);
+
 
 
 #endif

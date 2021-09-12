@@ -1,5 +1,6 @@
 #include "flash.h"
 #include "main.h"
+#include "systick.h"
 
 void Flash_InitGPIO(void)
 {
@@ -75,18 +76,18 @@ void Flash_SendInstructionOnly(uint8_t instruction)
 //
 void Flash_ClearBuffer(void)
 {
-	while (QUADSPI->SR & QUADSPI_SR_FTF)
+	uint32_t timeout_counter = 0;
+	while ((QUADSPI->SR & QUADSPI_SR_FTF) && timeout_counter < FLASH_TIMEOUT_VALUE)
 	{
+		timeout_counter++;
 		QUADSPI->DR;
 	}
 }
-void Flash_SendCommand(uint8_t isRead, uint8_t instruction, uint8_t isAddress, uint32_t address, uint8_t isAlternateBytes, uint8_t alternateBytesSize, uint32_t alternateBytes, uint8_t dummyCycles,
-		uint8_t isData, uint32_t dataLength, uint8_t data)
+void Flash_SendCommand(uint8_t isRead, uint8_t instruction, uint8_t isAddress, uint32_t address, uint8_t isAlternateBytes, uint8_t alternateBytesSize, uint32_t alternateBytes, uint8_t dummyCycles, uint8_t isData, uint32_t dataLength, uint8_t data)
 {
 	// The order of the following statements should not be changed in order to avoid sending invalid commands.
 
-	while ((QUADSPI->SR & QUADSPI_SR_BUSY))
-		;		// to be improved using a transfer complete interrupt (TCI)
+	while ((QUADSPI->SR & QUADSPI_SR_BUSY));		// to be improved using a transfer complete interrupt (TCI)
 
 	uint32_t ccr_buffer = 0;
 
@@ -119,14 +120,13 @@ void Flash_SendCommand(uint8_t isRead, uint8_t instruction, uint8_t isAddress, u
 	ccr_buffer |= instruction;
 	ccr_buffer |= (1 << 8);							// IMODE = 01
 
-	while ((QUADSPI->SR & QUADSPI_SR_BUSY))
-		;		// to be improved using a transfer complete interrupt (TCI)
+	while ((QUADSPI->SR & QUADSPI_SR_BUSY));		// to be improved using a transfer complete interrupt (TCI)
 
 	QUADSPI->FCR |= (QUADSPI_FCR_CTCF);
 
 	if (isAddress)
 	{
-		QUADSPI->CCR = ccr_buffer | ((1 << 13) | (1 << 12));	// Sets the address length to 32 bit
+		QUADSPI->CCR = ccr_buffer | (0x3 << 12);	// Sets the address length to 32 bit
 		QUADSPI->AR = address;				// If no data needs to be sent, the command sequence will start here
 	}
 	else
@@ -142,8 +142,7 @@ void Flash_SendCommand(uint8_t isRead, uint8_t instruction, uint8_t isAddress, u
 uint8_t Flash_GetByteFromAddress(uint32_t address)
 {
 	Flash_SendCommand(1, FLASH_READ_DATA_WITH_4_BYTE_ADDRESS, 1, address, 0, 0, 0, 0, 0, 0, 0);
-	while (!(QUADSPI->SR & QUADSPI_SR_TCF))
-		;		// to be improved using a transfer complete interrupt (TCI)
+	while (!(QUADSPI->SR & QUADSPI_SR_TCF));		// to be improved using a transfer complete interrupt (TCI)
 	uint8_t data = QUADSPI->DR;
 	Flash_ClearBuffer();
 	return data;
@@ -158,22 +157,54 @@ void Flash_SetByteAtAddress(uint32_t address, uint8_t data)
 
 	Flash_SendInstructionOnly(FLASH_WRITE_ENABLE);
 	Flash_SendCommand(0, FLASH_PAGE_PROGRAM_WITH_4_BYTE_ADDRESS, 1, address, 0, 0, 0, 0, 1, 0, data);
+	Flash_ClearBuffer();
 
 }
 
 void Flash_GetBlockStartingFromAddress(uint32_t address, uint8_t *data, uint32_t length)
 {
-
+	for (uint32_t c = 0; c < length; c++)
+		data[c] = Flash_GetByteFromAddress(address + c);
 }
 
 void Flash_SetBlockStartingAtAddress(uint32_t address, uint8_t *data, uint32_t length)
 {
-
+	Flash_ClearBuffer();
+	for (uint32_t c = 0; c < length; c++)
+		Flash_SetByteAtAddress(address + c, data[c]);
 }
 
-void Flash_EraseSector(/*????*/)	//maybe block maybe both
+void Flash_ChipErase(void) //TODO CURRENTLY NOT WORKING
+{
+	Flash_SendInstructionOnly(FLASH_WRITE_ENABLE);
+	Flash_SendInstructionOnly(FLASH_CHIP_ERASE);
+	Flash_ClearBuffer();
+}
+void Flash_EraseSector(uint32_t address)	//maybe block maybe both
 {
 
+	Flash_SendInstructionOnly(FLASH_WRITE_ENABLE);
+	Flash_ClearBuffer();
+
+	while ((QUADSPI->SR & QUADSPI_SR_BUSY));		// to be improved using a transfer complete interrupt (TCI)
+
+	uint32_t ccr_buffer = 0;
+	QUADSPI->DLR = 0;
+	ccr_buffer |= (1 << 10);			// ADMODE = 01
+	ccr_buffer |= (1 << 24);			// DMODE = 01
+	ccr_buffer |= (1 << 26);			// FMODE = 01
+	ccr_buffer |= FLASH_SECTOR_ERASE_4_KB_WITH_4_BYTE_ADDRESS;
+	ccr_buffer |= (1 << 8);							// IMODE = 01
+
+	while ((QUADSPI->SR & QUADSPI_SR_BUSY));		// to be improved using a transfer complete interrupt (TCI)
+
+	QUADSPI->FCR |= (QUADSPI_FCR_CTCF);
+
+	QUADSPI->CCR = ccr_buffer | (0x2 << 12);	// Sets the address length to 32 bit
+	QUADSPI->AR = address;				// If no data needs to be sent, the command sequence will start here
+
+	Systick_BusyWait(1000);
+	Flash_ClearBuffer();
 }
 
 void Flash_ResetDevice()

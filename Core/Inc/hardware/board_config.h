@@ -5,9 +5,10 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD IOB
+#define BOARD BLMB
 
 #define SPI_TIMEOUT_VALUE 1000
+#define FLASH_TIMEOUT_VALUE 1000
 #include "lcb.h"
 #include "iob.h"
 #include "blmb.h"
