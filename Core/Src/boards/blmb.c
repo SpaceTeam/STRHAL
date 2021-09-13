@@ -26,7 +26,7 @@
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
-				.generic_channel = { 0 },
+		.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 				{
 					{ 0, CHANNEL_TYPE_SERVO, {{0}} }
@@ -92,7 +92,7 @@ void BLMB_InitFoc(void)
 
 	Systick_BusyWait(100);
 
-	uint16_t pos = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
+	uint16_t pos = AS5x47_GetAngle(BLMB_POSITION_ENCODER) << 2;
 
 	tmc4671_writeInt(TMC4671_ABN_DECODER_COUNT, 0);
 	tmc4671_writeInt(TMC4671_PID_POSITION_ACTUAL, BLMB_CalcMotorPos(pos));
@@ -264,7 +264,7 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			 Serial_PutString(", ");*/
-
+			/*
 			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.startpoint);
 			 Serial_PutString(", ");
 			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.endpoint);
@@ -273,7 +273,9 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_percentage);
 			 Serial_PutString(", ");
-			 Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);
+			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
+			 Serial_PutString(", ");
+			 Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);*/
 		}
 		if (Serial_CheckInput(serial_str))
 		{

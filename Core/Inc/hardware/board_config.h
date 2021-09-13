@@ -24,8 +24,8 @@
 
 //#define DEBUG_THRESHOLDS
 //#define DEBUG_DATA
-#define CAN_DEBUG_SEND
-#define CAN_DEBUG_RECEIVE
+//#define CAN_DEBUG_SEND
+//#define CAN_DEBUG_RECEIVE
 
 //#define DEFAULT_REFRESH_DIVIDER		100
 

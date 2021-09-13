@@ -5,6 +5,10 @@
 #define BLMB_SETTINGS_STATE_ADDRESS 0
 #define BLMB_SETTINGS_FLASH_ADDRESS 1
 
+
+#define BLMB_DEFAULT_STARTPOINT		0
+#define BLMB_DEFAULT_ENDPOINT 		UINT16_MAX
+
 static void BlmbSettings_StoreDefault(void)
 {
 	BLMB_Settings_t default_settings =

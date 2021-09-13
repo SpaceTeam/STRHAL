@@ -58,7 +58,6 @@ Result_t Generic_Status()
 
 Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 {
-
 	Result_t result = OOF;
 	data->channel_mask = 0;
 	for (uint32_t c = 0; c < MAX_CHANNELS; c++)

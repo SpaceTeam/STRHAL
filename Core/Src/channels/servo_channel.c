@@ -15,8 +15,6 @@ Result_t Servo_Status(Channel_t *channel);
 Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Servo_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd);
 
-#define BLMB_DEFAULT_STARTPOINT		0
-#define BLMB_DEFAULT_ENDPOINT 		UINT16_MAX
 Result_t Servo_InitChannel(Servo_Channel_t *servo)
 {
 
@@ -172,7 +170,19 @@ Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 
 static Result_t Servo_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	*data = (uint16_t) node.channels[channel_id].channel.servo.position;
+	Servo_Channel_t *servo = &node.channels[channel_id].channel.servo;
+	int64_t value = (int16_t) servo->position<<2;
+
+	value -= (int32_t) servo->startpoint;
+	int32_t position = (int64_t) value * UINT16_MAX / ((int32_t) servo->endpoint - (int32_t) servo->startpoint);
+	position = (position < 0) ? 0 : position;
+	position = (position > UINT16_MAX) ? UINT16_MAX : position;
+	*data = position;
+	/*
+	Serial_PutString("Feedback: ");
+	Serial_PutInt(servo->position);
+	Serial_PutString(", ");
+	Serial_PrintInt(position);*/
 	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }

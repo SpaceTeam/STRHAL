@@ -14,7 +14,7 @@
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
-				.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
+		.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 					{
 							{ 0, CHANNEL_TYPE_ADC24, {{0}} },
