@@ -90,10 +90,10 @@ Result_t Servo_SetPosition(Servo_Channel_t *servo, uint32_t input)
 	position += (int32_t) servo->startpoint;
 
 	/*int32_t position = (int64_t) input * ((int32_t) servo->endpoint - (int32_t) servo->startpoint) / ((int32_t) UINT16_MAX);
-	position += position >> 1;
-	position += (int32_t) servo->startpoint;
-	position -= (int32_t) (servo->endpoint - servo->startpoint) / 4;
-	*/
+	 position += position >> 1;
+	 position += (int32_t) servo->startpoint;
+	 position -= (int32_t) (servo->endpoint - servo->startpoint) / 4;
+	 */
 	servo->target_percentage = input;
 	servo->target_position = position;
 	return NOICE;
@@ -171,18 +171,14 @@ Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 static Result_t Servo_GetRawData(uint8_t channel_id, uint16_t *data)
 {
 	Servo_Channel_t *servo = &node.channels[channel_id].channel.servo;
-	int64_t value = (int16_t) servo->position<<2;
+	int64_t value = (int16_t) servo->position << 2;
 
 	value -= (int32_t) servo->startpoint;
 	int32_t position = (int64_t) value * UINT16_MAX / ((int32_t) servo->endpoint - (int32_t) servo->startpoint);
 	position = (position < 0) ? 0 : position;
 	position = (position > UINT16_MAX) ? UINT16_MAX : position;
 	*data = position;
-	/*
-	Serial_PutString("Feedback: ");
-	Serial_PutInt(servo->position);
-	Serial_PutString(", ");
-	Serial_PrintInt(position);*/
+	servo->position_percentage = position;
 	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	return NOICE;
 }

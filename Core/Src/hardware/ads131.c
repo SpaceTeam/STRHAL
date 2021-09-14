@@ -38,33 +38,41 @@ Result_t Ads131_Init(void)
 	int32_t data[4] =
 	{ 0 };
 	Result_t result = Ads131_ReadRegisters(ADS131_CLOCK, 3, data);
-/*	char send_buffer[256] =
-	{ 0 };
-	Serial_PrintString("REGISTER");
-	for (uint32_t i = 0; i < 4; ++i)
-	{
-		sprintf(send_buffer, "result: %i, data[%ld]: %ld\n\r", result, i, data[i]);
-		Serial_PrintString(send_buffer);
-	}*/
+	char send_buffer[256] =
+	 { 0 };
+	 Serial_PrintString("REGISTER");
+	 for (uint32_t i = 0; i < 4; ++i)
+	 {
+	 sprintf(send_buffer, "result: %i, data[%ld]: %ld\n\r", result, i, data[i]);
+	 Serial_PrintString(send_buffer);
+	 }
 
 	return result;
 }
 
 Result_t Ads131_WriteRegister(uint32_t reg, uint32_t value)
 {
-	uint8_t txData[2] = { (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
-	uint8_t rxData[2] = { 0 };
+	uint8_t txData[2] =
+	{ (ADS131_WREG_OPCODE(0, reg)) << 8, value << 8 };
+	uint8_t rxData[2] =
+	{ 0 };
 	uint32_t tickstart = 0;
-
+Ads131_SetCS(false);
 	Result_t result = SPI_Transmit_Receive(SPI1, txData, rxData, 2);
 
 	// uncomment to receive and print WREG response from ADS
-	/*int32_t txData2[1] = { 0 };
-	 int32_t rxData2[1] = { 0 };
-	 char send_buffer[256] = { 0 };
-	 SPI_Transmit_Receive(SPI1, txData2, rxData2, 1);
-	 sprintf(send_buffer, "Response: %ld\n\r", rxData2[0]);
-	 Serial_Print(send_buffer);*/
+	int32_t txData2[1] =
+	{ 0 };
+	int32_t rxData2[1] =
+	{ 0 };
+	char send_buffer[256] =
+	{ 0 };
+	SPI_Transmit_Receive(SPI1, (uint8_t*)txData2,  (uint8_t*)rxData2, 1);
+
+	Ads131_SetCS(true);
+
+	sprintf(send_buffer, "Response: %ld\n\r", rxData2[0]);
+	Serial_PrintString(send_buffer);
 
 	tickstart = Systick_GetTick();
 	while ((LL_GPIO_ReadInputPort(ADS_nDRDY_GPIO_Port) & ADS_nDRDY_Pin) == 0UL)
@@ -75,7 +83,11 @@ Result_t Ads131_WriteRegister(uint32_t reg, uint32_t value)
 
 	return result;
 }
+void Ads131_SetCS(uint8_t state)
+{
+	GPIO_WriteOutput(ADS_nCS_GPIO_Port, ADS_nCS_Pin, state);
 
+}
 // Requires data.length to be n+1, because ADS sends ack then n register values
 Result_t Ads131_ReadRegisters(uint32_t reg, uint32_t n, int32_t data[])
 {
@@ -86,9 +98,11 @@ Result_t Ads131_ReadRegisters(uint32_t reg, uint32_t n, int32_t data[])
 	int32_t rxData[1] =
 	{ 0 };
 	uint32_t tickstart = 0;
+	Ads131_SetCS(false);
 
-	Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t *) txData1, (uint8_t *) rxData, 1);
-	Result_t result2 = SPI_Transmit_Receive(SPI1, (uint8_t *) txData2, (uint8_t *) data, n + 1);
+	Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t*) txData1, (uint8_t*) rxData, 1);
+	Result_t result2 = SPI_Transmit_Receive(SPI1, (uint8_t*) txData2, (uint8_t*) data, n + 1);
+	Ads131_SetCS(true);
 
 	tickstart = Systick_GetTick();
 	while ((LL_GPIO_ReadInputPort(ADS_nDRDY_GPIO_Port) & ADS_nDRDY_Pin) == 0UL)
@@ -122,7 +136,9 @@ Result_t Ads131_UpdateData(void)
 		int32_t rxData[9] =
 		{ 0 };
 
-		Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t *) txData, (uint8_t *) rxData, 9);
+		Ads131_SetCS(false);
+		Result_t result = SPI_Transmit_Receive(SPI1, (uint8_t*) txData, (uint8_t*) rxData, 9);
+		Ads131_SetCS(true);
 
 		status = rxData[0];
 		for (uint8_t ch = 0; ch < 8; ch++)

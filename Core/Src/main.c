@@ -71,8 +71,10 @@ static void SendGenericData(void)
 	//TODO Add proper Error handling
 	if (result != NOICE)
 	{
+		/*
 		Serial_PutString("CAN ERROR:");
 		Serial_PrintInt(result); //TODO @ANDI Change TO Debug_PrintResult (and implement it)
+		*/
 	}
 	else
 		//Serial_PutString("0x1234567");

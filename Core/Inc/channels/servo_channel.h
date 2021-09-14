@@ -7,6 +7,7 @@
 typedef struct
 {
 	uint32_t position;
+	uint32_t position_percentage;
 	uint32_t target_percentage;
 	uint32_t target_position;
 	uint32_t target_pressure;
@@ -21,9 +22,8 @@ typedef struct
 	uint32_t endpoint;
 	uint32_t pwm_in_enabled;
 	uint32_t refresh_divider;
-	//other servo stuff
-}Servo_Channel_t;
-
+//other servo stuff
+} Servo_Channel_t;
 
 Result_t Servo_InitChannel(Servo_Channel_t *servo);
 Result_t Servo_SetPosition(Servo_Channel_t *servo, uint32_t input);

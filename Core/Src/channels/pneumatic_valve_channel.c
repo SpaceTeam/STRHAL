@@ -20,10 +20,13 @@ Result_t PneumaticValve_InitChannel(PneumaticValve_Channel_t *pneumatic_valve, u
 		pneumatic_valve->on_channel_id = on_channel_id;
 		pneumatic_valve->off_channel_id = off_channel_id;
 		pneumatic_valve->pos_channel_id = pos_channel_id;
-		pneumatic_valve->target_position = 40000;
+		pneumatic_valve->target_position = PNEUMATIC_VALVE_DEFAULT_STARTPOINT;
 		pneumatic_valve->refresh_divider = 0;
 		pneumatic_valve->threshold = PNEUMATIC_VALVE_DEFAULT_THRESHOLD; //TODO LOAD CONFIG
 		pneumatic_valve->hysteresis = PNEUMATIC_VALVE_DEFAULT_HYSTERESIS; //TODO LOAD CONFIG
+		pneumatic_valve->startpoint = PNEUMATIC_VALVE_DEFAULT_STARTPOINT;
+		pneumatic_valve->endpoint = PNEUMATIC_VALVE_DEFAULT_ENDPOINT;
+
 
 		if (node.channels[on_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
 			return OOF;
@@ -116,6 +119,16 @@ static Result_t PneumaticValve_GetRawData(uint8_t channel_id, uint16_t *data)
 {
 	*data = (uint16_t) node.channels[channel_id].channel.pneumatic_valve.position_percentage;
 	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
+	PneumaticValve_Channel_t *valve = &node.channels[channel_id].channel.pneumatic_valve;
+	uint16_t raw_value = 0;
+	Adc16_GetRawData(valve->pos_channel_id, &raw_value);
+
+	int64_t value = raw_value - (int32_t) valve->startpoint;
+	int32_t position = value * UINT16_MAX / ((int32_t) valve->endpoint - (int32_t) valve->startpoint);
+	position = (position < 0) ? 0 : position;
+	position = (position > UINT16_MAX) ? UINT16_MAX : position;
+	*data = position;
+	valve->position_percentage = position;
 	return NOICE;
 }
 

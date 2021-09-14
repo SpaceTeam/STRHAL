@@ -5,7 +5,7 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD BLMB
+#define BOARD LCB
 
 #define SPI_TIMEOUT_VALUE 1000
 #define FLASH_TIMEOUT_VALUE 1000
@@ -40,6 +40,8 @@
 #define ADS_nDRDY_GPIO_Port GPIOC
 #define ADS_nRESET_Pin LL_GPIO_PIN_12
 #define ADS_nRESET_GPIO_Port GPIOC
+#define ADS_nCS_Pin LL_GPIO_PIN_12
+#define ADS_nCS_GPIO_Port GPIOC
 
 
 #define PIN_SPEAKER_N_Pin LL_GPIO_PIN_8

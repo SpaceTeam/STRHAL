@@ -48,9 +48,12 @@ void LCB_TIM2_IRQHandler(void)
 void LCB_main(void)
 {
 	uint64_t tick = 0;
+	uint64_t old_tick = 0;
 
 	LCB_InitAdc();
-	Ads131_Init();
+	Result_t result = Ads131_Init();
+	Serial_PutString("ADS131 INIT: ");
+	Serial_PrintHex(result);
 	char serial_str[1000] =
 	{ 0 };
 	while (1)
@@ -60,6 +63,19 @@ void LCB_main(void)
 		Ads131_UpdateData();
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
+
+		if (tick - old_tick > 500)
+		{
+			old_tick = tick;
+
+			for (uint8_t c = 0; c < 8; c++)
+			{
+				Serial_PutInt(Ads131_GetData(c));
+				Serial_PutString(", ");
+
+			}
+			Serial_PrintString("");
+		}
 
 		if (Serial_CheckInput(serial_str))
 		{
