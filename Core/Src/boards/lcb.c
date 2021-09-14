@@ -10,7 +10,7 @@
 #include "systick.h"
 #include "ui.h"
 #include <string.h>
-#include "git_version.h"
+#include <stdio.h>
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
@@ -40,22 +40,21 @@ void LCB_InitAdc(void)
 	Adc_StartAdc();
 }
 
+
 void LCB_TIM2_IRQHandler(void)
 {
 
 }
 
+#define UART_UPDATE_TIME 100
 void LCB_main(void)
 {
 	uint64_t tick = 0;
-	uint64_t old_tick = 0;
-
+	uint64_t uart_last_updated = 0;
+	char serial_str[1000] = { 0 };
 	LCB_InitAdc();
-	Result_t result = Ads131_Init();
-	Serial_PutString("ADS131 INIT: ");
-	Serial_PrintHex(result);
-	char serial_str[1000] =
-	{ 0 };
+	Ads131_Init();
+
 	while (1)
 	{
 		tick = Systick_GetTick();
@@ -64,17 +63,12 @@ void LCB_main(void)
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-		if (tick - old_tick > 500)
+		if (tick - uart_last_updated >= UART_UPDATE_TIME)
 		{
-			old_tick = tick;
+			uart_last_updated = tick;
 
-			for (uint8_t c = 0; c < 8; c++)
-			{
-				Serial_PutInt(Ads131_GetData(c));
-				Serial_PutString(", ");
-
-			}
-			Serial_PrintString("");
+			sprintf(serial_str, "%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %08ld", Ads131_GetData(0), Ads131_GetData(1), Ads131_GetData(2), Ads131_GetData(3), Ads131_GetData(4), Ads131_GetData(5), Ads131_GetData(6), Ads131_GetData(7), Ads131_GetStatus());
+			Serial_PrintString(serial_str);
 		}
 
 		if (Serial_CheckInput(serial_str))

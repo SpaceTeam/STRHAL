@@ -40,8 +40,8 @@
 #define ADS_nDRDY_GPIO_Port GPIOC
 #define ADS_nRESET_Pin LL_GPIO_PIN_12
 #define ADS_nRESET_GPIO_Port GPIOC
-#define ADS_nCS_Pin LL_GPIO_PIN_12
-#define ADS_nCS_GPIO_Port GPIOC
+#define ADS_nCS_Pin LL_GPIO_PIN_15
+#define ADS_nCS_GPIO_Port GPIOA
 
 
 #define PIN_SPEAKER_N_Pin LL_GPIO_PIN_8
