@@ -103,7 +103,7 @@ BlmbUi_Mode_t BlmbUi_GetUiMode(void)
 
 static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 {
-
+static uint32_t prev_pos = 0;
 	if (select_button_state == BLMB_UI_LONG_PRESSED)
 	{
 		speed = (speed + 2) % BLMB_UI_LAST_SPEED;
@@ -112,6 +112,7 @@ static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 		switch (mode)
 		{
 			case BLMB_UI_MODE_CALIBRATE_OPEN:
+				prev_pos = servo->target_percentage;
 				Servo_SetPosition(servo, 0);
 				break;
 			case BLMB_UI_MODE_CALIBRATE_CLOSE:
@@ -122,7 +123,7 @@ static Result_t BlmbUi_ProcessInput(uint16_t *return_var)
 			default:
 				servo->endpoint = servo->target_position;
 				BlmbUi_StoreServoEndpoints(servo->startpoint, servo->endpoint);
-				Servo_SetPosition(servo, servo->target_percentage);
+				Servo_SetPosition(servo, prev_pos);
 				break;
 
 		}

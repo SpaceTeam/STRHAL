@@ -5,7 +5,7 @@
 #define IOB  2
 #define BLMB 3
 
-#define BOARD LCB
+#define BOARD IOB
 
 #define SPI_TIMEOUT_VALUE 1000
 #define FLASH_TIMEOUT_VALUE 1000
@@ -25,12 +25,13 @@
 //#define DEBUG_THRESHOLDS
 //#define DEBUG_DATA
 //#define CAN_DEBUG_SEND
+//#define CAN_DEBUG_RECEIVE_ALL
 //#define CAN_DEBUG_RECEIVE
 
 //#define DEFAULT_REFRESH_DIVIDER		100
 
 #define DEFAULT_REFRESH_DIVIDER		1
-#define DEFAULT_REFRESH_RATE		100
+#define DEFAULT_REFRESH_RATE		100 //TODO FIX : is hardcoded to 50Hz
 #define ADC_REFRESH_RATE			1000
 
 #define SPI_TIMEOUT_VALUE 1000

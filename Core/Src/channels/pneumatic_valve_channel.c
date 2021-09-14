@@ -27,7 +27,6 @@ Result_t PneumaticValve_InitChannel(PneumaticValve_Channel_t *pneumatic_valve, u
 		pneumatic_valve->startpoint = PNEUMATIC_VALVE_DEFAULT_STARTPOINT;
 		pneumatic_valve->endpoint = PNEUMATIC_VALVE_DEFAULT_ENDPOINT;
 
-
 		if (node.channels[on_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
 			return OOF;
 		if (node.channels[off_channel_id].type != CHANNEL_TYPE_DIGITAL_OUT)
@@ -117,9 +116,12 @@ Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *d
 
 static Result_t PneumaticValve_GetRawData(uint8_t channel_id, uint16_t *data)
 {
-	*data = (uint16_t) node.channels[channel_id].channel.pneumatic_valve.position_percentage;
-	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	PneumaticValve_Channel_t *valve = &node.channels[channel_id].channel.pneumatic_valve;
+	if (!valve->enable)
+		return OOF_NO_NEW_DATA;
+
+	*data = (uint16_t) valve->position_percentage;
+	//TODO @ANDI if (No new data)  return OOF_NO_NEW_DATA;
 	uint16_t raw_value = 0;
 	Adc16_GetRawData(valve->pos_channel_id, &raw_value);
 
@@ -134,6 +136,7 @@ static Result_t PneumaticValve_GetRawData(uint8_t channel_id, uint16_t *data)
 
 Result_t PneumaticValve_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 {
+
 	uint16_t *out = (uint16_t*) (data + *length);
 	uint16_t new_data;
 	Result_t result = PneumaticValve_GetRawData(ch_id, &new_data);

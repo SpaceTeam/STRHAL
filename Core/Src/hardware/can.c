@@ -1,6 +1,7 @@
 #include "can.h"
 #include "ui.h"
 #include "serial.h"
+#include "board_config.h"
 #include "systick.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -214,8 +215,18 @@ Result_t Can_InitFdcan(uint32_t can_handle_index)
 	// Enable transmitter delay compensation
 	SET_BIT(can->DBTP, FDCAN_DBTP_TDC);
 
-	if (can == FDCAN1)	// Configure global filter to reject everything
+	if (can == FDCAN1)
+	{
+#ifdef CAN_DEBUG_RECEIVE_ALL
+		//Accept everything
+		can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+#else
+		// Configure global filter to reject everything
 		can->GFC = ((FDCAN_REJECT << FDCAN_GFC_ANFS_Pos) | (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
+#endif
+
+	}
+
 
 	if (can == FDCAN2)	//Accept everything
 		can->GFC = ((FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFS_Pos) | (FDCAN_ACCEPT_IN_RX_FIFO1 << FDCAN_GFC_ANFE_Pos) | (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos) | (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos));
@@ -329,7 +340,9 @@ void Can_checkFifo(uint32_t can_handle_index)
 	{
 		uint8_t get_index = ((can->RXF0S >> 8) & 0x3F);
 		id.uint32 = can_ram->rx_fifo0[get_index].R0.bit.ID >> 18;
-#ifdef CAN_DEBUG_RECEIVE
+
+
+#if defined(CAN_DEBUG_RECEIVE) || defined(CAN_DEBUG_RECEIVE_ALL)
 //		uint8_t is_extended = can_ram->rx_fifo0[get_index].R0.bit.XTD;
 		uint8_t is_remote_frame = can_ram->rx_fifo0[get_index].R0.bit.RTR;
 		uint8_t is_error_passiv = can_ram->rx_fifo0[get_index].R0.bit.ESI;
@@ -366,6 +379,18 @@ void Can_checkFifo(uint32_t can_handle_index)
 		}
 #endif
 
+#ifdef CAN_DEBUG_RECEIVE_ALL
+/*
+		Serial_PutString("id.info.node_id:  ");
+		Serial_PrintInt(id.info.node_id);
+*/
+		for (uint32_t c = 0; c < 12; c++)
+		{
+			Serial_PutString("  ");
+			Serial_PutHex(data.uint8[c]);
+		}
+		Serial_PrintString("");
+#endif
 		Ui_ProcessCanMessage(id, &data, length);
 
 		can->RXF0A = get_index & 0x3F;

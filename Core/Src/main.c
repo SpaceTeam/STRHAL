@@ -35,6 +35,7 @@ int main(void)
 	Can_Init(node.node_id);
 	Serial_PrintInt(node.node_id);
 
+
 	Serial_PrintString("STARTED");
 	Serial_PrintString(GIT_COMMIT_HASH);
 
@@ -78,7 +79,7 @@ static void SendGenericData(void)
 	}
 	else
 		//Serial_PutString("0x1234567");
-		Serial_PutString(", ");
+		Serial_PutString(",");
 }
 
 void main_TIM2_IRQHandler(void)

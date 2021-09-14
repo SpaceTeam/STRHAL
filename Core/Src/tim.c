@@ -75,7 +75,7 @@ void TIM1_Init(void)
 	*prescaler = i;
 	*autoreload = n/i;
 }*/
-void TIM2_Init(uint16_t rate)//TODO TEST
+void TIM2_Init(uint16_t rate)//TODO Fix rate doesn't work
 {
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
@@ -83,7 +83,7 @@ void TIM2_Init(uint16_t rate)//TODO TEST
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 
   uint16_t prescaler = 24000;
-  uint16_t autoreload = 1000;
+  uint16_t autoreload = 100; //TODO FIX hardcoded to 50Hz, for some reason its f = Sysclock / 2 / prescaler / autoreload; f = 50Hz
   //CalculatePRESandARR(rate, &prescaler, &autoreload);
   TIM_InitStruct.Prescaler = prescaler-1;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
@@ -97,13 +97,14 @@ void TIM2_Init(uint16_t rate)//TODO TEST
   NVIC_EnableIRQ(TIM2_IRQn);
 }
 
-void TIM3_Init(uint16_t rate) //TODO TEST
+void TIM3_Init(uint16_t rate) //TODO Fix rate doesn't work
 {
   LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
   uint16_t prescaler = 24000;
-  uint16_t autoreload = 100;
+  uint16_t autoreload = 100;//TODO FIX hardcoded to 50Hz, for some reason its f = Sysclock / 2 / prescaler / autoreload; f = 50Hz
+
   //CalculatePRESandARR(rate, &prescaler, &autoreload);
   TIM_InitStruct.Prescaler = prescaler-1;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
