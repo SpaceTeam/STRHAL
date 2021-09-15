@@ -81,7 +81,9 @@ Result_t Adc24_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 	int32_t new_data = Ads131_GetData(ch_id);
 	if (new_data == ADS131_NO_NEW_DATA)
 		return OOF_NO_NEW_DATA;
-	*out = new_data;
+	*out = new_data>>8;
+/*	if (ch_id == 0)
+		Serial_PrintInt(new_data);*/
 #ifdef DEBUG_DATA
 	Serial_PutInt(new_data);
 	Serial_PutString(", ");

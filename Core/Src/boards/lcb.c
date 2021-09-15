@@ -14,7 +14,7 @@
 
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
-		.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
+		.generic_channel = { NULL, NULL, NULL, NULL, 100, DEFAULT_REFRESH_RATE },
 				.channels =
 					{
 							{ 0, CHANNEL_TYPE_ADC24, {{0}} },
@@ -40,7 +40,6 @@ void LCB_InitAdc(void)
 	Adc_StartAdc();
 }
 
-
 void LCB_TIM2_IRQHandler(void)
 {
 
@@ -51,7 +50,8 @@ void LCB_main(void)
 {
 	uint64_t tick = 0;
 	uint64_t uart_last_updated = 0;
-	char serial_str[1000] = { 0 };
+	char serial_str[1000] =
+	{ 0 };
 	LCB_InitAdc();
 	Ads131_Init();
 
@@ -63,56 +63,57 @@ void LCB_main(void)
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
 
-		if (tick - uart_last_updated >= UART_UPDATE_TIME)
-		{
-			uart_last_updated = tick;
+		 if (tick - uart_last_updated >= UART_UPDATE_TIME)
+		 {
+		 uart_last_updated = tick;
 
-			sprintf(serial_str, "%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %08ld", Ads131_GetData(0), Ads131_GetData(1), Ads131_GetData(2), Ads131_GetData(3), Ads131_GetData(4), Ads131_GetData(5), Ads131_GetData(6), Ads131_GetData(7), Ads131_GetStatus());
-			Serial_PrintString(serial_str);
-		}
+		 sprintf(serial_str, "%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %08ld", Ads131_GetData(0), Ads131_GetData(1), Ads131_GetData(2), Ads131_GetData(3), Ads131_GetData(4), Ads131_GetData(5), Ads131_GetData(6), Ads131_GetData(7), Ads131_GetStatus());
+		 Serial_PrintString(serial_str);
+		 }
 
-		if (Serial_CheckInput(serial_str))
-		{
-			Serial_PrintString(serial_str);
-			uint8_t testdata[64] =
-			{ 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+		/*
+		 if (Serial_CheckInput(serial_str))
+		 {
+		 Serial_PrintString(serial_str);
+		 uint8_t testdata[64] =
+		 { 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
 
-			if (strlen(serial_str) > 4)
-			{
-				if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
-					Serial_PrintString("message sent\n");
-				else
-					Serial_PrintString("FOCK\n");
-			}
-			else
-			{
+		 if (strlen(serial_str) > 4)
+		 {
+		 if (Can_sendMessage(1, 0x598, testdata, 25) == NOICE)
+		 Serial_PrintString("message sent\n");
+		 else
+		 Serial_PrintString("FOCK\n");
+		 }
+		 else
+		 {
 
-				Can_MessageId_t message_id =
-				{ 0 };
-				message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
-				message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
-				message_id.info.node_id = node.node_id;
-				message_id.info.priority = STANDARD_PRIORITY;
+		 Can_MessageId_t message_id =
+		 { 0 };
+		 message_id.info.special_cmd = STANDARD_SPECIAL_CMD;
+		 message_id.info.direction = MASTER2NODE_DIRECTION; //TODO REMOVE: Just here for debugging
+		 message_id.info.node_id = node.node_id;
+		 message_id.info.priority = STANDARD_PRIORITY;
 
-				Can_MessageData_t data =
-				{ 0 };
-				data.bit.info.channel_id = GENERIC_CHANNEL_ID;
-				data.bit.info.buffer = DIRECT_BUFFER;
+		 Can_MessageData_t data =
+		 { 0 };
+		 data.bit.info.channel_id = GENERIC_CHANNEL_ID;
+		 data.bit.info.buffer = DIRECT_BUFFER;
 
-				data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
-				GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
-				getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
+		 data.bit.cmd_id = GENERIC_REQ_GET_VARIABLE;
+		 GetMsg_t *getmsg = (GetMsg_t*) &data.bit.data;
+		 getmsg->variable_id = GENERIC_BUS2_VOLTAGE;
 
-				Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
-				//Result_t result = Generic_NodeInfo();
+		 Result_t result = Ui_SendCanMessage(DEBUG_CAN_BUS, message_id, &data, sizeof(GetMsg_t));
+		 //Result_t result = Generic_NodeInfo();
 
-				if (result == NOICE)
-					Serial_PrintString("Noice");
-				else
-					Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
-			}
-		}
-
+		 if (result == NOICE)
+		 Serial_PrintString("Noice");
+		 else
+		 Serial_PrintString((result == OOF_CAN_TX_FULL) ? "OOF_CAN_TX_FULL" : "Oof");
+		 }
+		 }
+		 */
 	}
 }
 
