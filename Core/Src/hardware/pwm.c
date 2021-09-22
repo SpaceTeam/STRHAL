@@ -88,7 +88,7 @@ Result_t PWM_GetPWM(uint16_t *return_var)
 
 	uint32_t period = LL_TIM_IC_GetCaptureCH2(TIM1);
 	if (period > PWM_PERIOD_MAX50 || period < PWM_PERIOD_MIN50)
-		if(period > PWM_PERIOD_MAX60 || period < PWM_PERIOD_MIN60)
+		if (period > PWM_PERIOD_MAX60 || period < PWM_PERIOD_MIN60)
 			return OOF_NO_NEW_DATA;
 
 	uint32_t position = period - LL_TIM_IC_GetCaptureCH1(TIM1);
@@ -105,7 +105,7 @@ Result_t PWM_GetPWM(uint16_t *return_var)
 	pos = (pos > UINT14_MAX) ? UINT14_MAX : pos;
 	pos = (pos < 0) ? 0 : pos;
 	prev_pos = pos;
-	*return_var = (uint16_t) pos<<2;
+	*return_var = (uint16_t) pos << 2;
 	return NOICE;
 
 }

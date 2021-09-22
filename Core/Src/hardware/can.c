@@ -384,12 +384,28 @@ void Can_checkFifo(uint32_t can_handle_index)
 		Serial_PutString("id.info.node_id:  ");
 		Serial_PrintInt(id.info.node_id);
 */
-		for (uint32_t c = 0; c < 12; c++)
+		if(id.info.node_id == 0)
 		{
-			Serial_PutString("  ");
-			Serial_PutHex(data.uint8[c]);
+			Serial_PutString("id:  ");
+					Serial_PrintInt(id.uint32);
+					Serial_PutString("id.info.node_id:  ");
+					Serial_PrintInt(id.info.node_id);
+					Serial_PutString("is_remote_frame:  ");
+					Serial_PrintInt(is_remote_frame);
+					Serial_PutString("is_error_passiv:  ");
+					Serial_PrintInt(is_error_passiv);
+					Serial_PutString("dlc:  ");
+					Serial_PrintInt(dlc);
+
+					for (uint32_t c = 0; c < length; c++)
+					{
+						Serial_PutInt(c);
+						Serial_PutString(":  ");
+						Serial_PutInt(data.uint8[c]);
+						Serial_PutString("  ");
+						Serial_PrintHex(data.uint8[c]);
+					}
 		}
-		Serial_PrintString("");
 #endif
 		Ui_ProcessCanMessage(id, &data, length);
 

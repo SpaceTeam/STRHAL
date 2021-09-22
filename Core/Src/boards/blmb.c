@@ -232,18 +232,16 @@ void BLMB_main(void)
 		if (tick - old_tick >= 250)
 		{
 			old_tick = tick;
-			/*
-			 Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
-			 Serial_PutString(" ");
-			 Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
-			 Serial_PutString(" ");
-			 Serial_PrintInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
-			 */
 
-			//Serial_PutInt(position);
-			//Serial_PutString(", ");
-			//Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
-			//Serial_PutString(", ");
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
+			Serial_PutString(", ");
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
+
+			Serial_PutString(", ");
+			Serial_PutInt(position);
+			Serial_PutString(", ");
+			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
+			Serial_PutString(", ");
 			//Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
 			//Serial_PutString(", ");
 			//Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
@@ -253,8 +251,8 @@ void BLMB_main(void)
 			//Serial_PutString(", ");
 			//Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
 			//Serial_PutHex(tmc6200_readRegister(TMC6200_GSTAT));
-			//Serial_PutString(", ");
-			//Serial_PrintInt(tick);
+
+			Serial_PrintInt(tick);
 			//Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
 			// Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
 			/*
@@ -279,7 +277,7 @@ void BLMB_main(void)
 		}
 		if (Serial_CheckInput(serial_str))
 		{
-			//Serial_PrintString(serial_str);
+			Serial_PrintString(serial_str);
 			uint32_t input = atoi(serial_str);
 			/*			if(input == 0)
 			 TMC4671_highLevel_pwmOff();

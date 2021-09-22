@@ -109,6 +109,8 @@ Result_t Generic_GenerateDataPayload(DataMsg_t *data, uint32_t *length)
 	Serial_PrintString(" ");
 	Serial_PutString("0");
 #endif
+	if (data->channel_mask == 0)
+		return OOF_NO_NEW_DATA;
 	return NOICE; //TODO
 }
 

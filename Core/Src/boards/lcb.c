@@ -62,14 +62,14 @@ void LCB_main(void)
 		Ads131_UpdateData();
 		Can_checkFifo(LCB_MAIN_CAN_BUS);
 		Can_checkFifo(1);
-
+/*
 		 if (tick - uart_last_updated >= UART_UPDATE_TIME)
 		 {
 		 uart_last_updated = tick;
 
 		 sprintf(serial_str, "%ld, %ld, %ld, %ld, %ld, %ld, %ld, %ld, %08ld", Ads131_GetData(0), Ads131_GetData(1), Ads131_GetData(2), Ads131_GetData(3), Ads131_GetData(4), Ads131_GetData(5), Ads131_GetData(6), Ads131_GetData(7), Ads131_GetStatus());
 		 Serial_PrintString(serial_str);
-		 }
+		 }*/
 
 		/*
 		 if (Serial_CheckInput(serial_str))

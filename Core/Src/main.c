@@ -1,3 +1,4 @@
+#include "board_config.h"
 #include "channel_util.h"
 #include "main.h"
 #include "cmds.h"
@@ -30,8 +31,10 @@ int main(void)
 
 #if BOARD != BLMB
 	Speaker_Init();
-	Speaker_Set(300, 2000 / node.node_id, 100 / node.node_id, node.node_id);
+//	Speaker_Set(300, 2000 / node.node_id, 100 / node.node_id, node.node_id);
+	Speaker_Set(300, 300 , 200, 3);
 #endif
+
 	Can_Init(node.node_id);
 	Serial_PrintInt(node.node_id);
 
@@ -39,10 +42,12 @@ int main(void)
 	Serial_PrintString("STARTED");
 	Serial_PrintString(GIT_COMMIT_HASH);
 
-	TIM2_Init(node.generic_channel.refresh_rate);
 	Flash_Init();
 
+
+	TIM2_Init(node.generic_channel.refresh_rate);
 	LL_TIM_EnableCounter(TIM2);
+
 //	Flash_EraseSector(0);
 /*
 	uint8_t testdata[40] =

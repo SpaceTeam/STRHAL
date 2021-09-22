@@ -5,6 +5,7 @@
 
 #include "serial.h"
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 Result_t PneumaticValve_ResetSettings(Channel_t *channel);
@@ -49,7 +50,7 @@ uint32_t* PneumaticValve_VariableSelection(PneumaticValve_Channel_t *pneumatic_v
 			readonly_var = *node.channels[pneumatic_valve->pos_channel_id].channel.adc16.analog_in;
 			return &readonly_var;
 		case PNEUMATIC_VALVE_TARGET_POSITION:
-			return &pneumatic_valve->target_position;
+			return &pneumatic_valve->target_percentage;
 		case PNEUMATIC_VALVE_THRESHOLD:
 			return &pneumatic_valve->threshold;
 		case PNEUMATIC_VALVE_HYSTERESIS:
@@ -85,6 +86,13 @@ Result_t PneumaticValve_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 	if (var == NULL)
 		return OOF;
 	*var = set_msg->value;
+	if(set_msg->variable_id == PNEUMATIC_VALVE_TARGET_POSITION)
+	{
+		PneumaticValve_Channel_t *valve = &channel->channel.pneumatic_valve;
+		int32_t position = (int64_t) (*var) * ((int32_t) valve->endpoint - (int32_t) valve->startpoint) / UINT16_MAX;
+		position += (int32_t) valve->startpoint;
+		channel->channel.pneumatic_valve.target_position = position;
+	}
 	return PneumaticValve_GetVariable(channel, (GetMsg_t*) set_msg, PNEUMATIC_VALVE_RES_SET_VARIABLE);
 }
 
@@ -98,7 +106,7 @@ Result_t PneumaticValve_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *d
 	if (node.channels[ch_id].type != CHANNEL_TYPE_PNEUMATIC_VALVE)
 		return OOF_WRONG_CHANNEL_TYPE;
 	Channel_t *channel = &node.channels[ch_id];
-	Serial_PrintString("PneumaticValve ProcessMessage");
+//	Serial_PrintString("PneumaticValve ProcessMessage");
 	switch (cmd_id)
 	{
 		case PNEUMATIC_VALVE_REQ_RESET_SETTINGS:
@@ -161,12 +169,33 @@ Result_t PneumaticValve_Update(PneumaticValve_Channel_t *valve)
 			return result;
 
 		int32_t error = valve->target_position - position;
+/*
+		if (labs(error) > valve->threshold)
+			valve->error_counter++;
+		else
+			valve->error_counter = 0;
 
-		int32_t upper_threshold = (valve->threshold + DigitalOut_GetState(valve->off_channel_id) * valve->hysteresis);
-		int32_t lower_threshold = -(valve->threshold + DigitalOut_GetState(valve->on_channel_id) * valve->hysteresis);
+		if (valve->error_counter > PNEUMATIC_MAX_ERRORS)
+		{
+			DigitalOut_SetState(&node.channels[valve->off_channel_id].channel.digital_out, 0);
+			DigitalOut_SetState(&node.channels[valve->on_channel_id].channel.digital_out, 0);
+		}
+		else
+		{*/
+		/*
+		Serial_PutInt(valve->target_position);
+		Serial_PutString(", ");
+		Serial_PutInt(valve->target_percentage);
+		Serial_PutString(", ");
+		Serial_PrintInt(valve->position_percentage);
+		*/
 
-		DigitalOut_SetState(&node.channels[valve->off_channel_id].channel.digital_out, (error > upper_threshold));
-		DigitalOut_SetState(&node.channels[valve->on_channel_id].channel.digital_out, (error < lower_threshold));
+			int32_t upper_threshold = (valve->threshold - DigitalOut_GetState(valve->off_channel_id) * valve->hysteresis);
+			int32_t lower_threshold = -(valve->threshold - DigitalOut_GetState(valve->on_channel_id) * valve->hysteresis);
+
+			DigitalOut_SetState(&node.channels[valve->off_channel_id].channel.digital_out, (error > upper_threshold));
+			DigitalOut_SetState(&node.channels[valve->on_channel_id].channel.digital_out, (error < lower_threshold));
+		//}
 	}
 	return NOICE;
 }

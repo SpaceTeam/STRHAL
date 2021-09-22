@@ -206,19 +206,23 @@ void IOB_main(void)
 		if (tick - old_tick > 500)
 		{
 			old_tick = tick;
-			/*
-			 uint16_t position = 0;
 
-			 Result_t result = Adc16_GetRawData(5, &position);
-			 Serial_PutString("Position: ");
-			 Serial_PutInt(position);
-			 Serial_PutString("  target: ");
-			 Serial_PutInt(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.target_position);
-			 Serial_PutString("  off: ");
-			 Serial_PutInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.off_channel_id));
-			 Serial_PutString("  on: ");
-			 Serial_PrintInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.on_channel_id));
-			 */
+			uint16_t position = 0;
+
+			Result_t result = Adc16_GetRawData(5, &position);
+			Serial_PutString("Position: ");
+			Serial_PutInt(position);
+			Serial_PutString("  pos %: ");
+			Serial_PutInt(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.position_percentage);
+			Serial_PutString("  target: ");
+			Serial_PutInt(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.target_position);
+			Serial_PutString("  target %: ");
+			Serial_PutInt(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.target_percentage);
+			Serial_PutString("  off: ");
+			Serial_PutInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.off_channel_id));
+			Serial_PutString("  on: ");
+			Serial_PrintInt(DigitalOut_GetState(node.channels[PNEUMATIC_VALVE_2_CHANNEL_ID].channel.pneumatic_valve.on_channel_id));
+
 			/*
 			 for (int i = 0; i < MAX_IOB_CHANNELS; i++)
 			 {
