@@ -112,14 +112,20 @@ static uint32_t prev_pos = 0;
 		switch (mode)
 		{
 			case BLMB_UI_MODE_CALIBRATE_OPEN:
+				LL_GPIO_ResetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+				LL_GPIO_SetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
 				prev_pos = servo->target_percentage;
 				Servo_SetPosition(servo, 0);
 				break;
 			case BLMB_UI_MODE_CALIBRATE_CLOSE:
+				LL_GPIO_SetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+				LL_GPIO_ResetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
 				servo->startpoint = servo->target_position;
 				Servo_SetPosition(servo, UINT16_MAX);
 				break;
 			case BLMB_UI_MODE_NORMAL:
+				LL_GPIO_SetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+				LL_GPIO_SetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
 			default:
 				servo->endpoint = servo->target_position;
 				BlmbUi_StoreServoEndpoints(servo->startpoint, servo->endpoint);

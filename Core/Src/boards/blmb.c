@@ -220,10 +220,17 @@ void BLMB_main(void)
 		if (BlmbUi_GetUiMode() == BLMB_UI_MODE_NORMAL)
 		{
 			if (result == OOF_NO_NEW_DATA)
+
 				result = PWM_GetPWM(&position);
+
 		}
 		if (result == NOICE)
+		{
 			Servo_SetPosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, position);
+			LL_GPIO_SetOutputPin(LED_DEBUG_GPIO_Port, LED_DEBUG_Pin);
+		}
+		else
+			LL_GPIO_ResetOutputPin(LED_DEBUG_GPIO_Port, LED_DEBUG_Pin);
 
 		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position));
 
