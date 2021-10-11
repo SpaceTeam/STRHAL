@@ -171,7 +171,7 @@ void BLMB_InitGPIO(void)
 void BLMB_disableMotor(void)
 {
 	static uint16_t angle_correct_counter = 0;
-	if ((abs((int32_t) TMC4671_highLevel_getPositionActual() - (int32_t) TMC4671_highLevel_getPositionTarget()) < BLMB_ERROR_THRESHOLD) && angle_correct_counter < 65535)
+	if ((labs((int32_t) TMC4671_highLevel_getPositionActual() - (int32_t) TMC4671_highLevel_getPositionTarget()) < BLMB_ERROR_THRESHOLD) && angle_correct_counter < BLMB_ERROR_TIMER)
 		angle_correct_counter++;
 	else
 		angle_correct_counter = 0;
@@ -186,7 +186,7 @@ void BLMB_main(void)
 {
 	uint64_t tick = 0;
 	uint64_t old_tick = 0;
-
+	uint8_t blink_counter = 0;
 	BLMB_InitGPIO(); // button inputs, status inputs, chip select outputs
 	Servo_InitChannel(&node.channels[BLMB_SERVO_CHANNEL].channel.servo);
 
@@ -203,7 +203,7 @@ void BLMB_main(void)
 
 	char serial_str[1000] =
 	{ 0 };
-
+	Servo_Channel_t *servo = &node.channels[BLMB_SERVO_CHANNEL].channel.servo;
 	while (1)
 	{
 		tick = Systick_GetTick();
@@ -211,44 +211,72 @@ void BLMB_main(void)
 		Can_checkFifo(BLMB_MAIN_CAN_BUS);
 		Can_checkFifo(DEBUG_CAN_BUS);
 
-		node.channels[BLMB_SERVO_CHANNEL].channel.servo.position = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
-		Dac_SetValue(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position >> 2);
-
+		servo->position = AS5x47_GetAngle(BLMB_POSITION_ENCODER);
+		Servo_GetRawData(BLMB_SERVO_CHANNEL, NULL);
+		Dac_SetValue(servo->position_percentage >> 2);
 		uint16_t position = 0;
 		Result_t result = BlmbUi_CheckInput(&position);
 
 		if (BlmbUi_GetUiMode() == BLMB_UI_MODE_NORMAL)
 		{
 			if (result == OOF_NO_NEW_DATA)
-
 				result = PWM_GetPWM(&position);
-
 		}
 		if (result == NOICE)
 		{
-			Servo_SetPosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, position);
+			Servo_SetPosition(servo, position);
 			LL_GPIO_SetOutputPin(LED_DEBUG_GPIO_Port, LED_DEBUG_Pin);
 		}
 		else
 			LL_GPIO_ResetOutputPin(LED_DEBUG_GPIO_Port, LED_DEBUG_Pin);
 
-		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position));
+		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(servo->target_position));
 
 		BLMB_disableMotor();
 
 		if (tick - old_tick >= 250)
 		{
 			old_tick = tick;
+			blink_counter++;
+			if (blink_counter % 2)
+			{
+				if (servo->position_percentage < ENDPOINT_THRESHOLD)
+				{
+					LL_GPIO_ResetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+					LL_GPIO_SetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
+				}
+				else if ((((uint32_t) 1UL << 16UL) - servo->position_percentage) < ENDPOINT_THRESHOLD)
+				{
+					LL_GPIO_SetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+					LL_GPIO_ResetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
+				}
+				else
+				{
+					LL_GPIO_ResetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+					LL_GPIO_ResetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
+				}
+			}
+			else
+			{
+				LL_GPIO_ResetOutputPin(LED_STATUS_1_GPIO_Port, LED_STATUS_1_Pin);
+				LL_GPIO_ResetOutputPin(LED_STATUS_2_GPIO_Port, LED_STATUS_2_Pin);
+			}
 
-			Serial_PutInt(LL_TIM_IC_GetCaptureCH1(TIM1));
+			Serial_PutInt(servo->startpoint);
 			Serial_PutString(", ");
-			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1));
-
+			Serial_PutInt(servo->endpoint);
 			Serial_PutString(", ");
 			Serial_PutInt(position);
+			Serial_PutString(",     ");
+			Serial_PutInt(servo->position_percentage);
 			Serial_PutString(", ");
-			Serial_PutInt(LL_TIM_IC_GetCaptureCH2(TIM1) - LL_TIM_IC_GetCaptureCH1(TIM1));
+			Serial_PutInt(servo->position);
+			Serial_PutString(",     ");
+			Serial_PutInt(servo->target_position);
 			Serial_PutString(", ");
+			Serial_PutInt(servo->target_percentage);
+			Serial_PrintString(",     ");
+
 			//Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
 			//Serial_PutString(", ");
 			//Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
@@ -259,7 +287,7 @@ void BLMB_main(void)
 			//Serial_PrintHex(as5147_getAngle(BLMB_POSITION_ENCODER));
 			//Serial_PutHex(tmc6200_readRegister(TMC6200_GSTAT));
 
-			Serial_PrintInt(tick);
+//			Serial_PrintInt(tick);
 			//Serial_PrintInt(LL_GPIO_IsInputPinSet(STATUS_GPIO_Port, STATUS_Pin));
 			// Serial_PrintInt(LL_GPIO_IsInputPinSet(FAULT_GPIO_Port, FAULT_Pin));
 			/*
@@ -269,18 +297,7 @@ void BLMB_main(void)
 			 Serial_PutString(", ");
 			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
 			 Serial_PutString(", ");*/
-			/*
-			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.startpoint);
-			 Serial_PutString(", ");
-			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.endpoint);
-			 Serial_PutString(", ");
-			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_position);
-			 Serial_PutString(", ");
-			 Serial_PutInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.target_percentage);
-			 Serial_PutString(", ");
-			 Serial_PutInt(AS5x47_GetAngle(BLMB_MOTOR_ENCODER));
-			 Serial_PutString(", ");
-			 Serial_PrintInt(node.channels[BLMB_SERVO_CHANNEL].channel.servo.position);*/
+
 		}
 		if (Serial_CheckInput(serial_str))
 		{
@@ -290,7 +307,7 @@ void BLMB_main(void)
 			 TMC4671_highLevel_pwmOff();
 			 else
 			 TMC4671_highLevel_positionMode2();*/
-			Servo_SetPosition(&node.channels[BLMB_SERVO_CHANNEL].channel.servo, input);
+			Servo_SetPosition(servo, input);
 
 		}
 	}
