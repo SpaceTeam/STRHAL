@@ -24,12 +24,16 @@
 #include "git_version.h"
 #include <string.h>
 
+static AdcData_t* torque_ptr = NULL;
+
 //@formatter:off
 Node_t node = { .node_id = 0, .firmware_version = GIT_COMMIT_HASH_VALUE,
 		.generic_channel = { NULL, NULL, NULL, NULL, DEFAULT_REFRESH_DIVIDER, DEFAULT_REFRESH_RATE },
 				.channels =
 				{
-					{ 0, CHANNEL_TYPE_SERVO, {{0}} }
+					{ 0, CHANNEL_TYPE_SERVO, {{0}} },
+					{ 1, CHANNEL_TYPE_ADC16, {{0}} },
+					{ 2, CHANNEL_TYPE_ADC16, {{0}} }
 				}
 				};
 //@formatter:on
@@ -62,6 +66,9 @@ void BLMB_InitAdc(void)
 	node.generic_channel.bus2_voltage = Adc_AddRegularChannel(PWR_BUS_VOLTAGE_2);
 	node.generic_channel.power_voltage = Adc_AddRegularChannel(SUPPLY_VOLTAGE_SENSE);
 	node.generic_channel.power_current = Adc_AddRegularChannel(SUPPLY_CURRENT_SENSE);
+
+	node.channels[1].channel.adc16.analog_in = Adc_AddRegularChannel(1);
+	node.channels[2].channel.adc16.analog_in = torque_ptr;
 	Adc_Calibrate();
 	Adc_StartAdc();
 }
@@ -232,6 +239,8 @@ void BLMB_main(void)
 
 		TMC4671_highLevel_setPosition(BLMB_CalcMotorPos(servo->target_position));
 
+		*torque_ptr = TMC4671_highLevel_getTorqueActual();
+
 		BLMB_disableMotor();
 
 		if (tick - old_tick >= 250)
@@ -275,6 +284,8 @@ void BLMB_main(void)
 			Serial_PutInt(servo->target_position);
 			Serial_PutString(", ");
 			Serial_PutInt(servo->target_percentage);
+			Serial_PutString(", ");
+			Serial_PutInt(*node.channels[2].channel.adc16.analog_in);
 			Serial_PrintString(",     ");
 
 			//Serial_PutInt(AS5x47_GetAngle(BLMB_POSITION_ENCODER));
@@ -308,6 +319,13 @@ void BLMB_main(void)
 			 else
 			 TMC4671_highLevel_positionMode2();*/
 			Servo_SetPosition(servo, input);
+
+			/*
+			SetMsg_t set_msg = { 0 };
+			set_msg.variable_id = SERVO_MAX_TORQUE;
+			set_msg.value = 10000;
+			Servo_ProcessMessage(0, SERVO_REQ_SET_VARIABLE, (uint8_t*)&set_msg, 0);
+			*/
 
 		}
 	}

@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "foc/tmc4671/TMC4671.h"
+
 Result_t Servo_ResetSettings(Channel_t *channel);
 Result_t Servo_Status(Channel_t *channel);
 Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
@@ -22,11 +24,11 @@ Result_t Servo_InitChannel(Servo_Channel_t *servo)
 	servo->target_percentage = 0;
 	servo->target_position = 0;
 	servo->target_pressure = 0;
-	servo->max_speed = 0;
-	servo->max_accel = 0;
-	servo->max_torque = 0;
-	servo->p_param = 0;
-	servo->i_param = 0;
+	servo->max_speed = 5000;
+	servo->max_accel = 100;
+	servo->max_torque = 10000;
+	servo->p_param = (200 << TMC4671_PID_POSITION_P_SHIFT);
+	servo->i_param = (0 << TMC4671_PID_POSITION_I_SHIFT);
 	servo->d_param = 0;
 	servo->startpoint = 0;
 	servo->endpoint = 0;
@@ -128,6 +130,7 @@ Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg)
 		if (var == NULL)
 			return OOF;
 		*var = set_msg->value;
+		Servo_Update(&channel->channel.servo, set_msg->variable_id);
 	}
 	return Servo_GetVariable(channel, (GetMsg_t*) set_msg, SERVO_RES_SET_VARIABLE);
 }
@@ -202,8 +205,27 @@ Result_t Servo_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 	return NOICE;
 }
 
-Result_t Servo_Update(Servo_Channel_t *servo)
+Result_t Servo_Update(Servo_Channel_t *servo, uint8_t var_id)
 {
-
-	return OOF_NOT_IMPLEMENTED;
+	switch (var_id)
+	{
+		case SERVO_MAX_SPEED:
+			tmc4671_writeInt(TMC4671_PID_VELOCITY_LIMIT, servo->max_speed);
+			break;
+		case SERVO_MAX_ACCEL:
+			tmc4671_writeInt(TMC4671_PID_ACCELERATION_LIMIT, servo->max_accel);
+			break;
+		case SERVO_MAX_TORQUE:
+			tmc4671_writeInt(TMC4671_PID_TORQUE_FLUX_LIMITS, servo->max_torque);
+			break;
+		case SERVO_P_PARAM:
+			tmc4671_setPositionPI(servo->p_param, servo->i_param);
+			break;
+		case SERVO_I_PARAM:
+			tmc4671_setPositionPI(servo->p_param, servo->i_param);
+			break;
+		default:
+			break;
+	}
+	return NOICE;
 }
