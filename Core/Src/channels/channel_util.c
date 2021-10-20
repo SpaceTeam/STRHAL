@@ -77,3 +77,34 @@ Result_t ChannelUtil_GetVariable(Channel_t *channel, GetMsg_t *get_msg, uint8_t 
 
 	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, sizeof(SetMsg_t));
 }
+
+Result_t ChannelUtil_Ack(Channel_t *channel, uint8_t response_cmd) // TODO test and talk about how to handle no-payload-msgs
+{
+	Can_MessageId_t message_id =
+	{ 0 };
+	ChannelUtil_DefaultMessageId(&message_id);
+
+	Can_MessageData_t data =
+	{ 0 };
+
+	data.bit.cmd_id = response_cmd;
+	data.bit.info.buffer = DIRECT_BUFFER;
+
+	if(channel == NULL)
+	{
+		data.bit.info.channel_id = GENERIC_CHANNEL_ID;
+	}
+	else
+	{
+		data.bit.info.channel_id = channel->id;
+	}
+
+#ifdef DEBUG_DATA
+
+	char serial_str[20] =
+	{ 0 };
+	Serial_PutString("ACK");
+#endif
+
+	return Ui_SendCanMessage( MAIN_CAN_BUS, message_id, &data, 0);
+}

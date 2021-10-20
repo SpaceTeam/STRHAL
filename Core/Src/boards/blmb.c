@@ -53,6 +53,19 @@ void BLMB_LoadSettings(void)
 	servo->max_accel = settings.max_accel;
 	servo->max_speed = settings.max_speed;
 	servo->max_torque = settings.max_torque;
+	servo->p_param = settings.p_param;
+	servo->i_param = settings.i_param;
+	servo->d_param = settings.d_param;
+	servo->pwm_in_enabled = settings.pwm_in_enabled;
+	servo->refresh_divider = 0; // TODO ask about default setting
+	servo->pressure_control_enabled = settings.pressure_control_enabled;
+	servo->pos_p_param = settings.pos_p_param;
+	servo->pos_i_param = settings.pos_i_param;
+	servo->vel_p_param = settings.vel_p_param;
+	servo->vel_i_param = settings.vel_i_param;
+	servo->torq_p_param = settings.torq_p_param;
+	servo->torq_i_param = settings.torq_i_param;
+
 	Serial_PutString("\r\nLoadSettings\r\nStartpoint: ");
 	Serial_PutInt(servo->startpoint);
 	Serial_PutString("\r\nEndpoint: ");

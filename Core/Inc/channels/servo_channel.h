@@ -17,11 +17,17 @@ typedef struct
 	uint32_t p_param;
 	uint32_t i_param;
 	uint32_t d_param;
-	uint32_t sensor_channel_id;
 	uint32_t startpoint;
 	uint32_t endpoint;
 	uint32_t pwm_in_enabled;
 	uint32_t refresh_divider;
+	uint32_t pressure_control_enabled;
+	uint32_t pos_p_param;
+	uint32_t pos_i_param;
+	uint32_t vel_p_param;
+	uint32_t vel_i_param;
+	uint32_t torq_p_param;
+	uint32_t torq_i_param;
 //other servo stuff
 } Servo_Channel_t;
 

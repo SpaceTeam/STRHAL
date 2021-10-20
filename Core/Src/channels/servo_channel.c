@@ -5,6 +5,7 @@
 #include "channel_util.h"
 #include "channels.h"
 #include "ui.h"
+#include "blmb_settings.h"
 
 #include "serial.h"
 #include <string.h>
@@ -13,30 +14,18 @@
 #include "foc/tmc4671/TMC4671.h"
 
 Result_t Servo_ResetSettings(Channel_t *channel);
+Result_t Servo_SaveSettings(Channel_t *channel);
 Result_t Servo_Status(Channel_t *channel);
 Result_t Servo_SetVariable(Channel_t *channel, SetMsg_t *set_msg);
 Result_t Servo_GetVariable(Channel_t *channel, GetMsg_t *get_msg, PNEUMATIC_VALVE_CMDs response_cmd);
 
-Result_t Servo_InitChannel(Servo_Channel_t *servo)
+Result_t Servo_InitChannel(Servo_Channel_t *servo) // TODO Servo: maybe remove because unnecessary
 {
-
-	servo->position = 0;
-	servo->target_percentage = 0;
-	servo->target_position = 0;
-	servo->target_pressure = 0;
-	servo->max_speed = 5000;
-	servo->max_accel = 100;
-	servo->max_torque = 10000;
-	servo->p_param = (200 << TMC4671_PID_POSITION_P_SHIFT);
-	servo->i_param = (0 << TMC4671_PID_POSITION_I_SHIFT);
-	servo->d_param = 0;
-	servo->startpoint = 0;
-	servo->endpoint = 0;
-	servo->pwm_in_enabled = 0;
-	servo->refresh_divider = 0;
-
 	if (node.channels[BLMB_SENSOR_CHANNEL].type != CHANNEL_TYPE_ADC16)
 		return OOF;
+
+	if (node.channels[BLMB_TORQUE_CHANNEL].type != CHANNEL_TYPE_ADC16)
+			return OOF;
 
 	return NOICE;
 }
@@ -66,8 +55,6 @@ uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_
 			return &servo->i_param;
 		case SERVO_D_PARAM:
 			return &servo->d_param;
-		case SERVO_SENSOR_CHANNEL_ID:
-			return &servo->sensor_channel_id;
 		case SERVO_POSITION_STARTPOINT:
 			return &servo->startpoint;
 		case SERVO_POSITION_ENDPOINT:
@@ -76,6 +63,20 @@ uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_
 			return &servo->pwm_in_enabled;
 		case SERVO_SENSOR_REFRESH_DIVIDER:
 			return &servo->refresh_divider;
+		case SERVO_PRESSURE_CONTROL_ENABLED:
+			return &servo->pressure_control_enabled;
+		case SERVO_POS_P_PARAM:
+			return &servo->pos_p_param;
+		case SERVO_POS_I_PARAM:
+			return &servo->pos_i_param;
+		case SERVO_VEL_P_PARAM:
+			return &servo->vel_p_param;
+		case SERVO_VEL_I_PARAM:
+			return &servo->vel_i_param;
+		case SERVO_TORQ_P_PARAM:
+			return &servo->torq_p_param;
+		case SERVO_TORQ_I_PARAM:
+			return &servo->torq_i_param;
 		default:
 			return NULL;
 	}
@@ -84,7 +85,33 @@ uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_
 Result_t Servo_ResetSettings(Channel_t *channel)
 {
 	Serial_PrintString("ResetSettings");
-	return OOF_NOT_IMPLEMENTED;
+	BlmbSettings_StoreDefault();
+	return ChannelUtil_Ack(channel, SERVO_RES_RESET_SETTINGS);
+}
+Result_t Servo_SaveSettings(Channel_t *channel) // TODO Servo: not all variables are settings?!
+{
+	Serial_PrintString("SaveSettings");
+	BLMB_Settings_t settings =
+	{ 0 };
+	Servo_Channel_t *servo = &channel->channel.servo;
+	settings.startpoint = servo->startpoint;
+	settings.endpoint = servo->endpoint;
+	settings.max_accel = servo->max_accel;
+	settings.max_speed = servo->max_speed;
+	settings.max_torque = servo->max_torque;
+	settings.p_param = servo->p_param;
+	settings.i_param = servo->i_param;
+	settings.d_param = servo->d_param;
+	settings.pwm_in_enabled = servo->pwm_in_enabled;
+	settings.pressure_control_enabled = servo->pressure_control_enabled;
+	settings.pos_p_param = servo->pos_p_param;
+	settings.pos_i_param = servo->pos_i_param;
+	settings.vel_p_param = servo->vel_p_param;
+	settings.vel_i_param = servo->vel_i_param;
+	settings.torq_p_param = servo->torq_p_param;
+	settings.torq_i_param = servo->torq_i_param;
+	BlmbSettings_Store(&settings);
+	return ChannelUtil_Ack(channel, SERVO_RES_SAVE_SETTINGS);
 }
 uint16_t Servo_CalculatePercentagePosition(Servo_Channel_t *servo, uint16_t input)
 {
@@ -168,6 +195,8 @@ Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint
 			return Servo_GetVariable(channel, (GetMsg_t*) data, SERVO_RES_GET_VARIABLE);
 		case SERVO_REQ_MOVE:
 			return Servo_Move(channel, (ServoMoveMsg_t*) data);
+		case SERVO_REQ_SAVE_SETTINGS:
+			return Servo_SaveSettings(channel);
 		default:
 			return OOF_UNKNOWN_CMD;
 	}
@@ -218,11 +247,23 @@ Result_t Servo_Update(Servo_Channel_t *servo, uint8_t var_id)
 		case SERVO_MAX_TORQUE:
 			tmc4671_writeInt(TMC4671_PID_TORQUE_FLUX_LIMITS, servo->max_torque);
 			break;
-		case SERVO_P_PARAM:
-			tmc4671_setPositionPI(servo->p_param, servo->i_param);
+		case SERVO_POS_P_PARAM:
+			tmc4671_setPositionPI(servo->pos_p_param, servo->pos_i_param);
 			break;
-		case SERVO_I_PARAM:
-			tmc4671_setPositionPI(servo->p_param, servo->i_param);
+		case SERVO_POS_I_PARAM:
+			tmc4671_setPositionPI(servo->pos_p_param, servo->pos_i_param);
+			break;
+		case SERVO_VEL_P_PARAM:
+			tmc4671_setVelocityPI(servo->vel_p_param, servo->vel_i_param);
+			break;
+		case SERVO_VEL_I_PARAM:
+			tmc4671_setVelocityPI(servo->vel_p_param, servo->vel_i_param);
+			break;
+		case SERVO_TORQ_P_PARAM:
+			tmc4671_setTorqueFluxPI(servo->torq_p_param, servo->torq_i_param);
+			break;
+		case SERVO_TORQ_I_PARAM:
+			tmc4671_setTorqueFluxPI(servo->torq_p_param, servo->torq_i_param);
 			break;
 		default:
 			break;
