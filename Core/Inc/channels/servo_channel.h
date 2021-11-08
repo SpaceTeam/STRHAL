@@ -28,6 +28,9 @@ typedef struct
 	uint32_t vel_i_param;
 	uint32_t torq_p_param;
 	uint32_t torq_i_param;
+	uint32_t pressure_hysteresis; // 10x actual hysteresis (fixed point with 1 decimal)
+	uint32_t filter_enabled;
+	uint32_t filter_alpha; // 1000x actual alpha value (to avoid float)
 //other servo stuff
 } Servo_Channel_t;
 
@@ -37,6 +40,7 @@ Result_t Servo_SetPosition(Servo_Channel_t *servo, uint32_t input);
 Result_t Servo_SetRelativePosition(Servo_Channel_t *servo, int16_t distance);
 Result_t Servo_ProcessMessage(uint8_t ch_id, uint8_t cmd_id, uint8_t *data, uint32_t length);
 Result_t Servo_GetRawData(uint8_t channel_id, uint16_t *data);
+Result_t Servo_GetFilteredData(uint8_t channel_id, uint16_t *data);
 Result_t Servo_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length);
 Result_t Servo_Update(Servo_Channel_t *servo, uint8_t var_id);
 uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_t ch_id);

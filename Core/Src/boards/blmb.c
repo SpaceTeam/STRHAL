@@ -202,6 +202,59 @@ void BLMB_disableMotor(void)
 		swdriver_setEnable(true);
 }
 
+Result_t BLMB_PressureControl(uint16_t *return_var, Servo_Channel_t *servo, AdcData_t *pressure_raw)
+{
+	static uint64_t contrl_tick_last = 0;
+	static float pressure_old = -100;
+	static float threshold = 0;
+
+	if(Systick_GetTick() > contrl_tick_last) // at least 1ms passed
+	{
+		float dt = Systick_GetTick() - contrl_tick_last;
+		contrl_tick_last = Systick_GetTick();
+		//static float valvePercentage = 1; //init valve percentage
+
+		float pressure = (float)*pressure_raw * 0.023497 - 8.74088; //TODO: change to actual data sheet conversion
+		static float filt_pressure = -100;
+		filt_pressure = filt_pressure * (0.999) + pressure * 0.001;
+		float dp = filt_pressure - pressure_old;
+		float gradient = dp / dt;
+		static float gradient_filt = 0;
+		gradient_filt = gradient_filt * 0.99 + gradient * 0.01;
+		static uint16_t grad_pos_count = 0;
+		if(gradient_filt >= -0.001)
+		{
+			grad_pos_count++;
+		}
+		else
+		{
+			grad_pos_count = 0;
+		}
+		if(pressure > threshold) //if pressure too high
+		{
+			threshold = servo->target_pressure - servo->pressure_hysteresis/10;
+			if(grad_pos_count > 100)
+			{
+				if(servo->target_percentage < 0xffff)
+				{
+					*return_var = servo->target_percentage + ((servo->target_percentage < 0x4000) ? 0x1A00 : 0x0400); // ramp up to open
+				}
+			}
+		}
+		else // pressure < threshold
+		{
+			threshold = servo->target_pressure;
+			if(servo->target_percentage != 0)
+			{
+				*return_var = 0;
+			}
+		}
+		pressure_old = filt_pressure; //set old pressure to current pressure
+	}
+
+	return NOICE;
+}
+
 void BLMB_main(void)
 {
 	uint64_t tick = 0;
@@ -235,7 +288,17 @@ void BLMB_main(void)
 		Servo_GetRawData(BLMB_SERVO_CHANNEL, NULL);
 		Dac_SetValue(servo->position_percentage >> 2);
 		uint16_t position = 0;
-		Result_t result = BlmbUi_CheckInput(&position);
+		Result_t result;
+
+		//TODO calc position with PID if enabled
+		if(servo->pressure_control_enabled)
+		{
+			result = BLMB_PressureControl(&position, servo, node.channels[BLMB_SENSOR_CHANNEL].channel.adc16.analog_in);
+		}
+		else
+		{
+			result = BlmbUi_CheckInput(&position);
+		}
 
 		if (BlmbUi_GetUiMode() == BLMB_UI_MODE_NORMAL)
 		{

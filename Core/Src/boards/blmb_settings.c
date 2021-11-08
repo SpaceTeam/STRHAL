@@ -12,7 +12,7 @@
 #define BLMB_DEFAULT_MAX_SPEED 					5000
 #define BLMB_DEFAULT_MAX_TORQ 					10000
 #define BLMB_DEFAULT_PWM_IN_ENABLED				1
-#define BLMB_DEFAULT_PRESSURE_CONTROL_ENABLED	0
+#define BLMB_DEFAULT_PRESSURE_CONTROL_ENABLED	1
 #define BLMB_DEFAULT_P_PARAM 					1
 #define BLMB_DEFAULT_I_PARAM 					1
 #define BLMB_DEFAULT_D_PARAM 					1
@@ -22,6 +22,7 @@
 #define BLMB_DEFAULT_VEL_I_PARAM				4000
 #define BLMB_DEFAULT_TORQ_P_PARAM				100
 #define BLMB_DEFAULT_TORQ_I_PARAM				1000
+#define BLMB_DEFAULT_PRESSURE_HYSTERESIS		10
 
 void BlmbSettings_StoreDefault(void)
 {
@@ -43,6 +44,7 @@ void BlmbSettings_StoreDefault(void)
 	default_settings.vel_i_param = BLMB_DEFAULT_VEL_I_PARAM;
 	default_settings.torq_p_param = BLMB_DEFAULT_TORQ_P_PARAM;
 	default_settings.torq_i_param = BLMB_DEFAULT_TORQ_I_PARAM;
+	default_settings.pressure_hysteresis = BLMB_DEFAULT_PRESSURE_HYSTERESIS;
 
 	BlmbSettings_Store(&default_settings);
 }

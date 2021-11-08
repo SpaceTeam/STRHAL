@@ -20,6 +20,7 @@ typedef struct
 		uint32_t vel_i_param;
 		uint32_t torq_p_param;
 		uint32_t torq_i_param;
+		uint32_t pressure_hysteresis;
 }BLMB_Settings_t;
 
 

@@ -77,6 +77,12 @@ uint32_t* Servo_VariableSelection(Servo_Channel_t *servo, uint8_t var_id, uint8_
 			return &servo->torq_p_param;
 		case SERVO_TORQ_I_PARAM:
 			return &servo->torq_i_param;
+		case SERVO_PRESSURE_HYSTERESIS:
+			return &servo->pressure_hysteresis;
+		case SERVO_FILTER_ENABLED:
+			return &servo->filter_enabled;
+		case SERVO_FILTER_ALPHA:
+			return &servo->filter_alpha;
 		default:
 			return NULL;
 	}
@@ -110,6 +116,7 @@ Result_t Servo_SaveSettings(Channel_t *channel) // TODO Servo: not all variables
 	settings.vel_i_param = servo->vel_i_param;
 	settings.torq_p_param = servo->torq_p_param;
 	settings.torq_i_param = servo->torq_i_param;
+	settings.pressure_hysteresis = servo->pressure_hysteresis;
 	BlmbSettings_Store(&settings);
 	return ChannelUtil_Ack(channel, SERVO_RES_SAVE_SETTINGS);
 }
@@ -218,11 +225,36 @@ Result_t Servo_GetRawData(uint8_t channel_id, uint16_t *data)
 	return NOICE;
 }
 
+Result_t Servo_GetFilteredData(uint8_t channel_id, uint16_t *data) // can potentially be optimized to using integer
+{
+	Servo_Channel_t *servo = &node.channels[channel_id].channel.servo;
+	float alpha = servo->filter_alpha/1000.0f;
+	uint16_t new_data;
+	Result_t result = Servo_GetRawData(channel_id, &new_data);
+	if (result != NOICE)
+		return result;
+	float raw = new_data;
+	static float filtered = 0;
+	filtered = filtered * alpha + raw * (1-alpha);
+	if(data != NULL)
+		*data = filtered;
+	return NOICE;
+}
+
 Result_t Servo_GetData(uint8_t ch_id, uint8_t *data, uint32_t *length)
 {
+	Servo_Channel_t *servo = &node.channels[ch_id].channel.servo;
 	uint16_t *out = (uint16_t*) (data + *length);
 	uint16_t new_data;
-	Result_t result = Servo_GetRawData(ch_id, &new_data);
+	Result_t result;
+	if (servo->filter_enabled)
+	{
+		result = Servo_GetFilteredData(ch_id, &new_data);
+	}
+	else
+	{
+		result = Servo_GetRawData(ch_id, &new_data);
+	}
 	if (result != NOICE)
 		return result;
 	*out = new_data;
