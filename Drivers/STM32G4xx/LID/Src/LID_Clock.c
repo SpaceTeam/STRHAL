@@ -1,22 +1,25 @@
-#include "ECU_Clock.h"
-
 #include <stm32g4xx_ll_rcc.h>
 #include <stm32g4xx_ll_cortex.h>
 #include <stm32g4xx_ll_pwr.h>
 #include <stm32g4xx_ll_utils.h>
 #include <stm32g4xx_ll_bus.h>
 #include <stm32g4xx_ll_system.h>
+#include "../Inc/LID_Clock.h"
 
-static int _SysClock_Init();
+static LID_Clock_Status_t _SysClock_Init();
 
-int ECU_Clock_Init() {
-	_SysClock_Init();
-	return 0;
+LID_Clock_Status_t LID_Clock_Init() {
+	LID_Clock_Status_t e = LID_CLOCK_GOOD;
+
+	e = _SysClock_Init();
+	if(e != LID_CLOCK_GOOD)
+		return e;
+
+	return LID_CLOCK_GOOD;
 }
 
-int _SysClock_Init() {
+LID_Clock_Status_t _SysClock_Init() {
 	LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-
 	while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0)
 	{
 	}
@@ -40,5 +43,6 @@ int _SysClock_Init() {
 	LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
 	LL_SetSystemCoreClock(16000000);
 
-	return 0;
+
+	return LID_CLOCK_GOOD;
 }

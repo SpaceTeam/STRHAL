@@ -37,10 +37,10 @@
 *.hex
 
 # Debug files
-Debug/
-Release/
-Debug_G4xx/
+Debug_H7xx/
 Release_H7xx/
+Debug_G4xx/
+Release_G4xx/
 *.dSYM/
 *.su
 *.idb
