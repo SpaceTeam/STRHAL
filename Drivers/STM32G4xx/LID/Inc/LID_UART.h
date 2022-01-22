@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#define LID_UART_BAUDRATE 115200
+
 typedef enum {
 	LID_UART_STATE_00 = 0x00,
 	LID_UART_STATE_TX = (1<<1),
