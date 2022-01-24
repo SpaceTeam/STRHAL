@@ -16,10 +16,24 @@ typedef struct {
 	uint32_t n;
 } LID_LinearBuffer_t;
 
-void LID_LinearBuffer_Init(LID_LinearBuffer_t *buf, uint8_t *mem, uint32_t size);
+typedef struct {
+	uint8_t *data;
+	LID_Buffer_State_t state;
+	uint32_t size;
+	uint32_t t;
+	uint32_t n;
+} LID_CircularBuffer_t;
 
+void LID_LinearBuffer_Init(LID_LinearBuffer_t *buf, uint8_t *mem, uint32_t size);
 uint32_t LID_LinearBuffer_Write(LID_LinearBuffer_t *buf, uint8_t *data, uint32_t n);
 uint32_t LID_LinearBuffer_Read(LID_LinearBuffer_t *buf, uint8_t *data, uint32_t n);
-LID_Buffer_State_t LID_LinearBuffer_GetState(const LID_LinearBuffer_t *buf);
+
+void LID_CircularBuffer_Init(LID_CircularBuffer_t *buf, uint8_t *mem, uint32_t size);
+uint32_t LID_CircularBuffer_VWrite(LID_CircularBuffer_t *buf, uint32_t n);
+uint32_t LID_CircularBuffer_VRead(LID_CircularBuffer_t *buf, uint32_t n);
+uint32_t LID_CircularBuffer_Write(LID_CircularBuffer_t *buf, const uint8_t *data, uint32_t n);
+uint32_t LID_CircularBuffer_Read(LID_CircularBuffer_t *buf, uint8_t *data, uint32_t n);
+uint32_t LID_CircularBuffer_GetFreeSpace(LID_CircularBuffer_t *buf);
+void LID_CircularBuffer_Flush(LID_CircularBuffer_t *buf);
 
 #endif /*LID_CONTAINER_H*/
