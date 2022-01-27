@@ -59,9 +59,9 @@ const static LID_ADC_AnalogPin_t gpioMapping[3][LID_ADC_CHANNEL_LAST] = {
 			[LID_ADC_CHANNEL_5] = { .port = GPIOC,	.pin = LL_GPIO_PIN_4,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },	//LID_ADC_5V_SENSE
 			[LID_ADC_CHANNEL_11] = { .port = GPIOC,	.pin = LL_GPIO_PIN_5,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_11 },	//LID_ADC_12VA_SENSE
 			[LID_ADC_CHANNEL_15] = { .port = GPIOB,	.pin = LL_GPIO_PIN_15,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_15 },	//LID_ADC_PRESS_0
+			[LID_ADC_CHANNEL_16] = { .port = GPIOA,	.pin = 0x00000000,		.type = LID_ADC_INTYPE_OPAMP, 	.channel = LL_ADC_CHANNEL_VOPAMP2 },	//LID_ADC_SOLENOID_0_CURR
 			[LID_ADC_CHANNEL_17] = { .port = GPIOA,	.pin = LL_GPIO_PIN_4,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_17 },	//LID_ADC_SERVO_2_CURR
-			[LID_ADC_CHANNEL_12] = { .port = GPIOA,	.pin = LL_GPIO_PIN_7,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_12 },	//LID_ADC_SOLENOID_0_CURR
-			[LID_ADC_CHANNEL_13] = { .port = GPIOB,	.pin = LL_GPIO_PIN_0,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_13 }	//LID_ADC_SOLENOID_1_CURR
+			[LID_ADC_CHANNEL_18] = { .port = GPIOB,	.pin = 0x00000000,		.type = LID_ADC_INTYPE_OPAMP, 	.channel = LL_ADC_CHANNEL_VOPAMP3_ADC2 }	//LID_ADC_SOLENOID_1_CURR
 		},
 		{
 			[LID_ADC_CHANNEL_2] = { .port = GPIOE,	.pin = LL_GPIO_PIN_9,	.type = LID_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_2 },	//LID_ADC_PYRO_0_CURR
@@ -73,15 +73,15 @@ const static LID_ADC_AnalogPin_t gpioMapping[3][LID_ADC_CHANNEL_LAST] = {
 };
 
 static uint32_t adc1_length = 0;
-static LID_ADC_Data_t adc1_data[18] =
+static LID_ADC_Data_t adc1_data[LID_ADC_CHANNEL_LAST] =
 { 0 };
 
 static uint32_t adc2_length = 0;
-static LID_ADC_Data_t adc2_data[18] =
+static LID_ADC_Data_t adc2_data[LID_ADC_CHANNEL_LAST] =
 { 0 };
 
 static uint32_t adc3_length = 0;
-static LID_ADC_Data_t adc3_data[18] =
+static LID_ADC_Data_t adc3_data[LID_ADC_CHANNEL_LAST] =
 { 0 };
 
 static volatile uint64_t LID_ADC_ChannelState = 0;
@@ -176,7 +176,7 @@ void LID_ADC_Init() {
 	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2, (uint32_t) adc3_data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC3);
 }
 
-LID_ADC_Data_t * LID_ADC_subscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_Channel_Type_t UNUSED) {
+LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_InType_t type) {
 
 	LID_ADC_AnalogPin_t analogPin;
 	LID_ADC_Data_t *data_ptr = NULL;
@@ -206,23 +206,29 @@ LID_ADC_Data_t * LID_ADC_subscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_Ch
 	}
 
 	// wrong input type passed
-	if(analogPin.type != channel->type) return NULL;
+	if(analogPin.type != type) return NULL;
 
 	// channel already initialized
 	if(!(adcChannelMsk & LID_ADC_ChannelState)) return NULL;
 
 	LID_ADC_ChannelState |= adcChannelMsk;
 
-	// enabling gpio port necessary?
-	//LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOF);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct =
-	{ 0 };
+	if(type == LID_ADC_INTYPE_REGULAR) {
+		LL_GPIO_InitTypeDef GPIO_InitStruct =
+		{ 0 };
 
-	GPIO_InitStruct.Pin = analogPin.pin;
-	GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-	LL_GPIO_Init(analogPin.port, &GPIO_InitStruct);
+		GPIO_InitStruct.Pin = analogPin.pin;
+		GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
+		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+		LL_GPIO_Init(analogPin.port, &GPIO_InitStruct);
+	}
 
 	LL_ADC_SetChannelSamplingTime(channel->ADCx, channel->channelId, LID_ADC_CHANNEL_SAMPLINGTIME);
 	LL_ADC_SetChannelSingleDiff(channel->ADCx, channel->channelId, LID_ADC_SINGLEDIFF);

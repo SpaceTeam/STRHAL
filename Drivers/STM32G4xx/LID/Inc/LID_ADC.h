@@ -11,7 +11,7 @@
 
 /***** DEFINES *****/
 //ADC
-//#define LID_ADC_N_CHANNELS 18
+//#define LID_ADC_N_CHANNELS 19
 #define LID_ADC_CHANNEL_SAMPLINGTIME LL_ADC_SAMPLINGTIME_12CYCLES_5
 #define LID_ADC_SINGLEDIFF LL_ADC_SINGLE_ENDED
 #define LID_ADC_RESOLUTION LL_ADC_RESOLUTION_12B
@@ -45,12 +45,14 @@ typedef enum {
 	LID_ADC_CHANNEL_15,
 	LID_ADC_CHANNEL_16,
 	LID_ADC_CHANNEL_17,
+	LID_ADC_CHANNEL_18,
 
 	LID_ADC_CHANNEL_LAST
 } LID_ADC_ChannelId_t;
 
 typedef enum {
 	LID_ADC_INTYPE_REGULAR,
+	LID_ADC_INTYPE_OPAMP
 } LID_ADC_InType_t;
 
 typedef struct {
@@ -63,14 +65,13 @@ typedef struct {
 typedef struct {
 	ADC_TypeDef *ADCx;
 	LID_ADC_ChannelId_t channelId;
-	LID_ADC_InType_t type;
 } LID_ADC_Channel_t;
 
 typedef volatile uint16_t LID_ADC_Data_t;
 
 void LID_ADC_Init();
 
-LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_Channel_Type_t type);
+LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_InType_t type);
 
 void LID_ADC_Run();
 
