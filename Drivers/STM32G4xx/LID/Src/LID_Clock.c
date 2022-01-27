@@ -41,7 +41,11 @@ LID_Clock_Status_t _SysClock_Init() {
 	LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 	LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
 	LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
-	LL_SetSystemCoreClock(16000000);
+	LL_SetSystemCoreClock(170000000);
+
+
+	LL_Init1msTick(170000000);
+
 
 
 	return LID_CLOCK_GOOD;
