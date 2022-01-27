@@ -1,9 +1,11 @@
-#ifndef ECU_H_
-#define ECU_H_
+#ifndef LID_H_
+#define LID_H_
 
 #include "LID_Clock.h"
 #include "LID_GPIO.h"
+#include "LID_ADC.h"
+#include "LID_UART.h"
 
 int LID_Init();
 
-#endif /* ECU_H_ */
+#endif /* LID_H_ */
