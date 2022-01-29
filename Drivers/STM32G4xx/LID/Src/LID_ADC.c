@@ -72,17 +72,10 @@ const static LID_ADC_AnalogPin_t gpioMapping[3][LID_ADC_CHANNEL_LAST] = {
 		}
 };
 
-static uint32_t adc1_length = 0;
-static LID_ADC_Data_t adc1_data[LID_ADC_CHANNEL_LAST] =
-{ 0 };
-
-static uint32_t adc2_length = 0;
-static LID_ADC_Data_t adc2_data[LID_ADC_CHANNEL_LAST] =
-{ 0 };
-
-static uint32_t adc3_length = 0;
-static LID_ADC_Data_t adc3_data[LID_ADC_CHANNEL_LAST] =
-{ 0 };
+static struct {
+	LID_ADC_Data_t data[LID_ADC_CHANNEL_LAST];
+	uint32_t length;
+} adc1_buf, adc2_buf, adc3_buf;
 
 static volatile uint64_t LID_ADC_ChannelState = 0;
 
@@ -91,6 +84,14 @@ static void LID_ADC_RegInit(ADC_TypeDef *ADCx) {
 	{ 0 };
 	LL_ADC_REG_InitTypeDef ADC_REG_InitStruct =
 	{ 0 };
+	LL_ADC_EnableInternalRegulator(ADCx);
+	// Delay for ADC internal voltage regulator stabilization.
+	uint32_t wait_loop_index;
+	wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
+	while (wait_loop_index != 0)
+	{
+		wait_loop_index--;
+	}
 	ADC_InitStruct.Resolution = LID_ADC_RESOLUTION;
 	ADC_InitStruct.DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
 	ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
@@ -106,7 +107,6 @@ static void LID_ADC_RegInit(ADC_TypeDef *ADCx) {
 	LL_ADC_SetGainCompensation(ADCx, 0);
 	LL_ADC_SetOverSamplingScope(ADCx, LL_ADC_OVS_DISABLE);
 	LL_ADC_DisableDeepPowerDown(ADCx);
-	LL_ADC_EnableInternalRegulator(ADCx);
 	//LL_ADC_EnableIT_EOS(adc);
 }
 
@@ -156,21 +156,9 @@ void LID_ADC_Init() {
 	LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_SYSCLK);
 
 	//Init DMA for ADC123
-	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL, (uint32_t) adc1_data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC1);
-	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+1, (uint32_t) adc2_data, LL_ADC_DMA_GetRegAddr(ADC2, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC2);
-	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2, (uint32_t) adc3_data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC3);
-
-	LID_ADC_RegInit(ADC1);
-	LID_ADC_RegInit(ADC2);
-	LID_ADC_RegInit(ADC3);
-
-	// Delay for ADC internal voltage regulator stabilization.
-	uint32_t wait_loop_index;
-	wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
-	while (wait_loop_index != 0)
-	{
-		wait_loop_index--;
-	}
+	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL, (uint32_t) adc1_buf.data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC1);
+	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+1, (uint32_t) adc2_buf.data, LL_ADC_DMA_GetRegAddr(ADC2, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC2);
+	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2, (uint32_t) adc3_buf.data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC3);
 
 	LL_ADC_CommonInitTypeDef ADC_CommonInitStruct =
 	{ 0 };
@@ -180,6 +168,10 @@ void LID_ADC_Init() {
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1), &ADC_CommonInitStruct);
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC2), &ADC_CommonInitStruct);
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC3), &ADC_CommonInitStruct);
+
+	LID_ADC_RegInit(ADC1);
+	LID_ADC_RegInit(ADC2);
+	LID_ADC_RegInit(ADC3);
 
 	LID_ADC_Calibrate();
 }
@@ -193,20 +185,20 @@ LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_In
 	uint64_t adcChannelMsk = 0;
 	if(channel->ADCx == ADC1) {
 		analogPin = gpioMapping[1][channel->channelId];
-		data_ptr = adc1_data;
-		length_ptr = &adc1_length;
+		data_ptr = adc1_buf.data;
+		length_ptr = &adc1_buf.length;
 		dmaChannel = LID_ADC_DMA_CHANNEL;
 		adcChannelMsk = (1U) << (channel->channelId);
 	} else if (channel->ADCx == ADC2) {
 		analogPin = gpioMapping[2][channel->channelId];
-		data_ptr = adc2_data;
-		length_ptr = &adc2_length;
+		data_ptr = adc2_buf.data;
+		length_ptr = &adc2_buf.length;
 		dmaChannel = LID_ADC_DMA_CHANNEL+1;
 		adcChannelMsk = (1U) << (LID_ADC_CHANNEL_LAST + channel->channelId);
 	} else if (channel->ADCx == ADC3) {
 		analogPin = gpioMapping[3][channel->channelId];
-		data_ptr = adc3_data;
-		length_ptr = &adc3_length;
+		data_ptr = adc3_buf.data;
+		length_ptr = &adc3_buf.length;
 		dmaChannel = LID_ADC_DMA_CHANNEL+2;
 		adcChannelMsk = (1U) << (2*LID_ADC_CHANNEL_LAST + channel->channelId);
 	} else {
@@ -244,6 +236,7 @@ LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_In
 
 	LL_ADC_SetChannelSamplingTime(channel->ADCx, analogPin.channel, LID_ADC_CHANNEL_SAMPLINGTIME);
 	LL_ADC_SetChannelSingleDiff(channel->ADCx, analogPin.channel, LID_ADC_SINGLEDIFF);
+	//TODO: Offset
 	//LL_ADC_SetChannelPreSelection(channel->ADCx, channel->channelId);
 
 
@@ -255,9 +248,24 @@ LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_In
 }
 
 void LID_ADC_Run() {
-	LL_ADC_REG_SetSequencerLength(ADC1, adcSeqRanks[adc1_length-1]);
-	LL_ADC_REG_SetSequencerLength(ADC2, adcSeqRanks[adc2_length-1]);
-	LL_ADC_REG_SetSequencerLength(ADC3, adcSeqRanks[adc3_length-1]);
+	LL_ADC_REG_SetSequencerLength(ADC1, adcSeqRanks[adc1_buf.length-1]);
+	LL_ADC_REG_SetSequencerLength(ADC2, adcSeqRanks[adc2_buf.length-1]);
+	LL_ADC_REG_SetSequencerLength(ADC3, adcSeqRanks[adc3_buf.length-1]);
+
+	LL_DMA_EnableIT_TE(LID_ADC_DMA, LID_ADC_DMA_CHANNEL);
+	LL_DMA_EnableIT_TE(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+1);
+	LL_DMA_EnableIT_TE(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2);
+
+	NVIC_SetPriority(DMA1_Channel3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+	NVIC_SetPriority(DMA1_Channel4_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+	NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+	NVIC_SetPriority(DMA1_Channel5_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+	NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+
+	LL_DMA_ClearFlag_TE3(DMA1);
+	LL_DMA_ClearFlag_TE4(DMA1);
+	LL_DMA_ClearFlag_TE5(DMA1);
 
 	LL_DMA_EnableChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL);
     while(!LL_DMA_IsEnabledChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL))
@@ -268,6 +276,20 @@ void LID_ADC_Run() {
 	LL_DMA_EnableChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2);
 	while(!LL_DMA_IsEnabledChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2))
 	    ;
+
+	//TODO: Add ADC OVR interrupt
+	LL_ADC_EnableIT_OVR(ADC1);
+	LL_ADC_EnableIT_OVR(ADC2);
+	LL_ADC_EnableIT_OVR(ADC3);
+
+	NVIC_SetPriority(ADC1_2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+	NVIC_EnableIRQ(ADC1_2_IRQn);
+	NVIC_SetPriority(ADC3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+	NVIC_EnableIRQ(ADC3_IRQn);
+
+	LL_ADC_ClearFlag_OVR(ADC1);
+	LL_ADC_ClearFlag_OVR(ADC2);
+	LL_ADC_ClearFlag_OVR(ADC3);
 
 	LL_ADC_Enable(ADC1);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC1) == 0)
@@ -282,4 +304,37 @@ void LID_ADC_Run() {
 	LL_ADC_REG_StartConversion(ADC1);
 	LL_ADC_REG_StartConversion(ADC2);
 	LL_ADC_REG_StartConversion(ADC3);
+}
+
+void DMA1_Channel3_IRQHandler() {
+	if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_3) && LL_DMA_IsActiveFlag_TE3(DMA1)) {
+		LL_DMA_ClearFlag_TE3(DMA1);
+	}
+}
+
+void DMA1_Channel4_IRQHandler() {
+	if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_4) && LL_DMA_IsActiveFlag_TE4(DMA1)) {
+		LL_DMA_ClearFlag_TE4(DMA1);
+	}
+}
+
+void DMA1_Channel5_IRQHandler() {
+	if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_5) && LL_DMA_IsActiveFlag_TE5(DMA1)) {
+		LL_DMA_ClearFlag_TE5(DMA1);
+	}
+}
+
+void ADC1_2_IRQHandler() {
+	if(LL_ADC_IsEnabledIT_OVR(ADC1) && LL_ADC_IsActiveFlag_OVR(ADC1)) {
+		LL_ADC_ClearFlag_OVR(ADC1);
+	}
+	if(LL_ADC_IsEnabledIT_OVR(ADC2) && LL_ADC_IsActiveFlag_OVR(ADC2)) {
+		LL_ADC_ClearFlag_OVR(ADC2);
+	}
+}
+
+void ADC3_IRQHandler() {
+	if(LL_ADC_IsEnabledIT_OVR(ADC3) && LL_ADC_IsActiveFlag_OVR(ADC3)) {
+		LL_ADC_ClearFlag_OVR(ADC3);
+	}
 }
