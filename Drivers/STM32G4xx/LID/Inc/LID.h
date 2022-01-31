@@ -6,6 +6,7 @@
 #include "LID_ADC.h"
 #include "LID_OPAMP.h"
 #include "LID_UART.h"
+#include "LID_TIM.h"
 
 typedef enum {
 	LID_SYSCLK_SRC_BKP, //Backup SYSCLK SRC = ever working internal HSI without PLL
