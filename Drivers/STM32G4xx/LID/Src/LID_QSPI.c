@@ -1,6 +1,6 @@
 #include "../Inc/LID_QSPI.h"
 
-static typedef struct {
+static struct {
 		uint8_t data[LID_QSPI_WRITE_BUF_SIZE];
 		uint32_t n;
 } _write_buf;
