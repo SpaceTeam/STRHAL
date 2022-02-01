@@ -9,10 +9,10 @@
 
 typedef enum {
 	LID_TIM_TIM1 = 0,
-	LID_TIM_TIM2,
-	LID_TIM_TIM3,
-	LID_TIM_TIM4,
-	LID_TIM_TIM8,
+	LID_TIM_TIM2 = 1,
+	LID_TIM_TIM3 = 2,
+	LID_TIM_TIM4 = 3,
+	LID_TIM_TIM8 = 4,
 } LID_TIM_TimerId_t;
 
 typedef enum {
@@ -131,8 +131,6 @@ typedef enum {
 
 	LID_TIM_TIM8_CH4N_PD0,
 	LID_TIM_TIM8_CH4_PD1,
-
-
 } LID_TIM_ChannelId_t;
 
 
@@ -149,7 +147,6 @@ typedef struct {
 
 void LID_TIM_Init();
 void LID_TIM_Run();
-
 
 int32_t LID_TIM_PWM_Init(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res);
 int LID_TIM_PWM_AddChannel(LID_TIM_PWM_Channel_t *pwmChannel, LID_TIM_ChannelId_t channelId, LID_TIM_PWM_ChannelType_t pwmType);

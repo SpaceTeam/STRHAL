@@ -7,17 +7,17 @@
 #include <stm32g4xx_ll_bus.h>
 #include <stm32g4xx_ll_system.h>
 
-#define LID_SYSCLK_INT_PLL_M 2
-#define LID_SYSCLK_INT_PLL_N 32
-#define LID_SYSCLK_INT_PLL_R 2
+#define LID_SYSCLK_INT_PLL_M LL_RCC_PLLM_DIV_4
+#define LID_SYSCLK_INT_PLL_N 75
+#define LID_SYSCLK_INT_PLL_R LL_RCC_PLLR_DIV_2
 
-#define LID_SYSCLK_EXT_PLL_M 2
-#define LID_SYSCLK_EXT_PLL_N 128000000/HSE_VALUE
-#define LID_SYSCLK_EXT_PLL_R 2
+#define LID_SYSCLK_EXT_PLL_M LL_RCC_PLLM_DIV_2
+#define LID_SYSCLK_EXT_PLL_R LL_RCC_PLLR_DIV_2
 
-#define LID_SYSCLK_FREQ 128000000
 
-#define LID_SYSCLK_START_TOT 1600000
+#define LID_SYSCLK_FREQ 150000000
+
+#define LID_SYSCLK_START_TOT 16000000
 
 static LID_SysClk_Src_t _SysClk_Src = LID_SYSCLK_SRC_BKP;
 static int _SysClk_LOCKED = 0;
@@ -37,8 +37,9 @@ LID_Status_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
 	LID_OPAMP_Init();
 	LID_UART_Init();
 	LID_ADC_Init();
+	LID_TIM_Init();
 
-	return 0;
+	return status;
 }
 
 inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
@@ -49,14 +50,15 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 
 	uint32_t tot;
 	if(src == LID_SYSCLK_SRC_INT) {
-		if(!LL_SetFlashLatency(LID_SYSCLK_FREQ))
+		if(LL_SetFlashLatency(LID_SYSCLK_FREQ) != SUCCESS)
 			return _SysClk_Backup();
 
 		LL_PWR_EnableRange1BoostMode();
 
 		LL_RCC_PLL_Disable();
+		LL_RCC_HSI_Enable();
 
-		for(tot = 0; LL_RCC_PLL_IsReady() && !LL_RCC_HSE_IsReady(); ++tot) {
+		for(tot = 0; LL_RCC_PLL_IsReady() && !LL_RCC_HSI_IsReady(); ++tot) {
 			if(tot > LID_SYSCLK_START_TOT)
 				return _SysClk_Backup();
 		}
@@ -66,6 +68,7 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 				LID_SYSCLK_INT_PLL_N,
 				LID_SYSCLK_INT_PLL_R
 		);
+
 		LL_RCC_PLL_EnableDomain_SYS();
 		LL_RCC_PLL_Enable();
 
@@ -75,15 +78,17 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 		}
 		LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
 
-		for(tot = 0; LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_PLL; ++tot) {
+		for(tot = 0; LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL; ++tot) {
 			if(tot > LID_SYSCLK_START_TOT)
 				return _SysClk_Backup();
 		}
 
+		LL_Init1msTick(LID_SYSCLK_FREQ);
+		LL_SetSystemCoreClock(LID_SYSCLK_FREQ);
 		_SysClk_Src = LID_SYSCLK_SRC_INT;
 	}
 	else if(src == LID_SYSCLK_SRC_EXT) {
-		if(!LL_SetFlashLatency(LID_SYSCLK_FREQ))
+		if(LL_SetFlashLatency(LID_SYSCLK_FREQ) != SUCCESS)
 			return _SysClk_Backup();
 
 		LL_RCC_PLL_Disable();
@@ -106,7 +111,7 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 
 		LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE,
 				LID_SYSCLK_EXT_PLL_M,
-				LID_SYSCLK_EXT_PLL_N,
+				4*LID_SYSCLK_FREQ/freq,
 				LID_SYSCLK_EXT_PLL_R
 		);
 	    LL_RCC_PLL_EnableDomain_SYS();
@@ -118,11 +123,13 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 		}
 		LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
 
-		for(tot = 0; LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_PLL; ++tot) {
+		for(tot = 0; LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL; ++tot) {
 			if(tot > LID_SYSCLK_START_TOT)
 				return _SysClk_Backup();
 		}
 
+		LL_Init1msTick(LID_SYSCLK_FREQ);
+		LL_SetSystemCoreClock(LID_SYSCLK_FREQ);
 		_SysClk_Src = LID_SYSCLK_SRC_EXT;
 	}
 

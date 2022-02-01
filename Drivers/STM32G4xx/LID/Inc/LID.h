@@ -18,7 +18,7 @@ typedef enum {
 	LID_SYSCLK_ERR= (1<<0),
 	LID_CLOCK_ERR = (1<<1),
 	LID_GPIO_ERR = (1<<2),
-	LID_NOICE
+	LID_NOICE = 0x00,
 } LID_Status_t;
 
 LID_Status_t LID_Init(LID_SysClk_Src_t src, uint32_t freq);

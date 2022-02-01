@@ -7,7 +7,8 @@
 
 typedef enum {
 	LID_TIM_TIMER_TYPE_STD,
-	LID_TIM_TIMER_TYPE_ADV
+	LID_TIM_TIMER_TYPE_ADV,
+	LID_TIM_TIMER_TYPE_BAS,
 } LID_TIM_TimerType_t;
 
 typedef enum {
@@ -798,6 +799,14 @@ static const LID_TIM_Channel_t _tim_channels[LID_TIM_N_TIM_CHANNELS] = {
 };
 
 void LID_TIM_Init() {
+	/* GPIO Ports Clock Enable */
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOF);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
+
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
@@ -817,14 +826,21 @@ int32_t LID_TIM_PWM_Init(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res) {
 	LL_TIM_InitTypeDef TIM_InitStruct = {0};
 	TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
 	TIM_InitStruct.CounterMode = LL_TIM_COUNTERDIRECTION_UP;
-	TIM_InitStruct.Autoreload = res;
-	TIM_InitStruct.Prescaler = psc;
+	TIM_InitStruct.Autoreload = res - 1;
+	TIM_InitStruct.Prescaler = psc > 0 ? psc -1 : psc;
 	LL_TIM_Init(tim->timx, &TIM_InitStruct);
+
+	LL_TIM_EnableARRPreload(tim->timx);
+	if(IS_TIM_BREAK_INSTANCE(tim->timx))
+		LL_TIM_EnableAutomaticOutput(tim->timx);
+
+	LL_TIM_DisableMasterSlaveMode(tim->timx);
+
 	tim->cfreq = 0;
 	tim->utype = LID_TIM_USAGE_PWM;
-	LL_TIM_EnableCounter(tim->timx);
 
-	return 0;
+	uint16_t freq = SystemCoreClock / (res * psc);
+	return freq;
 }
 
 int LID_TIM_PWM_AddChannel(LID_TIM_PWM_Channel_t *pwmChannel, LID_TIM_ChannelId_t channelId, LID_TIM_PWM_ChannelType_t pwmType) {
@@ -832,21 +848,34 @@ int LID_TIM_PWM_AddChannel(LID_TIM_PWM_Channel_t *pwmChannel, LID_TIM_ChannelId_
 		return -1;
 
 	const LID_TIM_Channel_t *ch = &_tim_channels[channelId];
-
 	if(pwmType == LID_TIM_PWM_CHANNELTYPE_SO) {
+
+		LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+		GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+		GPIO_InitStruct.Alternate = ch->afn;
+		GPIO_InitStruct.Pin = ch->pin;
+		GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+		GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+		GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+		LL_GPIO_Init(ch->port, &GPIO_InitStruct);
+
 		LL_TIM_OC_InitTypeDef OC_InitStruct = {0};
 		OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
-		OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
+		OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
 		OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
 		OC_InitStruct.OCNPolarity = LL_TIM_OCPOLARITY_LOW;
 		OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_LOW;
 		OC_InitStruct.OCNIdleState = LL_TIM_OCIDLESTATE_HIGH;
 		LL_TIM_OC_Init(ch->tim->timx, ch->n, &OC_InitStruct);
+		LL_TIM_OC_EnablePreload(ch->tim->timx, ch->n);
+		LL_TIM_OC_DisableFast(ch->tim->timx, ch->n);
 	}
 	else if(pwmType == LID_TIM_PWM_CHANNELTYPE_IN) {
 		//LL_TIM_IC_InitTypeDef IC_InitStruct = {0};
 	}
 
+	pwmChannel->channelId = channelId;
+	pwmChannel->type = pwmType;
 	return 0;
 }
 
@@ -860,7 +889,7 @@ int32_t LID_TIM_PWM_Read(LID_TIM_PWM_Channel_t *pwmChannel, uint16_t *duty) {
 
 	*duty = (uint16_t) ((*ch->ccr) & 0xFFFF);
 	uint16_t freq = SystemCoreClock /
-			(LL_TIM_GetAutoReload(ch->tim->timx) * LL_TIM_GetPrescaler(ch->tim->timx));
+			(LL_TIM_GetAutoReload(ch->tim->timx) * (LL_TIM_GetPrescaler(ch->tim->timx)+1));
 	return freq;
 }
 
@@ -872,8 +901,11 @@ int32_t LID_TIM_PWM_SetFreq(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res) {
 	if(tim->utype != LID_TIM_USAGE_PWM)
 		return -1;
 
-	LL_TIM_SetPrescaler(tim->timx, psc);
-	LL_TIM_SetAutoReload(tim->timx, res);
+	if(res < 2)
+		res = 2;
+
+	LL_TIM_SetPrescaler(tim->timx, psc > 0 ? psc -1 : psc);
+	LL_TIM_SetAutoReload(tim->timx, res -1);
 	return SystemCoreClock / (psc *res);
 }
 
@@ -891,17 +923,16 @@ int32_t LID_TIM_PWM_SetDuty(LID_TIM_PWM_Channel_t *pwmChannel, uint16_t duty) {
 
 int LID_TIM_PWM_Enable(LID_TIM_PWM_Channel_t *pwmChannel, int enable) {
 	if(pwmChannel->channelId > LID_TIM_N_TIM_CHANNELS)
-		return 0;
+		return -1;
 
 	const LID_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channelId];
 	if(ch->tim->utype != LID_TIM_USAGE_PWM)
-		return 0;
+		return -1;
 
 	if(enable) {
+		LL_TIM_CC_EnableChannel(ch->tim->timx, ch->n);
 		if(!LL_TIM_IsEnabledCounter(ch->tim->timx))
 			LL_TIM_EnableCounter(ch->tim->timx);
-
-		LL_TIM_CC_EnableChannel(ch->tim->timx, ch->n);
 	} else {
 		LL_TIM_CC_DisableChannel(ch->tim->timx, ch->n);
 	}
