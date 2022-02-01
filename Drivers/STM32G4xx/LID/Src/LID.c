@@ -38,6 +38,7 @@ LID_Status_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
 	LID_UART_Init();
 	LID_ADC_Init();
 	LID_TIM_Init();
+	LID_QSPI_Init(24, 7, 0);
 
 	return status;
 }

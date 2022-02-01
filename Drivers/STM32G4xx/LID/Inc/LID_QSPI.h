@@ -6,6 +6,14 @@
 #include <stm32g4xx_ll_dma.h>
 #include <stm32g4xx_ll_dmamux.h>
 
+/*
+ * @brief QSPI command frame structure
+ *
+ * The only field required is Instruction.
+ * SendAddress, SendAlternate and SendData are boolean values that determine whether to send the respective data.
+ * If they are set to 0, the respective data are ignored.
+ * DummyLength directly specifies the number of dummy cycles to send. If set to 0, no dummy cycles are sent.
+ */
 typedef struct {
 		uint8_t Instruction;
 		uint8_t SendAddress;
@@ -30,15 +38,18 @@ typedef enum {
 	LID_QSPI_STATE_RX	= 1 << 4,
 } LID_QSPI_State_t;
 
-/* @brief Init QSPI interface
+/* @brief Initialize QSPI interface
  * @param flash_size  actual flash size will be 2^(value+1) | e.g. value=24 -> 32 MiB
  * @param ncs_high_time  minimum number of cycles during which nCS must be high between commands
  * @param clk_level  if clk should stay low (0) or high (1) when nCS is high
  */
 void LID_QSPI_Init(uint8_t flash_size, uint8_t ncs_high_time, uint8_t clk_level);
 
-void LID_QSPI_WriteInstruction(uint8_t instruction);
-
+/*
+ * @brief Write commands over QSPI
+ * @param cmd  QSPI command frame structure
+ * @return TODO: bytes written
+ */
 uint32_t LID_QSPI_Write(LID_QSPI_Command cmd);
 
 #endif
