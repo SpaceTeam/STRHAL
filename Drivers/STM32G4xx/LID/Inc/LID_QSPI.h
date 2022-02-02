@@ -6,6 +6,8 @@
 #include <stm32g4xx_ll_dma.h>
 #include <stm32g4xx_ll_dmamux.h>
 
+#define LID_QSPI_RX_BUF_SIZE 1024
+
 /*
  * @brief QSPI command frame structure
  *
@@ -15,17 +17,18 @@
  * DummyLength directly specifies the number of dummy cycles to send. If set to 0, no dummy cycles are sent.
  */
 typedef struct {
+		uint8_t ReadWrite;  // 0 = read, 1 = write
 		uint8_t Instruction;
 		uint8_t SendAddress;
 		uint32_t Address;
 		uint8_t SendAlternate;
-		uint8_t AlternateLength;
+		uint8_t AlternateLength;  // If SendAlternate is 1, AlternateLength+1 alternate bytes will be sent
 		uint32_t Alternate;
 		uint8_t DummyLength;
 		uint8_t SendData;
-		uint8_t DataLength;
+		uint8_t DataLength;  // If SendData is 1, DataLength+1 bytes at Data will be sent
 		uint8_t *Data;
-} LID_QSPI_Command;
+} LID_QSPI_Command_t;
 
 
 typedef enum {
@@ -50,6 +53,6 @@ void LID_QSPI_Init(uint8_t flash_size, uint8_t ncs_high_time, uint8_t clk_level)
  * @param cmd  QSPI command frame structure
  * @return TODO: bytes written
  */
-uint32_t LID_QSPI_Write(LID_QSPI_Command cmd);
+uint32_t LID_QSPI_Write(LID_QSPI_Command_t cmd);
 
 #endif
