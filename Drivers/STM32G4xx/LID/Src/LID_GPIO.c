@@ -32,7 +32,7 @@ void LID_GPIO_SingleInit(LID_GPIO_t *gpio, LID_GPIO_Type_t type) {
 
 		case LID_GPIO_TYPE_OOD:
 			GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-			GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+			GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
 			break;
 
 		case LID_GPIO_TYPE_IHZ:

@@ -84,14 +84,6 @@ static void LID_ADC_RegInit(ADC_TypeDef *ADCx) {
 	{ 0 };
 	LL_ADC_REG_InitTypeDef ADC_REG_InitStruct =
 	{ 0 };
-	LL_ADC_EnableInternalRegulator(ADCx);
-	// Delay for ADC internal voltage regulator stabilization.
-	uint32_t wait_loop_index;
-	wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
-	while (wait_loop_index != 0)
-	{
-		wait_loop_index--;
-	}
 	ADC_InitStruct.Resolution = LID_ADC_RESOLUTION;
 	ADC_InitStruct.DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
 	ADC_InitStruct.LowPowerMode = LL_ADC_LP_MODE_NONE;
@@ -107,7 +99,6 @@ static void LID_ADC_RegInit(ADC_TypeDef *ADCx) {
 	LL_ADC_SetGainCompensation(ADCx, 0);
 	LL_ADC_SetOverSamplingScope(ADCx, LL_ADC_OVS_DISABLE);
 	LL_ADC_DisableDeepPowerDown(ADCx);
-	//LL_ADC_EnableIT_EOS(adc);
 }
 
 static void LID_ADC_DmaInit(DMA_TypeDef * DMAx, uint32_t dmaChannel, uint32_t dest, uint32_t src, uint32_t periph)
@@ -131,12 +122,18 @@ static void LID_ADC_DmaInit(DMA_TypeDef * DMAx, uint32_t dmaChannel, uint32_t de
 
 static void LID_ADC_Calibrate()
 {
+	LL_ADC_EnableInternalRegulator(ADC1);
+	LL_mDelay(100);
 	LL_ADC_StartCalibration(ADC1, LID_ADC_SINGLEDIFF);
 	while (LL_ADC_IsCalibrationOnGoing(ADC1));
 
+	LL_ADC_EnableInternalRegulator(ADC2);
+	LL_mDelay(100);
 	LL_ADC_StartCalibration(ADC2, LID_ADC_SINGLEDIFF);
 	while (LL_ADC_IsCalibrationOnGoing(ADC2));
 
+	LL_ADC_EnableInternalRegulator(ADC3);
+	LL_mDelay(100);
 	LL_ADC_StartCalibration(ADC3, LID_ADC_SINGLEDIFF);
 	while (LL_ADC_IsCalibrationOnGoing(ADC3));
 }
@@ -148,12 +145,13 @@ void LID_ADC_Init() {
 	} else if(LID_ADC_DMA == DMA2) {
 		LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
 	}
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC12);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC345);
 
 	LL_RCC_SetADCClockSource(LL_RCC_ADC12_CLKSOURCE_SYSCLK);
 	LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_SYSCLK);
+
+	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC12);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC345);
 
 	//Init DMA for ADC123
 	LID_ADC_DmaInit(LID_ADC_DMA, LID_ADC_DMA_CHANNEL, (uint32_t) adc1_buf.data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC1);
@@ -184,19 +182,19 @@ LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_In
 	uint32_t dmaChannel = 0;
 	uint64_t adcChannelMsk = 0;
 	if(channel->ADCx == ADC1) {
-		analogPin = gpioMapping[1][channel->channelId];
+		analogPin = gpioMapping[0][channel->channelId];
 		data_ptr = adc1_buf.data;
 		length_ptr = &adc1_buf.length;
 		dmaChannel = LID_ADC_DMA_CHANNEL;
 		adcChannelMsk = (1U) << (channel->channelId);
 	} else if (channel->ADCx == ADC2) {
-		analogPin = gpioMapping[2][channel->channelId];
+		analogPin = gpioMapping[1][channel->channelId];
 		data_ptr = adc2_buf.data;
 		length_ptr = &adc2_buf.length;
 		dmaChannel = LID_ADC_DMA_CHANNEL+1;
 		adcChannelMsk = (1U) << (LID_ADC_CHANNEL_LAST + channel->channelId);
 	} else if (channel->ADCx == ADC3) {
-		analogPin = gpioMapping[3][channel->channelId];
+		analogPin = gpioMapping[2][channel->channelId];
 		data_ptr = adc3_buf.data;
 		length_ptr = &adc3_buf.length;
 		dmaChannel = LID_ADC_DMA_CHANNEL+2;
@@ -236,9 +234,6 @@ LID_ADC_Data_t * LID_ADC_SubscribeChannel(LID_ADC_Channel_t *channel, LID_ADC_In
 
 	LL_ADC_SetChannelSamplingTime(channel->ADCx, analogPin.channel, LID_ADC_CHANNEL_SAMPLINGTIME);
 	LL_ADC_SetChannelSingleDiff(channel->ADCx, analogPin.channel, LID_ADC_SINGLEDIFF);
-	//TODO: Offset
-	//LL_ADC_SetChannelPreSelection(channel->ADCx, channel->channelId);
-
 
 	LL_ADC_REG_SetSequencerRanks(channel->ADCx, adcRanks[*length_ptr], analogPin.channel);
 	uint32_t length = *length_ptr;
@@ -252,21 +247,6 @@ void LID_ADC_Run() {
 	LL_ADC_REG_SetSequencerLength(ADC2, adcSeqRanks[adc2_buf.length-1]);
 	LL_ADC_REG_SetSequencerLength(ADC3, adcSeqRanks[adc3_buf.length-1]);
 
-	LL_DMA_EnableIT_TE(LID_ADC_DMA, LID_ADC_DMA_CHANNEL);
-	LL_DMA_EnableIT_TE(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+1);
-	LL_DMA_EnableIT_TE(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2);
-
-	NVIC_SetPriority(DMA1_Channel3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
-	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
-	NVIC_SetPriority(DMA1_Channel4_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
-	NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-	NVIC_SetPriority(DMA1_Channel5_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
-	NVIC_EnableIRQ(DMA1_Channel5_IRQn);
-
-	LL_DMA_ClearFlag_TE3(DMA1);
-	LL_DMA_ClearFlag_TE4(DMA1);
-	LL_DMA_ClearFlag_TE5(DMA1);
-
 	LL_DMA_EnableChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL);
     while(!LL_DMA_IsEnabledChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL))
     	;
@@ -276,20 +256,6 @@ void LID_ADC_Run() {
 	LL_DMA_EnableChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2);
 	while(!LL_DMA_IsEnabledChannel(LID_ADC_DMA, LID_ADC_DMA_CHANNEL+2))
 	    ;
-
-	//TODO: Add ADC OVR interrupt
-	LL_ADC_EnableIT_OVR(ADC1);
-	LL_ADC_EnableIT_OVR(ADC2);
-	LL_ADC_EnableIT_OVR(ADC3);
-
-	NVIC_SetPriority(ADC1_2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
-	NVIC_EnableIRQ(ADC1_2_IRQn);
-	NVIC_SetPriority(ADC3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
-	NVIC_EnableIRQ(ADC3_IRQn);
-
-	LL_ADC_ClearFlag_OVR(ADC1);
-	LL_ADC_ClearFlag_OVR(ADC2);
-	LL_ADC_ClearFlag_OVR(ADC3);
 
 	LL_ADC_Enable(ADC1);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC1) == 0)
@@ -304,37 +270,4 @@ void LID_ADC_Run() {
 	LL_ADC_REG_StartConversion(ADC1);
 	LL_ADC_REG_StartConversion(ADC2);
 	LL_ADC_REG_StartConversion(ADC3);
-}
-
-void DMA1_Channel3_IRQHandler() {
-	if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_3) && LL_DMA_IsActiveFlag_TE3(DMA1)) {
-		LL_DMA_ClearFlag_TE3(DMA1);
-	}
-}
-
-void DMA1_Channel4_IRQHandler() {
-	if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_4) && LL_DMA_IsActiveFlag_TE4(DMA1)) {
-		LL_DMA_ClearFlag_TE4(DMA1);
-	}
-}
-
-void DMA1_Channel5_IRQHandler() {
-	if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_5) && LL_DMA_IsActiveFlag_TE5(DMA1)) {
-		LL_DMA_ClearFlag_TE5(DMA1);
-	}
-}
-
-void ADC1_2_IRQHandler() {
-	if(LL_ADC_IsEnabledIT_OVR(ADC1) && LL_ADC_IsActiveFlag_OVR(ADC1)) {
-		LL_ADC_ClearFlag_OVR(ADC1);
-	}
-	if(LL_ADC_IsEnabledIT_OVR(ADC2) && LL_ADC_IsActiveFlag_OVR(ADC2)) {
-		LL_ADC_ClearFlag_OVR(ADC2);
-	}
-}
-
-void ADC3_IRQHandler() {
-	if(LL_ADC_IsEnabledIT_OVR(ADC3) && LL_ADC_IsActiveFlag_OVR(ADC3)) {
-		LL_ADC_ClearFlag_OVR(ADC3);
-	}
 }

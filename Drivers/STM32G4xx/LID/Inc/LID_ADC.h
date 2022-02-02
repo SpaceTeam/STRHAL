@@ -8,6 +8,7 @@
 #include <stm32g4xx_ll_dma.h>
 #include <stm32g4xx_ll_dmamux.h>
 #include <stm32g4xx_ll_rcc.h>
+#include <stm32g4xx_ll_utils.h>
 
 /***** DEFINES *****/
 //ADC
