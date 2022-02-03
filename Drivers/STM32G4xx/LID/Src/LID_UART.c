@@ -1,5 +1,4 @@
 #include "../Inc/LID_UART.h"
-#include "../Inc/LID_GPIO.h"
 
 #include <stm32g4xx_ll_rcc.h>
 #include <stm32g4xx_ll_bus.h>
@@ -8,15 +7,6 @@
 #include <stm32g4xx_ll_usart.h>
 #include <stm32g4xx_ll_dma.h>
 #include <stm32g4xx_ll_dmamux.h>
-
-
-LID_GPIO_t HAPPY_LED_PIN =
-	{.port = GPIOD, .pin=2}
-;
-
-LID_GPIO_t BAD_LED_PIN =
-	{.port = GPIOD, .pin=1}
-;
 
 static struct {
 	struct {
@@ -39,9 +29,6 @@ void LID_UART_Init() {
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
-
-	LID_GPIO_SingleInit(&HAPPY_LED_PIN, LID_GPIO_TYPE_OPP);
-	LID_GPIO_SingleInit(&BAD_LED_PIN, LID_GPIO_TYPE_OPP);
 
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 	GPIO_InitStruct.Pin = LL_GPIO_PIN_3 | LL_GPIO_PIN_4;
@@ -264,8 +251,6 @@ LID_UART_State_t LID_UART_GetState() {
 
 void DMA1_Channel1_IRQHandler(void) {
 	if(LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_1) && LL_DMA_IsActiveFlag_TC1(DMA1)) {
-		LID_GPIO_Write(&HAPPY_LED_PIN, LID_GPIO_VALUE_H);
-		LID_GPIO_Write(&BAD_LED_PIN, LID_GPIO_VALUE_L);
 	    LL_DMA_ClearFlag_TC1(DMA1);
 		_uart.rx_buf.n += _uart.rx_buf.n_dma;
 		_uart.rx_buf.n_dma = LID_UART_BUF_SIZE;
@@ -273,8 +258,6 @@ void DMA1_Channel1_IRQHandler(void) {
 		if(_uart.rx_buf.n > LID_UART_BUF_SIZE) {
 			_uart.rx_buf.h += _uart.rx_buf.n % LID_UART_BUF_SIZE;
 			_uart.rx_buf.n = LID_UART_BUF_SIZE;
-			LID_GPIO_Write(&HAPPY_LED_PIN, LID_GPIO_VALUE_L);
-			LID_GPIO_Write(&BAD_LED_PIN, LID_GPIO_VALUE_H);
 
 			_uart.state |= LID_UART_STATE_RO;
 		}
