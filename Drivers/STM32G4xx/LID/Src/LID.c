@@ -25,12 +25,12 @@ static int _SysClk_LOCKED = 0;
 static inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq);
 static inline LID_SysClk_Src_t _SysClk_Backup();
 
-LID_Status_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
-	LID_Status_t status = LID_NOICE;
+LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
+	LID_Oof_t status = LID_NOICE;
 
 	NVIC_SetPriorityGrouping(0x03);
 	if(_SysClk_Init(src, freq) != src)
-		status |= LID_SYSCLK_ERR;
+		status |= LID_OOF_SYSCLK;
 
 	LID_Clock_Init();
 	LID_GPIO_Init();

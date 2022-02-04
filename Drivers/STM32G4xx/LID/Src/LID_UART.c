@@ -1,5 +1,5 @@
+#include "../Inc/LID_Oof.h"
 #include "../Inc/LID_UART.h"
-
 #include <stm32g4xx_ll_rcc.h>
 #include <stm32g4xx_ll_bus.h>
 #include <stm32g4xx_ll_cortex.h>
@@ -270,6 +270,8 @@ void DMA1_Channel1_IRQHandler(void) {
 		_uart.state &= ~LID_UART_STATE_RX;
 		_uart.state &= ~LID_UART_STATE_RC;
 		_uart.state |= LID_UART_STATE_RE;
+
+		LID_OofHandler(LID_OOF_UART, "DMA FAIL");
 	}
 }
 

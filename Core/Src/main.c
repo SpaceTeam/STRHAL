@@ -11,3 +11,7 @@ int main(void) {
 
 	return 0;
 }
+
+void LID_OofHandler(LID_Oof_t oof, char *msg) {
+	do{}while(0);
+}
