@@ -9,14 +9,12 @@
 
 #define LID_SYSCLK_INT_PLL_M LL_RCC_PLLM_DIV_2
 #define LID_SYSCLK_INT_PLL_R LL_RCC_PLLR_DIV_2
-#define LID_SYSCLK_INT_PLL_Q LL_RCC_PLLQ_DIV_6
 
 #define LID_SYSCLK_EXT_PLL_M LL_RCC_PLLM_DIV_1
 #define LID_SYSCLK_EXT_PLL_R LL_RCC_PLLR_DIV_2
-#define LID_SYSCLK_EXT_PLL_Q LL_RCC_PLLQ_DIV_6
 
 
-#define LID_SYSCLK_FREQ 144000000 //=6*48000000/2
+#define LID_SYSCLK_FREQ 160000000
 
 #define LID_SYSCLK_START_TOT 16000000
 
@@ -43,6 +41,7 @@ LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
 	LID_UART_Init();
 	LID_ADC_Init();
 	LID_TIM_Init();
+	_status |= LID_CAN_Init();
 	LID_QSPI_Init(24, 7, 0);
 
 	_INITIALIZED = 1;
@@ -70,11 +69,6 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 				LID_SYSCLK_INT_PLL_M,
 				4*LID_SYSCLK_FREQ/HSI_VALUE,
 				LID_SYSCLK_INT_PLL_R
-		);
-		LL_RCC_PLL_ConfigDomain_48M(LL_RCC_PLLSOURCE_HSI,
-				LID_SYSCLK_INT_PLL_M,
-				4*LID_SYSCLK_FREQ/HSI_VALUE,
-				LID_SYSCLK_EXT_PLL_Q
 		);
 
 		LL_RCC_PLL_EnableDomain_SYS();
@@ -122,13 +116,7 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 				2*LID_SYSCLK_FREQ/freq,
 				LID_SYSCLK_EXT_PLL_R
 		);
-		LL_RCC_PLL_ConfigDomain_48M(LL_RCC_PLLSOURCE_HSE,
-				LID_SYSCLK_EXT_PLL_M,
-				2*LID_SYSCLK_FREQ/freq,
-				LID_SYSCLK_EXT_PLL_Q
-		);
 	    LL_RCC_PLL_EnableDomain_SYS();
-		LL_RCC_PLL_EnableDomain_48M();
 	    LL_RCC_PLL_Enable();
 
 	    for(tot = 0; !LL_RCC_PLL_IsReady(); ++tot) {
