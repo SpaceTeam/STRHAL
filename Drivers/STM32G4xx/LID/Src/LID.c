@@ -7,30 +7,35 @@
 #include <stm32g4xx_ll_bus.h>
 #include <stm32g4xx_ll_system.h>
 
-#define LID_SYSCLK_INT_PLL_M LL_RCC_PLLM_DIV_4
-#define LID_SYSCLK_INT_PLL_N 75
+#define LID_SYSCLK_INT_PLL_M LL_RCC_PLLM_DIV_2
 #define LID_SYSCLK_INT_PLL_R LL_RCC_PLLR_DIV_2
+#define LID_SYSCLK_INT_PLL_Q LL_RCC_PLLQ_DIV_6
 
-#define LID_SYSCLK_EXT_PLL_M LL_RCC_PLLM_DIV_2
+#define LID_SYSCLK_EXT_PLL_M LL_RCC_PLLM_DIV_1
 #define LID_SYSCLK_EXT_PLL_R LL_RCC_PLLR_DIV_2
+#define LID_SYSCLK_EXT_PLL_Q LL_RCC_PLLQ_DIV_6
 
 
-#define LID_SYSCLK_FREQ 150000000
+#define LID_SYSCLK_FREQ 144000000 //=6*48000000/2
 
 #define LID_SYSCLK_START_TOT 16000000
 
 static LID_SysClk_Src_t _SysClk_Src = LID_SYSCLK_SRC_BKP;
-static int _SysClk_LOCKED = 0;
+static int _INITIALIZED = 0;
+static LID_Oof_t _status = LID_NOICE;
 
 static inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq);
 static inline LID_SysClk_Src_t _SysClk_Backup();
 
 LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
-	LID_Oof_t status = LID_NOICE;
+	if(_INITIALIZED)
+		return _status;
+
+	_status = LID_NOICE;
 
 	NVIC_SetPriorityGrouping(0x03);
 	if(_SysClk_Init(src, freq) != src)
-		status |= LID_OOF_SYSCLK;
+		_status |= LID_OOF_SYSCLK;
 
 	LID_Clock_Init();
 	LID_GPIO_Init();
@@ -40,15 +45,12 @@ LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
 	LID_TIM_Init();
 	LID_QSPI_Init(24, 7, 0);
 
-	return status;
+	_INITIALIZED = 1;
+
+	return _status;
 }
 
 inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
-	if(_SysClk_LOCKED)
-		return _SysClk_Src;
-
-	_SysClk_LOCKED = 1;
-
 	uint32_t tot;
 	if(src == LID_SYSCLK_SRC_INT) {
 		if(LL_SetFlashLatency(LID_SYSCLK_FREQ) != SUCCESS)
@@ -66,8 +68,13 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 
 		LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI,
 				LID_SYSCLK_INT_PLL_M,
-				LID_SYSCLK_INT_PLL_N,
+				4*LID_SYSCLK_FREQ/HSI_VALUE,
 				LID_SYSCLK_INT_PLL_R
+		);
+		LL_RCC_PLL_ConfigDomain_48M(LL_RCC_PLLSOURCE_HSI,
+				LID_SYSCLK_INT_PLL_M,
+				4*LID_SYSCLK_FREQ/HSI_VALUE,
+				LID_SYSCLK_EXT_PLL_Q
 		);
 
 		LL_RCC_PLL_EnableDomain_SYS();
@@ -112,10 +119,16 @@ inline LID_SysClk_Src_t _SysClk_Init(LID_SysClk_Src_t src, uint32_t freq) {
 
 		LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE,
 				LID_SYSCLK_EXT_PLL_M,
-				4*LID_SYSCLK_FREQ/freq,
+				2*LID_SYSCLK_FREQ/freq,
 				LID_SYSCLK_EXT_PLL_R
 		);
+		LL_RCC_PLL_ConfigDomain_48M(LL_RCC_PLLSOURCE_HSE,
+				LID_SYSCLK_EXT_PLL_M,
+				2*LID_SYSCLK_FREQ/freq,
+				LID_SYSCLK_EXT_PLL_Q
+		);
 	    LL_RCC_PLL_EnableDomain_SYS();
+		LL_RCC_PLL_EnableDomain_48M();
 	    LL_RCC_PLL_Enable();
 
 	    for(tot = 0; !LL_RCC_PLL_IsReady(); ++tot) {
@@ -169,7 +182,6 @@ inline LID_SysClk_Src_t _SysClk_Backup() {
 	LL_Init1msTick(HSI_VALUE);
 	LL_SetSystemCoreClock(HSI_VALUE);
 
-	_SysClk_LOCKED = 1;
 	_SysClk_Src = LID_SYSCLK_SRC_BKP;
 
 	return _SysClk_Src;
