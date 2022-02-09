@@ -104,7 +104,7 @@ typedef struct __attribute__((__packed__)) {
 } Can_Extended_Filter_Element;
 
 typedef union {
-	struct __attribute__((__packed__)) {
+	struct {
 		uint32_t ID :29;		//bit:  0..28  Identifier
 		uint32_t RTR :1;		//bit:  29     Remote Transmission Request
 		uint32_t XTD :1;		//bit:  30     Extended Identifier
@@ -114,7 +114,7 @@ typedef union {
 } CAN_RX_ELEMENT_R0_Type;
 
 typedef union {
-	struct __attribute__((__packed__)) {
+	struct {
 		uint32_t RXTS :16;		//bit: 0..15   Rx Timestamp
 		uint32_t DLC :4;		//bit: 16..19  Data Length Code
 		uint32_t BRS :1;		//bit: 20      Bit Rate Switch
@@ -127,7 +127,7 @@ typedef union {
 } CAN_RX_ELEMENT_R1_Type;
 
 typedef union {
-	struct __attribute__((__packed__)) {
+	struct {
 		uint32_t ID :29;		//bit:  0..28  Identifier
 		uint32_t RTR :1;		//bit:  29     Remote Transmission Request
 		uint32_t XTD :1;		//bit:  30     Extended Identifier
@@ -137,7 +137,7 @@ typedef union {
 } CAN_TX_ELEMENT_T0_Type;
 
 typedef union {
-	struct __attribute__((__packed__)) {
+	struct {
 		uint32_t :16;		//bit: 0..15   Reserved
 		uint32_t DLC :4;		//bit: 16..19  Data Length Code
 		uint32_t BRS :1;		//bit: 20      Bit Rate Switching
@@ -150,7 +150,7 @@ typedef union {
 } CAN_TX_ELEMENT_T1_Type;
 
 typedef union {
-	struct __attribute__((__packed__)) {
+	struct {
 		uint32_t ID :29;		//bit:  0..28  Identifier
 		uint32_t RTR :1;		//bit:  29     Remote Transmission Request
 		uint32_t XTD :1;		//bit:  30     Extended Identifier
@@ -160,7 +160,7 @@ typedef union {
 } CAN_TX_EVENT_ELEMENT_E0_Type;
 
 typedef union {
-	struct __attribute__((__packed__)) {
+	struct {
 		uint32_t TXTS :16;	//bit:  0..15  Tx Timestamp
 		uint32_t DLC :4;	//bit:  16..19 Data length code
 		uint32_t BRS :1;	//bit:  20     Bit rate switching
@@ -171,13 +171,13 @@ typedef union {
 	uint32_t reg;
 } CAN_TX_EVENT_ELEMENT_E1_Type;
 
-typedef union __attribute__((__packed__))
+typedef union
 {
 	uint8_t byte[64];
 	uint32_t word[64 / 4];
 } CAN_RX_ELEMENT_DATA_Type;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct {
 	CAN_RX_ELEMENT_R0_Type R0;
 	CAN_RX_ELEMENT_R1_Type R1;
 	CAN_RX_ELEMENT_DATA_Type data;
@@ -188,13 +188,13 @@ typedef union {
 	uint32_t word[64 / 4];
 } CAN_TX_ELEMENT_DATA_Type;
 
-typedef volatile struct __attribute__((__packed__)) {
+typedef volatile struct {
 	CAN_TX_ELEMENT_T0_Type T0;
 	CAN_TX_ELEMENT_T1_Type T1;
 	CAN_TX_ELEMENT_DATA_Type data;
 } Can_Tx_Element;
 
-typedef volatile struct __attribute__((__packed__)) {
+typedef volatile struct {
 	CAN_TX_EVENT_ELEMENT_E0_Type E0;
 	CAN_TX_EVENT_ELEMENT_E1_Type E1;
 } Can_Tx_Event_Element;

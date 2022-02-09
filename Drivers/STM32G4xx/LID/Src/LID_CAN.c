@@ -90,16 +90,6 @@ static LID_CAN_Handle_t _fdcans[2] = {
 	[LID_FDCAN2] = { FDCAN2, FDCAN2_MESSAGE_RAM, LID_CAN_STATE_0}
 };
 
-static void LID_CAN_ClockCalibration(void)
-{
-	/* Bypass clock calibration */
-	//SET_BIT(FDCAN_CCU->CCFG, FDCANCCU_CCFG_BCC);
-
-	/* Configure clock divider */
-	//MODIFY_REG(FDCAN_CCU->CCFG, FDCANCCU_CCFG_CDIV, FDCAN_CLOCK_DIV1);
-	MODIFY_REG(FDCAN_CONFIG->CKDIV, FDCAN_CKDIV_PDIV, FDCAN_CLOCK_DIV2);
-}
-
 static void LID_CAN_Init_GPIO(void)
 {
 
@@ -204,12 +194,19 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 	//SET_BIT(can->CCCR, FDCAN_CCCR_FDOE);
 	SET_BIT(can->CCCR, FDCAN_FRAME_FD_BRS); //FD mode with BitRate Switching
 
-	//CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
-	//CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
+	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
+	CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
 
-	SET_BIT(can->CCCR, FDCAN_CCCR_TEST);
-	SET_BIT(can->TEST, FDCAN_TEST_LBCK);
-	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
+	SET_BIT(can->CCCR, FDCAN_CCCR_MON); // Monitoring Mode
+
+	// External LoopBack
+	//SET_BIT(can->CCCR, FDCAN_CCCR_TEST);
+	//SET_BIT(can->TEST, FDCAN_TEST_LBCK);
+	//CLEAR_BIT(can->CCCR, (FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
+
+	if(fdcan_id == LID_FDCAN1) {
+		MODIFY_REG(FDCAN_CONFIG->CKDIV, FDCAN_CKDIV_PDIV, FDCAN_CLOCK_DIV2);
+	}
 
 	// Set FDCAN Operating Mode:
 	//           | Normal | Restricted |    Bus     | Internal | External
@@ -250,7 +247,6 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 LID_Oof_t LID_CAN_Init()
 {
 	LID_Oof_t status = LID_NOICE;
-	LID_CAN_ClockCalibration();
 	LID_CAN_Init_GPIO();
 
 	//TODO: Add filter implementation
@@ -282,6 +278,8 @@ uint8_t LID_CAN_Receive(LID_FDCAN_Id_t fdcan_id, LID_CAN_MessageId_t *id, LID_CA
 
 		uint32_t dlc = can_ram->rx_fifo0[get_index].R1.bit.DLC;
 		*length = Can_DlcToLength[dlc];
+		*length -= sizeof(LID_CAN_MessageDataInfo_t);
+		*length -= sizeof(uint8_t);
 		memcpy(can_data->byte, &can_ram->rx_fifo0[get_index].data.byte[0], FDCAN_ELMTS_ARRAY_SIZE);
 
 		//Ui_ProcessCanMessage(id, &data, length);
