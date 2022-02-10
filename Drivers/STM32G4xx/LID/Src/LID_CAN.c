@@ -86,22 +86,13 @@ typedef struct {
 	volatile LID_CAN_State_t state;
 	LID_CAN_Receptor_t rxReceptors[LID_FDCAN_N_RX];
 	uint8_t filter_n;
+	uint8_t fifo_sub_state;
 } LID_CAN_Handle_t;
 
 static LID_CAN_Handle_t _fdcans[2] = {
-	[LID_FDCAN1] = { .can = FDCAN1, .can_ram = FDCAN1_MESSAGE_RAM, LID_CAN_STATE_0},
-	[LID_FDCAN2] = { .can = FDCAN2, .can_ram = FDCAN2_MESSAGE_RAM, LID_CAN_STATE_0}
+	[LID_FDCAN1] = { .can = FDCAN1, .can_ram = FDCAN1_MESSAGE_RAM, .state = LID_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0},
+	[LID_FDCAN2] = { .can = FDCAN2, .can_ram = FDCAN2_MESSAGE_RAM, .state = LID_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0}
 };
-
-static void LID_CAN_ClockCalibration(void)
-{
-	/* Bypass clock calibration */
-	//SET_BIT(FDCAN_CCU->CCFG, FDCANCCU_CCFG_BCC);
-
-	/* Configure clock divider */
-	//MODIFY_REG(FDCAN_CCU->CCFG, FDCANCCU_CCFG_CDIV, FDCAN_CLOCK_DIV1);
-	MODIFY_REG(FDCAN_CONFIG->CKDIV, FDCAN_CKDIV_PDIV, FDCAN_CLOCK_DIV2);
-}
 
 static void LID_CAN_Init_GPIO(void)
 {
@@ -148,7 +139,6 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 		return -1;
 
 	_fdcans[fdcan_id].state = LID_CAN_STATE_INITIALISING;
-	_fdcans[fdcan_id].filter_n = 0;
 
 	FDCAN_GlobalTypeDef *can = _fdcans[fdcan_id].can;
 	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
@@ -183,34 +173,20 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 			return -1;
 	}
 
-	//CLEAR_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Enabled
 	SET_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Disabled
 
-	//SET_BIT(can->CCCR, FDCAN_CCCR_TXP);    //transmit pause Enabled
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_TXP);  //transmit pause Disabled
 
-	//CLEAR_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling Enabled
 	SET_BIT(can->CCCR, FDCAN_CCCR_PXHD); //Protocol Exception Handling  Disabled
 
-
-	//SET_BIT(can->CCCR, FDCAN_CCCR_BRSE);
-	//SET_BIT(can->CCCR, FDCAN_CCCR_FDOE);
 	SET_BIT(can->CCCR, FDCAN_FRAME_FD_BRS); //FD mode with BitRate Switching
 
-	//CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
-	//CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
+	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
+	CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
 
-	SET_BIT(can->CCCR, FDCAN_CCCR_TEST);
-	SET_BIT(can->TEST, FDCAN_TEST_LBCK);
-	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
-
-	// Set FDCAN Operating Mode:
-	//           | Normal | Restricted |    Bus     | Internal | External
-	//           |        | Operation  | Monitoring | LoopBack | LoopBack
-	// CCCR.TEST |   0    |     0      |     0      |    1     |    1
-	// CCCR.MON  |   0    |     0      |     1      |    1     |    0
-	// TEST.LBCK |   0    |     0      |     0      |    1     |    1
-	// CCCR.ASM  |   0    |     1      |     0      |    0     |    0
+	if(fdcan_id == LID_FDCAN1) {
+		MODIFY_REG(FDCAN_CONFIG->CKDIV, FDCAN_CKDIV_PDIV, FDCAN_CLOCK_DIV2);
+	}
 
 	// Set the nominal bit timing register
 	can->NBTP = ((((uint32_t) FDCAN_NOMINAL_SYNC_JUMP_WIDTH - 1U) << FDCAN_NBTP_NSJW_Pos) | (((uint32_t) FDCAN_NOMINAL_TIMESEG_1 - 1U) << FDCAN_NBTP_NTSEG1_Pos) | (((uint32_t) FDCAN_NOMINAL_TIMESEG_2 - 1U) << FDCAN_NBTP_NTSEG2_Pos) | (((uint32_t) FDCAN_NOMINAL_PRESCALER - 1U) << FDCAN_NBTP_NBRP_Pos));
@@ -222,8 +198,8 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_LSE, (LID_CAN_EXT_FILTER_NUMBER << FDCAN_RXGFC_LSE_Pos)); // Extended filter elements number
 	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_F0OM, (FDCAN_RX_FIFO_BLOCKING << FDCAN_RXGFC_F0OM_Pos)); // FIFO 0 operation mode
 	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_F1OM, (FDCAN_RX_FIFO_BLOCKING << FDCAN_RXGFC_F1OM_Pos)); // FIFO 1 operation mode
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_ANFS, (FDCAN_ACCEPT_IN_RX_FIFO0 << FDCAN_RXGFC_ANFS_Pos)); // Accept Non-matching Frames Standard
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_ANFE, (FDCAN_ACCEPT_IN_RX_FIFO0 << FDCAN_RXGFC_ANFE_Pos)); // Accept Non-matching Frames Extended
+	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_ANFS, (FDCAN_REJECT << FDCAN_RXGFC_ANFS_Pos)); // Accept Non-matching Frames Standard
+	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_ANFE, (FDCAN_REJECT << FDCAN_RXGFC_ANFE_Pos)); // Accept Non-matching Frames Extended
 	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_RRFS, (FDCAN_FILTER_REMOTE << FDCAN_RXGFC_RRFS_Pos)); // Reject Remote Frames Standard
 	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_RRFE, (FDCAN_REJECT_REMOTE << FDCAN_RXGFC_RRFE_Pos)); // Reject Remote Frames Extended
 
@@ -241,21 +217,22 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 }
 
 int LID_CAN_Subscribe(LID_FDCAN_Id_t fdcan_id, LID_FDCAN_Rx_Id_t rx_id, LID_FDCAN_Filter_t *filter, uint8_t n, LID_CAN_Receptor_t receptor){
-	if(fdcan_id < 0 || fdcan_id >= LID_N_FDCAN)
+	/* Error handling for user inputs */
+	if(fdcan_id < 0 || fdcan_id >= LID_N_FDCAN) // invalid fdcan instance
 		return -1;
 
 	LID_CAN_Handle_t *fdcan = &_fdcans[fdcan_id];
-	if(fdcan->state != LID_CAN_STATE_INITIALISING)
+	if(fdcan->state != LID_CAN_STATE_INITIALISING)	// fdcan not in init mode (Subscribe called in wrong order)
 		return -1;
 
-	if(filter == NULL || receptor == NULL)
+	if(filter == NULL || receptor == NULL) // Nullptr check
 		return 0;
 
-
-	uint8_t i;
-	if(n > LID_CAN_RAM_N_FILTER - fdcan->filter_n)
+	if(n > LID_CAN_RAM_N_FILTER - fdcan->filter_n) // Correct Filter Nbr
 		n = fdcan->filter_n - n;
 
+	if(fdcan->fifo_sub_state & (1U << rx_id)) // Already subscribed to this fifo
+		return -1;
 
 	Can_Message_RAM *can_ram = fdcan->can_ram;
 
@@ -264,29 +241,32 @@ int LID_CAN_Subscribe(LID_FDCAN_Id_t fdcan_id, LID_FDCAN_Rx_Id_t rx_id, LID_FDCA
 	switch(rx_id) {
 		case LID_FDCAN_RX0:
 			fdcan->rxReceptors[0] = receptor;
+			fdcan->fifo_sub_state |= 1U << LID_FDCAN_RX0;
 			sfec = FDCAN_FILTER_TO_RXFIFO0;
 			break;
 
 		case LID_FDCAN_RX1:
 			fdcan->rxReceptors[1] = receptor;
+			fdcan->fifo_sub_state |= 1U << LID_FDCAN_RX1;
 			sfec = FDCAN_FILTER_TO_RXFIFO1;
 		default:
 			return -1;
 	}
 
+	uint8_t i;
 	for(i = 0; i < n; i++, fdcan->filter_n++) {
 		can_ram->std_filters[i].S0.bit.SFEC = sfec;
 		can_ram->std_filters[i].S0.bit.SFID1 = filter->value;
 		can_ram->std_filters[i].S0.bit.SFID2 = filter->mask;
 		can_ram->std_filters[i].S0.bit.SFT = FDCAN_FILTER_MASK;
 	}
+	MODIFY_REG(fdcan->can->RXGFC, FDCAN_RXGFC_LSS, (fdcan->filter_n << FDCAN_RXGFC_LSS_Pos)); // Standard filter elements number
 	return n;
 }
 
 LID_Oof_t LID_CAN_Init()
 {
 	LID_Oof_t status = LID_NOICE;
-	LID_CAN_ClockCalibration();
 	LID_CAN_Init_GPIO();
 
 	return status;
@@ -367,18 +347,20 @@ int32_t LID_CAN_Send(LID_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, 
 
 
 void LID_CAN_Run() {
-	// End initialisation - start FDCAN
-	if(_fdcans[LID_FDCAN1].state == LID_CAN_STATE_INITIALISING) {
-		CLEAR_BIT(FDCAN1->IR, FDCAN_IR_RF0N);
-		CLEAR_BIT(FDCAN1->IR, FDCAN_IR_RF1N);
-		SET_BIT(FDCAN1->IE, FDCAN_IE_RF0NE);
-		SET_BIT(FDCAN1->IE, FDCAN_IE_RF1NE);
-
-
-		SET_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO0);
-		SET_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO1);
-
-		SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
+	// End initialisation - start FDCANs
+	LID_CAN_Handle_t *fdcan1 = &_fdcans[LID_FDCAN1];
+	LID_CAN_Handle_t *fdcan2 = &_fdcans[LID_FDCAN2];
+	if(fdcan1->state == LID_CAN_STATE_INITIALISING) {
+		if(fdcan1->fifo_sub_state & (1U << LID_FDCAN_RX0)) {
+			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO0);
+			SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
+			SET_BIT(FDCAN1->IE, FDCAN_IE_RF0NE);
+		}
+		if(fdcan1->fifo_sub_state & (1U << LID_FDCAN_RX0)) {
+			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO1);
+			SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
+			SET_BIT(FDCAN1->IE, FDCAN_IE_RF1NE);
+		}
 
 		NVIC_SetPriority(FDCAN1_IT0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 1));
 		NVIC_EnableIRQ(FDCAN1_IT0_IRQn);
@@ -388,17 +370,17 @@ void LID_CAN_Run() {
 		_fdcans[LID_FDCAN1].state = LID_CAN_STATE_RUNNING;
 		LL_mDelay(100);
 	}
-	if(_fdcans[LID_FDCAN2].state == LID_CAN_STATE_INITIALISING) {
-		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_RF0N);
-		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_RF1N);
-		SET_BIT(FDCAN2->IE, FDCAN_IE_RF0NE);
-		SET_BIT(FDCAN2->IE, FDCAN_IE_RF1NE);
-
-
-		SET_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO0);
-		SET_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO1);
-
-		SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
+	if(fdcan2->state == LID_CAN_STATE_INITIALISING) {
+		if(fdcan1->fifo_sub_state & (1U << LID_FDCAN_RX0)) {
+			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO0);
+			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
+			SET_BIT(FDCAN2->IE, FDCAN_IE_RF0NE);
+		}
+		if(fdcan1->fifo_sub_state & (1U << LID_FDCAN_RX0)) {
+			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO1);
+			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
+			SET_BIT(FDCAN2->IE, FDCAN_IE_RF1NE);
+		}
 
 		NVIC_SetPriority(FDCAN2_IT0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
 		NVIC_EnableIRQ(FDCAN2_IT0_IRQn);
@@ -412,7 +394,7 @@ void LID_CAN_Run() {
 
 void FDCAN1_IT0_IRQHandler(void) {
 	if(FDCAN1->IR & FDCAN_IR_RF0N) {
-		CLEAR_BIT(FDCAN1->IR, FDCAN_IR_RF0N);
+		SET_BIT(FDCAN1->IR, FDCAN_IR_RF0N);
 
 		LID_CAN_Receptor_t rec = _fdcans[LID_FDCAN1].rxReceptors[0];
 		Can_Message_RAM *can_ram = _fdcans[LID_FDCAN1].can_ram;
@@ -428,12 +410,13 @@ void FDCAN1_IT0_IRQHandler(void) {
 		id = rx_fifo->R0.bit.ID >> 18;
 		l = Can_DlcToLength[rx_fifo->R1.bit.DLC];
 
-		rec(id, rx_fifo->data.byte, l-2);
+		if(rec != NULL)
+			rec(id, rx_fifo->data.byte, l-2);
 
 		FDCAN1->RXF0A = i & 0x7;
 	}
 	if(FDCAN1->IR & FDCAN_IR_RF1N) {
-		CLEAR_BIT(FDCAN1->IR, FDCAN_IR_RF1N);
+		SET_BIT(FDCAN1->IR, FDCAN_IR_RF1N);
 
 		LID_CAN_Receptor_t rec = _fdcans[LID_FDCAN1].rxReceptors[1];
 		Can_Message_RAM *can_ram = _fdcans[LID_FDCAN1].can_ram;
@@ -455,7 +438,7 @@ void FDCAN1_IT0_IRQHandler(void) {
 }
 
 void FDCAN2_IT0_IRQHandler(void) {
-	if(FDCAN1->IR & FDCAN_IR_RF0N) {
+	if(FDCAN2->IR & FDCAN_IR_RF0N) {
 		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_RF0N);
 
 		LID_CAN_Receptor_t rec = _fdcans[LID_FDCAN2].rxReceptors[0];
@@ -478,17 +461,17 @@ void FDCAN2_IT0_IRQHandler(void) {
 
 
 	}
-	if(FDCAN1->IR & FDCAN_IR_RF1N) {
-		CLEAR_BIT(FDCAN1->IR, FDCAN_IR_RF1N);
+	if(FDCAN2->IR & FDCAN_IR_RF1N) {
+		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_RF1N);
 
-		LID_CAN_Receptor_t rec = _fdcans[LID_FDCAN1].rxReceptors[1];
-		Can_Message_RAM *can_ram = _fdcans[LID_FDCAN1].can_ram;
+		LID_CAN_Receptor_t rec = _fdcans[LID_FDCAN2].rxReceptors[1];
+		Can_Message_RAM *can_ram = _fdcans[LID_FDCAN2].can_ram;
 
 		uint8_t i;
 		uint32_t l;
 		uint32_t id;
 
-		i = ((FDCAN_RXF1S_F1GI_Msk & FDCAN1->RXF1S) >> FDCAN_RXF1S_F1GI_Pos);
+		i = ((FDCAN_RXF1S_F1GI_Msk & FDCAN2->RXF1S) >> FDCAN_RXF1S_F1GI_Pos);
 
 		Can_Rx_Element *rx_fifo = &can_ram->rx_fifo1[i];
 
