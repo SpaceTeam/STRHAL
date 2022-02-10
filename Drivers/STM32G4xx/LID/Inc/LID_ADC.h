@@ -10,6 +10,11 @@
 #include <stm32g4xx_ll_rcc.h>
 #include <stm32g4xx_ll_utils.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***** DEFINES *****/
 //ADC
 //#define LID_ADC_N_CHANNELS 19
@@ -168,5 +173,10 @@ PYRO_SENSE PB1 ADC1_IN12 ADC1
 [LID_ADC_PYRO_1_CURR] =		{ ADC3, LL_ADC_CHANNEL_6 },
 [LID_ADC_PRESS_3] =			{ ADC3, LL_ADC_CHANNEL_7 },
 };*/
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

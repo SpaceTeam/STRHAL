@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	LID_BUFFER_STATE_0 = 0,
 	LID_BUFFER_STATE_W = (1<<0),
@@ -35,5 +40,10 @@ uint32_t LID_CircularBuffer_Write(LID_CircularBuffer_t *buf, const uint8_t *data
 uint32_t LID_CircularBuffer_Read(LID_CircularBuffer_t *buf, uint8_t *data, uint32_t n);
 uint32_t LID_CircularBuffer_GetFreeSpace(LID_CircularBuffer_t *buf);
 void LID_CircularBuffer_Flush(LID_CircularBuffer_t *buf);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*LID_CONTAINER_H*/

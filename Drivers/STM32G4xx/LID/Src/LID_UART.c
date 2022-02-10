@@ -77,7 +77,7 @@ void LID_UART_Init() {
 	LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
 	LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
 
-    NVIC_SetPriority(DMA1_Channel1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 1));
+    NVIC_SetPriority(DMA1_Channel1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 1));
     NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 
@@ -100,7 +100,7 @@ void LID_UART_Init() {
 	LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
 	LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_2);
 
-    NVIC_SetPriority(DMA1_Channel2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+    NVIC_SetPriority(DMA1_Channel2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 2));
     NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 
     LL_USART_EnableDirectionTx(USART2);

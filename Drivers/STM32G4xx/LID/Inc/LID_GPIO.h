@@ -4,6 +4,12 @@
 #include <stm32g4xx.h>
 #include <stm32g4xx_ll_gpio.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef enum {
 	LID_GPIO_TYPE_OPP, //Output push pull
 	LID_GPIO_TYPE_OOD, //Output open drain
@@ -39,6 +45,11 @@ void LID_GPIO_GroupWrite(const LID_GPIO_Group_t *gpios, LID_GPIO_Value_t value);
 
 LID_GPIO_Value_t LID_GPIO_Read(const LID_GPIO_t *gpio);
 void LID_GPIO_GroupRead(const LID_GPIO_Group_t *gpios, LID_GPIO_Value_t *values);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* LID_GPIO_H_ */

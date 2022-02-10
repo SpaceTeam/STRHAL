@@ -1,10 +1,13 @@
 #ifndef LID_UART_H
 #define LID_UART_H
 
-#define LID_UART_BUF_SIZE 256
-
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define LID_UART_BUF_SIZE 256
 #define LID_UART_BAUDRATE 115200
 
 typedef enum {
@@ -31,5 +34,8 @@ LID_UART_State_t LID_UART_Listen();
 LID_UART_State_t LID_UART_GetState();
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*LID_UART_H*/

@@ -4,6 +4,11 @@
 #include <stm32g4xx.h>
 #include <stdint.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FDCAN_FRAME_CLASSIC   ((uint32_t)0x00000000U)                         /*!< Classic mode                      */
 #define FDCAN_FRAME_FD_NO_BRS ((uint32_t)FDCAN_CCCR_FDOE)                     /*!< FD mode without BitRate Switching */
 #define FDCAN_FRAME_FD_BRS    ((uint32_t)(FDCAN_CCCR_FDOE | FDCAN_CCCR_BRSE)) /*!< FD mode with BitRate Switching    */
@@ -42,6 +47,11 @@
 
 #define FDCAN_FILTER_REMOTE ((uint32_t)0x00000000U) /*!< Filter remote frames */
 #define FDCAN_REJECT_REMOTE ((uint32_t)0x00000001U) /*!< Reject all remote frames */
+
+#define FDCAN_FILTER_RANGE         ((uint32_t)0x00000000U) //!< Range filter from FilterID1 to FilterID2
+#define FDCAN_FILTER_DUAL          ((uint32_t)0x00000001U) //!< Dual ID filter for FilterID1 or FilterID2
+#define FDCAN_FILTER_MASK          ((uint32_t)0x00000002U) //!< Classic filter: FilterID1 = filter, FilterID2 = mask
+#define FDCAN_FILTER_RANGE_NO_EIDM ((uint32_t)0x00000003U) //!< Range filter from FilterID1 to FilterID2, EIDM mask not applied
 
 #define FDCAN_ELMTS_ARRAY_SIZE			64
 #define FDCAN_NOMINAL_PRESCALER			8
@@ -208,5 +218,10 @@ typedef struct {
 	__attribute__((__aligned__(4))) Can_Tx_Element tx_buffer[3];
 
 } Can_Message_RAM;
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

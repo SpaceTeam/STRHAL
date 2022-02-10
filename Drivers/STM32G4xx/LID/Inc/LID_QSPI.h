@@ -6,6 +6,11 @@
 #include <stm32g4xx_ll_dma.h>
 #include <stm32g4xx_ll_dmamux.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LID_QSPI_RX_BUF_SIZE 1024
 
 /*
@@ -54,5 +59,10 @@ void LID_QSPI_Init(uint8_t flash_size, uint8_t ncs_high_time, uint8_t clk_level)
  * @return TODO: bytes written
  */
 uint32_t LID_QSPI_Write(LID_QSPI_Command_t cmd);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

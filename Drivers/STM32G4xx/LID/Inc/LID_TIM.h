@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stm32g4xx.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LID_TIM_N_TIM 7
 #define LID_TIM_N_TIM_CHANNELS 128
 
@@ -155,6 +160,10 @@ int32_t LID_TIM_PWM_SetFreq(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res);
 int32_t LID_TIM_PWM_SetDuty(LID_TIM_PWM_Channel_t *pwmChannel, uint16_t duty) ;
 int LID_TIM_PWM_Enable(LID_TIM_PWM_Channel_t *pwmChannel, int enable);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /*LID_TIM_H*/

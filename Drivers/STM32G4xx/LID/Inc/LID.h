@@ -11,6 +11,12 @@
 #include "LID_QSPI.h"
 #include "LID_CAN.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef enum {
 	LID_SYSCLK_SRC_BKP, //Backup SYSCLK SRC = ever working internal HSI without PLL
 	LID_SYSCLK_SRC_INT, //Internal SYSCLK SRC = internal HSI + PLL
@@ -18,5 +24,10 @@ typedef enum {
 } LID_SysClk_Src_t;
 
 LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LID_H_ */

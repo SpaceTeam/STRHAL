@@ -7,6 +7,11 @@
 #include <stm32g4xx_ll_rcc.h>
 #include <stm32g4xx_ll_opamp.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***** DEFINES *****/
 
 
@@ -14,5 +19,10 @@
 void LID_OPAMP_Init();
 
 void LID_OPAMP_Run();
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,11 @@
 #ifndef LID_ERROR_H
 #define LID_ERROR_H
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	LID_OOF_SYSCLK = (1<<0),
 	LID_OOF_CLOCK = (1<<1),
@@ -11,5 +16,10 @@ typedef enum {
 } LID_Oof_t;
 
 extern void LID_OofHandler(LID_Oof_t err, char *msg);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*LID_ERROR_H*/
