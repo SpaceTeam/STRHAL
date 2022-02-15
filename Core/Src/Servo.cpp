@@ -32,14 +32,13 @@ int Servo::reset() {
 	return 0;
 }
 
-int Servo::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret) {
+int Servo::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret) {
 	switch(cmd_id) {
 		case SERVO_REQ_MOVE:
 			if(move() < 0)
 				return -1;
 
-			ret[0] = (uint8_t) t_pos & 0xFF;
-			ret[1] = (uint8_t) (t_pos >> 8) & 0xFF;
+			ret = t_pos;
 			return 2;
 
 		default:
@@ -59,26 +58,22 @@ int Servo::setVar(uint8_t variable_id, uint32_t data) {
 	}
 }
 
-int Servo::getVar(uint8_t variable_id, uint8_t *data, uint8_t n) const {
-	uint32_t tmp;
+int Servo::getVar(uint8_t variable_id, uint32_t &data) const {
 	switch(variable_id) {
 	case SERVO_POSITION:
-		tmp = *fdbk_meas;
-		data[0] = (uint8_t) tmp & 0xFF;
-		data[1] = (uint8_t) (tmp >> 8) & 0xFF;
-		return 2;
+		data = *fdbk_meas;
+		return sizeof(uint16_t);
 
 	case SERVO_TARGET_POSITION:
-		data[0] = (uint8_t) t_pos & 0xFF;
-		data[1] = (uint8_t) (t_pos >> 8) & 0xFF;
-		return 2;
+		data = t_pos;
+		return sizeof(uint16_t);
 
 	default:
 		return -1;
 	}
 }
 
-int Servo::setTargetPos(uint32_t pos) {
+int Servo::setTargetPos(uint16_t pos) {
 	if(pos > max_pos || pos < min_pos)
 		return -1;
 
@@ -86,16 +81,17 @@ int Servo::setTargetPos(uint32_t pos) {
 	return pos;
 }
 
-uint32_t Servo::getTargetPos() const {
+uint16_t Servo::getTargetPos() const {
 	return t_pos;
 }
 
-uint32_t Servo::getCurrentPos() const {
+uint16_t Servo::getPos() const {
 	return (uint32_t) *fdbk_meas;
 }
 
 int Servo::move() {
-	if(LID_TIM_PWM_SetDuty(&pwm_ch, t_pos) != t_pos)
+	int32_t tmp = LID_TIM_PWM_SetDuty(&pwm_ch, t_pos);
+	if(tmp< 0 || (uint16_t) tmp != t_pos)
 		return -1;
 
 	return 1;

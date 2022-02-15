@@ -23,11 +23,11 @@ class AbstractChannel {
 		virtual int reset() = 0;
 		virtual int exec() = 0;
 
-		virtual int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret);
+		virtual int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret);
 
 	protected:
 		virtual int setVar(uint8_t variable_id, uint32_t data) = 0;
-		virtual int getVar(uint8_t variable_id, uint8_t *data, uint8_t n) const = 0;
+		virtual int getVar(uint8_t variable_id, uint32_t &data) const = 0;
 
 	private:
 		const CHANNEL_TYPE ch_type;

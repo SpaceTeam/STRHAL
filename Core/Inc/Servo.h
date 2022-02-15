@@ -18,17 +18,19 @@ class Servo : public AbstractChannel {
 		int exec() override;
 
 
-		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret) override;
+		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret) override;
 		int move();
-		int setTargetPos(uint32_t pos);
-		uint32_t getTargetPos() const;
-		uint32_t getCurrentPos() const;
+
+		int setTargetPos(uint16_t pos);
+		uint16_t getTargetPos() const;
+
+		uint16_t getPos() const;
 
 		static constexpr uint16_t SERVO_PWM_FREQ = 50;
 
 	protected:
 		int setVar(uint8_t variable_id, uint32_t data) override;
-		int getVar(uint8_t variable_id, uint8_t *data, uint8_t n) const override;
+		int getVar(uint8_t variable_id, uint32_t &data) const override;
 
 	private:
 		LID_TIM_TimerId_t pwm_tim;
