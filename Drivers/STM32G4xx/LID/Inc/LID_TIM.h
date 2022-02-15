@@ -9,16 +9,22 @@
 extern "C" {
 #endif
 
-#define LID_TIM_N_TIM 7
-#define LID_TIM_N_TIM_CHANNELS 128
-
 typedef enum {
 	LID_TIM_TIM1 = 0,
 	LID_TIM_TIM2 = 1,
 	LID_TIM_TIM3 = 2,
 	LID_TIM_TIM4 = 3,
 	LID_TIM_TIM8 = 4,
+
+	LID_TIM_N_TIM = 5
 } LID_TIM_TimerId_t;
+
+typedef enum {
+	LID_TIM_TIM6 = 0,
+	LID_TIM_TIM7 = 1,
+
+	LID_TIM_N_BASICTIM = 2
+} LID_TIM_BasicTimerId_t;
 
 typedef enum {
 	/*TIM1 Channels */
@@ -136,6 +142,8 @@ typedef enum {
 
 	LID_TIM_TIM8_CH4N_PD0,
 	LID_TIM_TIM8_CH4_PD1,
+
+	LID_TIM_N_TIM_CHANNELS
 } LID_TIM_ChannelId_t;
 
 
@@ -160,6 +168,11 @@ int32_t LID_TIM_PWM_SetFreq(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res);
 int32_t LID_TIM_PWM_SetDuty(LID_TIM_PWM_Channel_t *pwmChannel, uint16_t duty) ;
 int LID_TIM_PWM_Enable(LID_TIM_PWM_Channel_t *pwmChannel, int enable);
 
+typedef void (*LID_TIM_Burnable_t) ();
+
+int32_t LID_TIM_Burner_Init(LID_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res);
+int LID_TIM_Burner_Subscribe(LID_TIM_BasicTimerId_t id, LID_TIM_Burnable_t burn);
+int LID_TIM_Burner_Start2Burn(LID_TIM_BasicTimerId_t id);
 
 #ifdef __cplusplus
 }

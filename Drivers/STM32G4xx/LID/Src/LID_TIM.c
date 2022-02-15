@@ -4,24 +4,19 @@
 #include <stm32g4xx_ll_tim.h>
 #include <stm32g4xx_ll_gpio.h>
 
-
-typedef enum {
-	LID_TIM_TIMER_TYPE_STD,
-	LID_TIM_TIMER_TYPE_ADV,
-	LID_TIM_TIMER_TYPE_BAS,
-} LID_TIM_TimerType_t;
+#include <stddef.h>
 
 typedef enum {
 	LID_TIM_USAGE_000 = 0x00,
 	LID_TIM_USAGE_BAS,
 	LID_TIM_USAGE_PWM,
+	LID_TIM_USAGE_BRN
 } LID_TIM_Usage_t;
 
 typedef struct {
 	TIM_TypeDef *timx;
 	uint16_t cfreq;
 	uint8_t ch_n;
-	LID_TIM_TimerType_t type;
 	LID_TIM_Usage_t utype;
 } LID_TIM_Timer_t;
 
@@ -34,35 +29,48 @@ typedef struct {
 	__IO uint32_t *ccr;
 } LID_TIM_Channel_t;
 
+typedef struct {
+	TIM_TypeDef *timx;
+	uint16_t cfreq;
+	LID_TIM_Usage_t utype;
+	LID_TIM_Burnable_t burnie;
+} LID_TIM_BasicTimer_t;
 
+static LID_TIM_BasicTimer_t _basicTims[LID_TIM_N_BASICTIM] = {
+	[LID_TIM_TIM6] = {
+		.timx = TIM6,
+		.utype = LID_TIM_USAGE_000,
+		.burnie = NULL,
+	},
+	[LID_TIM_TIM7] = {
+		.timx = TIM7,
+		.utype = LID_TIM_USAGE_000,
+		.burnie = NULL,
+	},
+};
 static LID_TIM_Timer_t _tims[LID_TIM_N_TIM] = {
 	[LID_TIM_TIM1] = {
 		.timx = TIM1,
-		.type = LID_TIM_TIMER_TYPE_ADV,
 		.ch_n = 4,
 		.utype = LID_TIM_USAGE_000,
 	},
 	[LID_TIM_TIM2] = {
 		.timx = TIM2,
-		.type = LID_TIM_TIMER_TYPE_ADV,
 		.ch_n = 4,
 		.utype = LID_TIM_USAGE_000,
 	},
 	[LID_TIM_TIM3] = {
 		.timx = TIM3,
-		.type = LID_TIM_TIMER_TYPE_STD,
 		.ch_n = 4,
 		.utype = LID_TIM_USAGE_000,
 	},
 	[LID_TIM_TIM4] = {
 		.timx = TIM4,
-		.type = LID_TIM_TIMER_TYPE_STD,
 		.ch_n = 4,
 		.utype = LID_TIM_USAGE_000,
 	},
 	[LID_TIM_TIM8] = {
 		.timx = TIM8,
-		.type = LID_TIM_TIMER_TYPE_ADV,
 		.ch_n = 4,
 		.utype = LID_TIM_USAGE_000,
 	},
@@ -813,6 +821,12 @@ void LID_TIM_Init() {
 
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM8);
+
+
+	NVIC_EnableIRQ(TIM6_DAC_IRQn);
+	NVIC_EnableIRQ(TIM7_IRQn);
+	NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
+	NVIC_SetPriority(TIM7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 1));
 }
 
 int32_t LID_TIM_PWM_Init(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res) {
@@ -894,7 +908,7 @@ int32_t LID_TIM_PWM_Read(LID_TIM_PWM_Channel_t *pwmChannel, uint16_t *duty) {
 }
 
 int32_t LID_TIM_PWM_SetFreq(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res) {
-	if(id > LID_TIM_N_TIM_CHANNELS)
+	if(id > LID_TIM_N_TIM)
 		return -1;
 
 	const LID_TIM_Timer_t *tim = &_tims[id];
@@ -939,4 +953,77 @@ int LID_TIM_PWM_Enable(LID_TIM_PWM_Channel_t *pwmChannel, int enable) {
 
 	return enable;
 }
+
+int32_t LID_TIM_Burner_Init(LID_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res) {
+	if(id > LID_TIM_N_BASICTIM || id < 0)
+			return -1;
+
+	LID_TIM_BasicTimer_t *tim = &_basicTims[id];
+	if(tim->utype != LID_TIM_USAGE_000)
+		return -1;
+
+	LL_TIM_InitTypeDef TIM_InitStruct = {0};
+	TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+	TIM_InitStruct.CounterMode = LL_TIM_COUNTERDIRECTION_UP;
+	TIM_InitStruct.Autoreload = res - 1;
+	TIM_InitStruct.Prescaler = psc > 0 ? psc -1 : psc;
+	LL_TIM_Init(tim->timx, &TIM_InitStruct);
+
+	LL_TIM_EnableARRPreload(tim->timx);
+
+	tim->cfreq = 0;
+	tim->utype = LID_TIM_USAGE_BRN;
+
+	uint16_t freq = SystemCoreClock / (res * psc);
+	return freq;
+}
+
+int LID_TIM_Burner_Subscribe(LID_TIM_BasicTimerId_t id, LID_TIM_Burnable_t burn) {
+	if(id > LID_TIM_N_BASICTIM || id < 0)
+		return -1;
+
+	LID_TIM_BasicTimer_t *tim = &_basicTims[id];
+	if(tim->utype != LID_TIM_USAGE_BRN)
+		return -1;
+
+	tim->burnie = burn;
+	return 0;
+}
+
+int LID_TIM_Burner_Start2Burn(LID_TIM_BasicTimerId_t id) {
+	if(id > LID_TIM_N_BASICTIM || id < 0)
+		return -1;
+
+	LID_TIM_BasicTimer_t *tim = &_basicTims[id];
+	if(tim->utype != LID_TIM_USAGE_BRN)
+		return -1;
+
+	LL_TIM_ClearFlag_UPDATE(tim->timx);
+	LL_TIM_EnableIT_UPDATE(tim->timx);
+	LL_TIM_EnableCounter(tim->timx);
+	return 0;
+}
+
+void TIM6_DAC_IRQHandler(void) {
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM6)) {
+		LID_TIM_BasicTimer_t *tim = &_basicTims[LID_TIM_TIM6];
+
+		if(tim->burnie != NULL)
+			tim->burnie();
+
+		LL_TIM_ClearFlag_UPDATE(TIM6);
+	}
+}
+
+void TIM7_IRQHandler(void) {
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM7)) {
+		LID_TIM_BasicTimer_t *tim = &_basicTims[LID_TIM_TIM7];
+
+		if(tim->burnie != NULL)
+			tim->burnie();
+
+		LL_TIM_ClearFlag_UPDATE(TIM7);
+	}
+}
+
 

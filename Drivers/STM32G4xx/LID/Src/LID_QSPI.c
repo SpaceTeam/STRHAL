@@ -48,7 +48,7 @@ static void LID_QSPI_InitDMA() {
 	LL_DMA_EnableIT_TC(LID_QSPI_DMA, LID_QSPI_DMA_CHANNEL);
 	LL_DMA_EnableIT_TE(LID_QSPI_DMA, LID_QSPI_DMA_CHANNEL);
 
-	NVIC_SetPriority(DMA1_Channel6_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
+	NVIC_SetPriority(DMA1_Channel6_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 2));
 	NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 }
 
