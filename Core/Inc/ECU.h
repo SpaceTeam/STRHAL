@@ -3,17 +3,19 @@
 
 #include "AbstractBoard.h"
 
+#include <LID.h>
+
 class ECU : public AbstractBoard {
 	public:
 		ECU(uint32_t node_id);
 		ECU(const ECU &other) = delete;
 		ECU& operator=(const ECU &other) = delete;
 
-
 		BoardState init() override;
 		BoardState exec() override;
 
 	private:
+
 
 };
 
