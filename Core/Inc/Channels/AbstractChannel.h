@@ -4,14 +4,14 @@
 #include <can_houbolt/can_cmds.h>
 #include <can_houbolt/cmds.h>
 
-enum class ChannelState : int {
+enum class ChannelStatus : int {
 
 };
 
 class AbstractChannel {
 	public:
 		AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id);
-		~AbstractChannel();
+		virtual ~AbstractChannel();
 
 		CHANNEL_TYPE getChannelType() const;
 		CHANNEL_STATUS getChannelStatus() const;

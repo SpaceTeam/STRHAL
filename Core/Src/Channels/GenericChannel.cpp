@@ -1,30 +1,24 @@
 #include "../Inc/Channels/GenericChannel.h"
 
-GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version) : AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID), cancom(node_id, *this), node_id(node_id), fw_version(fw_version) {
+GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version)
+	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID), node_id(node_id), fw_version(fw_version) {
+}
+
+uint32_t GenericChannel::getNodeId() const {
+	return node_id;
 }
 
 int GenericChannel::init() {
-	if(LID_Init(LID_SYSCLK_SRC_EXT, 8000000) != LID_NOICE)
-		return -1;
-
-	COMState CANState;
-
-	CANState = cancom.init();
-	if(CANState != COMState::SBY)
-		return -1;
-
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;
 		if(channel->init() != 0)
 			return -1;
 	}
-
 	return 0;
 }
 
 int GenericChannel::exec() {
-	cancom.exec();
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;
@@ -81,7 +75,14 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	return 0;
 }
 
-int GenericChannel::addChannel(AbstractChannel &channel) {
-	channels[n_sens++] = &channel;
-	return 0;
+void GenericChannel::registerChannel(AbstractChannel *channel) {
+	if(n_sens <= MAX_CHANNELS)
+		channels[n_sens++] = channel;
+}
+
+void GenericChannel::registerChannels(AbstractChannel **channels, uint8_t n) {
+	for(uint8_t i = 0; i < (n > MAX_CHANNELS ? MAX_CHANNELS : n); i++) {
+		this->channels[i] = channels[i];
+		n_sens++;
+	}
 }

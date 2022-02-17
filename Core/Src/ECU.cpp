@@ -18,18 +18,39 @@
  */
 
 ECU::ECU(uint32_t node_id, uint32_t fw_version) :
-	GenericChannel(node_id, fw_version)	{
-	channels[n_sens++] = new PressureChannel(0, {.ADCx = ADC2, .channelId = LID_ADC_CHANNEL_15});
-	channels[n_sens++] = new PressureChannel(1, {.ADCx = ADC3, .channelId = LID_ADC_CHANNEL_4});
-	channels[n_sens++] = new PressureChannel(2, {.ADCx = ADC1, .channelId = LID_ADC_CHANNEL_14});
-	channels[n_sens++] = new PressureChannel(3, {.ADCx = ADC3, .channelId = LID_ADC_CHANNEL_7});
-	channels[n_sens++] = new PressureChannel(4, {.ADCx = ADC1, .channelId = LID_ADC_CHANNEL_5});
-	channels[n_sens++] = new TempChannel(6, {.ADCx = ADC1, .channelId = LID_ADC_CHANNEL_6});
-	channels[n_sens++] = new TempChannel(7, {.ADCx = ADC1, .channelId = LID_ADC_CHANNEL_7});
-	channels[n_sens++] = new TempChannel(8, {.ADCx = ADC1, .channelId = LID_ADC_CHANNEL_8});
+	GenericChannel(node_id, fw_version),
+	press0Ch{0, {ADC2, LID_ADC_CHANNEL_15}},
+	press1Ch{1, {ADC3, LID_ADC_CHANNEL_5}},
+	press2Ch{2, {ADC1, LID_ADC_CHANNEL_14}},
+	press3Ch{3, {ADC3, LID_ADC_CHANNEL_7}},
+	press4Ch{4, {ADC1, LID_ADC_CHANNEL_5}},
+	press5Ch{5, {ADC1, LID_ADC_CHANNEL_11}},
+	temp0Ch{6, {ADC1, LID_ADC_CHANNEL_6}},
+	temp1Ch{7, {ADC1, LID_ADC_CHANNEL_7}},
+	temp2Ch{8, {ADC1, LID_ADC_CHANNEL_8}}
+{
+	cancom = CANCOM::instance(this);
+	registerChannel(&press0Ch);
+	registerChannel(&press1Ch);
+	registerChannel(&press2Ch);
+	registerChannel(&press3Ch);
+	registerChannel(&press4Ch);
+	registerChannel(&temp0Ch);
+	registerChannel(&temp1Ch);
+	registerChannel(&temp2Ch);
 }
 
 int ECU::init() {
+	if(LID_Init(LID_SYSCLK_SRC_EXT, 8000000) != LID_NOICE)
+		return -1;
+
+	if(cancom == nullptr)
+		return -1;
+
+	CANState = cancom->init();
+	if(CANState != COMState::SBY)
+		return -1;
+
 	if(GenericChannel::init() != 0)
 		return -1;
 
@@ -37,11 +58,10 @@ int ECU::init() {
 }
 
 int ECU::exec() {
-	if(GenericChannel::exec() != 0)
-		return -1;
-
 	while(1) {
-
+		cancom->exec();
+		//if(GenericChannel::exec() != 0)
+			//return -1;
 	}
 	return 0;
 }

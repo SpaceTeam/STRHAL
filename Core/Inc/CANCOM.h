@@ -9,9 +9,13 @@ class GenericChannel; // Forward declaration to avoid cyclic dependency
 
 class CANCOM : public AbstractCOM {
 	public:
-		CANCOM(uint32_t node_id, GenericChannel & generic_ch);
 		CANCOM(const CANCOM &other) = delete;
 		CANCOM& operator=(const CANCOM &other) = delete;
+		CANCOM(const CANCOM &&other) = delete;
+		CANCOM& operator=(const CANCOM &&other) = delete;
+		~CANCOM();
+
+		static CANCOM* instance(GenericChannel *gc = nullptr);
 
 		COMState init() override;
 		COMState exec() override;
@@ -19,10 +23,14 @@ class CANCOM : public AbstractCOM {
 		COMState subscribe2Node(uint8_t nodeId, AbstractChannel & channel);
 
 	private:
+		CANCOM(GenericChannel *gc);
+		CANCOM(GenericChannel &gc);
+
 		static GenericChannel *generic_ch;
-		static uint32_t _node_id;
 		static void mainReceptor(uint32_t id, uint8_t *data, uint32_t n);
 		static void burner();
+
+		static CANCOM *cancom;
 
 };
 

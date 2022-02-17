@@ -5,12 +5,20 @@
 #include <can_houbolt/can_cmds.h>
 #include <cstring>
 
-GenericChannel *CANCOM::generic_ch = nullptr;
-uint32_t CANCOM::_node_id = 0;
+CANCOM* CANCOM::cancom = nullptr;
+GenericChannel* CANCOM::generic_ch = nullptr;
 
-CANCOM::CANCOM(uint32_t node_id, GenericChannel & generic_ch) : AbstractCOM(node_id) {
-	CANCOM::generic_ch = &generic_ch;
-	_node_id = node_id;
+CANCOM::CANCOM(GenericChannel *g_ch)
+	: AbstractCOM(g_ch->getNodeId()) {
+	CANCOM::generic_ch = g_ch;
+}
+
+CANCOM* CANCOM::instance(GenericChannel *gc) {
+	if(CANCOM::cancom == nullptr && gc != nullptr) {
+		CANCOM::cancom = new CANCOM(gc);
+	}
+
+	return CANCOM::cancom;
 }
 
 COMState CANCOM::init() {
@@ -69,10 +77,10 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	uint32_t ret = 0;
 
 	if(ch_id == GENERIC_CHANNEL_ID) {
-		if(CANCOM::generic_ch->prcMsg(cmd_id, var_id, ch_val, ret) == 0)
+		if(generic_ch->prcMsg(cmd_id, var_id, ch_val, ret) != 0)
 			return;
 	} else {
-		if(CANCOM::generic_ch->prcMsg(cmd_id, var_id, ch_val, ret, ch_id) == 0)
+		if(generic_ch->prcMsg(cmd_id, var_id, ch_val, ret, ch_id) != 0)
 			return;
 	}
 
@@ -90,7 +98,7 @@ void CANCOM::burner() {
 	{ 0 };
 	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
 	msg_id.info.direction = NODE2MASTER_DIRECTION;
-	msg_id.info.node_id = _node_id;
+	msg_id.info.node_id = generic_ch->getNodeId();
 	msg_id.info.priority = STANDARD_PRIORITY;
 
 	Can_MessageData_t msg_data =
@@ -101,8 +109,10 @@ void CANCOM::burner() {
 
 	DataMsg_t *data = (DataMsg_t*) &msg_data.bit.data;
 	uint8_t n = 0;
-	if(CANCOM::generic_ch->getSensorData(data->uint8, n) != 0)
+	if(generic_ch->getSensorData(data->uint8, n) != 0)
 		return;
 	//TODO: Channel Mask in DataMsg_t
 	LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
 }
+
+CANCOM::~CANCOM() {}

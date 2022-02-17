@@ -1,8 +1,10 @@
 #include "../Inc/Channels/ServoChannel.h"
 
-ServoChannel::ServoChannel(uint8_t channel_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedback, const LID_ADC_Channel_t &current, const LID_GPIO_t &led_out)
-	: AbstractChannel(CHANNEL_TYPE_SERVO, channel_id),
-	  pwm_tim(pwm_timer), ctrl_chid(control), fdbk_ch(feedback), curr_ch(current), led_o(led_out) {
+ServoChannel::ServoChannel(uint8_t channel_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const ADCChannel &feedbackChannel, const ADCChannel &currentChannel, const LID_GPIO_t &led_o) :
+	AbstractChannel(CHANNEL_TYPE_SERVO, channel_id),
+	pwm_tim(pwm_timer), ctrl_chid(control),
+	fdbkCh(feedbackChannel), currCh(currentChannel),
+	led_o(led_o) {
 
 
 }
@@ -13,12 +15,6 @@ int ServoChannel::init() {
 		return -1;
 
 	if(LID_TIM_PWM_AddChannel(&pwm_ch, ctrl_chid, LID_TIM_PWM_CHANNELTYPE_SO) < 0)
-		return -1;
-
-	fdbk_meas = LID_ADC_SubscribeChannel(&fdbk_ch, LID_ADC_INTYPE_REGULAR);
-	curr_meas = LID_ADC_SubscribeChannel(&curr_ch, LID_ADC_INTYPE_REGULAR);
-
-	if(fdbk_meas == nullptr || curr_meas == nullptr)
 		return -1;
 
 	return 0;
@@ -71,7 +67,7 @@ int ServoChannel::setVar(uint8_t variable_id, uint32_t data) {
 int ServoChannel::getVar(uint8_t variable_id, uint32_t &data) const {
 	switch(variable_id) {
 	case SERVO_POSITION:
-		data = *fdbk_meas;
+		data = c_pos;
 		return sizeof(uint16_t);
 
 	case SERVO_TARGET_POSITION:
@@ -96,7 +92,7 @@ uint16_t ServoChannel::getTargetPos() const {
 }
 
 uint16_t ServoChannel::getPos() const {
-	return (uint32_t) *fdbk_meas;
+	return (uint16_t) c_pos;
 }
 
 int ServoChannel::move() {
