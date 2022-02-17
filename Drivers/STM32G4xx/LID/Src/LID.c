@@ -15,7 +15,6 @@
 
 
 #define LID_SYSCLK_FREQ 160000000
-
 #define LID_SYSCLK_START_TOT 16000000
 
 static LID_SysClk_Src_t _SysClk_Src = LID_SYSCLK_SRC_BKP;

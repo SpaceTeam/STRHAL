@@ -1,5 +1,5 @@
-#ifndef ABSTRACTBOARDUNIT_H
-#define ABSTRACTBOARDUNIT_H
+#ifndef ABSTRACTCHANNEL_H
+#define ABSTRACTCHANNEL_H
 
 #include <can_houbolt/can_cmds.h>
 #include <can_houbolt/cmds.h>
@@ -24,6 +24,7 @@ class AbstractChannel {
 		virtual int exec() = 0;
 
 		virtual int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret);
+		virtual int getSensorData(uint8_t *data, uint8_t &n) = 0;
 
 	protected:
 		virtual int setVar(uint8_t variable_id, uint32_t data) = 0;
@@ -35,4 +36,4 @@ class AbstractChannel {
 		CHANNEL_STATUS ch_status;
 };
 
-#endif /*ABSTRACTBOARDUNIT_H*/
+#endif /*ABSTRACTCHANNEL_H*/

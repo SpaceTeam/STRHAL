@@ -1,4 +1,4 @@
-#include "../Inc/AbstractChannel.h"
+#include "../Inc/Channels/AbstractChannel.h"
 
 #include <cstring>
 
@@ -23,7 +23,6 @@ bool AbstractChannel::IsChannelId(uint8_t channel_id) const {
 	return channel_id == ch_id;
 }
 
-
 int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret) {
 	switch(cmd_id) {
 		case COMMON_REQ_GET_VARIABLE:
@@ -34,7 +33,9 @@ int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, 
 			break;
 
 		case COMMON_REQ_SET_VARIABLE:
-			return setVar(variable_id, data);
+			if(setVar(variable_id, data) == -1)
+				return -1;
+			return getVar(variable_id, ret);
 			break;
 
 		case COMMON_REQ_STATUS:

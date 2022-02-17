@@ -1,24 +1,23 @@
-#ifndef SERVO_H
-#define SERVO_H
+#ifndef SERVOCHANNEL_H
+#define SERVOCHANNEL_H
 
 #include "./AbstractChannel.h"
 
 #include <can_houbolt/channels/servo_channel_def.h>
 #include <LID.h>
 
-class Servo : public AbstractChannel {
+class ServoChannel : public AbstractChannel {
 	public:
-		Servo(CHANNEL_TYPE t, uint8_t channel_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedback, const LID_ADC_Channel_t &current, const LID_GPIO_t &led_o);
-
-		Servo(const Servo &other) = delete;
-		Servo& operator=(const Servo &other) = delete;
+		ServoChannel(uint8_t channel_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedback, const LID_ADC_Channel_t &current, const LID_GPIO_t &led_o);
 
 		int init() override;
 		int reset() override;
 		int exec() override;
 
-
 		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret) override;
+		int getSensorData(uint8_t *data, uint8_t &n) override;
+
+
 		int move();
 
 		int setTargetPos(uint16_t pos);
@@ -45,8 +44,8 @@ class Servo : public AbstractChannel {
 		uint32_t t_pos;
 		uint32_t c_pos;
 
-		uint32_t min_pos = 0;
-		uint32_t max_pos = 360;
+		uint32_t start_pos = 0;
+		uint32_t end_pos = 360;
 };
 
-#endif /*SERVO_H*/
+#endif /*SERVOCHANNEL_H*/
