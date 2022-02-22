@@ -1,13 +1,11 @@
 #include "../Inc/Channels/ServoChannel.h"
 
-ServoChannel::ServoChannel(uint8_t channel_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const ADCChannel &feedbackChannel, const ADCChannel &currentChannel, const LID_GPIO_t &led_o) :
-	AbstractChannel(CHANNEL_TYPE_SERVO, channel_id),
-	pwm_tim(pwm_timer), ctrl_chid(control),
-	fdbkCh(feedbackChannel), currCh(currentChannel),
-	led_o(led_o) {
-
+ServoChannel::ServoChannel(uint8_t channel_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedback, const LID_ADC_Channel_t &current, const LID_GPIO_t &led_out)
+	: AbstractChannel(CHANNEL_TYPE_SERVO, channel_id),
+	  pwm_tim(pwm_timer), ctrl_chid(control), fdbk_ch(feedback), curr_ch(current), led_o(led_out) {
 
 }
+
 int ServoChannel::init() {
 	LID_GPIO_SingleInit(&led_o, LID_GPIO_TYPE_OPP);
 
@@ -28,17 +26,18 @@ int ServoChannel::reset() {
 	return 0;
 }
 
-int ServoChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret) {
+int ServoChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
 		case SERVO_REQ_MOVE:
 			if(move() < 0)
 				return -1;
 
-			ret = t_pos;
-			return sizeof(uint16_t);
+			//ret = t_pos;
+			//return sizeof(uint16_t);
+			return 0;
 
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret);
+			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
 	}
 }
 
@@ -64,14 +63,16 @@ int ServoChannel::setVar(uint8_t variable_id, uint32_t data) {
 	}
 }
 
-int ServoChannel::getVar(uint8_t variable_id, uint32_t &data) const {
+int ServoChannel::getVar(uint8_t variable_id, uint8_t *data) const {
+	SetMsg_t * set_msg = (SetMsg_t *) data;
+	set_msg->variable_id = variable_id;
 	switch(variable_id) {
 	case SERVO_POSITION:
-		data = c_pos;
+		set_msg->value = c_pos;
 		return sizeof(uint16_t);
 
 	case SERVO_TARGET_POSITION:
-		data = t_pos;
+		set_msg->value = t_pos;
 		return sizeof(uint16_t);
 
 	default:

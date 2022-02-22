@@ -15,6 +15,7 @@ class AbstractChannel {
 
 		CHANNEL_TYPE getChannelType() const;
 		CHANNEL_STATUS getChannelStatus() const;
+		uint8_t getChannelId() const;
 
 		bool IsChannelType(CHANNEL_TYPE t) const;
 		bool IsChannelId(uint8_t channel_id) const;
@@ -23,12 +24,12 @@ class AbstractChannel {
 		virtual int reset() = 0;
 		virtual int exec() = 0;
 
-		virtual int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret);
+		virtual int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n);
 		virtual int getSensorData(uint8_t *data, uint8_t &n) = 0;
 
 	protected:
 		virtual int setVar(uint8_t variable_id, uint32_t data) = 0;
-		virtual int getVar(uint8_t variable_id, uint32_t &data) const = 0;
+		virtual int getVar(uint8_t variable_id, uint8_t *data) const = 0;
 
 	private:
 		const CHANNEL_TYPE ch_type;

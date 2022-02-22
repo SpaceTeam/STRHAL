@@ -10,6 +10,7 @@
 #include "LID_TIM.h"
 #include "LID_QSPI.h"
 #include "LID_CAN.h"
+#include "LID_SysTick.h"
 
 
 #ifdef __cplusplus

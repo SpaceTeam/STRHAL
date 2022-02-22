@@ -24,7 +24,6 @@ class CANCOM : public AbstractCOM {
 
 	private:
 		CANCOM(GenericChannel *gc);
-		CANCOM(GenericChannel &gc);
 
 		static GenericChannel *generic_ch;
 		static void mainReceptor(uint32_t id, uint8_t *data, uint32_t n);

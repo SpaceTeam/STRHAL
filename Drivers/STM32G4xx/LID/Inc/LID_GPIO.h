@@ -44,6 +44,7 @@ void LID_GPIO_GroupWrite(const LID_GPIO_Group_t *gpios, LID_GPIO_Value_t value);
 
 
 LID_GPIO_Value_t LID_GPIO_Read(const LID_GPIO_t *gpio);
+LID_GPIO_Value_t LID_GPIO_ReadOutput(const LID_GPIO_t *gpio);
 void LID_GPIO_GroupRead(const LID_GPIO_Group_t *gpios, LID_GPIO_Value_t *values);
 
 

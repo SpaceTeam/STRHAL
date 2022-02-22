@@ -1,18 +1,18 @@
-#ifndef ADCCHANNEL_H
-#define ADCCHANNEL_H
+#ifndef DIGITALINCHANNEL_H
+#define DIGITALINCHANNEL_H
 
 #include "./Channels/AbstractChannel.h"
 #include <can_houbolt/channels/adc16_channel_def.h>
 #include <LID.h>
 
-class ADCChannel : public AbstractChannel {
+class DigitalInChannel : public AbstractChannel {
 	public:
-		ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch);
+		DigitalInChannel(uint8_t channel_id, const LID_GPIO_t &digin_pin);
 
-		ADCChannel(const ADCChannel &other) = delete;
-		ADCChannel& operator=(const ADCChannel &other) = delete;
-		ADCChannel(const ADCChannel &&other) = delete;
-		ADCChannel& operator=(const ADCChannel &&other) = delete;
+		DigitalInChannel(const DigitalInChannel &other) = delete;
+		DigitalInChannel& operator=(const DigitalInChannel &other) = delete;
+		DigitalInChannel(const DigitalInChannel &&other) = delete;
+		DigitalInChannel& operator=(const DigitalInChannel &&other) = delete;
 
 		int init() override;
 		int reset() override;
@@ -29,9 +29,8 @@ class ADCChannel : public AbstractChannel {
 		int getVar(uint8_t variable_id, uint8_t *data) const override;
 
 	private:
-		LID_ADC_Channel_t adc_ch;
-		LID_ADC_Data_t *adc_meas = nullptr;
+		LID_GPIO_t digin_pin;
 
 };
 
-#endif /*ADCCHANNEL_H*/
+#endif /*DIGITALINCHANNEL_H*/

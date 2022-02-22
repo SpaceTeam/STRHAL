@@ -256,8 +256,8 @@ int LID_CAN_Subscribe(LID_FDCAN_Id_t fdcan_id, LID_FDCAN_Rx_Id_t rx_id, LID_FDCA
 	uint8_t i;
 	for(i = 0; i < n; i++, fdcan->filter_n++) {
 		can_ram->std_filters[i].S0.bit.SFEC = sfec;
-		can_ram->std_filters[i].S0.bit.SFID1 = filter->value;
-		can_ram->std_filters[i].S0.bit.SFID2 = filter->mask;
+		can_ram->std_filters[i].S0.bit.SFID1 = filter[i].value;
+		can_ram->std_filters[i].S0.bit.SFID2 = filter[i].mask;
 		can_ram->std_filters[i].S0.bit.SFT = FDCAN_FILTER_MASK;
 	}
 	MODIFY_REG(fdcan->can->RXGFC, FDCAN_RXGFC_LSS, (fdcan->filter_n << FDCAN_RXGFC_LSS_Pos)); // Standard filter elements number
@@ -338,7 +338,12 @@ int32_t LID_CAN_Send(LID_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, 
 	frame->T1.bit.DLC = Can_LengthToDlc[n];
 	frame->T1.bit.EFCC = 0;
 	frame->T1.bit.MM = 0;
-	memcpy(frame->data.byte, data, n);
+
+	uint32_t j = 0;
+	for (uint32_t c = 0; c < n; c += 4)
+		frame->data.word[j++] = data[c] | data[c + 1] << 8 | data[c + 2] << 16 | data[c + 3] << 24;
+	while (j < Can_DlcToLength[Can_LengthToDlc[n]] / 4)
+		frame->data.word[j++] = 0;
 
 	can->TXBAR = (1 << i);
 

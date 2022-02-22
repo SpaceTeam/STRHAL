@@ -35,6 +35,7 @@ LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
 		_status |= LID_OOF_SYSCLK;
 
 	LID_Clock_Init();
+	LID_SysTick_Init();
 	LID_GPIO_Init();
 	LID_OPAMP_Init();
 	LID_UART_Init();

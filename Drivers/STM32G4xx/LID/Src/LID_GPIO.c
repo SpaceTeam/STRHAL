@@ -87,6 +87,13 @@ LID_GPIO_Value_t LID_GPIO_Read(const LID_GPIO_t *gpio) {
 	return (LL_GPIO_ReadInputPort(gpio->port) & (1<<gpio->pin)) ? 1 : 0;
 }
 
+LID_GPIO_Value_t LID_GPIO_ReadOutput(const LID_GPIO_t *gpio) {
+	if(gpio->pin > 0x1F)
+		return LID_GPIO_VALUE_L;
+
+	return (LL_GPIO_ReadOutputPort(gpio->port) & (1<<gpio->pin)) ? 1 : 0;
+}
+
 void LID_GPIO_GroupRead(const LID_GPIO_Group_t *gpios, LID_GPIO_Value_t *values) {
 	uint8_t i;
 	for(i = 0; i < gpios->n; ++i)

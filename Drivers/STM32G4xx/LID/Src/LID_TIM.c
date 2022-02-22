@@ -5,6 +5,7 @@
 #include <stm32g4xx_ll_gpio.h>
 
 #include <stddef.h>
+#include "../Inc/LID.h"
 
 typedef enum {
 	LID_TIM_USAGE_000 = 0x00,
@@ -818,15 +819,16 @@ void LID_TIM_Init() {
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
+	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
+	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM7);
 
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM8);
 
-
 	NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	NVIC_EnableIRQ(TIM7_IRQn);
-	NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
-	NVIC_SetPriority(TIM7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 1));
+	NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 3));
+	NVIC_SetPriority(TIM7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 2)); //TODO check priorities
 }
 
 int32_t LID_TIM_PWM_Init(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res) {

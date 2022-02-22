@@ -1,4 +1,6 @@
 #include "../Inc/Channels/GenericChannel.h"
+#include <cstring>
+#include <cstdio>
 
 GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version)
 	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID), node_id(node_id), fw_version(fw_version) {
@@ -12,18 +14,22 @@ int GenericChannel::init() {
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;
-		if(channel->init() != 0)
+		if(channel->init() != 0) {
 			return -1;
+		}
 	}
 	return 0;
 }
 
 int GenericChannel::exec() {
-	for(AbstractChannel *channel : channels) {
-		if(channel == nullptr)
-			continue;
-		if(channel->exec() != 0)
-			return -1;
+	if(LID_Systick_GetTick() - systick_last > 100) {
+		systick_last = LID_Systick_GetTick();
+		for(AbstractChannel *channel : channels) {
+			if(channel == nullptr)
+				continue;
+			if(channel->exec() != 0)
+				return -1;
+		}
 	}
 	return 0;
 }
@@ -32,17 +38,21 @@ int GenericChannel::reset() {
 	return 0;
 }
 
-int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret) {
+int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
+		case GENERIC_REQ_NODE_INFO:
+			return this->getNodeInfo(ret_data, ret_n);
+		case GENERIC_REQ_DATA:
+			return this->getSensorData(ret_data, ret_n);
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret);
+			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
 	}
 }
 
-int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint32_t &ret, uint8_t ch_id) {
+int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id) {
 	for(AbstractChannel *channel : channels) {
 		if(channel->IsChannelId(ch_id)) {
-			if(channel->prcMsg(cmd_id, variable_id, data, ret) != 0)
+			if(channel->prcMsg(cmd_id, variable_id, data, ret_data, ret_n) != 0)
 				return -1;
 			return 0;
 		}
@@ -58,7 +68,7 @@ int GenericChannel::setVar(uint8_t variable_id, uint32_t data) {
 	}
 }
 
-int GenericChannel::getVar(uint8_t variable_id, uint32_t &data) const {
+int GenericChannel::getVar(uint8_t variable_id, uint8_t *data) const {
 	switch(variable_id) {
 		default:
 			return -1;
@@ -66,12 +76,35 @@ int GenericChannel::getVar(uint8_t variable_id, uint32_t &data) const {
 }
 
 int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
+	DataMsg_t *data_msg = (DataMsg_t *) data;
+	data_msg->channel_mask = 0;
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;
-		if(channel->getSensorData(data, n) == -1)
+		if(channel->getSensorData(&data_msg->uint8[0], n) == -1)
 			return -1;
+		data_msg->channel_mask |= 1 << channel->getChannelId();
 	}
+	return 0;
+}
+
+int GenericChannel::getNodeInfo(uint8_t *data, uint8_t &n) {
+
+	NodeInfoMsg_t *info = (NodeInfoMsg_t *) data;
+
+	info->firmware_version = fw_version;
+
+	info->channel_mask = 0x00000000;
+	uint32_t length = 0;
+	for(AbstractChannel *channel : channels) {
+		if(channel == nullptr)
+			continue;
+
+		info->channel_type[channel->getChannelId()] = channel->getChannelType();
+		info->channel_mask |= 1 << channel->getChannelId();
+		length++;
+	}
+	n = length + 2 * sizeof(uint32_t);
 	return 0;
 }
 
