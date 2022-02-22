@@ -26,7 +26,7 @@ int ServoChannel::reset() {
 	return 0;
 }
 
-int ServoChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
+int ServoChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
 		case SERVO_REQ_MOVE:
 			if(move() < 0)
@@ -37,7 +37,7 @@ int ServoChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uin
 			return 0;
 
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
+			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
 }
 
@@ -50,7 +50,7 @@ int ServoChannel::getSensorData(uint8_t *data, uint8_t &n) {
 }
 
 
-int ServoChannel::setVar(uint8_t variable_id, uint32_t data) {
+int ServoChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
 	case SERVO_TARGET_POSITION:
 		if(setTargetPos(data) < 0)
@@ -63,17 +63,15 @@ int ServoChannel::setVar(uint8_t variable_id, uint32_t data) {
 	}
 }
 
-int ServoChannel::getVar(uint8_t variable_id, uint8_t *data) const {
-	SetMsg_t * set_msg = (SetMsg_t *) data;
-	set_msg->variable_id = variable_id;
+int ServoChannel::getVar(uint8_t variable_id, int32_t *data) const {
 	switch(variable_id) {
 	case SERVO_POSITION:
-		set_msg->value = c_pos;
-		return sizeof(uint16_t);
+		*data = c_pos;
+		return 0;
 
 	case SERVO_TARGET_POSITION:
-		set_msg->value = t_pos;
-		return sizeof(uint16_t);
+		*data = t_pos;
+		return 0;
 
 	default:
 		return -1;

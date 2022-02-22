@@ -14,16 +14,16 @@ class GenericChannel : public AbstractChannel {
 		int reset() override;
 		int exec() override;
 
-		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n);
-		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id);
+		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n);
+		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id);
 		int getSensorData(uint8_t *data, uint8_t &n);
 		int getNodeInfo(uint8_t *data, uint8_t &n);
 
 		uint32_t getNodeId() const;
 
 	protected:
-		int setVar(uint8_t variable_id, uint32_t data) override;
-		int getVar(uint8_t variable_id, uint8_t *data) const override;
+		int setVar(uint8_t variable_id, int32_t data) override;
+		int getVar(uint8_t variable_id, int32_t *data) const override;
 		void registerChannel(AbstractChannel *channel);
 		void registerChannels(AbstractChannel **channels, uint8_t n);
 

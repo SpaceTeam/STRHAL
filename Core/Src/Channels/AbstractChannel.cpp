@@ -27,24 +27,30 @@ bool AbstractChannel::IsChannelId(uint8_t channel_id) const {
 	return channel_id == ch_id;
 }
 
-int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
+int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
+	SetMsg_t * set_msg =
+	{ 0 };
+	set_msg = (SetMsg_t *) ret_data;
+	int32_t temp = 0;
+	int ret = 0;
 	switch(cmd_id) {
 		case COMMON_REQ_GET_VARIABLE:
-			return getVar(variable_id, ret_data);
-			break;
+			ret = getVar(set_msg->variable_id, &temp);
+			set_msg->value = temp;
+			return ret;
+
 		case COMMON_REQ_RESET_SETTINGS:
 			return reset();
-			break;
 
 		case COMMON_REQ_SET_VARIABLE:
-			if(setVar(variable_id, data) == -1)
+			if(setVar(set_msg->variable_id, set_msg->value) == -1)
 				return -1;
-			return getVar(variable_id, ret_data);
-			break;
+			ret = getVar(set_msg->variable_id, &temp);
+			set_msg->value = temp;
+			return ret;
 
 		case COMMON_REQ_STATUS:
 			return getChannelStatus();
-			break;
 
 		default:
 			return -1;

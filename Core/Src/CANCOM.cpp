@@ -80,25 +80,25 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	{ 0 };
 	Can_MessageData_t msg_data =
 	{ 0 };
-	SetMsg_t * set_msg =
-	{ 0 };
+	//SetMsg_t * set_msg =
+	//{ 0 };
 	msg_id.uint32 = id;
 	memcpy(msg_data.uint8,data,64); //TODO only copy n bytes
-	set_msg = (SetMsg_t *) msg_data.bit.data.uint8;
+	//set_msg = (SetMsg_t *) msg_data.bit.data.uint8;
 	uint8_t cmd_id = msg_data.bit.cmd_id;
 	uint8_t ch_id = msg_data.bit.info.channel_id;
-	uint8_t var_id = set_msg->variable_id;
-	uint32_t ch_val = set_msg->value;
+	//uint8_t var_id = set_msg->variable_id;
+	//uint32_t ch_val = set_msg->value;
 	uint8_t ret_n = 0;
 
 	char buf[128];
 	std::sprintf(buf,"REC:nodeid:%ld, cmdid:%d, chid:%d\n",msg_id.info.node_id,cmd_id,ch_id);
 
 	if(ch_id == GENERIC_CHANNEL_ID) {
-		if(generic_ch->prcMsg(cmd_id, var_id, ch_val, msg_data.bit.data.uint8, ret_n) != 0)
+		if(generic_ch->prcMsg(cmd_id, msg_data.bit.data.uint8, ret_n) != 0)
 			return;
 	} else {
-		if(generic_ch->prcMsg(cmd_id, var_id, ch_val, msg_data.bit.data.uint8, ret_n, ch_id) != 0)
+		if(generic_ch->prcMsg(cmd_id, msg_data.bit.data.uint8, ret_n, ch_id) != 0)
 			return;
 	}
 

@@ -21,10 +21,10 @@ int ADCChannel::reset() {
 	return 0;
 }
 
-int ADCChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
+int ADCChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
+			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
 }
 
@@ -36,14 +36,14 @@ int ADCChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	return 0;
 }
 
-int ADCChannel::setVar(uint8_t variable_id, uint32_t data) {
+int ADCChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
 		default:
 			return -1;
 	}
 }
 
-int ADCChannel::getVar(uint8_t variable_id, uint8_t *data) const {
+int ADCChannel::getVar(uint8_t variable_id, int32_t *data) const {
 	switch(variable_id) {
 		default:
 			return -1;

@@ -31,10 +31,10 @@ int PressureControlChannel::reset() {
 	return 0;
 }
 
-int PressureControlChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
+int PressureControlChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
+			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
 }
 
@@ -46,7 +46,7 @@ int PressureControlChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	return 0;
 }
 
-int PressureControlChannel::setVar(uint8_t variable_id, uint32_t data) {
+int PressureControlChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
 		case PNEUMATIC_VALVE_ENABLED:
 			enabled = data;
@@ -68,24 +68,22 @@ int PressureControlChannel::setVar(uint8_t variable_id, uint32_t data) {
 	}
 }
 
-int PressureControlChannel::getVar(uint8_t variable_id, uint8_t *data) const {
-	SetMsg_t * set_msg = (SetMsg_t *) data;
-	set_msg->variable_id = variable_id;
+int PressureControlChannel::getVar(uint8_t variable_id, int32_t *data) const {
 	switch(variable_id) {
 		case PNEUMATIC_VALVE_ENABLED:
-			set_msg->value = enabled;
+			*data = enabled;
 			return 0;
 		case PNEUMATIC_VALVE_POSITION:
-			set_msg->value = position;
+			*data = position;
 			return 0;
 		case PNEUMATIC_VALVE_TARGET_POSITION:
-			set_msg->value = target_position;
+			*data = target_position;
 			return 0;
 		case PNEUMATIC_VALVE_THRESHOLD:
-			set_msg->value = threshold;
+			*data = threshold;
 			return 0;
 		case PNEUMATIC_VALVE_HYSTERESIS:
-			set_msg->value = hysteresis;
+			*data = hysteresis;
 			return 0;
 		default:
 			return -1;

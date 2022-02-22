@@ -22,12 +22,12 @@ class PyroChannel : public AbstractChannel {
 
 		uint16_t getMeas() const;
 
-		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) override;
+		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
 
 	protected:
 
-		int setVar(uint8_t variable_id, uint32_t data) override;
-		int getVar(uint8_t variable_id, uint8_t *data) const override;
+		int setVar(uint8_t variable_id, int32_t data) override;
+		int getVar(uint8_t variable_id, int32_t *data) const override;
 
 		uint32_t getState() const;
 		int setState(uint32_t state);

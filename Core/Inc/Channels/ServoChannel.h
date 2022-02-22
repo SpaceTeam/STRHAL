@@ -14,7 +14,7 @@ class ServoChannel : public AbstractChannel {
 		int reset() override;
 		int exec() override;
 
-		int prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) override;
+		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
 
@@ -28,8 +28,8 @@ class ServoChannel : public AbstractChannel {
 		static constexpr uint16_t SERVO_PWM_FREQ = 50;
 
 	protected:
-		int setVar(uint8_t variable_id, uint32_t data) override;
-		int getVar(uint8_t variable_id, uint8_t *data) const override;
+		int setVar(uint8_t variable_id, int32_t data) override;
+		int getVar(uint8_t variable_id, int32_t *data) const override;
 
 	private:
 		LID_TIM_TimerId_t pwm_tim;

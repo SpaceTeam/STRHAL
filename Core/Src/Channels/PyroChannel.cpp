@@ -22,10 +22,10 @@ int PyroChannel::reset() {
 	return 0;
 }
 
-int PyroChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
+int PyroChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
+			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
 }
 
@@ -37,7 +37,7 @@ int PyroChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	return 0;
 }
 
-int PyroChannel::setVar(uint8_t variable_id, uint32_t data) {
+int PyroChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
 		case DIGITAL_OUT_STATE:
 			if(setState(data) != 0)
@@ -54,18 +54,16 @@ int PyroChannel::setVar(uint8_t variable_id, uint32_t data) {
 	}
 }
 
-int PyroChannel::getVar(uint8_t variable_id, uint8_t *data) const {
-	SetMsg_t * set_msg = (SetMsg_t *) data;
-	set_msg->variable_id = variable_id;
+int PyroChannel::getVar(uint8_t variable_id, int32_t *data) const {
 	switch(variable_id) {
 		case DIGITAL_OUT_STATE:
-			set_msg->value = getState();
+			*data = getState();
 			return 0;
 		case DIGITAL_OUT_DUTY_CYCLE:
-			set_msg->value = duty_cycle;
+			*data = duty_cycle;
 			return 0;
 		case DIGITAL_OUT_FREQUENCY:
-			set_msg->value = frequency;
+			*data = frequency;
 			return 0;
 		default:
 			return -1;

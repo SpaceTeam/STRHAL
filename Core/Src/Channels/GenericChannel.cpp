@@ -38,21 +38,21 @@ int GenericChannel::reset() {
 	return 0;
 }
 
-int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n) {
+int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
 		case GENERIC_REQ_NODE_INFO:
 			return this->getNodeInfo(ret_data, ret_n);
 		case GENERIC_REQ_DATA:
 			return this->getSensorData(ret_data, ret_n);
 		default:
-			return AbstractChannel::prcMsg(cmd_id, variable_id, data, ret_data, ret_n);
+			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
 }
 
-int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id) {
+int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id) {
 	for(AbstractChannel *channel : channels) {
 		if(channel->IsChannelId(ch_id)) {
-			if(channel->prcMsg(cmd_id, variable_id, data, ret_data, ret_n) != 0)
+			if(channel->prcMsg(cmd_id, ret_data, ret_n) != 0)
 				return -1;
 			return 0;
 		}
@@ -61,14 +61,14 @@ int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t variable_id, uint32_t data, u
 	return -1;
 }
 
-int GenericChannel::setVar(uint8_t variable_id, uint32_t data) {
+int GenericChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
 		default:
 			return -1;
 	}
 }
 
-int GenericChannel::getVar(uint8_t variable_id, uint8_t *data) const {
+int GenericChannel::getVar(uint8_t variable_id, int32_t *data) const {
 	switch(variable_id) {
 		default:
 			return -1;
