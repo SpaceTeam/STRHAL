@@ -22,14 +22,11 @@ int GenericChannel::init() {
 }
 
 int GenericChannel::exec() {
-	if(LID_Systick_GetTick() - systick_last > 100) {
-		systick_last = LID_Systick_GetTick();
-		for(AbstractChannel *channel : channels) {
-			if(channel == nullptr)
-				continue;
-			if(channel->exec() != 0)
-				return -1;
-		}
+	for(AbstractChannel *channel : channels) {
+		if(channel == nullptr)
+			continue;
+		if(channel->exec() != 0)
+			return -1;
 	}
 	return 0;
 }

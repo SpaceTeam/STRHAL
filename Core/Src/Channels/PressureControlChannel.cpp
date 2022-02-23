@@ -10,6 +10,14 @@ int PressureControlChannel::init() {
 }
 
 int PressureControlChannel::exec() {
+	static uint64_t t_last_sample;
+
+	uint64_t t = LID_Systick_GetTick();
+	if((t - t_last_sample) < EXEC_SAMPLE_TICKS)
+		return 0;
+
+	t_last_sample = t;
+
 	uint16_t pressure = press_ch.getMeas();
 	if (enabled == 1U && pressure > threshold) { // pressure too high and control is enabled
 		threshold = target_position - hysteresis;

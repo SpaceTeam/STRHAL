@@ -12,7 +12,7 @@ class GenericChannel : public AbstractChannel {
 
 		int init() override;
 		int reset() override;
-		int exec() override;
+		int exec() override; //TODO: implement "smart" scheduler for different CPU
 
 		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n);
 		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id);
@@ -34,8 +34,6 @@ class GenericChannel : public AbstractChannel {
 		 uint32_t node_id;
 		 uint32_t fw_version;
 		 uint32_t channel_msk;
-
-		 uint32_t systick_last = 0;
 };
 
 #endif /*GENERICCHANNEL_H*/

@@ -23,6 +23,8 @@ class PressureControlChannel : public AbstractChannel {
 
 		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
 
+		static constexpr uint16_t EXEC_SAMPLE_TICKS = 100;
+
 	protected:
 
 		int setVar(uint8_t variable_id, int32_t data) override;

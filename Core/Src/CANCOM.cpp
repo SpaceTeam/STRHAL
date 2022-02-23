@@ -31,7 +31,7 @@ COMState CANCOM::init() {
 	if(LID_CAN_Instance_Init(LID_FDCAN2) != 0)
 		return state = COMState::ERR;
 
-	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 3200, 10000) != 5)
+	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 3200, 10000) != 5) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
 		return state = COMState::ERR;
 
 	if(LID_TIM_Burner_Subscribe(LID_TIM_TIM7, CANCOM::burner) != 0)
