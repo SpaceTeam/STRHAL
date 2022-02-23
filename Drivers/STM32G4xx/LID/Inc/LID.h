@@ -17,6 +17,7 @@
 extern "C" {
 #endif
 
+#define LID_SYSCLK_FREQ 160000000
 
 typedef enum {
 	LID_SYSCLK_SRC_BKP, //Backup SYSCLK SRC = ever working internal HSI without PLL

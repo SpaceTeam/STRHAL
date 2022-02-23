@@ -835,7 +835,11 @@ int32_t LID_TIM_PWM_Init(LID_TIM_TimerId_t id, uint16_t psc, uint16_t res) {
 	if(id > LID_TIM_N_TIM || id < 0)
 		return -1;
 
+
 	LID_TIM_Timer_t *tim = &_tims[id];
+	if(tim->utype == LID_TIM_USAGE_PWM)
+		return 0; //TODO: return actual hardware Frequency
+
 	if(tim->utype != LID_TIM_USAGE_000)
 		return -1;
 
