@@ -54,16 +54,16 @@ int PyroChannel::setVar(uint8_t variable_id, int32_t data) {
 	}
 }
 
-int PyroChannel::getVar(uint8_t variable_id, int32_t *data) const {
+int PyroChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 		case DIGITAL_OUT_STATE:
-			*data = getState();
+			data = getState();
 			return 0;
 		case DIGITAL_OUT_DUTY_CYCLE:
-			*data = duty_cycle;
+			data = duty_cycle;
 			return 0;
 		case DIGITAL_OUT_FREQUENCY:
-			*data = frequency;
+			data = frequency;
 			return 0;
 		default:
 			return -1;

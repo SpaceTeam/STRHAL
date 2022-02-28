@@ -151,23 +151,23 @@ int ServoChannel::setVar(uint8_t variable_id, int32_t data) {
 	}
 }
 
-int ServoChannel::getVar(uint8_t variable_id, int32_t *data) const {
+int ServoChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 	case SERVO_POSITION:
-		*data = fdbk_pos;
-		return sizeof(uint16_t);
+		data = fdbk_pos;
+		return 0;
 
 	case SERVO_TARGET_POSITION:
-		*data = targ_pos;
-		return sizeof(uint16_t);
+		data = targ_pos;
+		return 0;
 
 	case SERVO_POSITION_STARTPOINT:
-		*data = tPosToCanonic(pwm_ref.start, pwm0Ref);
-		return sizeof(uint16_t);
+		data = tPosToCanonic(pwm_ref.start, pwm0Ref);
+		return 0;
 
 	case SERVO_POSITION_ENDPOINT:
-		*data = tPosToCanonic(pwm_ref.end, pwm0Ref);
-		return sizeof(uint16_t);
+		data = tPosToCanonic(pwm_ref.end, pwm0Ref);
+		return 0;
 
 	default:
 		return -1;

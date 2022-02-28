@@ -47,8 +47,8 @@ COMState CANCOM::init() {
 	{ 0 };
 	id.info.direction = MASTER2NODE_DIRECTION;
 	id.info.special_cmd = STANDARD_SPECIAL_CMD;
-	//id.info.node_id = CANCOM::generic_ch->getNodeId(); //TODO use actual node id
-	id.info.node_id = 24;
+	id.info.node_id = CANCOM::generic_ch->getNodeId(); //TODO use actual node id
+	//id.info.node_id = 24;
 	Can_MessageId_t id2 =
 	{ 0 };
 	id2.info.direction = MASTER2NODE_DIRECTION;
@@ -107,10 +107,14 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
 	msg_id.info.priority = STANDARD_PRIORITY;
 	msg_data.bit.cmd_id++;
-
-	std::sprintf(buf+strlen(buf),"SENT: id:%ld, chid:%ld, cmdid:%d\n",msg_id.uint32, msg_data.bit.info.channel_id, msg_data.bit.cmd_id);
+	int32_t x = LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, ret_n);
+	if(x < 0) {
+		std::sprintf(buf+strlen(buf), "SEND FAILED | N-bytes: %ld\n", x);
+	} else {
+		SetMsg_t*sm = (SetMsg_t*) msg_data.bit.data.uint8;
+		std::sprintf(buf+strlen(buf),"SENT %ld bytes: id:%ld, chid:%ld, cmdid:%d, data:%ld\n",x, msg_id.uint32, msg_data.bit.info.channel_id, msg_data.bit.cmd_id, sm->value);
+	}
 	LID_UART_Write(buf,strlen(buf));
-	LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, ret_n);
 }
 
 void CANCOM::burner() {
@@ -130,10 +134,22 @@ void CANCOM::burner() {
 
 	DataMsg_t *data = (DataMsg_t*) &msg_data.bit.data;
 	uint8_t n = 0;
-	if(generic_ch->getSensorData(data->uint8, n) != 0)
-		return;
+	char buf[128];
 
-	LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
+	if(generic_ch->getSensorData(data->uint8, n) != 0) {
+		std::sprintf(buf+strlen(buf), "SENSOR DATA COLLECTION FAILED!!\n");
+		LID_UART_Write(buf,strlen(buf));
+		return;
+	}
+
+	int32_t x = LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
+
+	if(x < 0) {
+		std::sprintf(buf+strlen(buf), "SEND FAILED | N-bytes: %ld\n", x);
+	} else {
+		//std::sprintf(buf+strlen(buf),"SENT %ld bytes of sensor data\n",n);
+	}
+	LID_UART_Write(buf,strlen(buf));
 }
 
 CANCOM::~CANCOM() {}

@@ -2,7 +2,7 @@
 #include "LID.h"
 
 int main(void) {
-	ECU ecu(24,0x08b16d8c);
+	ECU ecu(3,0x08b16d8c);
 
 	if(ecu.init() != 0)
 		return -1;

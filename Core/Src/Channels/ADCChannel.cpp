@@ -43,7 +43,7 @@ int ADCChannel::setVar(uint8_t variable_id, int32_t data) {
 	}
 }
 
-int ADCChannel::getVar(uint8_t variable_id, int32_t *data) const {
+int ADCChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 		default:
 			return -1;

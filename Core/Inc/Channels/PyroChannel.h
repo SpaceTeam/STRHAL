@@ -27,7 +27,7 @@ class PyroChannel : public AbstractChannel {
 	protected:
 
 		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t *data) const override;
+		int getVar(uint8_t variable_id, int32_t &data) const override;
 
 		uint32_t getState() const;
 		int setState(uint32_t state);

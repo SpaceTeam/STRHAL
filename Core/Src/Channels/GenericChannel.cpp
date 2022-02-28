@@ -65,7 +65,7 @@ int GenericChannel::setVar(uint8_t variable_id, int32_t data) {
 	}
 }
 
-int GenericChannel::getVar(uint8_t variable_id, int32_t *data) const {
+int GenericChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 		default:
 			return -1;

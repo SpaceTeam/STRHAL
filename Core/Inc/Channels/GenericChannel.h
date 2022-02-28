@@ -23,7 +23,7 @@ class GenericChannel : public AbstractChannel {
 
 	protected:
 		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t *data) const override;
+		int getVar(uint8_t variable_id, int32_t &data) const override;
 		void registerChannel(AbstractChannel *channel);
 		void registerChannels(AbstractChannel **channels, uint8_t n);
 

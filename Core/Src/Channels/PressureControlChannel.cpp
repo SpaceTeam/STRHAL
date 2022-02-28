@@ -76,22 +76,22 @@ int PressureControlChannel::setVar(uint8_t variable_id, int32_t data) {
 	}
 }
 
-int PressureControlChannel::getVar(uint8_t variable_id, int32_t *data) const {
+int PressureControlChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 		case PNEUMATIC_VALVE_ENABLED:
-			*data = enabled;
+			data = enabled;
 			return 0;
 		case PNEUMATIC_VALVE_POSITION:
-			*data = position;
+			data = position;
 			return 0;
 		case PNEUMATIC_VALVE_TARGET_POSITION:
-			*data = target_position;
+			data = target_position;
 			return 0;
 		case PNEUMATIC_VALVE_THRESHOLD:
-			*data = threshold;
+			data = threshold;
 			return 0;
 		case PNEUMATIC_VALVE_HYSTERESIS:
-			*data = hysteresis;
+			data = hysteresis;
 			return 0;
 		default:
 			return -1;

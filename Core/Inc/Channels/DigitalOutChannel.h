@@ -28,7 +28,7 @@ class DigitalOutChannel : public AbstractChannel {
 	protected:
 
 		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t *data) const override;
+		int getVar(uint8_t variable_id, int32_t &data) const override;
 
 	private:
 		uint16_t duty_cycle;

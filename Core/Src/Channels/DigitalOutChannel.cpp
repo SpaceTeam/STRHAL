@@ -54,18 +54,16 @@ int DigitalOutChannel::setVar(uint8_t variable_id, int32_t data) {
 	}
 }
 
-int DigitalOutChannel::getVar(uint8_t variable_id, int32_t *data) const {
-	SetMsg_t * set_msg = (SetMsg_t *) data;
-	set_msg->variable_id = variable_id;
+int DigitalOutChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 		case DIGITAL_OUT_STATE:
-			set_msg->value = getState();
+			data = getState();
 			return 0;
 		case DIGITAL_OUT_DUTY_CYCLE:
-			set_msg->value = duty_cycle;
+			data = duty_cycle;
 			return 0;
 		case DIGITAL_OUT_FREQUENCY:
-			set_msg->value = frequency;
+			data = frequency;
 			return 0;
 		default:
 			return -1;

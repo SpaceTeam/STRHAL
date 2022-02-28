@@ -48,7 +48,7 @@ class ServoChannel : public AbstractChannel {
 
 		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
 
-		static constexpr ServoRefPos pwm0Ref = {1, 345};
+		static constexpr ServoRefPos pwm0Ref = {1800, 3600};
 		static constexpr ServoRefPos com0Ref = {0, UINT16_MAX};
 		static constexpr ServoRefPos adc0Ref = {0, 0x3F};
 
@@ -58,7 +58,7 @@ class ServoChannel : public AbstractChannel {
 
 	protected:
 		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t *data) const override;
+		int getVar(uint8_t variable_id, int32_t &data) const override;
 
 	private:
 		LID_TIM_TimerId_t pwm_tim;

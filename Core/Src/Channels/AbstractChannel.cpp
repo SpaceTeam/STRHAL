@@ -35,8 +35,9 @@ int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	int ret = 0;
 	switch(cmd_id) {
 		case COMMON_REQ_GET_VARIABLE:
-			ret = getVar(set_msg->variable_id, &temp);
+			ret = getVar(set_msg->variable_id, temp);
 			set_msg->value = temp;
+			ret_n+=sizeof(SetMsg_t);
 			return ret;
 
 		case COMMON_REQ_RESET_SETTINGS:
@@ -45,8 +46,9 @@ int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 		case COMMON_REQ_SET_VARIABLE:
 			if(setVar(set_msg->variable_id, set_msg->value) == -1)
 				return -1;
-			ret = getVar(set_msg->variable_id, &temp);
+			ret = getVar(set_msg->variable_id, temp);
 			set_msg->value = temp;
+			ret_n+=sizeof(SetMsg_t);
 			return ret;
 
 		case COMMON_REQ_STATUS:
