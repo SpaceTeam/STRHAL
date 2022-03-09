@@ -31,7 +31,6 @@ class ServoChannel : public AbstractChannel {
 		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
-
 		void setTargetPos(uint16_t pos);
 		uint16_t getTargetPos() const;
 
@@ -40,17 +39,18 @@ class ServoChannel : public AbstractChannel {
 		uint16_t getCurrentMeas() const;
 
 		static constexpr uint16_t PWM_FREQ = 50;
-		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ)*1800;
-		static constexpr uint16_t PWM_PSC = LID_SYSCLK_FREQ / PWM_RES;
+		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ)*1800; //36.000
+		static constexpr uint16_t PWM_PSC = LID_SYSCLK_FREQ / PWM_RES / PWM_FREQ;
 
 		static constexpr uint16_t POS_DEV = (UINT16_MAX / 180);
 		static constexpr uint8_t TARG_HIT_MIN = 5;
 
 		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
 
-		static constexpr ServoRefPos pwm0Ref = {1800, 3600};
+		//static constexpr ServoRefPos pwm0Ref = {1800, 3600};
+		static constexpr ServoRefPos pwm0Ref = {900, 4500};
 		static constexpr ServoRefPos com0Ref = {0, UINT16_MAX};
-		static constexpr ServoRefPos adc0Ref = {0, 0x3F};
+		static constexpr ServoRefPos adc0Ref = {0, 0xFFF};
 
 		static uint16_t tPosFromCanonic(uint16_t pos, const ServoRefPos &frame);
 		static uint16_t tPosToCanonic(uint16_t pos, const ServoRefPos &frame);

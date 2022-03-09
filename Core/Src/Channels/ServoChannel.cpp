@@ -33,6 +33,7 @@ int ServoChannel::init() {
 
 int ServoChannel::exec() {
 	static uint16_t targ_pos_last = targ_pos;
+	//static uint16_t targ_pos_last = 0;
 	static uint16_t fdbk_pos_last = 0;
 
 	static uint8_t targ_hit_cnt = 0;
@@ -211,7 +212,7 @@ uint16_t ServoChannel::tPosFromCanonic(uint16_t pos, const ServoRefPos &frame) {
 	else if(frame.end < frame.start)
 		return 0;
 
-	return pos / (UINT16_MAX / (frame.end - frame.start));
+	return (pos / (UINT16_MAX / (frame.end - frame.start))) + frame.start;
 }
 
 
