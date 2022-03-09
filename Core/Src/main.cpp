@@ -9,6 +9,7 @@ int main(void) {
 
 	LID_UART_Write("STARTED\n",8);
 	ecu.exec();
+
 	while(1);
 }
 

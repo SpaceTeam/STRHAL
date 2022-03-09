@@ -27,7 +27,6 @@ typedef enum {
 
 LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq);
 
-
 #ifdef __cplusplus
 }
 #endif

@@ -31,7 +31,7 @@ COMState CANCOM::init() {
 	if(LID_CAN_Instance_Init(LID_FDCAN2) != 0)
 		return state = COMState::ERR;
 
-	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 3200, 10000) != 5) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
+	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 16000, 10000) != 1) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
 		return state = COMState::ERR;
 
 	if(LID_TIM_Burner_Subscribe(LID_TIM_TIM7, CANCOM::burner) != 0)
@@ -123,7 +123,7 @@ void CANCOM::burner() {
 	{ 0 };
 	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
 	msg_id.info.direction = NODE2MASTER_DIRECTION;
-	msg_id.info.node_id = generic_ch->getNodeId();
+	msg_id.info.node_id = CANCOM::generic_ch->getNodeId();
 	msg_id.info.priority = STANDARD_PRIORITY;
 
 	Can_MessageData_t msg_data =
@@ -134,22 +134,26 @@ void CANCOM::burner() {
 
 	DataMsg_t *data = (DataMsg_t*) &msg_data.bit.data;
 	uint8_t n = 0;
-	char buf[128];
+	//char buf[256];
 
 	if(generic_ch->getSensorData(data->uint8, n) != 0) {
-		std::sprintf(buf+strlen(buf), "SENSOR DATA COLLECTION FAILED!!\n");
-		LID_UART_Write(buf,strlen(buf));
+		//std::sprintf(buf+strlen(buf), "SENSOR DATA COLLECTION FAILED!!\n");
+		//LID_UART_Write(buf,strlen(buf));
 		return;
 	}
+
+	//for(int i = 0; i < 10; i=i+2) {
+		//std::sprintf(buf+strlen(buf),"%d: %d\n",i,data->uint8[i] << 8 | data->uint8[i]);
+	//}
 
 	int32_t x = LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
 
 	if(x < 0) {
-		std::sprintf(buf+strlen(buf), "SEND FAILED | N-bytes: %ld\n", x);
+		//std::sprintf(buf+strlen(buf), "SEND FAILED | N-bytes: %ld\n", x);
 	} else {
 		//std::sprintf(buf+strlen(buf),"SENT %ld bytes of sensor data\n",n);
 	}
-	LID_UART_Write(buf,strlen(buf));
+	//LID_UART_Write(buf,strlen(buf));
 }
 
 CANCOM::~CANCOM() {}

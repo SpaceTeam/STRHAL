@@ -1,6 +1,10 @@
 #include "../Inc/ECU.h"
 #include "../Inc/CANCOM.h"
 
+
+#include <cstring>
+#include <cstdio>
+
 ECU::ECU(uint32_t node_id, uint32_t fw_version) :
 	GenericChannel(node_id, fw_version),
 	press_0(0, {ADC2, LID_ADC_CHANNEL_15}),
@@ -95,14 +99,113 @@ int ECU::init() {
 }
 
 int ECU::exec() {
+	LID_OPAMP_Run();
+	LID_ADC_Run();
 	CANState = cancom->exec();
 	if(CANState != COMState::RUN)
 		return -1;
 
 	LID_UART_Write("RUNNING\n",8);
+
+	// Call test functions from here, if desired
+	testServo(servo_0);
+
 	while(1) {
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}
 	return 0;
+}
+
+void ECU::testServo(ServoChannel &servo) {
+	servo.setTargetPos(0);
+	servo.getPos();
+
+	char buf[64];
+	uint64_t t_last_sample = 0;
+	uint8_t state = 0;
+	while(1) {
+		uint64_t t = LID_Systick_GetTick();
+		if((t - t_last_sample) > 3000) {
+			t_last_sample = t;
+			if(state == 0) {
+				servo.setTargetPos(63000);
+				state = 1;
+			} else {
+				servo.setTargetPos(0);
+				state = 0;
+			}
+
+		}
+		sprintf(buf,"%d, %d, %d\n",servo.getCurrentMeas(),servo.getFeedbackMeas(), servo.getPos());
+		LID_UART_Write(buf, strlen(buf));
+		if(GenericChannel::exec() != 0)
+			return;
+	}
+}
+
+void ECU::testChannels() {
+
+	char read[256], write[256];
+	uint8_t state = 0;
+	LID_UART_Listen();
+	while(1) {
+		int32_t n = LID_UART_Read(read, 2);
+		if(n > 0) {
+			AbstractChannel *channel = GenericChannel::channels[state];
+			CHANNEL_TYPE type = channel->getChannelType();
+			if(type == CHANNEL_TYPE_ADC16) {
+				ADCChannel * adc = (ADCChannel *) channel;
+				int nn = 0;
+				while(nn == 0) {
+					nn = LID_UART_Read(read, 2);
+					std::sprintf(write,"ChannelId: %d, ChannelType: %d, Measurement: %d\n",channel->getChannelId(),type,adc->getMeas());
+					LID_UART_Write(write, strlen(write));
+					LID_Systick_BusyWait(500);
+				}
+			} else if(type == CHANNEL_TYPE_DIGITAL_OUT) {
+				SetMsg_t set_msg =
+				{ 0 };
+				set_msg.variable_id = DIGITAL_OUT_STATE;
+				set_msg.value = 1;
+				uint8_t ret_n = 0;
+				std::sprintf(write,"ChannelId: %d, ChannelType: %d\n",state,type);
+				LID_UART_Write(write, strlen(write));
+				LID_Systick_BusyWait(1000);
+				LID_UART_Write("..Setting Output for 10s in\n", 28);
+				LID_Systick_BusyWait(500);
+				LID_UART_Write("..3s\n", 5);
+				LID_Systick_BusyWait(1000);
+				LID_UART_Write("..2s\n", 5);
+				LID_Systick_BusyWait(1000);
+				LID_UART_Write("..1s\n", 5);
+				LID_Systick_BusyWait(1000);
+				channel->prcMsg(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
+				for(int i = 0; i < 5; i++) {
+					uint8_t n = 0;
+					uint8_t meas[2];
+					channel->getSensorData(meas, n);
+					std::sprintf(write,"...Output ON, Measurement: %d\n",meas[0] << 8 | meas[1]);
+					LID_UART_Write(write, strlen(write));
+					LID_Systick_BusyWait(2000);
+				}
+				set_msg.variable_id = DIGITAL_OUT_STATE;
+				set_msg.value = 0;
+				channel->prcMsg(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
+				LID_UART_Write("..Output OFF\n", 13);
+			} else if(type == CHANNEL_TYPE_PNEUMATIC_VALVE) {
+				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
+				LID_UART_Write(write, strlen(write));
+				LID_UART_Write("Channel not implemented\n", 24);
+			} else if(type == CHANNEL_TYPE_SERVO) {
+				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
+				LID_UART_Write(write, strlen(write));
+			} else {
+				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
+				LID_UART_Write(write, strlen(write));
+			}
+			state = (state == 20) ? 0 : (state+1);
+		}
+		LID_Systick_BusyWait(500);
+	}
 }

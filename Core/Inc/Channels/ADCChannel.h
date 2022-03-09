@@ -7,7 +7,7 @@
 
 class ADCChannel : public AbstractChannel {
 	public:
-		ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch);
+		ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t adc_ch);
 
 		ADCChannel(const ADCChannel &other) = delete;
 		ADCChannel& operator=(const ADCChannel &other) = delete;

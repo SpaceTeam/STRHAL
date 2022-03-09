@@ -1,6 +1,6 @@
 #include <Channels/ADCChannel.h>
 
-ADCChannel::ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t & adc_ch)
+ADCChannel::ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t adc_ch)
 	: AbstractChannel(CHANNEL_TYPE_ADC16, channel_id), adc_ch(adc_ch) {
 }
 
@@ -30,7 +30,9 @@ int ADCChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 
 int ADCChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	*out = *adc_meas;
+	//*out = *adc_meas;
+	*out = (uint16_t) LID_Systick_GetTick();
+	//*out = 25;
 
 	n += sizeof(uint16_t);
 	return 0;
