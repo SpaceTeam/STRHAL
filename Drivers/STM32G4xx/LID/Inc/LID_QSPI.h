@@ -22,44 +22,33 @@ extern "C" {
  * DummyLength directly specifies the number of dummy cycles to send. If set to 0, no dummy cycles are sent.
  */
 typedef struct {
-		uint8_t ReadWrite;  // 0 = read, 1 = write
-		uint8_t Instruction;
-		uint8_t SendAddress;
-		uint32_t Address;
-		uint8_t SendAlternate;
-		uint8_t AlternateLength;  // If SendAlternate is 1, AlternateLength+1 alternate bytes will be sent
-		uint32_t Alternate;
-		uint8_t DummyLength;
-		uint8_t SendData;
-		uint8_t DataLength;  // If SendData is 1, DataLength+1 bytes at Data will be sent
-		uint8_t *Data;
+		uint8_t instruction;
+		uint8_t instruction_size : 1;
+		uint32_t addr;
+		uint32_t addr_size : 2;
+		uint8_t alt_size : 2;
+		uint32_t alt;
+		uint8_t dummy_size : 5;
 } LID_QSPI_Command_t;
 
 
-typedef enum {
-	LID_QSPI_STATE_IDLE	= 0 << 0,
+typedef struct {
+	uint8_t psc : 8;
+	uint8_t flash_size : 4;
+	uint8_t ncs_high_time : 3;
+	uint8_t clk_level : 1;
+} LID_QSPI_Config_t;
 
-	LID_QSPI_STATE_TX	= 1 << 1,
-	LID_QSPI_STATE_TC	= 1 << 2,
-	LID_QSPI_STATE_TE   = 1 << 3,
 
-	LID_QSPI_STATE_RX	= 1 << 4,
-} LID_QSPI_State_t;
+void LID_QSPI_Init();
+void LID_QSPI_Run();
+void LID_QSPI_Stop();
+void LID_QSPI_Reset();
 
-/* @brief Initialize QSPI interface
- * @param flash_size  actual flash size will be 2^(value+1) | e.g. value=24 -> 32 MiB
- * @param ncs_high_time  minimum number of cycles during which nCS must be high between commands
- * @param clk_level  if clk should stay low (0) or high (1) when nCS is high
- */
-void LID_QSPI_Init(uint8_t flash_size, uint8_t ncs_high_time, uint8_t clk_level);
+void LID_QSPI_Flash_Init(const LID_QSPI_Config_t *config);
 
-/*
- * @brief Write commands over QSPI
- * @param cmd  QSPI command frame structure
- * @return TODO: bytes written
- */
-uint32_t LID_QSPI_Write(LID_QSPI_Command_t cmd);
-
+uint32_t LID_QSPI_Indirect_Write(LID_QSPI_Command_t cmd, const uint8_t *data, uint32_t n, uint16_t tot);
+uint32_t LID_QSPI_Indirect_Read(LID_QSPI_Command_t cmd, uint8_t *data, uint32_t n, uint16_t tot);
 
 #ifdef __cplusplus
 }
