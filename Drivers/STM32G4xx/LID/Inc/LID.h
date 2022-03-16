@@ -8,6 +8,7 @@
 #include "LID_OPAMP.h"
 #include "LID_UART.h"
 #include "LID_TIM.h"
+#include "LID_SPI.h"
 #include "LID_QSPI.h"
 #include "LID_CAN.h"
 #include "LID_SysTick.h"
@@ -26,6 +27,7 @@ typedef enum {
 } LID_SysClk_Src_t;
 
 LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq);
+
 
 #ifdef __cplusplus
 }
