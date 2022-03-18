@@ -23,17 +23,17 @@ extern "C" {
  */
 typedef struct {
 		uint8_t instruction;
-		uint8_t instruction_size : 1;
+		uint8_t instruction_size;
 		uint32_t addr;
-		uint32_t addr_size : 2;
-		uint8_t alt_size : 2;
+		uint32_t addr_size;
+		uint8_t alt_size;
 		uint32_t alt;
-		uint8_t dummy_size : 5;
+		uint8_t dummy_size;
 } LID_QSPI_Command_t;
 
 
 typedef struct {
-	uint8_t psc : 8;
+	uint8_t psc : 5;
 	uint8_t flash_size : 4;
 	uint8_t ncs_high_time : 3;
 	uint8_t clk_level : 1;
@@ -45,10 +45,10 @@ void LID_QSPI_Run();
 void LID_QSPI_Stop();
 void LID_QSPI_Reset();
 
-void LID_QSPI_Flash_Init(const LID_QSPI_Config_t *config);
+int LID_QSPI_Flash_Init(const LID_QSPI_Config_t *config);
 
-uint32_t LID_QSPI_Indirect_Write(LID_QSPI_Command_t cmd, const uint8_t *data, uint32_t n, uint16_t tot);
-uint32_t LID_QSPI_Indirect_Read(LID_QSPI_Command_t cmd, uint8_t *data, uint32_t n, uint16_t tot);
+uint32_t LID_QSPI_Indirect_Write(const LID_QSPI_Command_t *cmd, const uint8_t *data, uint32_t n, uint16_t tot);
+uint32_t LID_QSPI_Indirect_Read(const LID_QSPI_Command_t *cmd, uint8_t *data, uint32_t n, uint16_t tot);
 
 #ifdef __cplusplus
 }

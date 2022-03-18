@@ -1,17 +1,22 @@
 #include "../Inc/Channels/IMUChannel.h"
 
 #include <cstring>
+#include <cstdio>
 
 IMUChannel::IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf) :
 	AbstractChannel(CHANNEL_TYPE_UNKNOWN, channel_id),
 	spi_id(spi_id),
-	spi_conf(spi_conf) {
+	spi_conf(spi_conf),
+	flash(0x1F, 256) {
 	meas_data_tail = meas_data_n = 0;
 }
 
 int IMUChannel::init() {
 	if(LID_SPI_Master_Init(spi_id, &spi_conf) < 0)
 		return -1;
+
+	if(flash.init() < 0)
+			return -1;
 
 	LID_SPI_Master_Run(spi_id);
 
@@ -66,8 +71,15 @@ int IMUChannel::exec() {
 	meas_data[i].alpha.y = tmp[2] << 8 | tmp[3];
 	meas_data[i].alpha.z = tmp[4] << 8 | tmp[5];
 
-	meas_data_n++;
-	meas_data_n %= BUF_DATA_SIZE;
+	if(i == BUF_DATA_SIZE-1) {
+		meas_data_n = 0;
+		(void) flash.writeEnable();
+		(void) flash.writeCurrentPage((uint8_t *)meas_data, BUF_DATA_SIZE*sizeof(IMUData));
+	} else {
+		meas_data_n++;
+	}
+	//meas_data_n++;
+	//meas_data_n %= BUF_DATA_SIZE;
 
 	return 0;
 }
@@ -79,6 +91,24 @@ uint8_t IMUChannel::whoAmI() const {
 	LID_SPI_Master_Transceive(spi_id, &cmd, 1, 1, &imu_id, 1, 100);
 
 	return imu_id;
+}
+
+void IMUChannel::printData() {
+	char kartoffel_buffer[256];
+	uint8_t readData[256];
+	for(int i = 0; i < 8000*16; i++) {
+		if(flash.read(i << 8, readData, 252) != 252) {
+			sprintf(kartoffel_buffer, "UNABLE TO READ PAGE!\n");
+			LID_UART_Write(kartoffel_buffer, strlen(kartoffel_buffer));
+		}
+		for(int j = 0; j < 252; j=j+14) {
+			IMUData * imuData;
+			imuData = (IMUData *) &readData[j];
+			sprintf(kartoffel_buffer, "%d;%d;%d;%d;%d;%d;%d\n", imuData->accel.x,imuData->accel.y,imuData->accel.z,imuData->alpha.x,imuData->alpha.y,imuData->alpha.z,imuData->temp);
+			LID_UART_Write(kartoffel_buffer, strlen(kartoffel_buffer));
+			LL_mDelay(2);
+		}
+	}
 }
 
 int IMUChannel::reset() {

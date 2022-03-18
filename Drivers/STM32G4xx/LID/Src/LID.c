@@ -40,8 +40,8 @@ LID_Oof_t LID_Init(LID_SysClk_Src_t src, uint32_t freq) {
 	LID_ADC_Init();
 	LID_TIM_Init();
 	LID_SPI_Init();
-	_status |= LID_CAN_Init();
-	//LID_QSPI_Init();
+	//_status |= LID_CAN_Init();
+	LID_QSPI_Init();
 
 	_INITIALIZED = 1;
 

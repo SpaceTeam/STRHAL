@@ -10,6 +10,8 @@
 #include <Channels/GenericChannel.h>
 #include <Channels/IMUChannel.h>
 #include <CANCOM.h>
+#include <W25Qxx_Flash.h>
+#include <Speaker.h>
 
 #include <LID.h>
 
@@ -23,11 +25,16 @@ class ECU : public GenericChannel {
 		//int reset() override;
 		int exec() override;
 
-		static constexpr uint8_t ECU_CHANNEL_N = 9;
+		void testChannels();
+		void testServo(ServoChannel &servo);
+
+		//static constexpr uint8_t ECU_CHANNEL_N = 22;
 
 	private:
 		CANCOM *cancom;
 		COMState CANState;
+
+		LID_GPIO_t ledRed, ledGreen;
 
 		ADCChannel press_0, press_1, press_2, press_3, press_4, press_5;
 		ADCChannel temp_0, temp_1, temp_2;
@@ -36,8 +43,17 @@ class ECU : public GenericChannel {
 		PyroChannel pyro_igniter0, pyro_igniter1, pyro_igniter2;
 		DigitalOutChannel solenoid_0, solenoid_1;
 		PressureControlChannel pressure_control;
-
 		IMUChannel imu_0;
+		ADCChannel pyro_sense;
+
+		Speaker speaker;
+
+		bool checkPyroVoltageHigh();
+		void readoutMode();
+		void loggingMode();
+		uint32_t pyro_on_counter;
+
+		//W25Qxx_Flash flash;
 };
 
 /*

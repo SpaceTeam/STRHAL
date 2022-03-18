@@ -2,6 +2,7 @@
 #define IMUCHANNEL_H
 
 #include "AbstractChannel.h"
+#include <W25Qxx_Flash.h>
 
 #include <LID.h>
 
@@ -47,13 +48,14 @@ class IMUChannel : public AbstractChannel {
 		bool getMeas(IMUData &x);
 
 		uint8_t whoAmI() const;
+		void printData();
 
 		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
 
 		static constexpr uint32_t BUF_DATA_SIZE = 256 / sizeof(IMUData);
 		static constexpr uint8_t READ_BIT = 0x80;
 
-		static constexpr uint64_t EXEC_SAMPLE_TICKS = 1;
+		static constexpr uint64_t EXEC_SAMPLE_TICKS = 2;
 
 	protected:
 		int setVar(uint8_t variable_id, int32_t data) override;
@@ -67,6 +69,8 @@ class IMUChannel : public AbstractChannel {
 
 		IMUData meas_data[BUF_DATA_SIZE] = {0};
 		uint32_t meas_data_tail, meas_data_n;
+
+		W25Qxx_Flash flash;
 };
 
 #endif /*IMUCHANNEL_H*/

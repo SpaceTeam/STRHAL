@@ -14,9 +14,12 @@
 
 //static uint8_t _rx_buf[LID_QSPI_RX_BUF_SIZE];
 static inline int _wait_for_status(uint32_t flag, uint16_t tot);
+static inline int _wait_for_status_clear(uint32_t flag, uint16_t);
+static inline void _clear_status(uint32_t flags);
 
 static void _init_GPIO() {
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
 	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -31,15 +34,24 @@ void LID_QSPI_Init() {
 	LL_AHB3_GRP1_EnableClock(LL_AHB3_GRP1_PERIPH_QSPI);
 }
 
-void LID_QSPI_Flash_Init(const LID_QSPI_Config_t *config) {
-	QUADSPI->CR |= config->psc << QUADSPI_CR_PRESCALER_Pos;
+int LID_QSPI_Flash_Init(const LID_QSPI_Config_t *config) {
+	LID_QSPI_Reset();
+
+	_init_GPIO();
+
 	QUADSPI->CR |= LID_QSPI_FIFO_THRESH << QUADSPI_CR_FTHRES_Pos;
 
+	if(_wait_for_status_clear(QUADSPI_SR_BUSY, 100) < 0)
+		return -1;
+
+	QUADSPI->CR |= config->psc << QUADSPI_CR_PRESCALER_Pos;
 	QUADSPI->DCR |= config->flash_size<< QUADSPI_DCR_FSIZE_Pos;
 	QUADSPI->DCR |= config->ncs_high_time << QUADSPI_DCR_CSHT_Pos;
 	QUADSPI->DCR |= config->clk_level << QUADSPI_DCR_CKMODE_Pos;
 
-	_init_GPIO();
+	LID_QSPI_Run();
+
+	return 0;
 }
 
 void LID_QSPI_Reset() {
@@ -49,17 +61,25 @@ void LID_QSPI_Reset() {
 	CLEAR_REG(QUADSPI->CR);
 	CLEAR_REG(QUADSPI->DCR);
 	CLEAR_REG(QUADSPI->CCR);
+
+	QUADSPI->FCR |= (QUADSPI_FCR_CSMF | QUADSPI_FCR_CTCF | QUADSPI_FCR_CTEF | QUADSPI_FCR_CTOF);
 }
 
 void LID_QSPI_Run() {
-	QUADSPI->CR |= QUADSPI_CR_EN;  // Enable QSPI
+	QUADSPI->CR |= QUADSPI_CR_EN;// Enable QSPI
 }
 
 void LID_QSPI_Stop() {
 	QUADSPI->CR &= ~QUADSPI_CR_EN;  // Enable QSPI
 }
 
-uint32_t LID_QSPI_Indirect_Write(LID_QSPI_Command_t cmd, const uint8_t *data, uint32_t n, uint16_t tot) {
+uint32_t LID_QSPI_Indirect_Write(const LID_QSPI_Command_t *cmd, const uint8_t *data, uint32_t n, uint16_t tot) {
+	if(_wait_for_status_clear(QUADSPI_SR_BUSY, tot) < 0)
+		return -1;
+
+	 __IO uint32_t *data_reg = &QUADSPI->DR;
+	 _clear_status(QUADSPI_FCR_CSMF | QUADSPI_FCR_CTCF | QUADSPI_FCR_CTEF | QUADSPI_FCR_CTOF);
+
 	uint32_t ccr = 0x00000000;
 
 	if(n > 0) {
@@ -67,30 +87,31 @@ uint32_t LID_QSPI_Indirect_Write(LID_QSPI_Command_t cmd, const uint8_t *data, ui
 		WRITE_REG(QUADSPI->DLR, n -1U);
 	}
 
-	if(cmd.alt_size > 0) {
+	if(cmd->alt_size > 0) {
 		ccr |= QUADSPI_CCR_ABMODE_0;
-		ccr |= cmd.alt_size << QUADSPI_CCR_ABSIZE_Pos;
-		WRITE_REG(QUADSPI->ABR, cmd.alt);
+		ccr |= ((cmd->alt_size-1) & 0x3) << QUADSPI_CCR_ABSIZE_Pos;
+		WRITE_REG(QUADSPI->ABR, cmd->alt);
 	}
 
-	ccr |= cmd.dummy_size << QUADSPI_CCR_DCYC_Pos;
+	ccr |= (cmd->dummy_size & 0x1F) << QUADSPI_CCR_DCYC_Pos;
 
-	if(cmd.instruction_size > 0) {
-		ccr |= cmd.instruction << QUADSPI_CCR_INSTRUCTION_Pos;
-		if(cmd.addr_size > 0) {
+	if(cmd->instruction_size > 0) {
+		ccr |= QUADSPI_CCR_IMODE_0;
+		ccr |= cmd->instruction << QUADSPI_CCR_INSTRUCTION_Pos;
+		if(cmd->addr_size > 0) {
 			ccr |= QUADSPI_CCR_ADMODE_0;
-			ccr |= cmd.addr_size << QUADSPI_CCR_ADSIZE_Pos;
+			ccr |= ((cmd->addr_size-1) & 0x3) << QUADSPI_CCR_ADSIZE_Pos;
 			WRITE_REG(QUADSPI->CCR, ccr);
-			WRITE_REG(QUADSPI->AR, cmd.addr);
+			WRITE_REG(QUADSPI->AR, cmd->addr);
 		} else {
 			WRITE_REG(QUADSPI->CCR, ccr);
 		}
 	} else {
-		if(cmd.addr_size > 0) {
+		if(cmd->addr_size > 0) {
 			ccr |= QUADSPI_CCR_ADMODE_0;
-			ccr |= cmd.addr_size << QUADSPI_CCR_ADSIZE_Pos;
+			ccr |= ((cmd->addr_size-1) & 0x3) << QUADSPI_CCR_ADSIZE_Pos;
 			WRITE_REG(QUADSPI->CCR, ccr);
-			WRITE_REG(QUADSPI->AR, cmd.addr);
+			WRITE_REG(QUADSPI->AR, cmd->addr);
 		} else {
 			WRITE_REG(QUADSPI->CCR, ccr);
 		}
@@ -101,62 +122,76 @@ uint32_t LID_QSPI_Indirect_Write(LID_QSPI_Command_t cmd, const uint8_t *data, ui
 		if(_wait_for_status(QUADSPI_SR_FTF, tot) < 0)
 			return i;
 
-		*((__IO uint8_t *)QUADSPI->DR) = data[i];
+		*((__IO uint8_t *) data_reg) = data[i];
+
 	}
 
 	if(_wait_for_status(QUADSPI_SR_TCF, tot) == 0) {
-		SET_BIT(QUADSPI->SR, QUADSPI_SR_TCF);
+		SET_BIT(QUADSPI->FCR, QUADSPI_FCR_CTCF);
 	}
 
 	return i;
 }
 
-uint32_t LID_QSPI_Indirect_Read(LID_QSPI_Command_t cmd, uint8_t *data, uint32_t n, uint16_t tot) {
+uint32_t LID_QSPI_Indirect_Read(const LID_QSPI_Command_t *cmd, uint8_t *data, uint32_t n, uint16_t tot) {
+	if(_wait_for_status_clear(QUADSPI_SR_BUSY, tot) < 0)
+		return -1;
+
+	 __IO uint32_t *data_reg = &QUADSPI->DR;
+	 _clear_status(QUADSPI_FCR_CSMF | QUADSPI_FCR_CTCF | QUADSPI_FCR_CTEF | QUADSPI_FCR_CTOF);
+
 	uint32_t ccr = 0x00000000;
 
+	ccr |= QUADSPI_CCR_FMODE_0;
+
 	if(n > 0) {
-		ccr |= QUADSPI_CCR_DMODE_1;
+		ccr |= QUADSPI_CCR_DMODE_0;
 		WRITE_REG(QUADSPI->DLR, n -1U);
 	}
-	if(cmd.alt_size > 0) {
+	if(cmd->alt_size > 0) {
 		ccr |= QUADSPI_CCR_ABMODE_0;
-		ccr |= cmd.alt_size << QUADSPI_CCR_ABSIZE_Pos;
-		WRITE_REG(QUADSPI->ABR, cmd.alt);
+		ccr |= ((cmd->alt_size-1) & 0x3) << QUADSPI_CCR_ABSIZE_Pos;
+		WRITE_REG(QUADSPI->ABR, cmd->alt);
 	}
 
-	ccr |= cmd.dummy_size << QUADSPI_CCR_DCYC_Pos;
+	ccr |= (cmd->dummy_size & 0x1F) << QUADSPI_CCR_DCYC_Pos;
 
-	if(cmd.instruction_size > 0) {
-		ccr |= cmd.instruction << QUADSPI_CCR_INSTRUCTION_Pos;
-		if(cmd.addr_size > 0) {
+	if(cmd->instruction_size > 0) {
+		ccr |= QUADSPI_CCR_IMODE_0;
+		ccr |= cmd->instruction << QUADSPI_CCR_INSTRUCTION_Pos;
+		if(cmd->addr_size > 0) {
 			ccr |= QUADSPI_CCR_ADMODE_0;
-			ccr |= cmd.addr_size << QUADSPI_CCR_ADSIZE_Pos;
+			ccr |= ((cmd->addr_size-1) & 0x3) << QUADSPI_CCR_ADSIZE_Pos;
 			WRITE_REG(QUADSPI->CCR, ccr);
-			WRITE_REG(QUADSPI->AR, cmd.addr);
+			WRITE_REG(QUADSPI->AR, cmd->addr);
 		} else {
 			WRITE_REG(QUADSPI->CCR, ccr);
 		}
 	} else {
-		if(cmd.addr_size > 0) {
+		if(cmd->addr_size > 0) {
 			ccr |= QUADSPI_CCR_ADMODE_0;
-			ccr |= cmd.addr_size << QUADSPI_CCR_ADSIZE_Pos;
+			ccr |= ((cmd->addr_size-1) & 0x3) << QUADSPI_CCR_ADSIZE_Pos;
 			WRITE_REG(QUADSPI->CCR, ccr);
-			WRITE_REG(QUADSPI->AR, cmd.addr);
+			WRITE_REG(QUADSPI->AR, cmd->addr);
 		} else {
 			WRITE_REG(QUADSPI->CCR, ccr);
 		}
 	}
 
+	if(_wait_for_status(QUADSPI_SR_BUSY, tot) < 0)
+		return 0;
+
 	uint32_t i;
 	for(i = 0; i < n; ++i) {
-		if(_wait_for_status(QUADSPI_SR_FTF, tot) < 0)
+		if(_wait_for_status(QUADSPI_SR_FTF | QUADSPI_SR_TCF, tot) < 0) {
+			_clear_status(QUADSPI_SR_TCF);
 			return i;
-
-		data[i] = *((__IO uint8_t *) QUADSPI->DR);
+		}
+		data[i] = *((__IO uint8_t *) data_reg);
 	}
 
 	if(_wait_for_status(QUADSPI_SR_TCF, tot) == 0) {
-		SET_BIT(QUADSPI->SR, QUADSPI_SR_TCF);
+		_clear_status(QUADSPI_SR_TCF);
 	}
 	return i;
 }
@@ -167,10 +202,20 @@ int _wait_for_status(uint32_t flag, uint16_t tot) {
 	while(!(QUADSPI->SR & flag)) {
 		if(LID_Systick_GetTick() - start > tot)
 			return -1;
+	}
+	return 0;
+}
 
-		if(QUADSPI->SR & QUADSPI_SR_TEF)
+int _wait_for_status_clear(uint32_t flag, uint16_t tot) {
+	uint64_t start = LID_Systick_GetTick();
+
+	while(QUADSPI->SR & flag) {
+		if(LID_Systick_GetTick() - start > tot)
 			return -1;
 	}
 	return 0;
+}
 
+void _clear_status(uint32_t flags) {
+	QUADSPI->FCR |= (flags);
 }
