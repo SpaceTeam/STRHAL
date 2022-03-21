@@ -25,7 +25,7 @@ typedef struct {
 		uint8_t instruction;
 		uint8_t instruction_size;
 		uint32_t addr;
-		uint32_t addr_size;
+		uint8_t addr_size;
 		uint8_t alt_size;
 		uint32_t alt;
 		uint8_t dummy_size;
@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
 	uint8_t psc : 5;
-	uint8_t flash_size : 4;
+	uint8_t flash_size : 5;
 	uint8_t ncs_high_time : 3;
 	uint8_t clk_level : 1;
 } LID_QSPI_Config_t;
