@@ -48,7 +48,6 @@ class IMUChannel : public AbstractChannel {
 		bool getMeas(IMUData &x);
 
 		uint8_t whoAmI() const;
-		void printData();
 
 		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
 

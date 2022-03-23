@@ -26,15 +26,11 @@ class W25Qxx_Flash {
 		bool disableWPS();
 
 		uint32_t writeCurrentPage(const uint8_t * data, uint32_t n);
-		uint32_t read(uint32_t address, uint8_t *data, uint32_t n) const;
+		uint32_t read(uint32_t address, uint8_t *data, uint32_t n);
 		bool writeEnable();
 		bool writeDisable();
 		bool sectorErase(uint32_t sector);
 		bool chipErase();
-
-		//bool pageRead(uint8_t *data, uint32_t addr);
-		//bool sectorErase(uint32_t sector);
-		//bool pageWrite(uint8_t *data, uint32_t n);
 
 		uint32_t getPageCount();
 		uint32_t getSectorCount();
@@ -46,7 +42,6 @@ class W25Qxx_Flash {
 		uint32_t pageCount;
 		uint32_t sectorCount;
 
-		//bool _waitForBusyClear(uint16_t tot);
 		int waitForSREGFlag(uint8_t flag, bool state, uint16_t tot);
 };
 

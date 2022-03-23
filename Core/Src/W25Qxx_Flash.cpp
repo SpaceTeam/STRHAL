@@ -252,7 +252,7 @@ uint32_t W25Qxx_Flash::writeCurrentPage(const uint8_t * data, uint32_t n) {
 	return n;
 }
 
-uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) const {
+uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) {
 	LID_QSPI_Command_t cmd;
 	cmd.instruction = 0x13;
 	cmd.instruction_size = 1;
@@ -264,7 +264,10 @@ uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) const {
 	if((uint64_t) address + n > (uint64_t) (1<<size_2n))
 		n = 0xFFFFFFFF-address;
 
-	if (LID_QSPI_Indirect_Read(&cmd, data, n, 100) != n)
+	if(waitForSREGFlag(0x01, false, 100) < 0)
+		return 0;
+
+	if (LID_QSPI_Indirect_Read(&cmd, data, n, 1000) != n)
 		return 0;
 
 	return n;

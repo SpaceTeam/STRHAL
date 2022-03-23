@@ -30,9 +30,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version) :
 	solenoid_1(19, {ADC2, LID_ADC_CHANNEL_18}, {GPIOD, 8, LID_GPIO_TYPE_OPP}),
 	pressure_control(20, press_1, solenoid_0),
 	imu_0(21, LID_SPI_SPI3, {LID_SPI_SPI3_SCK_PC10, LID_SPI_SPI3_MISO_PC11, LID_SPI_SPI3_MOSI_PC12, LID_SPI_SPI3_NSS_PA15, LID_SPI_MODE_MASTER, LID_SPI_CPOL_CPHASE_HH, 0x7, 0}),
-	pyro_sense(0, {ADC1, LID_ADC_CHANNEL_12}),
-	speaker(LID_TIM_TIM2, LID_TIM_TIM2_CH3_PB10),
-	pyro_on_counter(0)
+	speaker(LID_TIM_TIM2, LID_TIM_TIM2_CH3_PB10)
 	//flash(0x1F, 256)
 {
 	cancom = CANCOM::instance(this);
@@ -58,32 +56,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version) :
 	registerChannel(&solenoid_1);
 	registerChannel(&pressure_control);
 	registerChannel(&imu_0);
-	registerChannel(&pyro_sense);
 }
-
-	/*
-	0	press_fueltank			pressure		ADCChannel				ADC16
-	1	press_oxtank			pressure		ADCChannel				ADC16
-	2	press_chamber			pressure		ADCChannel				ADC16
-	3	press_fuelinj			pressure		ADCChannel				ADC16
-	4	press_oxinj				pressure		ADCChannel				ADC16
-	5	UNUSED					pressure		ADCChannel				ADC16
-	6	temp_oxbottom			temperature		ADCChannel				ADC16
-	7	temp_oxmiddle			temperature		ADCChannel				ADC16
-	8	temp_oxtop				temperature		ADCChannel				ADC16
-	9	servo_fuelmain			fdbk pos		ServoChannel			Servo
-	10	servo_oxmain			fdbk pos		ServoChannel			Servo
-	11	USUSDED					fdbk pos		ServoChannel			Servo
-	12	pyro_igniter0			current			DigitalOutChannel		DigitalOut
-	13	pyro0_cont				continuity		DigitalInChannel		ADC16
-	14	pyro_igniter1			current			DigitalOutChannel		DigitalOut
-	15	pyro1_cont				continuity		DigitalInChannel		ADC16
-	16	USUSED					current			DigitalOutChannel		DigitalOut
-	17	UNUSED					continuity		DigitalInChannel		ADC16
-	18	solenoid_supercharge	current			DigitalOutChannel		DigitalOut
-	19	UNUSED					current			DigitalOutChannel		DigitalOut
-	20	pressure_control		solenoid state	PressureControlChannel	PneumaticValve
-*/
 
 int ECU::init() {
 	if(LID_Init(LID_SYSCLK_SRC_EXT, 8000000) != LID_NOICE)
@@ -96,12 +69,12 @@ int ECU::init() {
 	//if(flash.init() < 0)
 		//return -1;
 
-	/*if(cancom == nullptr)
+	if(cancom == nullptr)
 		return -1;
 
 	CANState = cancom->init();
 	if(CANState != COMState::SBY)
-		return -1;*/
+		return -1;
 
 	if(GenericChannel::init() != 0)
 		return -1;
@@ -112,75 +85,24 @@ int ECU::init() {
 	return 0;
 }
 
-bool ECU::checkPyroVoltageHigh() {
-	if(pyro_sense.getMeas() > 400)
-		pyro_on_counter++;
-	else
-		pyro_on_counter = 0;
-	return (pyro_on_counter >= 50);
-}
-
-void ECU::readoutMode() {
-	LID_UART_Listen();
-	char read[64];
-	int32_t n = LID_UART_Read(read, 2);
-	if(n > 0) {
-		speaker.beep(5, 300, 300);
-		LID_UART_Write("READING MODE!\n", 14);
-		imu_0.printData();
-		LID_UART_Write("DONE PRINTING!\n", 14);
-	}
-}
-
-void ECU::loggingMode() {
-	LID_UART_Write("LOGGING MODE!\n", 14);
-	while(1) {
-		(void) imu_0.exec();
-	}
-}
-
 int ECU::exec() {
 	LID_OPAMP_Run();
 	LID_ADC_Run();
 	LID_QSPI_Run();
 
-	/*CANState = cancom->exec();
+	CANState = cancom->exec();
 	if(CANState != COMState::RUN)
-		return -1;*/
+		return -1;
 
 	LID_GPIO_Write(&ledRed, LID_GPIO_VALUE_H);
-	//LID_UART_Write("RUNNING\n",8);
+	LID_UART_Write("RUNNING\n",8);
 
 	speaker.beep(2, 400, 300);
 
-	// Turn on Pyros
-	uint8_t data[5] = { 0 };
-	SetMsg_t * set_msg = (SetMsg_t *) data;
-	set_msg->variable_id = DIGITAL_OUT_STATE;
-	set_msg->value = 1;
-	uint8_t n = 0;
-	pyro_igniter0.prcMsg(COMMON_REQ_SET_VARIABLE, data, n);
-	pyro_igniter2.prcMsg(COMMON_REQ_SET_VARIABLE, data, n);
-
-	for(int c = 0; c <= 1000; c++) {
-		while(checkPyroVoltageHigh())
-			readoutMode();
-	}
-
-	pyro_on_counter = 0;
-
-	while(42) {
-		readoutMode();
-		if(checkPyroVoltageHigh()) {
-			speaker.beep(2, 2000, 1000);
-			loggingMode();
-		}
-	}
-
-	/*while(1) {
+	while(1) {
 		if(GenericChannel::exec() != 0)
 			return -1;
-	}*/
+	}
 
 	return 0;
 }

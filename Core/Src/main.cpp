@@ -7,7 +7,7 @@ int main(void) {
 	if(ecu.init() != 0)
 		return -1;
 
-	//LID_UART_Write("STARTED\n",8);
+	LID_UART_Write("STARTED\n",8);
 	ecu.exec();
 
 	while(1);
