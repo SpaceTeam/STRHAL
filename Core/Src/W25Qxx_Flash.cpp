@@ -4,7 +4,17 @@
 #include <LID_SysTick.h>
 #include <LID.h>
 
-W25Qxx_Flash::W25Qxx_Flash(uint8_t size_2n, uint32_t page_size) : size_2n(size_2n & 0x3F), page_size(page_size), pageCount(0), sectorCount(0) {
+W25Qxx_Flash* W25Qxx_Flash::flash = nullptr;
+
+W25Qxx_Flash::W25Qxx_Flash(uint8_t size_2n) : size_2n(size_2n & 0x3F), pageCount(0), sectorCount(0) {
+}
+
+W25Qxx_Flash* W25Qxx_Flash::instance(uint8_t size_2n) {
+	if(W25Qxx_Flash::flash == nullptr) {
+		W25Qxx_Flash::flash = new W25Qxx_Flash(size_2n);
+	}
+
+	return W25Qxx_Flash::flash;
 }
 
 int W25Qxx_Flash::init() {
@@ -210,15 +220,7 @@ bool W25Qxx_Flash::exit4ByteAddrMode() {
 	return true;
 }
 
-uint32_t W25Qxx_Flash::writeCurrentPage(const uint8_t * data, uint32_t n) {
-	LID_QSPI_Command_t cmd;
-	cmd.instruction = 0x12;
-	cmd.instruction_size = 1;
-	cmd.addr = (pageCount << 8) | (sectorCount << 12);
-	cmd.addr_size = 4;
-	cmd.alt_size = 0;
-	cmd.dummy_size = 0;
-
+uint32_t W25Qxx_Flash::writeNextPage(const uint8_t * data, uint32_t n) {
 	if(sectorCount == 8192-1) {
 		return 0;
 	}
@@ -230,16 +232,9 @@ uint32_t W25Qxx_Flash::writeCurrentPage(const uint8_t * data, uint32_t n) {
 			return 0;
 	}
 
-	if(waitForSREGFlag(0x01, false, 100) < 0)
-		return 0;
+	uint32_t numWritten = write((pageCount << 8) | (sectorCount << 12),data,n);
 
-	if(!writeEnable())
-		return 0;
-
-	if(n > page_size)
-		n = page_size;
-
-	if (LID_QSPI_Indirect_Write(&cmd, data, n, 100) != n)
+	if(numWritten == n)
 		return 0;
 
 	if(pageCount == 15) {
@@ -248,6 +243,30 @@ uint32_t W25Qxx_Flash::writeCurrentPage(const uint8_t * data, uint32_t n) {
 	} else {
 		pageCount++;
 	}
+
+	return n;
+}
+
+uint32_t W25Qxx_Flash::write(uint32_t address, const uint8_t *data, uint32_t n) {
+	LID_QSPI_Command_t cmd;
+	cmd.instruction = 0x12;
+	cmd.instruction_size = 1;
+	cmd.addr = address;
+	cmd.addr_size = 4;
+	cmd.alt_size = 0;
+	cmd.dummy_size = 0;
+
+	if(waitForSREGFlag(0x01, false, 100) < 0)
+		return 0;
+
+	if(!writeEnable())
+		return 0;
+
+	if(n > PAGE_SIZE)
+		n = PAGE_SIZE;
+
+	if (LID_QSPI_Indirect_Write(&cmd, data, n, 100) != n)
+		return 0;
 
 	return n;
 }
@@ -271,6 +290,39 @@ uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) {
 		return 0;
 
 	return n;
+}
+
+bool W25Qxx_Flash::writeConfigReg(Config reg, uint32_t val) {
+	return writeConfigRegs(&reg, &val, 1);
+}
+
+bool W25Qxx_Flash::writeConfigRegs(Config *reg, uint32_t *val, uint16_t n) {
+	if(!readConfig())
+		return false;
+
+	for(int i = 0; i < n; i++) {
+		config.reg[static_cast<int>(reg[i])] = val[i];
+	}
+
+	if(!configErase()) {
+		return false;
+	}
+
+	return write(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
+
+}
+
+bool W25Qxx_Flash::readConfig() {
+	return read(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
+}
+
+// Update Config by calling readConfig() prior to this!
+uint32_t W25Qxx_Flash::readConfigReg(Config reg) {
+	return config.reg[static_cast<int>(reg)];
+}
+
+bool W25Qxx_Flash::configErase() {
+	return sectorErase(CONFIG_BASE >> 12);
 }
 
 bool W25Qxx_Flash::sectorErase(uint32_t sector) {

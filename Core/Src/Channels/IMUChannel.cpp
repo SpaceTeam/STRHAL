@@ -6,17 +6,13 @@
 IMUChannel::IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf) :
 	AbstractChannel(CHANNEL_TYPE_UNKNOWN, channel_id),
 	spi_id(spi_id),
-	spi_conf(spi_conf),
-	flash(0x1F, 256) {
+	spi_conf(spi_conf) {
 	meas_data_tail = meas_data_n = 0;
 }
 
 int IMUChannel::init() {
 	if(LID_SPI_Master_Init(spi_id, &spi_conf) < 0)
 		return -1;
-
-	if(flash.init() < 0)
-			return -1;
 
 	LID_SPI_Master_Run(spi_id);
 
@@ -114,11 +110,11 @@ bool IMUChannel::getMeas(IMUData &x) {
 }
 
 int IMUChannel::getSensorData(uint8_t *data, uint8_t &n) {
-	/*if(meas_data_n > 0) {
+	if(meas_data_n > 0) {
 		std::memcpy(data, &meas_data[meas_data_tail++], 12);
 		meas_data_tail %= BUF_DATA_SIZE;
 		meas_data_n--;
-	}*/
+	}
 
 	return 0;
 }

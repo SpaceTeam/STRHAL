@@ -68,8 +68,6 @@ class IMUChannel : public AbstractChannel {
 
 		IMUData meas_data[BUF_DATA_SIZE] = {0};
 		uint32_t meas_data_tail, meas_data_n;
-
-		W25Qxx_Flash flash;
 };
 
 #endif /*IMUCHANNEL_H*/

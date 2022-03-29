@@ -17,7 +17,7 @@
 
 class ECU : public GenericChannel {
 	public:
-		ECU(uint32_t node_id, uint32_t fw_version);
+		ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider);
 		ECU(const ECU &other) = delete;
 		ECU& operator=(const ECU &other) = delete;
 
@@ -31,6 +31,8 @@ class ECU : public GenericChannel {
 	private:
 		CANCOM *cancom;
 		COMState CANState;
+
+		W25Qxx_Flash *flash;
 
 		LID_GPIO_t ledRed, ledGreen;
 

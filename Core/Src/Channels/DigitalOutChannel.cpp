@@ -33,7 +33,7 @@ int DigitalOutChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
 	*out = *adc_meas;
 
-	n += sizeof(uint16_t);
+	n += DIGITAL_OUT_DATA_N_BYTES;
 	return 0;
 }
 

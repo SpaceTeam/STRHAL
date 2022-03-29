@@ -30,11 +30,9 @@ int ADCChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 
 int ADCChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	//*out = *adc_meas;
-	*out = (uint16_t) LID_Systick_GetTick();
-	//*out = 25;
+	*out = *adc_meas;
 
-	n += sizeof(uint16_t);
+	n += ADC16_DATA_N_BYTES;
 	return 0;
 }
 

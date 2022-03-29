@@ -173,7 +173,8 @@ int LID_CAN_Instance_Init(LID_FDCAN_Id_t fdcan_id) {
 			return -1;
 	}
 
-	SET_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Disabled
+	//SET_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Disabled
+	CLEAR_BIT(can->CCCR, FDCAN_CCCR_DAR);  //AutoRetransmission Enabled
 
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_TXP);  //transmit pause Disabled
 
@@ -338,6 +339,11 @@ int32_t LID_CAN_Send(LID_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, 
 	frame->T1.bit.DLC = Can_LengthToDlc[n];
 	frame->T1.bit.EFCC = 0;
 	frame->T1.bit.MM = 0;
+
+	/*if(frame->T0.bit.ID == 0 || frame->T1.bit.DLC == 0) {
+		uint8_t temp = 1;
+		(void) temp;
+	}*/
 
 	uint32_t j = 0;
 	for (uint32_t c = 0; c < n; c += 4)

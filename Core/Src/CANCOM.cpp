@@ -31,7 +31,7 @@ COMState CANCOM::init() {
 	if(LID_CAN_Instance_Init(LID_FDCAN2) != 0)
 		return state = COMState::ERR;
 
-	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 16000, 10000) != 1) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
+	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 160, 100) != 10000) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
 		return state = COMState::ERR;
 
 	if(LID_TIM_Burner_Subscribe(LID_TIM_TIM7, CANCOM::burner) != 0)
@@ -47,8 +47,7 @@ COMState CANCOM::init() {
 	{ 0 };
 	id.info.direction = MASTER2NODE_DIRECTION;
 	id.info.special_cmd = STANDARD_SPECIAL_CMD;
-	id.info.node_id = CANCOM::generic_ch->getNodeId(); //TODO use actual node id
-	//id.info.node_id = 24;
+	id.info.node_id = CANCOM::generic_ch->getNodeId();
 	Can_MessageId_t id2 =
 	{ 0 };
 	id2.info.direction = MASTER2NODE_DIRECTION;
@@ -80,19 +79,12 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	{ 0 };
 	Can_MessageData_t msg_data =
 	{ 0 };
-	//SetMsg_t * set_msg =
-	//{ 0 };
+
 	msg_id.uint32 = id;
 	memcpy(msg_data.uint8,data,64); //TODO only copy n bytes
-	//set_msg = (SetMsg_t *) msg_data.bit.data.uint8;
 	uint8_t cmd_id = msg_data.bit.cmd_id;
 	uint8_t ch_id = msg_data.bit.info.channel_id;
-	//uint8_t var_id = set_msg->variable_id;
-	//uint32_t ch_val = set_msg->value;
 	uint8_t ret_n = 0;
-
-	char buf[128];
-	std::sprintf(buf,"REC:nodeid:%ld, cmdid:%d, chid:%d\n",msg_id.info.node_id,cmd_id,ch_id);
 
 	if(ch_id == GENERIC_CHANNEL_ID) {
 		if(generic_ch->prcMsg(cmd_id, msg_data.bit.data.uint8, ret_n) != 0)
@@ -106,15 +98,9 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	msg_id.info.node_id = CANCOM::generic_ch->getNodeId();
 	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
 	msg_id.info.priority = STANDARD_PRIORITY;
-	msg_data.bit.cmd_id++;
-	int32_t x = LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, ret_n);
-	if(x < 0) {
-		std::sprintf(buf+strlen(buf), "SEND FAILED | N-bytes: %ld\n", x);
-	} else {
-		SetMsg_t*sm = (SetMsg_t*) msg_data.bit.data.uint8;
-		std::sprintf(buf+strlen(buf),"SENT %ld bytes: id:%ld, chid:%ld, cmdid:%d, data:%ld\n",x, msg_id.uint32, msg_data.bit.info.channel_id, msg_data.bit.cmd_id, sm->value);
-	}
-	LID_UART_Write(buf,strlen(buf));
+	msg_data.bit.cmd_id = cmd_id + 1;
+
+	(void) LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, CAN_MSG_LENGTH(ret_n));
 }
 
 void CANCOM::burner() {
@@ -132,28 +118,12 @@ void CANCOM::burner() {
 	msg_data.bit.info.channel_id = GENERIC_CHANNEL_ID;
 	msg_data.bit.info.buffer = DIRECT_BUFFER;
 
-	DataMsg_t *data = (DataMsg_t*) &msg_data.bit.data;
 	uint8_t n = 0;
-	//char buf[256];
-
-	if(generic_ch->getSensorData(data->uint8, n) != 0) {
-		//std::sprintf(buf+strlen(buf), "SENSOR DATA COLLECTION FAILED!!\n");
-		//LID_UART_Write(buf,strlen(buf));
+	if(generic_ch->getSensorData(&msg_data.bit.data.uint8[0], n) != 0) { // Sensor Data collection failed, or Refresh Divider not yet met
 		return;
 	}
 
-	//for(int i = 0; i < 10; i=i+2) {
-		//std::sprintf(buf+strlen(buf),"%d: %d\n",i,data->uint8[i] << 8 | data->uint8[i]);
-	//}
-
-	int32_t x = LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
-
-	if(x < 0) {
-		//std::sprintf(buf+strlen(buf), "SEND FAILED | N-bytes: %ld\n", x);
-	} else {
-		//std::sprintf(buf+strlen(buf),"SENT %ld bytes of sensor data\n",n);
-	}
-	//LID_UART_Write(buf,strlen(buf));
+	(void) LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
 }
 
 CANCOM::~CANCOM() {}

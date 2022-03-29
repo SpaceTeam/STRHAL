@@ -4,8 +4,8 @@
 #include <cstdio>
 #include <cstring>
 
-ECU::ECU(uint32_t node_id, uint32_t fw_version) :
-	GenericChannel(node_id, fw_version),
+ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
+	GenericChannel(node_id, fw_version, refresh_divider),
 	ledRed({GPIOD, 1, LID_GPIO_TYPE_OPP}),
 	ledGreen({GPIOD, 2, LID_GPIO_TYPE_OPP}),
 	press_0(0, {ADC2, LID_ADC_CHANNEL_15}),
@@ -17,9 +17,9 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version) :
 	temp_0(6, {ADC1, LID_ADC_CHANNEL_6}),
 	temp_1(7, {ADC1, LID_ADC_CHANNEL_7}),
 	temp_2(8, {ADC1, LID_ADC_CHANNEL_8}),
-	servo_0(9, LID_TIM_TIM4, LID_TIM_TIM4_CH2_PB7, {ADC1, LID_ADC_CHANNEL_9}, {ADC1, LID_ADC_CHANNEL_1}, {GPIOC, 13, LID_GPIO_TYPE_OPP}),
-	servo_1(10, LID_TIM_TIM4, LID_TIM_TIM4_CH3_PB8, {ADC1, LID_ADC_CHANNEL_2}, {ADC1, LID_ADC_CHANNEL_3}, {GPIOC, 14, LID_GPIO_TYPE_OPP}),
-	servo_2(11, LID_TIM_TIM4, LID_TIM_TIM4_CH4_PB9, {ADC1, LID_ADC_CHANNEL_4}, {ADC2, LID_ADC_CHANNEL_17}, {GPIOC, 15, LID_GPIO_TYPE_OPP}),
+	servo_0(9, 0, LID_TIM_TIM4, LID_TIM_TIM4_CH2_PB7, {ADC1, LID_ADC_CHANNEL_9}, {ADC1, LID_ADC_CHANNEL_1}, {GPIOC, 13, LID_GPIO_TYPE_OPP}),
+	servo_1(10, 1, LID_TIM_TIM4, LID_TIM_TIM4_CH3_PB8, {ADC1, LID_ADC_CHANNEL_2}, {ADC1, LID_ADC_CHANNEL_3}, {GPIOC, 14, LID_GPIO_TYPE_OPP}),
+	servo_2(11, 2, LID_TIM_TIM4, LID_TIM_TIM4_CH4_PB9, {ADC1, LID_ADC_CHANNEL_4}, {ADC2, LID_ADC_CHANNEL_17}, {GPIOC, 15, LID_GPIO_TYPE_OPP}),
 	pyro0_cont(13, {GPIOA, 10, LID_GPIO_TYPE_IHZ}),
 	pyro1_cont(15, {GPIOA, 8, LID_GPIO_TYPE_IHZ}),
 	pyro2_cont(17, {GPIOC, 8, LID_GPIO_TYPE_IHZ}),
@@ -28,12 +28,12 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version) :
 	pyro_igniter2(16, {ADC3, LID_ADC_CHANNEL_4}, {GPIOC, 7, LID_GPIO_TYPE_OPP}, pyro2_cont),
 	solenoid_0(18, {ADC2, LID_ADC_CHANNEL_16}, {GPIOD, 9, LID_GPIO_TYPE_OPP}),
 	solenoid_1(19, {ADC2, LID_ADC_CHANNEL_18}, {GPIOD, 8, LID_GPIO_TYPE_OPP}),
-	pressure_control(20, press_1, solenoid_0),
+	pressure_control(20, press_3, solenoid_0),
 	imu_0(21, LID_SPI_SPI3, {LID_SPI_SPI3_SCK_PC10, LID_SPI_SPI3_MISO_PC11, LID_SPI_SPI3_MOSI_PC12, LID_SPI_SPI3_NSS_PA15, LID_SPI_MODE_MASTER, LID_SPI_CPOL_CPHASE_HH, 0x7, 0}),
 	speaker(LID_TIM_TIM2, LID_TIM_TIM2_CH3_PB10)
-	//flash(0x1F, 256)
 {
 	cancom = CANCOM::instance(this);
+	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&press_0);
 	registerChannel(&press_1);
 	registerChannel(&press_2);
@@ -55,7 +55,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version) :
 	registerChannel(&solenoid_0);
 	registerChannel(&solenoid_1);
 	registerChannel(&pressure_control);
-	registerChannel(&imu_0);
+	//registerChannel(&imu_0);
 }
 
 int ECU::init() {
@@ -66,8 +66,11 @@ int ECU::init() {
 	LID_GPIO_SingleInit(&ledRed, LID_GPIO_TYPE_OPP);
 	LID_GPIO_SingleInit(&ledGreen, LID_GPIO_TYPE_OPP);
 
-	//if(flash.init() < 0)
-		//return -1;
+	if(flash == nullptr)
+		return -1;
+
+	if(flash->init() != 0)
+		return -1;
 
 	if(cancom == nullptr)
 		return -1;
@@ -75,6 +78,7 @@ int ECU::init() {
 	CANState = cancom->init();
 	if(CANState != COMState::SBY)
 		return -1;
+
 
 	if(GenericChannel::init() != 0)
 		return -1;
@@ -103,6 +107,8 @@ int ECU::exec() {
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}
+
+	speaker.beep(6, 100, 100);
 
 	return 0;
 }

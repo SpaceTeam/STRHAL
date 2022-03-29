@@ -29,7 +29,7 @@ int DigitalInChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
 	*out = (LID_GPIO_Read(&digin_pin) == LID_GPIO_VALUE_L) ? 0UL : 1UL;
 
-	n += sizeof(uint16_t);
+	n += ADC16_DATA_N_BYTES;
 	return 0;
 }
 

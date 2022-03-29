@@ -50,7 +50,7 @@ int PressureControlChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
 	*out = (uint16_t) solenoid_ch.getState();
 
-	n += sizeof(uint16_t);
+	n += PNEUMATIC_VALVE_DATA_N_BYTES;
 	return 0;
 }
 

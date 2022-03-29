@@ -2,8 +2,8 @@
 #include <cstring>
 #include <cstdio>
 
-GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version)
-	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID), node_id(node_id), fw_version(fw_version) {
+GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider)
+	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID), node_id(node_id), fw_version(fw_version), refresh_divider(refresh_divider), refresh_counter(0) {
 }
 
 uint32_t GenericChannel::getNodeId() const {
@@ -60,6 +60,10 @@ int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n, ui
 
 int GenericChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
+		case GENERIC_REFRESH_DIVIDER:
+			refresh_divider = data;
+			refresh_counter = 0;
+			return 0;
 		default:
 			return -1;
 	}
@@ -67,12 +71,22 @@ int GenericChannel::setVar(uint8_t variable_id, int32_t data) {
 
 int GenericChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
+		case GENERIC_REFRESH_DIVIDER:
+			data = (int32_t) refresh_divider;
+			return 0;
 		default:
 			return -1;
 	}
 }
 
 int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
+	if(refresh_divider == 0)
+		return -1;
+	refresh_counter++;
+	if(refresh_counter != refresh_divider)
+		return -1;
+
+	refresh_counter = 0;
 	DataMsg_t *data_msg = (DataMsg_t *) data;
 	data_msg->channel_mask = 0;
 	for(AbstractChannel *channel : channels) {
@@ -82,6 +96,7 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 			return -1;
 		data_msg->channel_mask |= 1 << channel->getChannelId();
 	}
+	n += 1 * sizeof(uint32_t);
 	return 0;
 }
 
