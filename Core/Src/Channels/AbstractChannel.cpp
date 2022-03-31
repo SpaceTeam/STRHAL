@@ -2,8 +2,8 @@
 
 #include <cstring>
 
-AbstractChannel::AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id)
-	: ch_type(t), ch_id(channel_id), ch_status(CHANNEL_STATUS_NOICE){
+AbstractChannel::AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id, uint32_t refresh_divider)
+	: refresh_divider(refresh_divider), refresh_counter(0), ch_type(t), ch_id(channel_id), ch_status(CHANNEL_STATUS_NOICE) {
 
 }
 
@@ -25,6 +25,17 @@ bool AbstractChannel::IsChannelType(CHANNEL_TYPE t) const {
 
 bool AbstractChannel::IsChannelId(uint8_t channel_id) const {
 	return channel_id == ch_id;
+}
+
+bool AbstractChannel::IsRefreshed() {
+	if(refresh_divider == 0)
+		return false;
+	refresh_counter++;
+	if(refresh_counter != refresh_divider)
+		return false;
+
+	refresh_counter = 0;
+	return true;
 }
 
 int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {

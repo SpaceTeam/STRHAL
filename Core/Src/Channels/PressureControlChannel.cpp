@@ -1,7 +1,7 @@
 #include <Channels/PressureControlChannel.h>
 
-PressureControlChannel::PressureControlChannel(uint8_t channel_id, const ADCChannel &press_ch, DigitalOutChannel &solenoid_ch)
-	: AbstractChannel(CHANNEL_TYPE_PNEUMATIC_VALVE, channel_id), press_ch(press_ch), solenoid_ch(solenoid_ch) {
+PressureControlChannel::PressureControlChannel(uint8_t channel_id, const ADCChannel &press_ch, DigitalOutChannel &solenoid_ch, uint32_t refresh_divider)
+	: AbstractChannel(CHANNEL_TYPE_PNEUMATIC_VALVE, channel_id, refresh_divider), press_ch(press_ch), solenoid_ch(solenoid_ch) {
 }
 
 int PressureControlChannel::init() {
@@ -71,6 +71,10 @@ int PressureControlChannel::setVar(uint8_t variable_id, int32_t data) {
 		case PNEUMATIC_VALVE_HYSTERESIS:
 			hysteresis = data;
 			return 0;
+		case PNEUMATIC_VALVE_POS_REFRESH_DIVIDER:
+			refresh_divider = data;
+			refresh_counter = 0;
+			return 0;
 		default:
 			return -1;
 	}
@@ -92,6 +96,9 @@ int PressureControlChannel::getVar(uint8_t variable_id, int32_t &data) const {
 			return 0;
 		case PNEUMATIC_VALVE_HYSTERESIS:
 			data = hysteresis;
+			return 0;
+		case PNEUMATIC_VALVE_POS_REFRESH_DIVIDER:
+			data = (int32_t) refresh_divider;
 			return 0;
 		default:
 			return -1;

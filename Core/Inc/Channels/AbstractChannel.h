@@ -10,7 +10,7 @@ enum class ChannelStatus : int {
 
 class AbstractChannel {
 	public:
-		AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id);
+		AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id, uint32_t refresh_divider);
 		virtual ~AbstractChannel();
 
 		CHANNEL_TYPE getChannelType() const;
@@ -19,6 +19,7 @@ class AbstractChannel {
 
 		bool IsChannelType(CHANNEL_TYPE t) const;
 		bool IsChannelId(uint8_t channel_id) const;
+		bool IsRefreshed();
 
 		virtual int init() = 0;
 		virtual int reset() = 0;
@@ -28,6 +29,8 @@ class AbstractChannel {
 		virtual int getSensorData(uint8_t *data, uint8_t &n) = 0;
 
 	protected:
+		uint32_t refresh_divider, refresh_counter;
+
 		virtual int setVar(uint8_t variable_id, int32_t data) = 0;
 		virtual int getVar(uint8_t variable_id, int32_t &data) const = 0; //TODO: maybe return data param call by ref
 

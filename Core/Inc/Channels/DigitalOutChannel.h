@@ -7,7 +7,7 @@
 
 class DigitalOutChannel : public AbstractChannel {
 	public:
-		DigitalOutChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch, const LID_GPIO_t &cntrl_pin);
+		DigitalOutChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch, const LID_GPIO_t &cntrl_pin, uint32_t refresh_divider);
 
 		DigitalOutChannel(const DigitalOutChannel &other) = delete;
 		DigitalOutChannel& operator=(const DigitalOutChannel &other) = delete;

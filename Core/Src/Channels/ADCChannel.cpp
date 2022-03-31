@@ -1,7 +1,7 @@
 #include <Channels/ADCChannel.h>
 
-ADCChannel::ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t adc_ch)
-	: AbstractChannel(CHANNEL_TYPE_ADC16, channel_id), adc_ch(adc_ch) {
+ADCChannel::ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t adc_ch, uint32_t refresh_divider)
+	: AbstractChannel(CHANNEL_TYPE_ADC16, channel_id, refresh_divider), adc_ch(adc_ch) {
 }
 
 int ADCChannel::init() {
@@ -38,6 +38,10 @@ int ADCChannel::getSensorData(uint8_t *data, uint8_t &n) {
 
 int ADCChannel::setVar(uint8_t variable_id, int32_t data) {
 	switch(variable_id) {
+		case ADC16_REFRESH_DIVIDER:
+			refresh_divider = data;
+			refresh_counter = 0;
+			return 0;
 		default:
 			return -1;
 	}
@@ -45,6 +49,9 @@ int ADCChannel::setVar(uint8_t variable_id, int32_t data) {
 
 int ADCChannel::getVar(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
+		case ADC16_REFRESH_DIVIDER:
+			data = (int32_t) refresh_divider;
+			return 0;
 		default:
 			return -1;
 	}

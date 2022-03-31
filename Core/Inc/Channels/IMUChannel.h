@@ -29,7 +29,7 @@ enum class IMUAddr : uint8_t {
 
 class IMUChannel : public AbstractChannel {
 	public:
-		IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf);
+		IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf, uint32_t refresh_divider);
 
 		IMUChannel(const IMUChannel &other) = delete;
 		IMUChannel& operator=(const IMUChannel &other) = delete;

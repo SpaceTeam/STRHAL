@@ -3,8 +3,8 @@
 #include <cstring>
 #include <cstdio>
 
-IMUChannel::IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf) :
-	AbstractChannel(CHANNEL_TYPE_UNKNOWN, channel_id),
+IMUChannel::IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf, uint32_t refresh_divider) :
+	AbstractChannel(CHANNEL_TYPE_UNKNOWN, channel_id, refresh_divider),
 	spi_id(spi_id),
 	spi_conf(spi_conf) {
 	meas_data_tail = meas_data_n = 0;

@@ -8,7 +8,7 @@
 
 class PyroChannel : public AbstractChannel {
 	public:
-		PyroChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch, const LID_GPIO_t &cntrl_pin, const DigitalInChannel &cont_ch);
+		PyroChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch, const LID_GPIO_t &cntrl_pin, const DigitalInChannel &cont_ch, uint32_t refresh_divider);
 
 		PyroChannel(const PyroChannel &other) = delete;
 		PyroChannel& operator=(const PyroChannel &other) = delete;

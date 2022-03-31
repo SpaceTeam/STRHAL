@@ -23,7 +23,7 @@ enum class ServoState : int {
 
 class ServoChannel : public AbstractChannel {
 	public:
-		ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedbackChannel, const LID_ADC_Channel_t &currentChannel, const LID_GPIO_t &led_o);
+		ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedbackChannel, const LID_ADC_Channel_t &currentChannel, const LID_GPIO_t &led_o, uint32_t refresh_divider);
 
 		int init() override;
 		int reset() override;

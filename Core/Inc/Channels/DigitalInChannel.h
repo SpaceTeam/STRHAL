@@ -7,7 +7,7 @@
 
 class DigitalInChannel : public AbstractChannel {
 	public:
-		DigitalInChannel(uint8_t channel_id, const LID_GPIO_t &digin_pin);
+		DigitalInChannel(uint8_t channel_id, const LID_GPIO_t &digin_pin, uint32_t refresh_divider);
 
 		DigitalInChannel(const DigitalInChannel &other) = delete;
 		DigitalInChannel& operator=(const DigitalInChannel &other) = delete;

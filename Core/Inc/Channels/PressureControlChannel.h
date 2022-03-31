@@ -9,7 +9,7 @@
 
 class PressureControlChannel : public AbstractChannel {
 	public:
-		PressureControlChannel(uint8_t channel_id, const ADCChannel &press_ch, DigitalOutChannel &solenoid_ch);
+		PressureControlChannel(uint8_t channel_id, const ADCChannel &press_ch, DigitalOutChannel &solenoid_ch, uint32_t refresh_divider);
 
 		PressureControlChannel(const PressureControlChannel &other) = delete;
 		PressureControlChannel& operator=(const PressureControlChannel &other) = delete;

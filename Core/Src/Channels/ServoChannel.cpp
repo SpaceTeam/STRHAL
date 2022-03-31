@@ -8,8 +8,8 @@ constexpr ServoRefPos ServoChannel::com0Ref;
 constexpr ServoRefPos ServoChannel::pwm0Ref;
 constexpr ServoRefPos ServoChannel::adc0Ref;
 
-ServoChannel::ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedbackChannel, const LID_ADC_Channel_t &currentChannel, const LID_GPIO_t &led_o) :
-	AbstractChannel(CHANNEL_TYPE_SERVO, channel_id),
+ServoChannel::ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedbackChannel, const LID_ADC_Channel_t &currentChannel, const LID_GPIO_t &led_o, uint32_t refresh_divider) :
+	AbstractChannel(CHANNEL_TYPE_SERVO, channel_id, refresh_divider),
 	servo_id(servo_id),
 	pwm_tim(pwm_timer), ctrl_chid(control),
 	fdbkCh(feedbackChannel), currCh(currentChannel),
@@ -226,6 +226,11 @@ int ServoChannel::setVar(uint8_t variable_id, int32_t data) {
 		case SERVO_POSITION:
 			return -2;
 
+		case SERVO_SENSOR_REFRESH_DIVIDER:
+			refresh_divider = data;
+			refresh_counter = 0;
+			return 0;
+
 		default:
 			return -1;
 	}
@@ -247,6 +252,10 @@ int ServoChannel::getVar(uint8_t variable_id, int32_t &data) const {
 
 	case SERVO_POSITION_ENDPOINT:
 		data = tPosToCanonic(pwm_ref.end, pwm0Ref);
+		return 0;
+
+	case SERVO_SENSOR_REFRESH_DIVIDER:
+		data = (int32_t) refresh_divider;
 		return 0;
 
 	default:

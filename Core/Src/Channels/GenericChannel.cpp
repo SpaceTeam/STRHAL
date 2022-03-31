@@ -3,7 +3,7 @@
 #include <cstdio>
 
 GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider)
-	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID), node_id(node_id), fw_version(fw_version), refresh_divider(refresh_divider), refresh_counter(0) {
+	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refresh_divider), node_id(node_id), fw_version(fw_version) {
 }
 
 uint32_t GenericChannel::getNodeId() const {
@@ -80,17 +80,13 @@ int GenericChannel::getVar(uint8_t variable_id, int32_t &data) const {
 }
 
 int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
-	if(refresh_divider == 0)
-		return -1;
-	refresh_counter++;
-	if(refresh_counter != refresh_divider)
+	if(!IsRefreshed())
 		return -1;
 
-	refresh_counter = 0;
 	DataMsg_t *data_msg = (DataMsg_t *) data;
 	data_msg->channel_mask = 0;
 	for(AbstractChannel *channel : channels) {
-		if(channel == nullptr)
+		if(channel == nullptr || !channel->IsRefreshed())
 			continue;
 		if(channel->getSensorData(&data_msg->uint8[0], n) == -1)
 			return -1;

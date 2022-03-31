@@ -34,7 +34,6 @@ class GenericChannel : public AbstractChannel {
 		 uint32_t node_id;
 		 uint32_t fw_version;
 		 uint32_t channel_msk;
-		 uint32_t refresh_divider, refresh_counter;
 };
 
 #endif /*GENERICCHANNEL_H*/

@@ -1,7 +1,7 @@
 #include <Channels/PyroChannel.h>
 
-PyroChannel::PyroChannel(uint8_t channel_id, const LID_ADC_Channel_t & adc_ch, const LID_GPIO_t &cntrl_pin, const DigitalInChannel &cont_ch)
-	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, channel_id), adc_ch(adc_ch), cntrl_pin(cntrl_pin), cont_ch(cont_ch) {
+PyroChannel::PyroChannel(uint8_t channel_id, const LID_ADC_Channel_t & adc_ch, const LID_GPIO_t &cntrl_pin, const DigitalInChannel &cont_ch, uint32_t refresh_divider)
+	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, channel_id, refresh_divider), adc_ch(adc_ch), cntrl_pin(cntrl_pin), cont_ch(cont_ch) {
 }
 
 int PyroChannel::init() {
@@ -49,6 +49,10 @@ int PyroChannel::setVar(uint8_t variable_id, int32_t data) {
 		case DIGITAL_OUT_FREQUENCY:
 			frequency = data;
 			return 0;
+		case DIGITAL_OUT_SENSOR_REFRESH_DIVIDER:
+			refresh_divider = data;
+			refresh_counter = 0;
+			return 0;
 		default:
 			return -1;
 	}
@@ -64,6 +68,9 @@ int PyroChannel::getVar(uint8_t variable_id, int32_t &data) const {
 			return 0;
 		case DIGITAL_OUT_FREQUENCY:
 			data = frequency;
+			return 0;
+		case DIGITAL_OUT_SENSOR_REFRESH_DIVIDER:
+			data = (int32_t) refresh_divider;
 			return 0;
 		default:
 			return -1;
