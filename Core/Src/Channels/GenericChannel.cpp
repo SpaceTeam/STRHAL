@@ -18,6 +18,9 @@ int GenericChannel::init() {
 			return -1;
 		}
 	}
+
+	flash = W25Qxx_Flash::instance(0x1F);
+
 	return 0;
 }
 
@@ -41,6 +44,8 @@ int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 			return this->getNodeInfo(ret_data, ret_n);
 		case GENERIC_REQ_DATA:
 			return this->getSensorData(ret_data, ret_n);
+		case GENERIC_REQ_RESET_ALL_SETTINGS:
+			return ((flash->configReset()) ? 0 : -1);
 		default:
 			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
@@ -104,26 +109,27 @@ int GenericChannel::getNodeInfo(uint8_t *data, uint8_t &n) {
 
 	info->channel_mask = 0x00000000;
 	uint32_t length = 0;
+	uint8_t i = 0;
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;
 
-		info->channel_type[channel->getChannelId()] = channel->getChannelType();
+		info->channel_type[i] = channel->getChannelType();
 		info->channel_mask |= 1 << channel->getChannelId();
 		length++;
+		i++;
 	}
 	n = length + 2 * sizeof(uint32_t);
 	return 0;
 }
 
 void GenericChannel::registerChannel(AbstractChannel *channel) {
-	if(n_sens <= MAX_CHANNELS)
-		channels[n_sens++] = channel;
+	if(channel->getChannelId() < MAX_CHANNELS)
+		channels[channel->getChannelId()] = channel;
 }
 
 void GenericChannel::registerChannels(AbstractChannel **channels, uint8_t n) {
 	for(uint8_t i = 0; i < (n > MAX_CHANNELS ? MAX_CHANNELS : n); i++) {
-		this->channels[i] = channels[i];
-		n_sens++;
+		registerChannel(channels[i]);
 	}
 }

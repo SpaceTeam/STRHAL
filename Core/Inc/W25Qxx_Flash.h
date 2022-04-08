@@ -7,6 +7,8 @@
 /*!< W25Qxx memory map */
 #define CONFIG_BASE			0x00000000						//1st sector
 #define LOGGING_BASE		(CONFIG_BASE + 0x00001000UL)	//2nd sector
+#define SERVOCONFIG_OFFSET	0								//Offset from Config Base
+#define SERVOCONFIG_N_EACH	4								//Number of registers per servo
 
 typedef union {
 	uint32_t reg[PAGE_SIZE/4];
@@ -14,7 +16,7 @@ typedef union {
 } ConfigData_t;
 
 enum class Config : int {
-	SERVO0_ADC_START = 0,
+	SERVO0_ADC_START = SERVOCONFIG_OFFSET,
 	SERVO0_ADC_END,
 	SERVO0_PWM_START,
 	SERVO0_PWM_END,
@@ -56,14 +58,17 @@ class W25Qxx_Flash {
 		uint32_t writeNextPage(const uint8_t * data, uint32_t n);
 		uint32_t write(uint32_t address, const uint8_t *data, uint32_t n);
 		uint32_t read(uint32_t address, uint8_t *data, uint32_t n);
+		bool writeConfigRegsFromAddr(uint32_t startAddress, uint32_t *val, uint16_t n);
 		bool writeConfigRegs(Config *reg, uint32_t *val, uint16_t n);
 		bool writeConfigReg(Config reg, uint32_t val);
 		uint32_t readConfigReg(Config reg);
+		uint32_t readConfigReg(uint32_t regAddr);
 		bool readConfig();
 		bool writeEnable();
 		bool writeDisable();
 
 		bool configErase();
+		bool configReset();
 		bool sectorErase(uint32_t sector);
 		bool chipErase();
 

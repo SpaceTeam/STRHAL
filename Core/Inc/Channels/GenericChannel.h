@@ -5,6 +5,7 @@
 #include "CANCOM.h"
 #include <can_houbolt/channels/generic_channel_def.h>
 #include <LID.h>
+#include <W25Qxx_Flash.h>
 
 class GenericChannel : public AbstractChannel {
 	public:
@@ -28,12 +29,13 @@ class GenericChannel : public AbstractChannel {
 		void registerChannels(AbstractChannel **channels, uint8_t n);
 
 		AbstractChannel *channels[MAX_CHANNELS] = {nullptr};
-		uint8_t n_sens = 0;
 
 	private:
 		 uint32_t node_id;
 		 uint32_t fw_version;
 		 uint32_t channel_msk;
+
+		 W25Qxx_Flash *flash;
 };
 
 #endif /*GENERICCHANNEL_H*/

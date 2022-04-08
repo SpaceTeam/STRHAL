@@ -32,7 +32,7 @@ class AbstractChannel {
 		uint32_t refresh_divider, refresh_counter;
 
 		virtual int setVar(uint8_t variable_id, int32_t data) = 0;
-		virtual int getVar(uint8_t variable_id, int32_t &data) const = 0; //TODO: maybe return data param call by ref
+		virtual int getVar(uint8_t variable_id, int32_t &data) const = 0;
 
 	private:
 		const CHANNEL_TYPE ch_type;

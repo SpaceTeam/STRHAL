@@ -312,6 +312,21 @@ bool W25Qxx_Flash::writeConfigRegs(Config *reg, uint32_t *val, uint16_t n) {
 
 }
 
+bool W25Qxx_Flash::writeConfigRegsFromAddr(uint32_t startAddress, uint32_t *val, uint16_t n) {
+	if(!readConfig())
+		return false;
+
+	for(int i = 0; i < n; i++) {
+		config.reg[startAddress+i] = val[i];
+	}
+
+	if(!configErase()) {
+		return false;
+	}
+
+	return write(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
+}
+
 bool W25Qxx_Flash::readConfig() {
 	return read(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
 }
@@ -321,8 +336,22 @@ uint32_t W25Qxx_Flash::readConfigReg(Config reg) {
 	return config.reg[static_cast<int>(reg)];
 }
 
+// Update Config by calling readConfig() prior to this!
+uint32_t W25Qxx_Flash::readConfigReg(uint32_t regAddr) {
+	return config.reg[regAddr];
+}
+
+// Erase config, i.e. sets all config registers to 0xFFFF
 bool W25Qxx_Flash::configErase() {
 	return sectorErase(CONFIG_BASE >> 12);
+}
+
+// Resets config, i.e. sets all config registers to 0x000
+bool W25Qxx_Flash::configReset() {
+	for(int i = 0; i < PAGE_SIZE/4; i++) {
+		config.reg[i] = 0;
+	}
+	return sectorErase(CONFIG_BASE >> 12) && write(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
 }
 
 bool W25Qxx_Flash::sectorErase(uint32_t sector) {

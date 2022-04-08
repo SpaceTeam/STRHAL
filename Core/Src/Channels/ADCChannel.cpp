@@ -52,6 +52,9 @@ int ADCChannel::getVar(uint8_t variable_id, int32_t &data) const {
 		case ADC16_REFRESH_DIVIDER:
 			data = (int32_t) refresh_divider;
 			return 0;
+		case ADC16_MEASUREMENT:
+			data = (int32_t) *adc_meas;
+			return 0;
 		default:
 			return -1;
 	}

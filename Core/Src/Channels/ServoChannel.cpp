@@ -35,28 +35,12 @@ int ServoChannel::init() {
 	if(!flash->readConfig())
 		return -1;
 
-	switch(servo_id) {
-		case 0:
-			adc_ref.start = flash->readConfigReg(Config::SERVO0_ADC_START);
-			adc_ref.end = flash->readConfigReg(Config::SERVO0_ADC_END);
-			pwm_ref.start = flash->readConfigReg(Config::SERVO0_PWM_START);
-			pwm_ref.end = flash->readConfigReg(Config::SERVO0_PWM_END);
-			break;
-		case 1:
-			adc_ref.start = flash->readConfigReg(Config::SERVO1_ADC_START);
-			adc_ref.end = flash->readConfigReg(Config::SERVO1_ADC_END);
-			pwm_ref.start = flash->readConfigReg(Config::SERVO1_PWM_START);
-			pwm_ref.end = flash->readConfigReg(Config::SERVO1_PWM_END);
-			break;
-		case 2:
-			adc_ref.start = flash->readConfigReg(Config::SERVO2_ADC_START);
-			adc_ref.end = flash->readConfigReg(Config::SERVO2_ADC_END);
-			pwm_ref.start = flash->readConfigReg(Config::SERVO2_PWM_START);
-			pwm_ref.end = flash->readConfigReg(Config::SERVO2_PWM_END);
-			break;
-		default:
-			break;
-	}
+	// Read config values starting from the servos config register start address
+	uint32_t configAddrStart = SERVOCONFIG_OFFSET+servo_id*SERVOCONFIG_N_EACH;
+	adc_ref.start = flash->readConfigReg(configAddrStart);
+	adc_ref.end = flash->readConfigReg(configAddrStart+1);
+	pwm_ref.start = flash->readConfigReg(configAddrStart+2);
+	pwm_ref.end = flash->readConfigReg(configAddrStart+3);
 
 	if(fdbk_meas == nullptr || curr_meas == nullptr || flash == nullptr)
 		return -1;
@@ -115,54 +99,18 @@ int ServoChannel::exec() {
 			}
 
 			if(targ_hit_cnt >= CALIB_HIT_MIN) {
+				uint32_t configAddrStart = SERVOCONFIG_OFFSET+servo_id*SERVOCONFIG_N_EACH;
+
 				if(targ_pos == 0) {
 					adc_ref.start = *fdbk_meas;
-					switch(servo_id) {
-						case 0: {
-							Config regs[2] = { Config::SERVO0_ADC_START, Config::SERVO0_PWM_START };
-							uint32_t vals[2] = { (uint32_t) adc_ref.start, (uint32_t) pwm_ref.start };
-							flash->writeConfigRegs(regs,vals,2);
-							break;
-						}
-						case 1: {
-							Config regs[2] = { Config::SERVO1_ADC_START, Config::SERVO1_PWM_START };
-							uint32_t vals[2] = { (uint32_t) adc_ref.start, (uint32_t) pwm_ref.start };
-							flash->writeConfigRegs(regs,vals,2);
-							break;
-						}
-						case 2: {
-							Config regs[2] = { Config::SERVO2_ADC_START, Config::SERVO2_PWM_START };
-							uint32_t vals[2] = { (uint32_t) adc_ref.start, (uint32_t) pwm_ref.start };
-							flash->writeConfigRegs(regs,vals,2);
-							break;
-						}
-						default:
-							break;
-					}
+					Config regs[2] = { static_cast<Config>(configAddrStart), static_cast<Config>(configAddrStart+2) };
+					uint32_t vals[2] = { (uint32_t) adc_ref.start, (uint32_t) pwm_ref.start };
+					flash->writeConfigRegs(regs,vals,2);
 				} else {
 					adc_ref.end = *fdbk_meas;
-					switch(servo_id) {
-						case 0: {
-							Config regs[2] = { Config::SERVO0_ADC_END, Config::SERVO0_PWM_END };
-							uint32_t vals[2] = { (uint32_t) adc_ref.end, (uint32_t) pwm_ref.end };
-							flash->writeConfigRegs(regs,vals,2);
-							break;
-						}
-						case 1: {
-							Config regs[2] = { Config::SERVO1_ADC_END, Config::SERVO1_PWM_END };
-							uint32_t vals[2] = { (uint32_t) adc_ref.end, (uint32_t) pwm_ref.end };
-							flash->writeConfigRegs(regs,vals,2);
-							break;
-						}
-						case 2: {
-							Config regs[2] = { Config::SERVO2_ADC_END, Config::SERVO2_PWM_END };
-							uint32_t vals[2] = { (uint32_t) adc_ref.end, (uint32_t) pwm_ref.end };
-							flash->writeConfigRegs(regs,vals,2);
-							break;
-						}
-						default:
-							break;
-					}
+					Config regs[2] = { static_cast<Config>(configAddrStart+1), static_cast<Config>(configAddrStart+3) };
+					uint32_t vals[2] = { (uint32_t) adc_ref.end, (uint32_t) pwm_ref.end };
+					flash->writeConfigRegs(regs,vals,2);
 				}
 				servo_state = ServoState::IDLE;
 				reqCalib = false;
@@ -180,12 +128,13 @@ int ServoChannel::reset() {
 
 int ServoChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
 	switch(cmd_id) {
-		case SERVO_REQ_RESET_SETTINGS:
-			flash->configErase();
+		case SERVO_REQ_RESET_SETTINGS: {
+			uint32_t vals[4] = { (uint32_t) adc0Ref.start, (uint32_t) adc0Ref.end, (uint32_t) pwm0Ref.start, (uint32_t) pwm0Ref.end };
+			flash->writeConfigRegsFromAddr(SERVOCONFIG_OFFSET+servo_id*SERVOCONFIG_N_EACH, vals, 4);
 			adc_ref = adc0Ref;
 			pwm_ref = pwm0Ref;
 			return 0;
-
+		}
 		default:
 			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
 	}
@@ -284,21 +233,35 @@ uint16_t ServoChannel::getCurrentMeas () const {
 }
 
 uint16_t ServoChannel::tPosToCanonic(uint16_t pos, const ServoRefPos &frame) {
-	if(frame.end == frame.start || pos > frame.end)
+	if(frame.end == frame.start) {
 		return UINT16_MAX;
+	} else if(frame.end < frame.start) { // reversed servo
+		// check if out of bounds
+		if(pos <= frame.end) {
+			return UINT16_MAX;
+		} else if (pos >= frame.start) {
+			return 0;
+		}
+		return UINT16_MAX -((pos-frame.end) * (UINT16_MAX / (frame.start - frame.end)));
+	}
 
-	else if(frame.end < frame.start || pos < frame.start)
+	// check if out of bounds
+	if(pos <= frame.start) {
 		return 0;
+	} else if (pos >= frame.end) {
+		return UINT16_MAX;
+	}
 
 	return (pos-frame.start) * (UINT16_MAX / (frame.end - frame.start));
 }
 
 uint16_t ServoChannel::tPosFromCanonic(uint16_t pos, const ServoRefPos &frame) {
-	if(frame.end == frame.start)
+	if(frame.end == frame.start) {
 		return frame.end;
-
-	else if(frame.end < frame.start)
-		return 0;
+	} else if(frame.end < frame.start) { // reversed servo
+		uint16_t reversed_pos = UINT16_MAX - pos;
+		return (reversed_pos / (UINT16_MAX / (frame.start - frame.end))) + frame.end;
+	}
 
 	return (pos / (UINT16_MAX / (frame.end - frame.start))) + frame.start;
 }
