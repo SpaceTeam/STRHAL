@@ -7,16 +7,13 @@ This Repository contains the STM32CubeIDE project of the Liquid Firmware, that c
 2. [Structure](#application-structure)
 3. [Can_houbolt Protocol](#can_houbolt-protocol)
 
-<a name="run"/>
 ## Run 
 This repository is essentially an [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) Project. Thus, the intended use is said IDE. This makes embedding the software onto ST32 MCUs very easy. For each supported STM32 variant a build configuration has to be added that includes the correct Drivers folders. A proper Run and Debug configuration for the STM32G491 variant is already included and can be copied if needed.
 
-<a name="structure"/>
 ## Application Structure
 
 UML DIAGRAM
 
-<a name="protocol"/>
 ## can_houbolt Protocol
 The FDCAN communication assumes network with a single master ([LL Server](https://github.com/SpaceTeam/llserver_ecui_houbolt)) and multiple nodes (STM32 MCUs flashed with this repo's software), that are defined by an ID. The communication between nodes and to/from the master follows the protocol defined in [can_houbolt](https://github.com/SpaceTeam/can_houbolt). It includes the basic message structure, message types, channel types, channel variables and possible commands. Basically it defines the structure and possible values of the data bytes inside the FDCAN frame.
 
