@@ -4,15 +4,15 @@ This Repository contains the STM32CubeIDE project of the Liquid Firmware, that c
 
 ## Table of Contents  
 1. [Run](#run)
-2. [Structure](#structure)
-3. [Can_houbolt Protocol](#protocol)
+2. [Structure](#application-structure)
+3. [Can_houbolt Protocol](#can_houbolt-protocol)
 
 <a name="run"/>
 ## Run 
 This repository is essentially an [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) Project. Thus, the intended use is said IDE. This makes embedding the software onto ST32 MCUs very easy. For each supported STM32 variant a build configuration has to be added that includes the correct Drivers folders. A proper Run and Debug configuration for the STM32G491 variant is already included and can be copied if needed.
 
 <a name="structure"/>
-## C++ Application Structure
+## Application Structure
 
 UML DIAGRAM
 
