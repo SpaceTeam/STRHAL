@@ -1,7 +1,7 @@
 #include "../Inc/CANCOM.h"
 #include "../Inc/Channels/AbstractChannel.h"
 #include "../Inc/Channels/GenericChannel.h"
-#include "LID.h"
+#include "STRHAL.h"
 #include <can_houbolt/can_cmds.h>
 #include <cstring>
 #include <cstdio>
@@ -25,16 +25,16 @@ CANCOM* CANCOM::instance(GenericChannel *gc) {
 COMState CANCOM::init() {
 	state = COMState::SBY;
 
-	if(LID_CAN_Instance_Init(LID_FDCAN1) != 0)
+	if(STRHAL_CAN_Instance_Init(STRHAL_FDCAN1) != 0)
 		return state = COMState::ERR;
 
-	if(LID_CAN_Instance_Init(LID_FDCAN2) != 0)
+	if(STRHAL_CAN_Instance_Init(STRHAL_FDCAN2) != 0)
 		return state = COMState::ERR;
 
-	if(LID_TIM_Burner_Init(LID_TIM_TIM7, 160, 100) != 10000) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
+	if(STRHAL_TIM_Burner_Init(STRHAL_TIM_TIM7, 160, 100) != 10000) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
 		return state = COMState::ERR;
 
-	if(LID_TIM_Burner_Subscribe(LID_TIM_TIM7, CANCOM::burner) != 0)
+	if(STRHAL_TIM_Burner_Subscribe(STRHAL_TIM_TIM7, CANCOM::burner) != 0)
 		return state = COMState::ERR;
 
 	Can_MessageId_t mask =
@@ -54,12 +54,12 @@ COMState CANCOM::init() {
 	id2.info.special_cmd = STANDARD_SPECIAL_CMD;
 	id2.info.node_id = 0;
 
-	LID_FDCAN_Filter_t mainFilter[] = {
+	STRHAL_FDCAN_Filter_t mainFilter[] = {
 		{.value = id.uint32, .mask = mask.uint32},
 		{.value = id2.uint32, .mask = mask.uint32}
 	};
 
-	if(LID_CAN_Subscribe(LID_FDCAN1, LID_FDCAN_RX0, mainFilter, 2, CANCOM::mainReceptor) != 2)
+	if(STRHAL_CAN_Subscribe(STRHAL_FDCAN1, STRHAL_FDCAN_RX0, mainFilter, 2, CANCOM::mainReceptor) != 2)
 		return state = COMState::ERR;
 
 	return state;
@@ -67,8 +67,8 @@ COMState CANCOM::init() {
 
 COMState CANCOM::exec() {
 	state = COMState::RUN;
-	LID_CAN_Run();
-	if(LID_TIM_Burner_Start2Burn(LID_TIM_TIM7) != 0)
+	STRHAL_CAN_Run();
+	if(STRHAL_TIM_Burner_Start2Burn(STRHAL_TIM_TIM7) != 0)
 		return state = COMState::ERR;
 
 	return state;
@@ -100,11 +100,11 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	msg_id.info.priority = STANDARD_PRIORITY;
 	msg_data.bit.cmd_id = cmd_id + 1;
 
-	(void) LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, CAN_MSG_LENGTH(ret_n));
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msg_id.uint32, msg_data.uint8, CAN_MSG_LENGTH(ret_n));
 }
 
 void CANCOM::burner() {
-	//LID_UART_Write("BURN\n", 5);
+	//STRHAL_UART_Write("BURN\n", 5);
 	Can_MessageId_t msg_id =
 	{ 0 };
 	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
@@ -123,7 +123,7 @@ void CANCOM::burner() {
 		return;
 	}
 
-	(void) LID_CAN_Send(LID_FDCAN1, msg_id.uint32, msg_data.uint8, n);
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msg_id.uint32, msg_data.uint8, n);
 }
 
 CANCOM::~CANCOM() {}

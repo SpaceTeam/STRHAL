@@ -1,12 +1,12 @@
 #include <Channels/DigitalOutChannel.h>
 
-DigitalOutChannel::DigitalOutChannel(uint8_t channel_id, const LID_ADC_Channel_t & adc_ch, const LID_GPIO_t &cntrl_pin, uint32_t refresh_divider)
+DigitalOutChannel::DigitalOutChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t & adc_ch, const STRHAL_GPIO_t &cntrl_pin, uint32_t refresh_divider)
 	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, channel_id, refresh_divider), adc_ch(adc_ch), cntrl_pin(cntrl_pin) {
 }
 
 int DigitalOutChannel::init() {
-	adc_meas = LID_ADC_SubscribeChannel(&adc_ch, LID_ADC_INTYPE_OPAMP);
-	LID_GPIO_SingleInit(&cntrl_pin,LID_GPIO_TYPE_OPP);
+	adc_meas = STRHAL_ADC_SubscribeChannel(&adc_ch, STRHAL_ADC_INTYPE_OPAMP);
+	STRHAL_GPIO_SingleInit(&cntrl_pin,STRHAL_GPIO_TYPE_OPP);
 
 	if(adc_meas == nullptr)
 		return -1;
@@ -78,14 +78,14 @@ int DigitalOutChannel::getVar(uint8_t variable_id, int32_t &data) const {
 }
 
 uint32_t DigitalOutChannel::getState() const {
-	return (LID_GPIO_ReadOutput(&cntrl_pin) == LID_GPIO_VALUE_L) ? 0UL : 1UL;
+	return (STRHAL_GPIO_ReadOutput(&cntrl_pin) == STRHAL_GPIO_VALUE_L) ? 0UL : 1UL;
 }
 
 int DigitalOutChannel::setState(uint32_t state) {
 	if (state == 0) {
-		LID_GPIO_Write(&cntrl_pin, LID_GPIO_VALUE_L);
+		STRHAL_GPIO_Write(&cntrl_pin, STRHAL_GPIO_VALUE_L);
 	} else {
-		LID_GPIO_Write(&cntrl_pin, LID_GPIO_VALUE_H);
+		STRHAL_GPIO_Write(&cntrl_pin, STRHAL_GPIO_VALUE_H);
 	}
 	return 0;
 }

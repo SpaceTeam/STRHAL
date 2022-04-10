@@ -3,11 +3,11 @@
 
 #include "./Channels/AbstractChannel.h"
 #include <can_houbolt/channels/adc16_channel_def.h>
-#include <LID.h>
+#include <STRHAL.h>
 
 class DigitalInChannel : public AbstractChannel {
 	public:
-		DigitalInChannel(uint8_t channel_id, const LID_GPIO_t &digin_pin, uint32_t refresh_divider);
+		DigitalInChannel(uint8_t channel_id, const STRHAL_GPIO_t &digin_pin, uint32_t refresh_divider);
 
 		DigitalInChannel(const DigitalInChannel &other) = delete;
 		DigitalInChannel& operator=(const DigitalInChannel &other) = delete;
@@ -29,7 +29,7 @@ class DigitalInChannel : public AbstractChannel {
 		int getVar(uint8_t variable_id, int32_t &data) const override;
 
 	private:
-		LID_GPIO_t digin_pin;
+		STRHAL_GPIO_t digin_pin;
 
 };
 

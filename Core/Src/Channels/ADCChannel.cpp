@@ -1,11 +1,11 @@
 #include <Channels/ADCChannel.h>
 
-ADCChannel::ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t adc_ch, uint32_t refresh_divider)
+ADCChannel::ADCChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t adc_ch, uint32_t refresh_divider)
 	: AbstractChannel(CHANNEL_TYPE_ADC16, channel_id, refresh_divider), adc_ch(adc_ch) {
 }
 
 int ADCChannel::init() {
-	adc_meas = LID_ADC_SubscribeChannel(&adc_ch, LID_ADC_INTYPE_REGULAR);
+	adc_meas = STRHAL_ADC_SubscribeChannel(&adc_ch, STRHAL_ADC_INTYPE_REGULAR);
 
 	if(adc_meas == nullptr)
 		return -1;

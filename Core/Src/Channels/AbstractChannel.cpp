@@ -15,7 +15,7 @@ CHANNEL_STATUS AbstractChannel::getChannelStatus() const {
 	return ch_status;
 }
 
-uint8_t AbstractChannel::getChannelId() const {
+uint8_t AbstractChannel::getChanneSTRHAL() const {
 	return ch_id;
 }
 
@@ -23,7 +23,7 @@ bool AbstractChannel::IsChannelType(CHANNEL_TYPE t) const {
 	return t == ch_type;
 }
 
-bool AbstractChannel::IsChannelId(uint8_t channel_id) const {
+bool AbstractChannel::IsChanneSTRHAL(uint8_t channel_id) const {
 	return channel_id == ch_id;
 }
 

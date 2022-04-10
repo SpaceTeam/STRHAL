@@ -13,7 +13,7 @@
 #include <W25Qxx_Flash.h>
 #include <Speaker.h>
 
-#include <LID.h>
+#include <STRHAL.h>
 
 class ECU : public GenericChannel {
 	public:
@@ -34,7 +34,7 @@ class ECU : public GenericChannel {
 
 		W25Qxx_Flash *flash;
 
-		LID_GPIO_t ledRed, ledGreen;
+		STRHAL_GPIO_t ledRed, ledGreen;
 
 		ADCChannel press_0, press_1, press_2, press_3, press_4, press_5;
 		ADCChannel temp_0, temp_1, temp_2;

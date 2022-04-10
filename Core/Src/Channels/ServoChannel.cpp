@@ -1,6 +1,6 @@
 #include "../Inc/Channels/ServoChannel.h"
 
-#include <LID.h>
+#include <STRHAL.h>
 #include <cstring>
 #include <cstdio>
 
@@ -8,7 +8,7 @@ constexpr ServoRefPos ServoChannel::com0Ref;
 constexpr ServoRefPos ServoChannel::pwm0Ref;
 constexpr ServoRefPos ServoChannel::adc0Ref;
 
-ServoChannel::ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedbackChannel, const LID_ADC_Channel_t &currentChannel, const LID_GPIO_t &led_o, uint32_t refresh_divider) :
+ServoChannel::ServoChannel(uint8_t channel_id, uint8_t servo_id, const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChanneSTRHAL_t &control, const STRHAL_ADC_Channel_t &feedbackChannel, const STRHAL_ADC_Channel_t &currentChannel, const STRHAL_GPIO_t &led_o, uint32_t refresh_divider) :
 	AbstractChannel(CHANNEL_TYPE_SERVO, channel_id, refresh_divider),
 	servo_id(servo_id),
 	pwm_tim(pwm_timer), ctrl_chid(control),
@@ -18,16 +18,16 @@ ServoChannel::ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_T
 }
 
 int ServoChannel::init() {
-	LID_GPIO_SingleInit(&led_o, LID_GPIO_TYPE_OPP);
+	STRHAL_GPIO_SingleInit(&led_o, STRHAL_GPIO_TYPE_OPP);
 
-	if(LID_TIM_PWM_Init(pwm_tim, PWM_PSC, PWM_RES) < 0)
+	if(STRHAL_TIM_PWM_Init(pwm_tim, PWM_PSC, PWM_RES) < 0)
 		return -1;
 
-	if(LID_TIM_PWM_AddChannel(&pwm_ch, ctrl_chid, LID_TIM_PWM_CHANNELTYPE_SO) < 0)
+	if(STRHAL_TIM_PWM_AddChannel(&pwm_ch, ctrl_chid, STRHAL_TIM_PWM_CHANNELTYPE_SO) < 0)
 		return -1;
 
-	fdbk_meas = LID_ADC_SubscribeChannel(&fdbkCh, LID_ADC_INTYPE_REGULAR);
-	curr_meas = LID_ADC_SubscribeChannel(&currCh, LID_ADC_INTYPE_REGULAR);
+	fdbk_meas = STRHAL_ADC_SubscribeChannel(&fdbkCh, STRHAL_ADC_INTYPE_REGULAR);
+	curr_meas = STRHAL_ADC_SubscribeChannel(&currCh, STRHAL_ADC_INTYPE_REGULAR);
 
 	flash = W25Qxx_Flash::instance(0x1F);
 
@@ -50,7 +50,7 @@ int ServoChannel::init() {
 }
 
 int ServoChannel::exec() {
-	uint64_t t = LID_Systick_GetTick();
+	uint64_t t = STRHAL_Systick_GetTick();
 	if((t - t_last_sample) < EXEC_SAMPLE_TICKS)
 		return 0;
 
@@ -60,9 +60,9 @@ int ServoChannel::exec() {
 	fdbk_pos = tPosToCanonic(*fdbk_meas, adc_ref);
 
 	if(targ_pos != targ_pos_last) {
-		LID_TIM_PWM_SetDuty(&pwm_ch, tPosFromCanonic(targ_pos, pwm_ref));
-		LID_TIM_PWM_Enable(&pwm_ch, true);
-		LID_GPIO_Write(&led_o, LID_GPIO_VALUE_H);
+		STRHAL_TIM_PWM_SetDuty(&pwm_ch, tPosFromCanonic(targ_pos, pwm_ref));
+		STRHAL_TIM_PWM_Enable(&pwm_ch, true);
+		STRHAL_GPIO_Write(&led_o, STRHAL_GPIO_VALUE_H);
 		targ_pos_last = targ_pos;
 		targ_hit_cnt = 0;
 		t_last_cmd = t;
@@ -77,8 +77,8 @@ int ServoChannel::exec() {
 	switch(servo_state) {
 		case ServoState::IDLE:
 		case ServoState::READY:
-			LID_TIM_PWM_Enable(&pwm_ch, false);
-			LID_GPIO_Write(&led_o, LID_GPIO_VALUE_L);
+			STRHAL_TIM_PWM_Enable(&pwm_ch, false);
+			STRHAL_GPIO_Write(&led_o, STRHAL_GPIO_VALUE_L);
 			break;
 
 		case ServoState::MOVIN:

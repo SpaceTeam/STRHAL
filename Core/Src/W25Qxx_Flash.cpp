@@ -1,8 +1,8 @@
 #include "../Inc/W25Qxx_Flash.h"
 
-#include <LID_QSPI.h>
-#include <LID_SysTick.h>
-#include <LID.h>
+#include <STRHAL_QSPI.h>
+#include <STRHAL_SysTick.h>
+#include <STRHAL.h>
 
 W25Qxx_Flash* W25Qxx_Flash::flash = nullptr;
 
@@ -18,16 +18,16 @@ W25Qxx_Flash* W25Qxx_Flash::instance(uint8_t size_2n) {
 }
 
 int W25Qxx_Flash::init() {
-	LID_QSPI_Config_t qspi_conf;
+	STRHAL_QSPI_Config_t qspi_conf;
 	qspi_conf.clk_level = 0x0;
 	qspi_conf.flash_size = size_2n;
 	qspi_conf.ncs_high_time = 0x7;
 	qspi_conf.psc = 19;
 
-	if(LID_QSPI_Flash_Init(&qspi_conf) < 0)
+	if(STRHAL_QSPI_Flash_Init(&qspi_conf) < 0)
 		return -1;
 
-	LID_QSPI_Run();
+	STRHAL_QSPI_Run();
 
 	if(!enter4ByteAddrMode()) {
 		return -1;
@@ -47,42 +47,42 @@ int W25Qxx_Flash::init() {
 }
 
 bool W25Qxx_Flash::readSREG1(uint8_t &sreg1) const {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
 	cmd.instruction = 0x05;
-	if(LID_QSPI_Indirect_Read(&cmd, &sreg1, 1, 100) != 1)
+	if(STRHAL_QSPI_Indirect_Read(&cmd, &sreg1, 1, 100) != 1)
 		return false;
 
 	return true;
 }
 
 bool W25Qxx_Flash::readSREG2(uint8_t &sreg2) const {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
 	cmd.instruction = 0x35;
-	if(LID_QSPI_Indirect_Read(&cmd, &sreg2, 1, 100) != 1)
+	if(STRHAL_QSPI_Indirect_Read(&cmd, &sreg2, 1, 100) != 1)
 		return false;
 
 	return true;
 }
 
 bool W25Qxx_Flash::readSREG3(uint8_t &sreg3) const {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
 	cmd.instruction = 0x15;
-	if(LID_QSPI_Indirect_Read(&cmd, &sreg3, 1, 100) != 1)
+	if(STRHAL_QSPI_Indirect_Read(&cmd, &sreg3, 1, 100) != 1)
 		return false;
 
 	return true;
@@ -93,7 +93,7 @@ bool W25Qxx_Flash::readSREGs(uint8_t &sreg1, uint8_t &sreg2, uint8_t &sreg3) con
 }
 
 bool W25Qxx_Flash::writeEnable() {
-LID_QSPI_Command_t cmd;
+STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x06;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
@@ -103,22 +103,22 @@ LID_QSPI_Command_t cmd;
 	if(waitForSREGFlag(0x01, false, 100) < 0)
 		return false;
 
-	return LID_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) == 0;
+	return STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) == 0;
 }
 
 bool W25Qxx_Flash::writeDisable() {
-LID_QSPI_Command_t cmd;
+STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x04;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
-	return LID_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) == 0;
+	return STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) == 0;
 }
 
 uint8_t  W25Qxx_Flash::readDeviceId() const {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0xAB;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
@@ -126,14 +126,14 @@ uint8_t  W25Qxx_Flash::readDeviceId() const {
 	cmd.dummy_size = 3;
 
 	uint8_t device_id;
-	if(LID_QSPI_Indirect_Read(&cmd, &device_id, 1, 100) != 1)
+	if(STRHAL_QSPI_Indirect_Read(&cmd, &device_id, 1, 100) != 1)
 		return 0;
 
 	return device_id;
 }
 
 uint64_t W25Qxx_Flash::readUniqueId() const {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x4B;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
@@ -141,14 +141,14 @@ uint64_t W25Qxx_Flash::readUniqueId() const {
 	cmd.dummy_size = 5;
 
 	uint64_t id;
-	if(LID_QSPI_Indirect_Read(&cmd, (uint8_t *) &id, 8, 100) != 8)
+	if(STRHAL_QSPI_Indirect_Read(&cmd, (uint8_t *) &id, 8, 100) != 8)
 		return 0;
 
 	return id;
 }
 
 bool W25Qxx_Flash::readManufacturerDeviceId(uint8_t &manufacturer, uint8_t &device_id) const {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x90;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 3;
@@ -157,7 +157,7 @@ bool W25Qxx_Flash::readManufacturerDeviceId(uint8_t &manufacturer, uint8_t &devi
 	cmd.dummy_size = 0;
 
 	uint8_t tmp[2];
-	if(LID_QSPI_Indirect_Read(&cmd, tmp, 2, 100) != 2)
+	if(STRHAL_QSPI_Indirect_Read(&cmd, tmp, 2, 100) != 2)
 		return false;
 
 	manufacturer = tmp[0];
@@ -167,7 +167,7 @@ bool W25Qxx_Flash::readManufacturerDeviceId(uint8_t &manufacturer, uint8_t &devi
 }
 
 bool W25Qxx_Flash::disableWPS() {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x11;
 	//cmd.instruction = 0x98;
 	cmd.instruction_size = 1;
@@ -184,14 +184,14 @@ bool W25Qxx_Flash::disableWPS() {
 	if(!writeEnable())
 		return false;
 
-	if (LID_QSPI_Indirect_Write(&cmd, &value, 1, 100) != 1)
+	if (STRHAL_QSPI_Indirect_Write(&cmd, &value, 1, 100) != 1)
 		return false;
 
 	return true;
 }
 
 bool W25Qxx_Flash::enter4ByteAddrMode() {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0xB7;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
@@ -199,14 +199,14 @@ bool W25Qxx_Flash::enter4ByteAddrMode() {
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
-	if(LID_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
+	if(STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
 		return false;
 
 	return true;
 }
 
 bool W25Qxx_Flash::exit4ByteAddrMode() {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0xE9;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
@@ -214,7 +214,7 @@ bool W25Qxx_Flash::exit4ByteAddrMode() {
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
-	if(LID_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
+	if(STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
 		return false;
 
 	return true;
@@ -248,7 +248,7 @@ uint32_t W25Qxx_Flash::writeNextPage(const uint8_t * data, uint32_t n) {
 }
 
 uint32_t W25Qxx_Flash::write(uint32_t address, const uint8_t *data, uint32_t n) {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x12;
 	cmd.instruction_size = 1;
 	cmd.addr = address;
@@ -265,14 +265,14 @@ uint32_t W25Qxx_Flash::write(uint32_t address, const uint8_t *data, uint32_t n) 
 	if(n > PAGE_SIZE)
 		n = PAGE_SIZE;
 
-	if (LID_QSPI_Indirect_Write(&cmd, data, n, 100) != n)
+	if (STRHAL_QSPI_Indirect_Write(&cmd, data, n, 100) != n)
 		return 0;
 
 	return n;
 }
 
 uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x13;
 	cmd.instruction_size = 1;
 	cmd.addr = address;
@@ -286,7 +286,7 @@ uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) {
 	if(waitForSREGFlag(0x01, false, 100) < 0)
 		return 0;
 
-	if (LID_QSPI_Indirect_Read(&cmd, data, n, 1000) != n)
+	if (STRHAL_QSPI_Indirect_Read(&cmd, data, n, 1000) != n)
 		return 0;
 
 	return n;
@@ -355,7 +355,7 @@ bool W25Qxx_Flash::configReset() {
 }
 
 bool W25Qxx_Flash::sectorErase(uint32_t sector) {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0x21;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 4;
@@ -369,7 +369,7 @@ bool W25Qxx_Flash::sectorErase(uint32_t sector) {
 	if(!writeEnable())
 		return false;
 
-	if(LID_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
+	if(STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
 		return false;
 
 	if(waitForSREGFlag(0x01, false, 100) < 0)
@@ -379,7 +379,7 @@ bool W25Qxx_Flash::sectorErase(uint32_t sector) {
 }
 
 bool W25Qxx_Flash::chipErase() {
-	LID_QSPI_Command_t cmd;
+	STRHAL_QSPI_Command_t cmd;
 	cmd.instruction = 0xC7;
 	cmd.instruction_size = 1;
 	cmd.addr_size = 0;
@@ -393,7 +393,7 @@ bool W25Qxx_Flash::chipErase() {
 	if(!writeEnable())
 		return false;
 
-	if(LID_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
+	if(STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
 		return false;
 
 	if(waitForSREGFlag(0x01, false, 100) < 0)
@@ -403,7 +403,7 @@ bool W25Qxx_Flash::chipErase() {
 }
 
 int W25Qxx_Flash::waitForSREGFlag(uint8_t flag, bool state, uint16_t tot) {
-	uint64_t start = LID_Systick_GetTick();
+	uint64_t start = STRHAL_Systick_GetTick();
 	uint8_t sreg1;
 
 	if(state) {
@@ -411,7 +411,7 @@ int W25Qxx_Flash::waitForSREGFlag(uint8_t flag, bool state, uint16_t tot) {
 			if(!readSREG1(sreg1))
 				return -1;
 
-			if(LID_Systick_GetTick() - start > 100)
+			if(STRHAL_Systick_GetTick() - start > 100)
 				return -1;
 		} while(!(sreg1 & flag));
 	} else {
@@ -419,7 +419,7 @@ int W25Qxx_Flash::waitForSREGFlag(uint8_t flag, bool state, uint16_t tot) {
 			if(!readSREG1(sreg1))
 				return -1;
 
-			if(LID_Systick_GetTick() - start > 100)
+			if(STRHAL_Systick_GetTick() - start > 100)
 				return -1;
 		} while(sreg1 & flag);
 	}

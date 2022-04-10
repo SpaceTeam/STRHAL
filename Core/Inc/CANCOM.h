@@ -5,7 +5,7 @@ class GenericChannel; // Forward declaration to avoid cyclic dependency
 
 #include "AbstractCOM.h"
 #include "Channels/AbstractChannel.h"
-#include "LID.h"
+#include "STRHAL.h"
 
 class CANCOM : public AbstractCOM {
 	public:

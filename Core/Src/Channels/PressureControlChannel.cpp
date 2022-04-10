@@ -12,7 +12,7 @@ int PressureControlChannel::init() {
 int PressureControlChannel::exec() {
 	static uint64_t t_last_sample;
 
-	uint64_t t = LID_Systick_GetTick();
+	uint64_t t = STRHAL_Systick_GetTick();
 	if((t - t_last_sample) < EXEC_SAMPLE_TICKS)
 		return 0;
 

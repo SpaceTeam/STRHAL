@@ -3,11 +3,11 @@
 
 #include "./Channels/AbstractChannel.h"
 #include <can_houbolt/channels/adc16_channel_def.h>
-#include <LID.h>
+#include <STRHAL.h>
 
 class ADCChannel : public AbstractChannel {
 	public:
-		ADCChannel(uint8_t channel_id, const LID_ADC_Channel_t adc_ch, uint32_t refresh_divider);
+		ADCChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t adc_ch, uint32_t refresh_divider);
 
 		ADCChannel(const ADCChannel &other) = delete;
 		ADCChannel& operator=(const ADCChannel &other) = delete;
@@ -29,8 +29,8 @@ class ADCChannel : public AbstractChannel {
 		int getVar(uint8_t variable_id, int32_t &data) const override;
 
 	private:
-		LID_ADC_Channel_t adc_ch;
-		LID_ADC_Data_t *adc_meas = nullptr;
+		STRHAL_ADC_Channel_t adc_ch;
+		STRHAL_ADC_Data_t *adc_meas = nullptr;
 
 };
 

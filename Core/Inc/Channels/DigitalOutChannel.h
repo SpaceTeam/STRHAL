@@ -3,11 +3,11 @@
 
 #include "./Channels/AbstractChannel.h"
 #include <can_houbolt/channels/digital_out_channel_def.h>
-#include <LID.h>
+#include <STRHAL.h>
 
 class DigitalOutChannel : public AbstractChannel {
 	public:
-		DigitalOutChannel(uint8_t channel_id, const LID_ADC_Channel_t &adc_ch, const LID_GPIO_t &cntrl_pin, uint32_t refresh_divider);
+		DigitalOutChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t &adc_ch, const STRHAL_GPIO_t &cntrl_pin, uint32_t refresh_divider);
 
 		DigitalOutChannel(const DigitalOutChannel &other) = delete;
 		DigitalOutChannel& operator=(const DigitalOutChannel &other) = delete;
@@ -33,9 +33,9 @@ class DigitalOutChannel : public AbstractChannel {
 	private:
 		uint16_t duty_cycle;
 		uint16_t frequency;
-		LID_ADC_Channel_t adc_ch;
-		LID_ADC_Data_t *adc_meas = nullptr;
-		LID_GPIO_t cntrl_pin;
+		STRHAL_ADC_Channel_t adc_ch;
+		STRHAL_ADC_Data_t *adc_meas = nullptr;
+		STRHAL_GPIO_t cntrl_pin;
 
 };
 

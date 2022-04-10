@@ -4,7 +4,7 @@
 #include "AbstractChannel.h"
 #include <W25Qxx_Flash.h>
 
-#include <LID.h>
+#include <STRHAL.h>
 
 struct IMUData {
 	struct {
@@ -29,7 +29,7 @@ enum class IMUAddr : uint8_t {
 
 class IMUChannel : public AbstractChannel {
 	public:
-		IMUChannel(uint8_t channel_id, const LID_SPI_Id_t &spi_id, const LID_SPI_Config_t &spi_conf, uint32_t refresh_divider);
+		IMUChannel(uint8_t channel_id, const STRHAL_SPI_Id_t &spi_id, const STRHAL_SPI_Config_t &spi_conf, uint32_t refresh_divider);
 
 		IMUChannel(const IMUChannel &other) = delete;
 		IMUChannel& operator=(const IMUChannel &other) = delete;
@@ -63,8 +63,8 @@ class IMUChannel : public AbstractChannel {
 	private:
 		bool readReg(const IMUAddr &addr, uint8_t *reg, uint8_t n = 0);
 		bool writeReg(const IMUAddr &addr, uint8_t reg, uint16_t del = 0);
-		LID_SPI_Id_t spi_id;
-		LID_SPI_Config_t spi_conf;
+		STRHAL_SPI_Id_t spi_id;
+		STRHAL_SPI_Config_t spi_conf;
 
 		IMUData meas_data[BUF_DATA_SIZE] = {0};
 		uint32_t meas_data_tail, meas_data_n;

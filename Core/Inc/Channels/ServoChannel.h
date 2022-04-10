@@ -5,7 +5,7 @@
 #include "ADCChannel.h"
 
 #include <can_houbolt/channels/servo_channel_def.h>
-#include <LID.h>
+#include <STRHAL.h>
 #include <W25Qxx_Flash.h>
 
 struct ServoRefPos {
@@ -23,7 +23,7 @@ enum class ServoState : int {
 
 class ServoChannel : public AbstractChannel {
 	public:
-		ServoChannel(uint8_t channel_id, uint8_t servo_id, const LID_TIM_TimerId_t &pwm_timer, const LID_TIM_ChannelId_t &control, const LID_ADC_Channel_t &feedbackChannel, const LID_ADC_Channel_t &currentChannel, const LID_GPIO_t &led_o, uint32_t refresh_divider);
+		ServoChannel(uint8_t channel_id, uint8_t servo_id, const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChanneSTRHAL_t &control, const STRHAL_ADC_Channel_t &feedbackChannel, const STRHAL_ADC_Channel_t &currentChannel, const STRHAL_GPIO_t &led_o, uint32_t refresh_divider);
 
 		int init() override;
 		int reset() override;
@@ -41,7 +41,7 @@ class ServoChannel : public AbstractChannel {
 
 		static constexpr uint16_t PWM_FREQ = 50;
 		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ)*1800; //36.000
-		static constexpr uint16_t PWM_PSC = LID_SYSCLK_FREQ / PWM_RES / PWM_FREQ;
+		static constexpr uint16_t PWM_PSC = STRHAL_SYSCLK_FREQ / PWM_RES / PWM_FREQ;
 
 		static constexpr uint16_t POS_DEV = (UINT16_MAX / 180);
 		static constexpr uint8_t TARG_HIT_MIN = 20;
@@ -64,17 +64,17 @@ class ServoChannel : public AbstractChannel {
 
 	private:
 		uint8_t servo_id;
-		LID_TIM_TimerId_t pwm_tim;
-		LID_TIM_ChannelId_t ctrl_chid;
-		LID_TIM_PWM_Channel_t pwm_ch;
+		STRHAL_TIM_TimerId_t pwm_tim;
+		STRHAL_TIM_ChanneSTRHAL_t ctrl_chid;
+		STRHAL_TIM_PWM_Channel_t pwm_ch;
 
-		LID_ADC_Data_t *fdbk_meas = nullptr;
-		LID_ADC_Data_t *curr_meas = nullptr;
+		STRHAL_ADC_Data_t *fdbk_meas = nullptr;
+		STRHAL_ADC_Data_t *curr_meas = nullptr;
 
-		LID_ADC_Channel_t fdbkCh;
-		LID_ADC_Channel_t currCh;
+		STRHAL_ADC_Channel_t fdbkCh;
+		STRHAL_ADC_Channel_t currCh;
 
-		LID_GPIO_t led_o;
+		STRHAL_GPIO_t led_o;
 
 		uint16_t targ_pos = 0;
 		uint16_t fdbk_pos = 0;

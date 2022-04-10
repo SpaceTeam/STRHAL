@@ -5,7 +5,7 @@
 #include "./Channels/DigitalOutChannel.h"
 #include "./Channels/ADCChannel.h"
 #include <can_houbolt/channels/pneumatic_valve_channel_def.h>
-#include <LID.h>
+#include <STRHAL.h>
 
 class PressureControlChannel : public AbstractChannel {
 	public:
