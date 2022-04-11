@@ -1,6 +1,6 @@
 #include "../Inc/Speaker.h"
 
-Speaker::Speaker(const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChanneSTRHAL_t &control) :
+Speaker::Speaker(const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChannelId_t &control) :
 	pwm_tim(pwm_timer), ctrl_chid(control) {
 }
 

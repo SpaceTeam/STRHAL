@@ -1,7 +1,7 @@
 #include <Channels/PressureControlChannel.h>
 
-PressureControlChannel::PressureControlChannel(uint8_t channel_id, const ADCChannel &press_ch, DigitalOutChannel &solenoid_ch, uint32_t refresh_divider)
-	: AbstractChannel(CHANNEL_TYPE_PNEUMATIC_VALVE, channel_id, refresh_divider), press_ch(press_ch), solenoid_ch(solenoid_ch) {
+PressureControlChannel::PressureControlChannel(uint8_t id, const ADCChannel &pressureChannel, DigitalOutChannel &solenoidChannel, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_PNEUMATIC_VALVE, id, refreshDivider), pressureChannel(pressureChannel), solenoidChannel(solenoidChannel) {
 }
 
 int PressureControlChannel::init() {
@@ -10,25 +10,23 @@ int PressureControlChannel::init() {
 }
 
 int PressureControlChannel::exec() {
-	static uint64_t t_last_sample;
-
-	uint64_t t = STRHAL_Systick_GetTick();
-	if((t - t_last_sample) < EXEC_SAMPLE_TICKS)
+	uint64_t time = STRHAL_Systick_GetTick();
+	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
 		return 0;
 
-	t_last_sample = t;
+	timeLastSample = time;
 
-	uint16_t pressure = press_ch.getMeas();
+	uint16_t pressure = pressureChannel.getMeasurement();
 	if (enabled == 1U && pressure > threshold) { // pressure too high and control is enabled
-		threshold = target_position - hysteresis;
-		if(solenoid_ch.getState() != 1) {
-			if(solenoid_ch.setState(1) != 0) // if not already open -> open
+		threshold = targetPosition - hysteresis;
+		if(solenoidChannel.getState() != 1) {
+			if(solenoidChannel.setState(1) != 0) // if not already open -> open
 				return -1;
 		}
 	} else { // pressure below threshold or control disabled
-		threshold = target_position;
-		if(solenoid_ch.getState() != 0) {
-			if(solenoid_ch.setState(0) != 0) // if not already closed -> close
+		threshold = targetPosition;
+		if(solenoidChannel.getState() != 0) {
+			if(solenoidChannel.setState(0) != 0) // if not already closed -> close
 				return -1;
 		}
 	}
@@ -39,23 +37,23 @@ int PressureControlChannel::reset() {
 	return 0;
 }
 
-int PressureControlChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
-	switch(cmd_id) {
+int PressureControlChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+	switch(commandId) {
 		default:
-			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
+			return AbstractChannel::processMessage(commandId, returnData, n);
 	}
 }
 
 int PressureControlChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	*out = (uint16_t) solenoid_ch.getState();
+	*out = (uint16_t) solenoidChannel.getState();
 
 	n += PNEUMATIC_VALVE_DATA_N_BYTES;
 	return 0;
 }
 
-int PressureControlChannel::setVar(uint8_t variable_id, int32_t data) {
-	switch(variable_id) {
+int PressureControlChannel::setVariable(uint8_t variableId, int32_t data) {
+	switch(variableId) {
 		case PNEUMATIC_VALVE_ENABLED:
 			enabled = data;
 			return 0;
@@ -63,25 +61,25 @@ int PressureControlChannel::setVar(uint8_t variable_id, int32_t data) {
 			position = data;
 			return 0;
 		case PNEUMATIC_VALVE_TARGET_POSITION:
-			target_position = data;
-			threshold = data;
+			targetPosition = data*4095/UINT16_MAX; // convert from 16 to 12bit scale
+			threshold = data*4095/UINT16_MAX;
 			return 0;
 		case PNEUMATIC_VALVE_THRESHOLD: //cannot set threshold
 			return -1;
 		case PNEUMATIC_VALVE_HYSTERESIS:
-			hysteresis = data;
+			hysteresis = data*4095/UINT16_MAX;
 			return 0;
 		case PNEUMATIC_VALVE_POS_REFRESH_DIVIDER:
-			refresh_divider = data;
-			refresh_counter = 0;
+			refreshDivider = data;
+			refreshCounter = 0;
 			return 0;
 		default:
 			return -1;
 	}
 }
 
-int PressureControlChannel::getVar(uint8_t variable_id, int32_t &data) const {
-	switch(variable_id) {
+int PressureControlChannel::getVariable(uint8_t variableId, int32_t &data) const {
+	switch(variableId) {
 		case PNEUMATIC_VALVE_ENABLED:
 			data = enabled;
 			return 0;
@@ -89,16 +87,16 @@ int PressureControlChannel::getVar(uint8_t variable_id, int32_t &data) const {
 			data = position;
 			return 0;
 		case PNEUMATIC_VALVE_TARGET_POSITION:
-			data = target_position;
+			data = targetPosition*UINT16_MAX/4095; // convert back to 16bit full scale
 			return 0;
 		case PNEUMATIC_VALVE_THRESHOLD:
-			data = threshold;
+			data = threshold*UINT16_MAX/4095;
 			return 0;
 		case PNEUMATIC_VALVE_HYSTERESIS:
-			data = hysteresis;
+			data = hysteresis*UINT16_MAX/4095;
 			return 0;
 		case PNEUMATIC_VALVE_POS_REFRESH_DIVIDER:
-			data = (int32_t) refresh_divider;
+			data = (int32_t) refreshDivider;
 			return 0;
 		default:
 			return -1;

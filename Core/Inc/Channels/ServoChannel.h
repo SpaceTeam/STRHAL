@@ -23,21 +23,21 @@ enum class ServoState : int {
 
 class ServoChannel : public AbstractChannel {
 	public:
-		ServoChannel(uint8_t channel_id, uint8_t servo_id, const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChanneSTRHAL_t &control, const STRHAL_ADC_Channel_t &feedbackChannel, const STRHAL_ADC_Channel_t &currentChannel, const STRHAL_GPIO_t &led_o, uint32_t refresh_divider);
+		ServoChannel(uint8_t id, uint8_t servoId, const STRHAL_TIM_TimerId_t &pwmTimer, const STRHAL_TIM_ChannelId_t &control, const STRHAL_ADC_Channel_t &feedbackChannel, const STRHAL_ADC_Channel_t &currentChannel, const STRHAL_GPIO_t &led, uint32_t refreshDivider);
 
 		int init() override;
 		int reset() override;
 		int exec() override;
 
-		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
+		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
 		void setTargetPos(uint16_t pos);
 		uint16_t getTargetPos() const;
 
 		uint16_t getPos() const;
-		uint16_t getFeedbackMeas() const;
-		uint16_t getCurrentMeas() const;
+		uint16_t getFeedbackMeasurement() const;
+		uint16_t getCurrentMeasurement() const;
 
 		static constexpr uint16_t PWM_FREQ = 50;
 		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ)*1800; //36.000
@@ -59,37 +59,37 @@ class ServoChannel : public AbstractChannel {
 		static uint16_t distPos(uint16_t pos1, uint16_t pos2);
 
 	protected:
-		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t &data) const override;
+		int setVariable(uint8_t variableId, int32_t data) override;
+		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		uint8_t servo_id;
-		STRHAL_TIM_TimerId_t pwm_tim;
-		STRHAL_TIM_ChanneSTRHAL_t ctrl_chid;
-		STRHAL_TIM_PWM_Channel_t pwm_ch;
+		uint8_t servoId;
+		STRHAL_TIM_TimerId_t pwmTimer;
+		STRHAL_TIM_ChannelId_t ctrlChannelId;
+		STRHAL_TIM_PWM_Channel_t pwmChannel;
 
-		STRHAL_ADC_Data_t *fdbk_meas = nullptr;
-		STRHAL_ADC_Data_t *curr_meas = nullptr;
+		STRHAL_ADC_Data_t *feedbackMeasurement = nullptr;
+		STRHAL_ADC_Data_t *currentMeasurement = nullptr;
 
-		STRHAL_ADC_Channel_t fdbkCh;
-		STRHAL_ADC_Channel_t currCh;
+		STRHAL_ADC_Channel_t feedbackChannel;
+		STRHAL_ADC_Channel_t currentChannel;
 
-		STRHAL_GPIO_t led_o;
+		STRHAL_GPIO_t led;
 
-		uint16_t targ_pos = 0;
-		uint16_t fdbk_pos = 0;
+		uint16_t targetPosition = 0;
+		uint16_t feedbackPosition = 0;
 
-		ServoRefPos adc_ref = adc0Ref;
-		ServoRefPos pwm_ref = pwm0Ref;
+		ServoRefPos adcRef = adc0Ref;
+		ServoRefPos pwmRef = pwm0Ref;
 
 		W25Qxx_Flash *flash;
 
-		ServoState servo_state;
+		ServoState servoState;
 		bool reqCalib;
 
-		uint16_t targ_pos_last = 0, fdbk_pos_last = 0;
-		uint16_t targ_hit_cnt = 0;
-		uint64_t t_last_sample = 0, t_last_cmd = 0;
+		uint16_t targetPositionLast = 0, feedbackPositionLast = 0;
+		uint16_t targetHitCount = 0;
+		uint64_t timeLastSample = 0, timeLastCommand = 0;
 };
 
 #endif /*SERVOCHANNEL_H*/

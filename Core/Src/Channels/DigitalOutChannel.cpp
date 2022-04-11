@@ -1,14 +1,14 @@
 #include <Channels/DigitalOutChannel.h>
 
-DigitalOutChannel::DigitalOutChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t & adc_ch, const STRHAL_GPIO_t &cntrl_pin, uint32_t refresh_divider)
-	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, channel_id, refresh_divider), adc_ch(adc_ch), cntrl_pin(cntrl_pin) {
+DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t & adcChannel, const STRHAL_GPIO_t &cntrlPin, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, id, refreshDivider), adcChannel(adcChannel), cntrlPin(cntrlPin) {
 }
 
 int DigitalOutChannel::init() {
-	adc_meas = STRHAL_ADC_SubscribeChannel(&adc_ch, STRHAL_ADC_INTYPE_OPAMP);
-	STRHAL_GPIO_SingleInit(&cntrl_pin,STRHAL_GPIO_TYPE_OPP);
+	adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_OPAMP);
+	STRHAL_GPIO_SingleInit(&cntrlPin,STRHAL_GPIO_TYPE_OPP);
 
-	if(adc_meas == nullptr)
+	if(adcMeasurement == nullptr)
 		return -1;
 
 	return 0;
@@ -22,55 +22,55 @@ int DigitalOutChannel::reset() {
 	return 0;
 }
 
-int DigitalOutChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
-	switch(cmd_id) {
+int DigitalOutChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+	switch(commandId) {
 		default:
-			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
+			return AbstractChannel::processMessage(commandId, returnData, n);
 	}
 }
 
 int DigitalOutChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	*out = *adc_meas;
+	*out = *adcMeasurement << 4; // shift to 16bit full scale
 
 	n += DIGITAL_OUT_DATA_N_BYTES;
 	return 0;
 }
 
-int DigitalOutChannel::setVar(uint8_t variable_id, int32_t data) {
-	switch(variable_id) {
+int DigitalOutChannel::setVariable(uint8_t variableId, int32_t data) {
+	switch(variableId) {
 		case DIGITAL_OUT_STATE:
 			if(setState(data) != 0)
 				return -1;
 			return 0;
 		case DIGITAL_OUT_DUTY_CYCLE:
-			duty_cycle = data;
+			dutyCycle = data;
 			return 0;
 		case DIGITAL_OUT_FREQUENCY:
 			frequency = data;
 			return 0;
 		case DIGITAL_OUT_SENSOR_REFRESH_DIVIDER:
-			refresh_divider = data;
-			refresh_counter = 0;
+			refreshDivider = data;
+			refreshCounter = 0;
 			return 0;
 		default:
 			return -1;
 	}
 }
 
-int DigitalOutChannel::getVar(uint8_t variable_id, int32_t &data) const {
-	switch(variable_id) {
+int DigitalOutChannel::getVariable(uint8_t variableId, int32_t &data) const {
+	switch(variableId) {
 		case DIGITAL_OUT_STATE:
 			data = getState();
 			return 0;
 		case DIGITAL_OUT_DUTY_CYCLE:
-			data = duty_cycle;
+			data = dutyCycle;
 			return 0;
 		case DIGITAL_OUT_FREQUENCY:
 			data = frequency;
 			return 0;
 		case DIGITAL_OUT_SENSOR_REFRESH_DIVIDER:
-			data = (int32_t) refresh_divider;
+			data = (int32_t) refreshDivider;
 			return 0;
 		default:
 			return -1;
@@ -78,19 +78,19 @@ int DigitalOutChannel::getVar(uint8_t variable_id, int32_t &data) const {
 }
 
 uint32_t DigitalOutChannel::getState() const {
-	return (STRHAL_GPIO_ReadOutput(&cntrl_pin) == STRHAL_GPIO_VALUE_L) ? 0UL : 1UL;
+	return (STRHAL_GPIO_ReadOutput(&cntrlPin) == STRHAL_GPIO_VALUE_L) ? 0UL : 1UL;
 }
 
 int DigitalOutChannel::setState(uint32_t state) {
 	if (state == 0) {
-		STRHAL_GPIO_Write(&cntrl_pin, STRHAL_GPIO_VALUE_L);
+		STRHAL_GPIO_Write(&cntrlPin, STRHAL_GPIO_VALUE_L);
 	} else {
-		STRHAL_GPIO_Write(&cntrl_pin, STRHAL_GPIO_VALUE_H);
+		STRHAL_GPIO_Write(&cntrlPin, STRHAL_GPIO_VALUE_H);
 	}
 	return 0;
 }
 
 
 uint16_t DigitalOutChannel::getMeas() const {
-	return *adc_meas;
+	return *adcMeasurement;
 }

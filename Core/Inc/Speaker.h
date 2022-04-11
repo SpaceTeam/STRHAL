@@ -5,7 +5,7 @@
 
 class Speaker {
 	public:
-		Speaker(const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChanneSTRHAL_t &control);
+		Speaker(const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChannelId_t &control);
 
 		int init();
 
@@ -19,7 +19,7 @@ class Speaker {
 
 	private:
 		STRHAL_TIM_TimerId_t pwm_tim;
-		STRHAL_TIM_ChanneSTRHAL_t ctrl_chid;
+		STRHAL_TIM_ChannelId_t ctrl_chid;
 		STRHAL_TIM_PWM_Channel_t pwm_ch;
 
 };

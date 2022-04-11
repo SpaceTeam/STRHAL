@@ -133,7 +133,7 @@ void ECU::testServo(ServoChannel &servo) {
 			}
 
 		}
-		sprintf(buf,"%d, %d, %d\n",servo.getCurrentMeas(),servo.getFeedbackMeas(), servo.getPos());
+		sprintf(buf,"%d, %d, %d\n",servo.getCurrentMeasurement(),servo.getFeedbackMeasurement(), servo.getPos());
 		STRHAL_UART_Write(buf, strlen(buf));
 		if(GenericChannel::exec() != 0)
 			return;
@@ -154,7 +154,7 @@ void ECU::testChannels() {
 				int nn = 0;
 				while(nn == 0) {
 					nn = STRHAL_UART_Read(read, 2);
-					std::sprintf(write,"ChanneSTRHAL: %d, ChannelType: %d, Measurement: %d\n",channel->getChanneSTRHAL(),type,adc->getMeas());
+					std::sprintf(write,"ChanneSTRHAL: %d, ChannelType: %d, Measurement: %d\n",channel->getChanneSTRHAL(),type,adc->getMeasurement());
 					STRHAL_UART_Write(write, strlen(write));
 					STRHAL_Systick_BusyWait(500);
 				}
@@ -175,7 +175,7 @@ void ECU::testChannels() {
 				STRHAL_Systick_BusyWait(1000);
 				STRHAL_UART_Write("..1s\n", 5);
 				STRHAL_Systick_BusyWait(1000);
-				channel->prcMsg(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
+				channel->processMessage(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
 				for(int i = 0; i < 5; i++) {
 					uint8_t n = 0;
 					uint8_t meas[2];
@@ -186,7 +186,7 @@ void ECU::testChannels() {
 				}
 				set_msg.variable_id = DIGITAL_OUT_STATE;
 				set_msg.value = 0;
-				channel->prcMsg(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
+				channel->processMessage(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
 				STRHAL_UART_Write("..Output OFF\n", 13);
 			} else if(type == CHANNEL_TYPE_PNEUMATIC_VALVE) {
 				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);

@@ -7,7 +7,7 @@
 
 class DigitalOutChannel : public AbstractChannel {
 	public:
-		DigitalOutChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t &adc_ch, const STRHAL_GPIO_t &cntrl_pin, uint32_t refresh_divider);
+		DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t &adcChannel, const STRHAL_GPIO_t &cntrlPin, uint32_t refreshDivider);
 
 		DigitalOutChannel(const DigitalOutChannel &other) = delete;
 		DigitalOutChannel& operator=(const DigitalOutChannel &other) = delete;
@@ -21,21 +21,21 @@ class DigitalOutChannel : public AbstractChannel {
 
 		uint16_t getMeas() const;
 
-		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
+		int processMessage(uint8_t commandI, uint8_t *returnData, uint8_t &n) override;
 
 		uint32_t getState() const;
 		int setState(uint32_t state);
 	protected:
 
-		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t &data) const override;
+		int setVariable(uint8_t variableId, int32_t data) override;
+		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		uint16_t duty_cycle;
+		uint16_t dutyCycle;
 		uint16_t frequency;
-		STRHAL_ADC_Channel_t adc_ch;
-		STRHAL_ADC_Data_t *adc_meas = nullptr;
-		STRHAL_GPIO_t cntrl_pin;
+		STRHAL_ADC_Channel_t adcChannel;
+		STRHAL_ADC_Data_t *adcMeasurement = nullptr;
+		STRHAL_GPIO_t cntrlPin;
 
 };
 

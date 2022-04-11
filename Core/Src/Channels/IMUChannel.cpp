@@ -3,18 +3,18 @@
 #include <cstring>
 #include <cstdio>
 
-IMUChannel::IMUChannel(uint8_t channel_id, const STRHAL_SPI_Id_t &spi_id, const STRHAL_SPI_Config_t &spi_conf, uint32_t refresh_divider) :
-	AbstractChannel(CHANNEL_TYPE_UNKNOWN, channel_id, refresh_divider),
-	spi_id(spi_id),
-	spi_conf(spi_conf) {
-	meas_data_tail = meas_data_n = 0;
+IMUChannel::IMUChannel(uint8_t id, const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, uint32_t refreshDivider) :
+	AbstractChannel(CHANNEL_TYPE_UNKNOWN, id, refreshDivider),
+	spiId(spiId),
+	spiConf(spiConf) {
+	measDataTail = measDataNum = 0;
 }
 
 int IMUChannel::init() {
-	if(STRHAL_SPI_Master_Init(spi_id, &spi_conf) < 0)
+	if(STRHAL_SPI_Master_Init(spiId, &spiConf) < 0)
 		return -1;
 
-	STRHAL_SPI_Master_Run(spi_id);
+	STRHAL_SPI_Master_Run(spiId);
 
 	if(!writeReg(IMUAddr::PWR_MGMT_1, 0x80, 1000)
 			 ||	!writeReg(IMUAddr::PWR_MGMT_1, 0x01, 50)
@@ -36,36 +36,34 @@ int IMUChannel::init() {
 }
 
 int IMUChannel::exec() {
-	static uint64_t t_last_sample = STRHAL_Systick_GetTick();
-
-	uint64_t t = STRHAL_Systick_GetTick();
-	if((t - t_last_sample) < EXEC_SAMPLE_TICKS)
+	uint64_t time = STRHAL_Systick_GetTick();
+	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
 		return 0;
 
-	t_last_sample = t;
+	timeLastSample = time;
 
-	uint8_t i = (meas_data_tail + meas_data_n) % BUF_DATA_SIZE;
+	uint8_t i = (measDataTail + measDataNum) % BUF_DATA_SIZE;
 
 	uint8_t tmp[6];
 
 	if(!readReg(IMUAddr::ACCEL_XOUT_H, &tmp[0], 6))
 		return -1;
 
-	meas_data[i].accel.x = tmp[0] << 8 | tmp[1];
-	meas_data[i].accel.y = tmp[2] << 8 | tmp[3];
-	meas_data[i].accel.z = tmp[4] << 8 | tmp[5];
+	measData[i].accel.x = tmp[0] << 8 | tmp[1];
+	measData[i].accel.y = tmp[2] << 8 | tmp[3];
+	measData[i].accel.z = tmp[4] << 8 | tmp[5];
 
 	if(!readReg(IMUAddr::TEMP_OUT_H, &tmp[0], 2))
 		return -1;
 
-	meas_data[i].temp = tmp[0] << 8 | tmp[1];
+	measData[i].temp = tmp[0] << 8 | tmp[1];
 
 	if(!readReg(IMUAddr::GYRO_XOUT_H, &tmp[0], 6))
 		return -1;
 
-	meas_data[i].alpha.x = tmp[0] << 8 | tmp[1];
-	meas_data[i].alpha.y = tmp[2] << 8 | tmp[3];
-	meas_data[i].alpha.z = tmp[4] << 8 | tmp[5];
+	measData[i].alpha.x = tmp[0] << 8 | tmp[1];
+	measData[i].alpha.y = tmp[2] << 8 | tmp[3];
+	measData[i].alpha.z = tmp[4] << 8 | tmp[5];
 
 	/*if(i == BUF_DATA_SIZE-1) {
 		meas_data_n = 0;
@@ -74,81 +72,81 @@ int IMUChannel::exec() {
 	} else {
 		meas_data_n++;
 	}*/
-	meas_data_n++;
-	meas_data_n %= BUF_DATA_SIZE;
+	measDataNum++;
+	measDataNum %= BUF_DATA_SIZE;
 
 	return 0;
 }
 
 uint8_t IMUChannel::whoAmI() const {
-	uint8_t cmd = static_cast<uint8_t>(IMUAddr::WHO_AM_I) | READ_BIT;
+	uint8_t command = static_cast<uint8_t>(IMUAddr::WHO_AM_I) | READ_BIT;
 
-	uint8_t imu_id;
-	STRHAL_SPI_Master_Transceive(spi_id, &cmd, 1, 1, &imu_id, 1, 100);
+	uint8_t imuId;
+	STRHAL_SPI_Master_Transceive(spiId, &command, 1, 1, &imuId, 1, 100);
 
-	return imu_id;
+	return imuId;
 }
 
 int IMUChannel::reset() {
-	meas_data_tail = meas_data_n = 0;
+	measDataTail = measDataNum = 0;
 
 	return 0;
 }
 
-bool IMUChannel::IsMeasAvailable() const {
-	return meas_data_n > 0;
+bool IMUChannel::IsMeasurementAvailable() const {
+	return measDataNum > 0;
 }
 
-bool IMUChannel::getMeas(IMUData &x) {
-	if(meas_data_n == 0)
+bool IMUChannel::getMeasurement(IMUData &x) {
+	if(measDataNum == 0)
 		return false;
 
-	x = meas_data[meas_data_tail++];
-	meas_data_tail %= BUF_DATA_SIZE;
-	meas_data_n--;
+	x = measData[measDataTail++];
+	measDataTail %= BUF_DATA_SIZE;
+	measDataNum--;
 	return true;
 }
 
 int IMUChannel::getSensorData(uint8_t *data, uint8_t &n) {
-	if(meas_data_n > 0) {
-		std::memcpy(data, &meas_data[meas_data_tail++], 12);
-		meas_data_tail %= BUF_DATA_SIZE;
-		meas_data_n--;
+	if(measDataNum > 0) {
+		std::memcpy(data, &measData[measDataTail++], 12);
+		measDataTail %= BUF_DATA_SIZE;
+		measDataNum--;
 	}
 
 	return 0;
 }
 
-int IMUChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
-	return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
+int IMUChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+	return AbstractChannel::processMessage(commandId, returnData, n);
 }
 
-int IMUChannel::setVar(uint8_t variable_id, int32_t data) {
+int IMUChannel::setVariable(uint8_t variableId, int32_t data) {
 	return -1;
 }
 
-int IMUChannel::getVar(uint8_t variable_id, int32_t &data) const {
+int IMUChannel::getVariable(uint8_t variableId, int32_t &data) const {
 	return -1;
 }
 
-bool IMUChannel::writeReg(const IMUAddr &addr, uint8_t reg, uint16_t del) {
+bool IMUChannel::writeReg(const IMUAddr &address, uint8_t reg, uint16_t delay) {
 	uint8_t cmd[2];
 
-	cmd[0] = static_cast<uint8_t>(addr);
+	cmd[0] = static_cast<uint8_t>(address);
 	cmd[1] = reg;
 
-	if(STRHAL_SPI_Master_Transceive(spi_id, cmd, 2, 2, nullptr, 0, 100) != 0)
+	if(STRHAL_SPI_Master_Transceive(spiId, cmd, 2, 2, nullptr, 0, 100) != 0)
 		return false;
 
-	LL_mDelay(del);
+	LL_mDelay(delay);
 	return true;
 }
 
-bool IMUChannel::readReg(const IMUAddr &addr, uint8_t *reg, uint8_t n) {
+bool IMUChannel::readReg(const IMUAddr &address, uint8_t *reg, uint8_t n) {
 	uint8_t cmd;
-	cmd = READ_BIT | static_cast<uint8_t>(addr);
+	cmd = READ_BIT | static_cast<uint8_t>(address);
 
-	return STRHAL_SPI_Master_Transceive(spi_id, &cmd, 1, 1, reg, n, 100) == ((int32_t) n);
+	return STRHAL_SPI_Master_Transceive(spiId, &cmd, 1, 1, reg, n, 100) == ((int32_t) n);
 }
 
 IMUChannel::~IMUChannel() {

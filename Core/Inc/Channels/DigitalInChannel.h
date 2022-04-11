@@ -7,7 +7,7 @@
 
 class DigitalInChannel : public AbstractChannel {
 	public:
-		DigitalInChannel(uint8_t channel_id, const STRHAL_GPIO_t &digin_pin, uint32_t refresh_divider);
+		DigitalInChannel(uint8_t id, const STRHAL_GPIO_t &digitalInPin, uint32_t refreshDivider);
 
 		DigitalInChannel(const DigitalInChannel &other) = delete;
 		DigitalInChannel& operator=(const DigitalInChannel &other) = delete;
@@ -19,17 +19,17 @@ class DigitalInChannel : public AbstractChannel {
 		int exec() override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
-		uint16_t getMeas() const;
+		uint16_t getMeasurement() const;
 
-		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
+		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
 	protected:
 
-		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t &data) const override;
+		int setVariable(uint8_t variableId, int32_t data) override;
+		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		STRHAL_GPIO_t digin_pin;
+		STRHAL_GPIO_t digitalInPin;
 
 };
 

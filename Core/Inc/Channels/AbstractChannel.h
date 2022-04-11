@@ -10,7 +10,7 @@ enum class ChannelStatus : int {
 
 class AbstractChannel {
 	public:
-		AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id, uint32_t refresh_divider);
+		AbstractChannel(CHANNEL_TYPE type, uint8_t id, uint32_t refreshDivider);
 		virtual ~AbstractChannel();
 
 		CHANNEL_TYPE getChannelType() const;
@@ -18,26 +18,26 @@ class AbstractChannel {
 		uint8_t getChanneSTRHAL() const;
 
 		bool IsChannelType(CHANNEL_TYPE t) const;
-		bool IsChanneSTRHAL(uint8_t channel_id) const;
+		bool IsChannelId(uint8_t id) const;
 		bool IsRefreshed();
 
 		virtual int init() = 0;
 		virtual int reset() = 0;
 		virtual int exec() = 0;
 
-		virtual int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n);
+		virtual int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n);
 		virtual int getSensorData(uint8_t *data, uint8_t &n) = 0;
 
 	protected:
-		uint32_t refresh_divider, refresh_counter;
+		uint32_t refreshDivider, refreshCounter;
 
-		virtual int setVar(uint8_t variable_id, int32_t data) = 0;
-		virtual int getVar(uint8_t variable_id, int32_t &data) const = 0;
+		virtual int setVariable(uint8_t variableId, int32_t data) = 0;
+		virtual int getVariable(uint8_t variableId, int32_t &data) const = 0;
 
 	private:
-		const CHANNEL_TYPE ch_type;
-		const uint8_t ch_id;
-		CHANNEL_STATUS ch_status;
+		const CHANNEL_TYPE channelType;
+		const uint8_t channelId;
+		CHANNEL_STATUS channelStatus;
 };
 
 #endif /*ABSTRACTCHANNEL_H*/

@@ -2,12 +2,12 @@
 #include <cstring>
 #include <cstdio>
 
-GenericChannel::GenericChannel(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider)
-	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refresh_divider), node_id(node_id), fw_version(fw_version) {
+GenericChannel::GenericChannel(uint32_t nodeId, uint32_t firmwareVersion, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refreshDivider), nodeId(nodeId), firmwareVersion(firmwareVersion) {
 }
 
 uint32_t GenericChannel::getNodeId() const {
-	return node_id;
+	return nodeId;
 }
 
 int GenericChannel::init() {
@@ -38,23 +38,23 @@ int GenericChannel::reset() {
 	return 0;
 }
 
-int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
-	switch(cmd_id) {
+int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+	switch(commandId) {
 		case GENERIC_REQ_NODE_INFO:
-			return this->getNodeInfo(ret_data, ret_n);
+			return this->getNodeInfo(returnData, n);
 		case GENERIC_REQ_DATA:
-			return this->getSensorData(ret_data, ret_n);
+			return this->getSensorData(returnData, n);
 		case GENERIC_REQ_RESET_ALL_SETTINGS:
 			return ((flash->configReset()) ? 0 : -1);
 		default:
-			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
+			return AbstractChannel::processMessage(commandId, returnData, n);
 	}
 }
 
-int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n, uint8_t ch_id) {
+int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n, uint8_t channelId) {
 	for(AbstractChannel *channel : channels) {
-		if(channel->IsChanneSTRHAL(ch_id)) {
-			if(channel->prcMsg(cmd_id, ret_data, ret_n) != 0)
+		if(channel->IsChannelId(channelId)) {
+			if(channel->processMessage(commandId, returnData, n) != 0)
 				return -1;
 			return 0;
 		}
@@ -63,21 +63,21 @@ int GenericChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n, ui
 	return -1;
 }
 
-int GenericChannel::setVar(uint8_t variable_id, int32_t data) {
-	switch(variable_id) {
+int GenericChannel::setVariable(uint8_t variableId, int32_t data) {
+	switch(variableId) {
 		case GENERIC_REFRESH_DIVIDER:
-			refresh_divider = data;
-			refresh_counter = 0;
+			refreshDivider = data;
+			refreshCounter = 0;
 			return 0;
 		default:
 			return -1;
 	}
 }
 
-int GenericChannel::getVar(uint8_t variable_id, int32_t &data) const {
-	switch(variable_id) {
+int GenericChannel::getVariable(uint8_t variableId, int32_t &data) const {
+	switch(variableId) {
 		case GENERIC_REFRESH_DIVIDER:
-			data = (int32_t) refresh_divider;
+			data = (int32_t) refreshDivider;
 			return 0;
 		default:
 			return -1;
@@ -88,14 +88,14 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	if(!IsRefreshed())
 		return -1;
 
-	DataMsg_t *data_msg = (DataMsg_t *) data;
-	data_msg->channel_mask = 0;
+	DataMsg_t *dataMsg = (DataMsg_t *) data;
+	dataMsg->channel_mask = 0;
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr || !channel->IsRefreshed())
 			continue;
-		if(channel->getSensorData(&data_msg->uint8[0], n) == -1)
+		if(channel->getSensorData(&dataMsg->uint8[0], n) == -1)
 			return -1;
-		data_msg->channel_mask |= 1 << channel->getChanneSTRHAL();
+		dataMsg->channel_mask |= 1 << channel->getChanneSTRHAL();
 	}
 	n += 1 * sizeof(uint32_t);
 	return 0;
@@ -105,7 +105,7 @@ int GenericChannel::getNodeInfo(uint8_t *data, uint8_t &n) {
 
 	NodeInfoMsg_t *info = (NodeInfoMsg_t *) data;
 
-	info->firmware_version = fw_version;
+	info->firmware_version = firmwareVersion;
 
 	info->channel_mask = 0x00000000;
 	uint32_t length = 0;

@@ -87,10 +87,10 @@ void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	uint8_t ret_n = 0;
 
 	if(ch_id == GENERIC_CHANNEL_ID) {
-		if(generic_ch->prcMsg(cmd_id, msg_data.bit.data.uint8, ret_n) != 0)
+		if(generic_ch->processMessage(cmd_id, msg_data.bit.data.uint8, ret_n) != 0)
 			return;
 	} else {
-		if(generic_ch->prcMsg(cmd_id, msg_data.bit.data.uint8, ret_n, ch_id) != 0)
+		if(generic_ch->processMessage(cmd_id, msg_data.bit.data.uint8, ret_n, ch_id) != 0)
 			return;
 	}
 

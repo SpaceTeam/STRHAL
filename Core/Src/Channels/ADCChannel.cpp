@@ -1,13 +1,13 @@
 #include <Channels/ADCChannel.h>
 
-ADCChannel::ADCChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t adc_ch, uint32_t refresh_divider)
-	: AbstractChannel(CHANNEL_TYPE_ADC16, channel_id, refresh_divider), adc_ch(adc_ch) {
+ADCChannel::ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChanel, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), adcChannel(adcChanel) {
 }
 
 int ADCChannel::init() {
-	adc_meas = STRHAL_ADC_SubscribeChannel(&adc_ch, STRHAL_ADC_INTYPE_REGULAR);
+	adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_REGULAR);
 
-	if(adc_meas == nullptr)
+	if(adcMeasurement == nullptr)
 		return -1;
 
 	return 0;
@@ -21,39 +21,39 @@ int ADCChannel::reset() {
 	return 0;
 }
 
-int ADCChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
-	switch(cmd_id) {
+int ADCChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+	switch(commandId) {
 		default:
-			return AbstractChannel::prcMsg(cmd_id, ret_data, ret_n);
+			return AbstractChannel::processMessage(commandId, returnData, n);
 	}
 }
 
 int ADCChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	*out = *adc_meas;
+	*out = *adcMeasurement << 4; // shift it to 16bit full scale
 
 	n += ADC16_DATA_N_BYTES;
 	return 0;
 }
 
-int ADCChannel::setVar(uint8_t variable_id, int32_t data) {
-	switch(variable_id) {
+int ADCChannel::setVariable(uint8_t variableId, int32_t data) {
+	switch(variableId) {
 		case ADC16_REFRESH_DIVIDER:
-			refresh_divider = data;
-			refresh_counter = 0;
+			refreshDivider = data;
+			refreshCounter = 0;
 			return 0;
 		default:
 			return -1;
 	}
 }
 
-int ADCChannel::getVar(uint8_t variable_id, int32_t &data) const {
-	switch(variable_id) {
+int ADCChannel::getVariable(uint8_t variableId, int32_t &data) const {
+	switch(variableId) {
 		case ADC16_REFRESH_DIVIDER:
-			data = (int32_t) refresh_divider;
+			data = (int32_t) refreshDivider;
 			return 0;
 		case ADC16_MEASUREMENT:
-			data = (int32_t) *adc_meas;
+			data = (int32_t) *adcMeasurement;
 			return 0;
 		default:
 			return -1;
@@ -61,6 +61,6 @@ int ADCChannel::getVar(uint8_t variable_id, int32_t &data) const {
 }
 
 
-uint16_t ADCChannel::getMeas() const {
-	return *adc_meas;
+uint16_t ADCChannel::getMeasurement() const {
+	return *adcMeasurement;
 }

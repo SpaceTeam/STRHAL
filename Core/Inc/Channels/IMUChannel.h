@@ -29,7 +29,7 @@ enum class IMUAddr : uint8_t {
 
 class IMUChannel : public AbstractChannel {
 	public:
-		IMUChannel(uint8_t channel_id, const STRHAL_SPI_Id_t &spi_id, const STRHAL_SPI_Config_t &spi_conf, uint32_t refresh_divider);
+		IMUChannel(uint8_t id, const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, uint32_t refreshDivider);
 
 		IMUChannel(const IMUChannel &other) = delete;
 		IMUChannel& operator=(const IMUChannel &other) = delete;
@@ -44,12 +44,12 @@ class IMUChannel : public AbstractChannel {
 
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
-		bool IsMeasAvailable() const;
-		bool getMeas(IMUData &x);
+		bool IsMeasurementAvailable() const;
+		bool getMeasurement(IMUData &x);
 
 		uint8_t whoAmI() const;
 
-		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
+		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
 		static constexpr uint32_t BUF_DATA_SIZE = 256 / sizeof(IMUData);
 		static constexpr uint8_t READ_BIT = 0x80;
@@ -57,17 +57,18 @@ class IMUChannel : public AbstractChannel {
 		static constexpr uint64_t EXEC_SAMPLE_TICKS = 2;
 
 	protected:
-		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t &data) const override;
+		int setVariable(uint8_t variableId, int32_t data) override;
+		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		bool readReg(const IMUAddr &addr, uint8_t *reg, uint8_t n = 0);
-		bool writeReg(const IMUAddr &addr, uint8_t reg, uint16_t del = 0);
-		STRHAL_SPI_Id_t spi_id;
-		STRHAL_SPI_Config_t spi_conf;
+		bool readReg(const IMUAddr &address, uint8_t *reg, uint8_t n = 0);
+		bool writeReg(const IMUAddr &address, uint8_t reg, uint16_t delay = 0);
+		STRHAL_SPI_Id_t spiId;
+		STRHAL_SPI_Config_t spiConf;
 
-		IMUData meas_data[BUF_DATA_SIZE] = {0};
-		uint32_t meas_data_tail, meas_data_n;
+		IMUData measData[BUF_DATA_SIZE] = {0};
+		uint32_t measDataTail, measDataNum;
+		uint64_t timeLastSample = 0;
 };
 
 #endif /*IMUCHANNEL_H*/

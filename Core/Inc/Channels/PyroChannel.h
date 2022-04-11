@@ -8,7 +8,7 @@
 
 class PyroChannel : public AbstractChannel {
 	public:
-		PyroChannel(uint8_t channel_id, const STRHAL_ADC_Channel_t &adc_ch, const STRHAL_GPIO_t &cntrl_pin, const DigitalInChannel &cont_ch, uint32_t refresh_divider);
+		PyroChannel(uint8_t id, const STRHAL_ADC_Channel_t &adcChannel, const STRHAL_GPIO_t &cntrlPin, const DigitalInChannel &continuityChannel, uint32_t refreshDivider);
 
 		PyroChannel(const PyroChannel &other) = delete;
 		PyroChannel& operator=(const PyroChannel &other) = delete;
@@ -22,23 +22,23 @@ class PyroChannel : public AbstractChannel {
 
 		uint16_t getMeas() const;
 
-		int prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) override;
+		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
 	protected:
 
-		int setVar(uint8_t variable_id, int32_t data) override;
-		int getVar(uint8_t variable_id, int32_t &data) const override;
+		int setVariable(uint8_t variableId, int32_t data) override;
+		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 		uint32_t getState() const;
 		int setState(uint32_t state);
 
 	private:
-		uint16_t duty_cycle;
+		uint16_t dutyCycle;
 		uint16_t frequency;
-		STRHAL_ADC_Channel_t adc_ch;
-		STRHAL_ADC_Data_t *adc_meas = nullptr;
-		STRHAL_GPIO_t cntrl_pin;
-		const DigitalInChannel &cont_ch;
+		STRHAL_ADC_Channel_t adcChannel;
+		STRHAL_ADC_Data_t *adcMeasurement = nullptr;
+		STRHAL_GPIO_t cntrlPin;
+		const DigitalInChannel &continuityChannel;
 
 };
 

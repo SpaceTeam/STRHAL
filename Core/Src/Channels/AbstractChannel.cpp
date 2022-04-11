@@ -2,65 +2,65 @@
 
 #include <cstring>
 
-AbstractChannel::AbstractChannel(CHANNEL_TYPE t, uint8_t channel_id, uint32_t refresh_divider)
-	: refresh_divider(refresh_divider), refresh_counter(0), ch_type(t), ch_id(channel_id), ch_status(CHANNEL_STATUS_NOICE) {
+AbstractChannel::AbstractChannel(CHANNEL_TYPE type, uint8_t id, uint32_t refreshDivider)
+	: refreshDivider(refreshDivider), refreshCounter(0), channelType(type), channelId(id), channelStatus(CHANNEL_STATUS_NOICE) {
 
 }
 
 CHANNEL_TYPE AbstractChannel::getChannelType() const {
-	return ch_type;
+	return channelType;
 }
 
 CHANNEL_STATUS AbstractChannel::getChannelStatus() const {
-	return ch_status;
+	return channelStatus;
 }
 
 uint8_t AbstractChannel::getChanneSTRHAL() const {
-	return ch_id;
+	return channelId;
 }
 
-bool AbstractChannel::IsChannelType(CHANNEL_TYPE t) const {
-	return t == ch_type;
+bool AbstractChannel::IsChannelType(CHANNEL_TYPE type) const {
+	return type == channelType;
 }
 
-bool AbstractChannel::IsChanneSTRHAL(uint8_t channel_id) const {
-	return channel_id == ch_id;
+bool AbstractChannel::IsChannelId(uint8_t id) const {
+	return channelId == id;
 }
 
 bool AbstractChannel::IsRefreshed() {
-	if(refresh_divider == 0)
+	if(refreshDivider == 0)
 		return false;
-	refresh_counter++;
-	if(refresh_counter != refresh_divider)
+	refreshCounter++;
+	if(refreshCounter != refreshDivider)
 		return false;
 
-	refresh_counter = 0;
+	refreshCounter = 0;
 	return true;
 }
 
-int AbstractChannel::prcMsg(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret_n) {
-	SetMsg_t * set_msg =
+int AbstractChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+	SetMsg_t * setMsg =
 	{ 0 };
-	set_msg = (SetMsg_t *) ret_data;
+	setMsg = (SetMsg_t *) returnData;
 	int32_t temp = 0;
-	int ret = 0;
-	switch(cmd_id) {
+	int status = 0;
+	switch(commandId) {
 		case COMMON_REQ_GET_VARIABLE:
-			ret = getVar(set_msg->variable_id, temp);
-			set_msg->value = temp;
-			ret_n+=sizeof(SetMsg_t);
-			return ret;
+			status = getVariable(setMsg->variable_id, temp);
+			setMsg->value = temp;
+			n+=sizeof(SetMsg_t);
+			return status;
 
 		case COMMON_REQ_RESET_SETTINGS:
 			return reset();
 
 		case COMMON_REQ_SET_VARIABLE:
-			if(setVar(set_msg->variable_id, set_msg->value) == -1)
+			if(setVariable(setMsg->variable_id, setMsg->value) == -1)
 				return -1;
-			ret = getVar(set_msg->variable_id, temp);
-			set_msg->value = temp;
-			ret_n+=sizeof(SetMsg_t);
-			return ret;
+			status = getVariable(setMsg->variable_id, temp);
+			setMsg->value = temp;
+			n+=sizeof(SetMsg_t);
+			return status;
 
 		case COMMON_REQ_STATUS:
 			return getChannelStatus();

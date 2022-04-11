@@ -862,7 +862,7 @@ int32_t STRHAL_TIM_PWM_Init(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res)
 	return freq;
 }
 
-int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChanneSTRHAL_t channeSTRHAL, STRHAL_TIM_PWM_ChannelType_t pwmType) {
+int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channeSTRHAL, STRHAL_TIM_PWM_ChannelType_t pwmType) {
 	if(channeSTRHAL > STRHAL_TIM_N_TIM_CHANNELS)
 		return -1;
 
