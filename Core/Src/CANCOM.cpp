@@ -7,16 +7,16 @@
 #include <cstdio>
 
 CANCOM* CANCOM::cancom = nullptr;
-GenericChannel* CANCOM::generic_ch = nullptr;
+GenericChannel* CANCOM::genericChannel = nullptr;
 
-CANCOM::CANCOM(GenericChannel *g_ch)
-	: AbstractCOM(g_ch->getNodeId()) {
-	CANCOM::generic_ch = g_ch;
+CANCOM::CANCOM(GenericChannel *genericChannel)
+	: AbstractCOM(genericChannel->getNodeId()) {
+	CANCOM::genericChannel = genericChannel;
 }
 
-CANCOM* CANCOM::instance(GenericChannel *gc) {
-	if(CANCOM::cancom == nullptr && gc != nullptr) {
-		CANCOM::cancom = new CANCOM(gc);
+CANCOM* CANCOM::instance(GenericChannel *genericChannel) {
+	if(CANCOM::cancom == nullptr && genericChannel != nullptr) {
+		CANCOM::cancom = new CANCOM(genericChannel);
 	}
 
 	return CANCOM::cancom;
@@ -47,7 +47,7 @@ COMState CANCOM::init() {
 	{ 0 };
 	id.info.direction = MASTER2NODE_DIRECTION;
 	id.info.special_cmd = STANDARD_SPECIAL_CMD;
-	id.info.node_id = CANCOM::generic_ch->getNodeId();
+	id.info.node_id = CANCOM::genericChannel->getNodeId();
 	Can_MessageId_t id2 =
 	{ 0 };
 	id2.info.direction = MASTER2NODE_DIRECTION;
@@ -75,55 +75,55 @@ COMState CANCOM::exec() {
 }
 
 void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
-	Can_MessageId_t msg_id =
+	Can_MessageId_t msgId =
 	{ 0 };
-	Can_MessageData_t msg_data =
+	Can_MessageData_t msgData =
 	{ 0 };
 
-	msg_id.uint32 = id;
-	memcpy(msg_data.uint8,data,64); //TODO only copy n bytes
-	uint8_t cmd_id = msg_data.bit.cmd_id;
-	uint8_t ch_id = msg_data.bit.info.channel_id;
+	msgId.uint32 = id;
+	memcpy(msgData.uint8,data,64); //TODO only copy n bytes
+	uint8_t commandId = msgData.bit.cmd_id;
+	uint8_t channelId = msgData.bit.info.channel_id;
 	uint8_t ret_n = 0;
 
-	if(ch_id == GENERIC_CHANNEL_ID) {
-		if(generic_ch->processMessage(cmd_id, msg_data.bit.data.uint8, ret_n) != 0)
+	if(channelId == GENERIC_CHANNEL_ID) {
+		if(genericChannel->processMessage(commandId, msgData.bit.data.uint8, ret_n) != 0)
 			return;
 	} else {
-		if(generic_ch->processMessage(cmd_id, msg_data.bit.data.uint8, ret_n, ch_id) != 0)
+		if(genericChannel->processMessage(commandId, msgData.bit.data.uint8, ret_n, channelId) != 0)
 			return;
 	}
 
-	msg_id.info.direction = NODE2MASTER_DIRECTION;
-	msg_id.info.node_id = CANCOM::generic_ch->getNodeId();
-	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
-	msg_id.info.priority = STANDARD_PRIORITY;
-	msg_data.bit.cmd_id = cmd_id + 1;
+	msgId.info.direction = NODE2MASTER_DIRECTION;
+	msgId.info.node_id = CANCOM::genericChannel->getNodeId();
+	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
+	msgId.info.priority = STANDARD_PRIORITY;
+	msgData.bit.cmd_id = commandId + 1;
 
-	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msg_id.uint32, msg_data.uint8, CAN_MSG_LENGTH(ret_n));
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, CAN_MSG_LENGTH(ret_n));
 }
 
 void CANCOM::burner() {
 	//STRHAL_UART_Write("BURN\n", 5);
-	Can_MessageId_t msg_id =
+	Can_MessageId_t msgId =
 	{ 0 };
-	msg_id.info.special_cmd = STANDARD_SPECIAL_CMD;
-	msg_id.info.direction = NODE2MASTER_DIRECTION;
-	msg_id.info.node_id = CANCOM::generic_ch->getNodeId();
-	msg_id.info.priority = STANDARD_PRIORITY;
+	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
+	msgId.info.direction = NODE2MASTER_DIRECTION;
+	msgId.info.node_id = CANCOM::genericChannel->getNodeId();
+	msgId.info.priority = STANDARD_PRIORITY;
 
-	Can_MessageData_t msg_data =
+	Can_MessageData_t msgData =
 	{ 0 };
-	msg_data.bit.cmd_id = GENERIC_RES_DATA;
-	msg_data.bit.info.channel_id = GENERIC_CHANNEL_ID;
-	msg_data.bit.info.buffer = DIRECT_BUFFER;
+	msgData.bit.cmd_id = GENERIC_RES_DATA;
+	msgData.bit.info.channel_id = GENERIC_CHANNEL_ID;
+	msgData.bit.info.buffer = DIRECT_BUFFER;
 
 	uint8_t n = 0;
-	if(generic_ch->getSensorData(&msg_data.bit.data.uint8[0], n) != 0) { // Sensor Data collection failed, or Refresh Divider not yet met
+	if(genericChannel->getSensorData(&msgData.bit.data.uint8[0], n) != 0) { // Sensor Data collection failed, or Refresh Divider not yet met
 		return;
 	}
 
-	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msg_id.uint32, msg_data.uint8, n);
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);
 }
 
 CANCOM::~CANCOM() {}

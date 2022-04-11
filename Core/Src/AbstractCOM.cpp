@@ -1,6 +1,6 @@
 #include "../Inc/AbstractCOM.h"
 
-AbstractCOM::AbstractCOM(uint32_t node_id) : node_id(node_id), state(COMState::INI) {
+AbstractCOM::AbstractCOM(uint32_t nodeId) : nodeId(nodeId), state(COMState::INI) {
 }
 
 COMState AbstractCOM::getState() const {

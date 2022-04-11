@@ -15,7 +15,7 @@ class CANCOM : public AbstractCOM {
 		CANCOM& operator=(const CANCOM &&other) = delete;
 		~CANCOM();
 
-		static CANCOM* instance(GenericChannel *gc = nullptr);
+		static CANCOM* instance(GenericChannel *genericChannel = nullptr);
 
 		COMState init() override;
 		COMState exec() override;
@@ -23,9 +23,9 @@ class CANCOM : public AbstractCOM {
 		COMState subscribe2Node(uint8_t nodeId, AbstractChannel & channel);
 
 	private:
-		CANCOM(GenericChannel *gc);
+		CANCOM(GenericChannel *genericChannel);
 
-		static GenericChannel *generic_ch;
+		static GenericChannel *genericChannel;
 		static void mainReceptor(uint32_t id, uint8_t *data, uint32_t n);
 		static void burner();
 

@@ -12,7 +12,7 @@ enum class COMState : int {
 
 class AbstractCOM {
 	public:
-		AbstractCOM(uint32_t node_id);
+		AbstractCOM(uint32_t nodeId);
 		virtual ~AbstractCOM() {}
 		virtual COMState init() = 0;
 		virtual COMState exec() = 0;
@@ -20,7 +20,7 @@ class AbstractCOM {
 		COMState getState() const;
 
 	protected:
-		uint32_t node_id;
+		uint32_t nodeId;
 		COMState state;
 };
 

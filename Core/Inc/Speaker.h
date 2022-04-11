@@ -5,7 +5,7 @@
 
 class Speaker {
 	public:
-		Speaker(const STRHAL_TIM_TimerId_t &pwm_timer, const STRHAL_TIM_ChannelId_t &control);
+		Speaker(const STRHAL_TIM_TimerId_t &pwmTimer, const STRHAL_TIM_ChannelId_t &control);
 
 		int init();
 
@@ -18,9 +18,9 @@ class Speaker {
 		void beep(uint8_t n, uint16_t tot1, uint16_t tot2);
 
 	private:
-		STRHAL_TIM_TimerId_t pwm_tim;
-		STRHAL_TIM_ChannelId_t ctrl_chid;
-		STRHAL_TIM_PWM_Channel_t pwm_ch;
+		STRHAL_TIM_TimerId_t pwmTimer;
+		STRHAL_TIM_ChannelId_t ctrlChannelId;
+		STRHAL_TIM_PWM_Channel_t pwmChannel;
 
 };
 
