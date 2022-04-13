@@ -17,17 +17,19 @@ int PressureControlChannel::exec() {
 	timeLastSample = time;
 
 	uint16_t pressure = pressureChannel.getMeasurement();
-	if (enabled == 1U && pressure > threshold) { // pressure too high and control is enabled
-		threshold = targetPosition - hysteresis;
-		if(solenoidChannel.getState() != 1) {
-			if(solenoidChannel.setState(1) != 0) // if not already open -> open
-				return -1;
-		}
-	} else { // pressure below threshold or control disabled
-		threshold = targetPosition;
-		if(solenoidChannel.getState() != 0) {
-			if(solenoidChannel.setState(0) != 0) // if not already closed -> close
-				return -1;
+	if(enabled == 1) {
+		if(pressure > threshold) { // pressure too high
+			threshold = targetPosition - hysteresis;
+			if(solenoidChannel.getState() != 1) {
+				if(solenoidChannel.setState(1) != 0) // if not already open -> open
+					return -1;
+			}
+		} else { // pressure below threshold
+			threshold = targetPosition;
+			if(solenoidChannel.getState() != 0) {
+				if(solenoidChannel.setState(0) != 0) // if not already closed -> close
+					return -1;
+			}
 		}
 	}
 	return 0;
@@ -56,6 +58,10 @@ int PressureControlChannel::setVariable(uint8_t variableId, int32_t data) {
 	switch(variableId) {
 		case PNEUMATIC_VALVE_ENABLED:
 			enabled = data;
+			if(data == 0 && solenoidChannel.getState() != 0) {
+				if(solenoidChannel.setState(0) != 0) // make sure solenoid is closed after disabling
+					return -1;
+			}
 			return 0;
 		case PNEUMATIC_VALVE_POSITION:
 			position = data;

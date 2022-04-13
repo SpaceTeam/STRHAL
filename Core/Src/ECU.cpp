@@ -28,7 +28,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	pyro_igniter2(16, {ADC3, STRHAL_ADC_CHANNEL_4}, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}, pyro2_cont, 1),
 	solenoid_0(18, {ADC2, STRHAL_ADC_CHANNEL_16}, {GPIOD, 9, STRHAL_GPIO_TYPE_OPP}, 1),
 	solenoid_1(19, {ADC2, STRHAL_ADC_CHANNEL_18}, {GPIOD, 8, STRHAL_GPIO_TYPE_OPP}, 1),
-	pressure_control(20, press_3, solenoid_0, 1),
+	pressure_control(20, press_1, solenoid_1, 1),
 	imu_0(21, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {

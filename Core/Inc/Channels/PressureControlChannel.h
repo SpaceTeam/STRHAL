@@ -31,11 +31,11 @@ class PressureControlChannel : public AbstractChannel {
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		uint16_t enabled;
+		uint16_t enabled = 0;
 		uint16_t position;
-		uint16_t targetPosition;
-		uint16_t threshold;
-		uint16_t hysteresis;
+		uint16_t targetPosition = 0;
+		uint16_t threshold = 0;
+		uint16_t hysteresis = 0;
 		const ADCChannel &pressureChannel;
 		DigitalOutChannel &solenoidChannel;
 
