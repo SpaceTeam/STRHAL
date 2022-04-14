@@ -1,3 +1,6 @@
 [submodule "Core/Inc/can_houbolt"]
 	path = Core/Inc/can_houbolt
 	url = git@github.com:SpaceTeam/can_houbolt.git
+[submodule "Drivers/STM32G491/STRHAL"]
+	path = Drivers/STM32G491/STRHAL
+	url = git@github.com:SpaceTeam/STRHAL.git
