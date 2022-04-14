@@ -65,13 +65,6 @@ int IMUChannel::exec() {
 	measData[i].alpha.y = tmp[2] << 8 | tmp[3];
 	measData[i].alpha.z = tmp[4] << 8 | tmp[5];
 
-	/*if(i == BUF_DATA_SIZE-1) {
-		meas_data_n = 0;
-		(void) flash.writeEnable();
-		(void) flash.writeCurrentPage((uint8_t *)meas_data, BUF_DATA_SIZE*sizeof(IMUData));
-	} else {
-		meas_data_n++;
-	}*/
 	measDataNum++;
 	measDataNum %= BUF_DATA_SIZE;
 
