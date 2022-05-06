@@ -91,6 +91,10 @@ int PyroChannel::setState(uint32_t state) {
 }
 
 
-uint16_t PyroChannel::getMeas() const {
+uint16_t PyroChannel::getMeasurement() const {
 	return *adcMeasurement;
+}
+
+uint16_t PyroChannel::getContinuity() const {
+	return continuityChannel.getMeasurement();
 }

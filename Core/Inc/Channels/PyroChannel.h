@@ -20,7 +20,11 @@ class PyroChannel : public AbstractChannel {
 		int exec() override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
-		uint16_t getMeas() const;
+		uint16_t getMeasurement() const;
+		uint16_t getContinuity() const;
+
+		uint32_t getState() const;
+		int setState(uint32_t state);
 
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
@@ -28,9 +32,6 @@ class PyroChannel : public AbstractChannel {
 
 		int setVariable(uint8_t variableId, int32_t data) override;
 		int getVariable(uint8_t variableId, int32_t &data) const override;
-
-		uint32_t getState() const;
-		int setState(uint32_t state);
 
 	private:
 		uint16_t dutyCycle;

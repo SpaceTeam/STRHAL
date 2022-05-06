@@ -9,6 +9,7 @@
 #include <Channels/ServoChannel.h>
 #include <Channels/GenericChannel.h>
 #include <Channels/IMUChannel.h>
+#include <Channels/RocketChannel.h>
 #include <CANCOM.h>
 #include <W25Qxx_Flash.h>
 #include <Speaker.h>
@@ -44,6 +45,7 @@ class ECU : public GenericChannel {
 		DigitalOutChannel solenoid_0, solenoid_1;
 		PressureControlChannel pressure_control;
 		IMUChannel imu_0;
+		RocketChannel rocket;
 
 		Speaker speaker;
 };

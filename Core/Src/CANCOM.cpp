@@ -74,6 +74,25 @@ COMState CANCOM::exec() {
 	return state;
 }
 
+void CANCOM::sendAsMaster(uint8_t receiverNodeId, uint8_t receiverChannelId, uint8_t commandId, uint8_t *data, uint8_t n) {
+	Can_MessageId_t msgId =
+	{ 0 };
+	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
+	msgId.info.direction = MASTER2NODE_DIRECTION;
+	msgId.info.node_id = receiverNodeId;
+	msgId.info.priority = STANDARD_PRIORITY;
+
+	Can_MessageData_t msgData =
+	{ 0 };
+	msgData.bit.cmd_id = commandId;
+	msgData.bit.info.channel_id = receiverChannelId;
+	msgData.bit.info.buffer = DIRECT_BUFFER;
+
+	memcpy(msgData.bit.data.uint8,data,n);
+
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);
+}
+
 void CANCOM::mainReceptor(uint32_t id, uint8_t *data, uint32_t n) {
 	Can_MessageId_t msgId =
 	{ 0 };

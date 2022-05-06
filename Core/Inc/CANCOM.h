@@ -20,6 +20,8 @@ class CANCOM : public AbstractCOM {
 		COMState init() override;
 		COMState exec() override;
 
+		void sendAsMaster(uint8_t receiverNodeId, uint8_t receiverChannelId, uint8_t commandId, uint8_t *data, uint8_t n);
+
 		COMState subscribe2Node(uint8_t nodeId, AbstractChannel & channel);
 
 	private:

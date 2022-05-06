@@ -30,6 +30,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	solenoid_1(19, {ADC2, STRHAL_ADC_CHANNEL_18}, {GPIOD, 8, STRHAL_GPIO_TYPE_OPP}, 1),
 	pressure_control(20, press_1, solenoid_1, 1),
 	imu_0(21, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
+	rocket(22, press_1, press_0, press_2, servo_2, servo_0, pyro_igniter0, pyro_igniter1, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	cancom = CANCOM::instance(this);
@@ -55,7 +56,8 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&solenoid_0);
 	registerChannel(&solenoid_1);
 	registerChannel(&pressure_control);
-	//registerChannel(&imu_0);
+	registerChannel(&imu_0);
+	registerChannel(&rocket);
 }
 
 int ECU::init() {

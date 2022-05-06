@@ -4,7 +4,7 @@
 #include "./Channels/AbstractChannel.h"
 #include "./Channels/DigitalOutChannel.h"
 #include "./Channels/ADCChannel.h"
-#include <can_houbolt/channels/pneumatic_valve_channel_def.h>
+#include <can_houbolt/channels/control_channel_def.h>
 #include <STRHAL.h>
 
 class PressureControlChannel : public AbstractChannel {
@@ -32,8 +32,7 @@ class PressureControlChannel : public AbstractChannel {
 
 	private:
 		uint16_t enabled = 0;
-		uint16_t position;
-		uint16_t targetPosition = 0;
+		uint16_t targetPressure = 0;
 		uint16_t threshold = 0;
 		uint16_t hysteresis = 0;
 		const ADCChannel &pressureChannel;

@@ -3,7 +3,7 @@
 
 #include "AbstractChannel.h"
 #include <W25Qxx_Flash.h>
-
+#include <can_houbolt/channels/imu_channel_def.h>
 #include <STRHAL.h>
 
 struct IMUData {

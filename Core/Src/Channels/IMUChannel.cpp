@@ -4,7 +4,7 @@
 #include <cstdio>
 
 IMUChannel::IMUChannel(uint8_t id, const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, uint32_t refreshDivider) :
-	AbstractChannel(CHANNEL_TYPE_UNKNOWN, id, refreshDivider),
+	AbstractChannel(CHANNEL_TYPE_IMU, id, refreshDivider),
 	spiId(spiId),
 	spiConf(spiConf) {
 	measDataTail = measDataNum = 0;
@@ -107,6 +107,7 @@ int IMUChannel::getSensorData(uint8_t *data, uint8_t &n) {
 		measDataNum--;
 	}
 
+	n += IMU_DATA_N_BYTES;
 	return 0;
 }
 
@@ -115,11 +116,27 @@ int IMUChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &
 }
 
 int IMUChannel::setVariable(uint8_t variableId, int32_t data) {
-	return -1;
+	switch(variableId) {
+		case IMU_REFRESH_DIVIDER:
+			refreshDivider = data;
+			refreshCounter = 0;
+			return 0;
+		default:
+			return -1;
+	}
 }
 
 int IMUChannel::getVariable(uint8_t variableId, int32_t &data) const {
-	return -1;
+	switch(variableId) {
+		case IMU_REFRESH_DIVIDER:
+			data = (int32_t) refreshDivider;
+			return 0;
+		//case IMU_MEASUREMENT: // TODO maybe return only z-Axis
+			//data = (int32_t) *adcMeasurement;
+			//return 0;
+		default:
+			return -1;
+	}
 }
 
 bool IMUChannel::writeReg(const IMUAddr &address, uint8_t reg, uint16_t delay) {
