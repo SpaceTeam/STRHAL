@@ -59,7 +59,7 @@ extern "C" {
 #define FDCAN_NOMINAL_TIMESEG_1			23
 #define FDCAN_NOMINAL_TIMESEG_2			16
 
-#define FDCAN_DATA_PRESCALER			2 // 40MHz, tq = 25ns
+#define FDCAN_DATA_PRESCALER			4 // 20MHz, tq = 50ns
 #define FDCAN_DATA_SYNC_JUMP_WIDTH		1
 #define FDCAN_DATA_TIMESEG_1			2
 #define FDCAN_DATA_TIMESEG_2			2
