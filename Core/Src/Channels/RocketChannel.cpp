@@ -11,7 +11,12 @@ RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, co
 	  igniter1Channel(igniter1Channel),
 	  state(PAD_IDLE),
 	  ignitionState(IgnitionSequence::INIT),
-	  chamberPressureTarget(0) {
+	  chamberPressureMin(0),
+	  chamberPressureLowCounter(0),
+	  chamberPressureGoodCounter(0),
+	  fuelPressureMin(0),
+	  oxPressureMin(0),
+	  holdDownTimeout(0) {
 }
 
 int RocketChannel::init() {
@@ -87,10 +92,10 @@ ROCKET_STATE RocketChannel::autoCheck(uint64_t time) {
 	if(igniter1Channel.getContinuity() == 1) //no continuity
 		return ABORT;
 
-	if(oxPressureChannel.getMeasurement() < 1) //TODO set using CAN interface OR hardcode 35 bar
+	if(oxPressureChannel.getMeasurement() < oxPressureMin) //TODO set using CAN interface OR hardcode 35 bar
 		return ABORT;
 
-	if(fuelPressureChannel.getMeasurement() < 1) //TODO set using CAN interface OR hardcode 30 bar
+	if(fuelPressureChannel.getMeasurement() < fuelPressureMin) //TODO set using CAN interface OR hardcode 30 bar
 		return ABORT;
 
 	return AUTO_CHECK;
@@ -156,31 +161,48 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time) {
 }
 
 ROCKET_STATE RocketChannel::holddown(uint64_t time) {
-	if(time - timeLastTransition > 4000) { // release after 4s to lessen apogee
-		//TODO calibrate holddown servo
-		if(cancom == nullptr)
-			return ABORT;
+	if(holdDownTimeout > 0) {
+		if(time - timeLastTransition > holdDownTimeout) { // release after x s to lessen apogee
+			if(chamberPressureChannel.getMeasurement() < chamberPressureMin) {// if holddown timeout has passed, still check for chamber pressure
+				chamberPressureGoodCounter = 0;
+				chamberPressureLowCounter++;
+			} else {
+				chamberPressureLowCounter = 0;
+				chamberPressureGoodCounter++;
+			}
 
-		SetMsg_t setMsg =
-		{ 0 };
-		setMsg.variable_id = 1; // servo target position
-		setMsg.value = 65000; // open servo
-		cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
-		return POWERED_ASCENT;
-		//return ABORT; // maybe abort if not enough chamber pressure achieved after some time
+			// if either event (low or good pressure) occurs exclusively for a specified amount of times -> abort (low)/release(good)
+			if(chamberPressureLowCounter > CHAMBER_PRESSURE_LOW_COUNT_MAX) {
+				chamberPressureLowCounter = 0;
+				return ABORT;
+			}
+
+			if(chamberPressureGoodCounter > CHAMBER_PRESSURE_GOOD_COUNT_MIN) {
+				//TODO calibrate holddown servo
+				if(cancom == nullptr)
+					return ABORT;
+
+				SetMsg_t setMsg =
+				{ 0 };
+				setMsg.variable_id = 1; // servo target position
+				setMsg.value = 65000; // open servo
+				cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
+				return POWERED_ASCENT;
+			}
+		}
+	} else {
+		if(chamberPressureChannel.getMeasurement() >= chamberPressureMin) {
+			if(cancom == nullptr)
+				return ABORT;
+
+			SetMsg_t setMsg =
+			{ 0 };
+			setMsg.variable_id = 1; // servo target position
+			setMsg.value = 65000; // open servo
+			cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
+			return POWERED_ASCENT;
+		}
 	}
-
-	/*if(chamberPressureChannel.getMeasurement() >= chamberPressureTarget) {
-		if(cancom == nullptr)
-			return ABORT;
-
-		SetMsg_t setMsg =
-		{ 0 };
-		setMsg.variable_id = 1; // servo target position
-		setMsg.value = 65000; // open servo
-		cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
-		return POWERED_ASCENT;
-	}*/
 	return HOLD_DOWN;
 
 }
@@ -218,14 +240,24 @@ int RocketChannel::reset() {
 
 int RocketChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
 	switch(commandId) {
-		case ROCKET_REQ_AUTO_SEQUENCE:
-			externalNextState = AUTO_CHECK;
+		case ROCKET_REQ_INTERNAL_CONTROL:
+			if(state == PAD_IDLE) {
+				externalNextState = AUTO_CHECK;
+			}
 			return 0;
 		case ROCKET_REQ_ABORT:
 			externalNextState = ABORT;
 			return 0;
-		case ROCKET_REQ_ENDOFFLIGHT:
-			externalNextState = DEPRESS;
+		case ROCKET_REQ_END_OF_FLIGHT:
+			if(state == UNPOWERED_ASCENT) {
+				externalNextState = DEPRESS;
+			}
+			return 0;
+		case ROCKET_REQ_SET_ROCKET_STATE:
+			setRocketState(returnData,n);
+			return 0;
+		case ROCKET_REQ_GET_ROCKET_STATE:
+			getRocketState(returnData,n);
 			return 0;
 		default:
 			return AbstractChannel::processMessage(commandId, returnData, n);
@@ -242,12 +274,22 @@ int RocketChannel::getSensorData(uint8_t *data, uint8_t &n) {
 
 int RocketChannel::setVariable(uint8_t variableId, int32_t data) {
 	switch(variableId) {
-		case ROCKET_REFRESH_DIVIDER:
+		case ROCKET_STATE_REFRESH_DIVIDER:
 			refreshDivider = data;
 			refreshCounter = 0;
 			return 0;
-		case ROCKET_CHAMBER_PRESSURE_TARGET:
-			chamberPressureTarget = data;
+		case ROCKET_MINIMUM_CHAMBER_PRESSURE:
+			chamberPressureMin = data;
+			return 0;
+		case ROCKET_MINIMUM_FUEL_PRESSURE:
+			fuelPressureMin = data;
+			return 0;
+		case ROCKET_MINIMUM_OX_PRESSURE:
+			oxPressureMin = data;
+			return 0;
+		case ROCKET_HOLDDOWN_TIMEOUT:
+			holdDownTimeout = data;
+			return 0;
 		default:
 			return -1;
 	}
@@ -255,16 +297,43 @@ int RocketChannel::setVariable(uint8_t variableId, int32_t data) {
 
 int RocketChannel::getVariable(uint8_t variableId, int32_t &data) const {
 	switch(variableId) {
-		case ROCKET_REFRESH_DIVIDER:
+		case ROCKET_STATE_REFRESH_DIVIDER:
 			data = (int32_t) refreshDivider;
 			return 0;
-		case ROCKET_CURRENT_STATE:
-			data = (int32_t) state;
+		case ROCKET_MINIMUM_CHAMBER_PRESSURE:
+			data = (int32_t) chamberPressureMin;
 			return 0;
-		case ROCKET_CHAMBER_PRESSURE_TARGET:
-			data = (int32_t) chamberPressureTarget;
+		case ROCKET_MINIMUM_FUEL_PRESSURE:
+			data = (int32_t) fuelPressureMin;
+			return 0;
+		case ROCKET_MINIMUM_OX_PRESSURE:
+			data = (int32_t) oxPressureMin;
+			return 0;
+		case ROCKET_HOLDDOWN_TIMEOUT:
+			data = (int32_t) holdDownTimeout;
 			return 0;
 		default:
 			return -1;
 	}
+}
+
+void RocketChannel::setRocketState(uint8_t *data, uint8_t &n) {
+	RocketStateReqMsg_t * rocketStateRequestMsg;
+	RocketStateResMsg_t * rocketStateResponseMsg;
+	rocketStateRequestMsg = (RocketStateReqMsg_t *) data;
+	state =  static_cast<ROCKET_STATE>(rocketStateRequestMsg->state);
+
+	rocketStateResponseMsg = (RocketStateResMsg_t *) data;
+	rocketStateResponseMsg->state = state;
+	rocketStateResponseMsg->status = SUCCESS;
+	n+=sizeof(RocketStateResMsg_t);
+}
+
+void RocketChannel::getRocketState(uint8_t *data, uint8_t &n) {
+	RocketStateResMsg_t * rocketStateResponseMsg;
+
+	rocketStateResponseMsg = (RocketStateResMsg_t *) data;
+	rocketStateResponseMsg->state = state;
+	rocketStateResponseMsg->status = WRITABLE;
+	n+=sizeof(RocketStateResMsg_t);
 }

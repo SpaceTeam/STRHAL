@@ -39,8 +39,7 @@ bool AbstractChannel::IsRefreshed() {
 }
 
 int AbstractChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
-	SetMsg_t * setMsg =
-	{ 0 };
+	SetMsg_t * setMsg;
 	setMsg = (SetMsg_t *) returnData;
 	int32_t temp = 0;
 	int status = 0;

@@ -36,6 +36,8 @@ class RocketChannel : public AbstractChannel {
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
 		static constexpr uint16_t EXEC_SAMPLE_TICKS = 1;
+		static constexpr uint16_t CHAMBER_PRESSURE_LOW_COUNT_MAX = 100;
+		static constexpr uint16_t CHAMBER_PRESSURE_GOOD_COUNT_MIN = 50;
 
 	protected:
 
@@ -53,6 +55,9 @@ class RocketChannel : public AbstractChannel {
 		ROCKET_STATE depress(uint64_t time);
 		ROCKET_STATE abort(uint64_t time);
 
+		void setRocketState(uint8_t *data, uint8_t &n);
+		void getRocketState(uint8_t *data, uint8_t &n);
+
 		const ADCChannel &oxPressureChannel;
 		const ADCChannel &fuelPressureChannel;
 		const ADCChannel &chamberPressureChannel;
@@ -62,7 +67,13 @@ class RocketChannel : public AbstractChannel {
 		PyroChannel &igniter1Channel;
 		ROCKET_STATE state;
 		IgnitionSequence ignitionState;
-		uint16_t chamberPressureTarget;
+
+		uint16_t chamberPressureMin;
+		uint16_t chamberPressureLowCounter;
+		uint16_t chamberPressureGoodCounter;
+		uint16_t fuelPressureMin;
+		uint16_t oxPressureMin;
+		uint16_t holdDownTimeout;
 
 		uint64_t timeLastSample = 0;
 		uint64_t timeLastTransition = 0;
