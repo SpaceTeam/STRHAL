@@ -15,7 +15,7 @@ CHANNEL_STATUS AbstractChannel::getChannelStatus() const {
 	return channelStatus;
 }
 
-uint8_t AbstractChannel::getChanneSTRHAL() const {
+uint8_t AbstractChannel::getChannelId() const {
 	return channelId;
 }
 

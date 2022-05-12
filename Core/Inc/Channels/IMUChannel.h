@@ -13,6 +13,15 @@ struct IMUData {
 	int16_t temp;
 };
 
+enum class IMUMeasurement : uint8_t {
+	X_ACCEL = 0,
+	Y_ACCEL,
+	Z_ACCEL,
+	X_GYRO,
+	Y_GYRO,
+	Z_GYRO,
+};
+
 enum class IMUAddr : uint8_t {
 	GYRO_CONFIG = 0x1B,
 	ACCEL_CONFIG = 0x1C,
@@ -43,6 +52,7 @@ class IMUChannel : public AbstractChannel {
 		int exec() override;
 
 		int getSensorData(uint8_t *data, uint8_t &n) override;
+		int getSensorDataSingle(uint16_t * data, IMUMeasurement measurementType);
 
 		bool IsMeasurementAvailable() const;
 		bool getMeasurement(IMUData &x);

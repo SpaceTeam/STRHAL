@@ -94,8 +94,8 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 		if(channel == nullptr || !channel->IsRefreshed())
 			continue;
 		if(channel->getSensorData(&dataMsg->uint8[0], n) == -1)
-			return -1;
-		dataMsg->channel_mask |= 1 << channel->getChanneSTRHAL();
+			continue;
+		dataMsg->channel_mask |= 1 << channel->getChannelId();
 	}
 	n += 1 * sizeof(uint32_t);
 	return 0;
@@ -115,7 +115,7 @@ int GenericChannel::getNodeInfo(uint8_t *data, uint8_t &n) {
 			continue;
 
 		info->channel_type[i] = channel->getChannelType();
-		info->channel_mask |= 1 << channel->getChanneSTRHAL();
+		info->channel_mask |= 1 << channel->getChannelId();
 		length++;
 		i++;
 	}
@@ -124,8 +124,8 @@ int GenericChannel::getNodeInfo(uint8_t *data, uint8_t &n) {
 }
 
 void GenericChannel::registerChannel(AbstractChannel *channel) {
-	if(channel->getChanneSTRHAL() < MAX_CHANNELS)
-		channels[channel->getChanneSTRHAL()] = channel;
+	if(channel->getChannelId() < MAX_CHANNELS)
+		channels[channel->getChannelId()] = channel;
 }
 
 void GenericChannel::registerChannels(AbstractChannel **channels, uint8_t n) {

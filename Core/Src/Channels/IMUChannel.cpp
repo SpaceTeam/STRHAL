@@ -101,14 +101,47 @@ bool IMUChannel::getMeasurement(IMUData &x) {
 }
 
 int IMUChannel::getSensorData(uint8_t *data, uint8_t &n) {
-	if(measDataNum > 0) {
+	/*if(measDataNum > 0) {
 		std::memcpy(data, &measData[measDataTail++], 12);
 		measDataTail %= BUF_DATA_SIZE;
 		measDataNum--;
 	}
 
-	n += IMU_DATA_N_BYTES;
-	return 0;
+	n += IMU_DATA_N_BYTES;*/
+	return -1;
+}
+
+int IMUChannel::getSensorDataSingle(uint16_t * data, IMUMeasurement measurementType) {
+	if(measDataNum > 0) {
+		IMUData allMeasurements = measData[measDataTail];
+		switch(measurementType) {
+			case IMUMeasurement::X_ACCEL:
+				*data = (uint16_t) allMeasurements.accel.x;
+				break;
+			case IMUMeasurement::Y_ACCEL:
+				*data = (uint16_t) allMeasurements.accel.y;
+				break;
+			case IMUMeasurement::Z_ACCEL:
+				*data = (uint16_t) allMeasurements.accel.z;
+				break;
+			case IMUMeasurement::X_GYRO:
+				*data = (uint16_t) allMeasurements.alpha.x;
+				break;
+			case IMUMeasurement::Y_GYRO:
+				*data = (uint16_t) allMeasurements.alpha.y;
+				break;
+			case IMUMeasurement::Z_GYRO:
+				*data = (uint16_t) allMeasurements.alpha.z;
+				measDataTail++;
+				measDataTail %= BUF_DATA_SIZE;
+				measDataNum--;
+				break;
+			default:
+				return -1;
+		}
+		return 0;
+	}
+	return -1;
 }
 
 int IMUChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {

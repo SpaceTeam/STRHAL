@@ -1,7 +1,7 @@
 #include <Channels/RocketChannel.h>
 
 RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, const ADCChannel &fuelPressureChannel, const ADCChannel &chamberPressureChannel, ServoChannel &oxServoChannel, ServoChannel &fuelServoChannel, PyroChannel &igniter0Channel, PyroChannel &igniter1Channel, uint32_t refreshDivider)
-	: AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider),
+	: AbstractChannel(CHANNEL_TYPE_ROCKET, id, refreshDivider),
 	  oxPressureChannel(oxPressureChannel),
 	  fuelPressureChannel(fuelPressureChannel),
 	  chamberPressureChannel(chamberPressureChannel),
@@ -25,6 +25,8 @@ int RocketChannel::init() {
 }
 
 int RocketChannel::exec() {
+	char buf[64];
+
 	uint64_t time = STRHAL_Systick_GetTick();
 	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
 		return 0;
@@ -44,6 +46,8 @@ int RocketChannel::exec() {
 
 	// Next State Logic
 	if(nextState != state) {
+		sprintf(buf,"next state: %d",nextState);
+		STRHAL_UART_Write(buf, strlen(buf));
 		nextStateLogic(nextState, time);
 	}
 
@@ -321,7 +325,7 @@ void RocketChannel::setRocketState(uint8_t *data, uint8_t &n) {
 	RocketStateReqMsg_t * rocketStateRequestMsg;
 	RocketStateResMsg_t * rocketStateResponseMsg;
 	rocketStateRequestMsg = (RocketStateReqMsg_t *) data;
-	state =  static_cast<ROCKET_STATE>(rocketStateRequestMsg->state);
+	externalNextState = static_cast<ROCKET_STATE>(rocketStateRequestMsg->state);
 
 	rocketStateResponseMsg = (RocketStateResMsg_t *) data;
 	rocketStateResponseMsg->state = state;

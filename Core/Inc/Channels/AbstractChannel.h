@@ -15,7 +15,7 @@ class AbstractChannel {
 
 		CHANNEL_TYPE getChannelType() const;
 		CHANNEL_STATUS getChannelStatus() const;
-		uint8_t getChanneSTRHAL() const;
+		uint8_t getChannelId() const;
 
 		bool IsChannelType(CHANNEL_TYPE t) const;
 		bool IsChannelId(uint8_t id) const;

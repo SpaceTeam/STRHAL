@@ -29,7 +29,13 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	solenoid_0(18, {ADC2, STRHAL_ADC_CHANNEL_16}, {GPIOD, 9, STRHAL_GPIO_TYPE_OPP}, 1),
 	solenoid_1(19, {ADC2, STRHAL_ADC_CHANNEL_18}, {GPIOD, 8, STRHAL_GPIO_TYPE_OPP}, 1),
 	pressure_control(20, press_1, solenoid_1, 1),
-	imu_0(21, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
+	/*imu_0(21, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
+	x_accel(22, IMUMeasurement::X_ACCEL, imu_0, 1),
+	y_accel(23, IMUMeasurement::Y_ACCEL, imu_0, 1),
+	z_accel(24, IMUMeasurement::Z_ACCEL, imu_0, 1),
+	x_gyro(25, IMUMeasurement::X_GYRO, imu_0, 1),
+	y_gyro(26, IMUMeasurement::Y_GYRO, imu_0, 1),
+	z_gyro(27, IMUMeasurement::Z_GYRO, imu_0, 1),*/
 	rocket(22, press_1, press_0, press_2, servo_2, servo_0, pyro_igniter0, pyro_igniter1, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
@@ -56,8 +62,15 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&solenoid_0);
 	registerChannel(&solenoid_1);
 	registerChannel(&pressure_control);
-	registerChannel(&imu_0);
+	/*registerChannel(&imu_0);
+	registerChannel(&x_accel);
+	registerChannel(&y_accel);
+	registerChannel(&zx_accel);
+	registerChannel(&x_gyro);
+	registerChannel(&y_gyro);
+	registerChannel(&z_gyro);*/
 	registerChannel(&rocket);
+
 }
 
 int ECU::init() {
@@ -156,7 +169,7 @@ void ECU::testChannels() {
 				int nn = 0;
 				while(nn == 0) {
 					nn = STRHAL_UART_Read(read, 2);
-					std::sprintf(write,"ChanneSTRHAL: %d, ChannelType: %d, Measurement: %d\n",channel->getChanneSTRHAL(),type,adc->getMeasurement());
+					std::sprintf(write,"ChanneSTRHAL: %d, ChannelType: %d, Measurement: %d\n",channel->getChannelId(),type,adc->getMeasurement());
 					STRHAL_UART_Write(write, strlen(write));
 					STRHAL_Systick_BusyWait(500);
 				}

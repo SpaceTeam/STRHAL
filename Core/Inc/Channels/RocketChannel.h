@@ -9,6 +9,10 @@
 #include <STRHAL.h>
 #include <CANCOM.h>
 
+#include <STRHAL_UART.h>
+#include <cstring>
+#include <cstdio>
+
 enum class IgnitionSequence : int {
 	INIT = 0,
 	IGNITION_ON,
