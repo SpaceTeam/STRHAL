@@ -20,7 +20,7 @@ RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, co
 }
 
 int RocketChannel::init() {
-	cancom = CANCOM::instance(nullptr); // works because the generic channel (e.g. ECU) has already initialized CANCOM
+	cancom = Can::instance(nullptr); // works because the generic channel (e.g. ECU) has already initialized CANCOM
 	return 0;
 }
 

@@ -1,6 +1,7 @@
 #ifndef ECU_H
 #define ECU_H
 
+#include <Can.h>
 #include <Channels/ADCChannel.h>
 #include <Channels/DigitalOutChannel.h>
 #include <Channels/DigitalInChannel.h>
@@ -11,7 +12,6 @@
 #include <Channels/IMUChannel.h>
 #include <Channels/IMUSingleChannel.h>
 #include <Channels/RocketChannel.h>
-#include <CANCOM.h>
 #include <W25Qxx_Flash.h>
 #include <Speaker.h>
 
@@ -31,7 +31,7 @@ class ECU : public GenericChannel {
 		void testServo(ServoChannel &servo);
 
 	private:
-		CANCOM *cancom;
+		Can *cancom;
 		COMState CANState;
 
 		W25Qxx_Flash *flash;

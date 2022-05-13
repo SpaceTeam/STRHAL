@@ -6,9 +6,8 @@
 #include "./Channels/ServoChannel.h"
 #include "./Channels/PyroChannel.h"
 #include <can_houbolt/channels/rocket_channel_def.h>
+#include <Can.h>
 #include <STRHAL.h>
-#include <CANCOM.h>
-
 #include <STRHAL_UART.h>
 #include <cstring>
 #include <cstdio>
@@ -84,7 +83,7 @@ class RocketChannel : public AbstractChannel {
 		ROCKET_STATE internalNextState = PAD_IDLE;
 		ROCKET_STATE externalNextState = PAD_IDLE;
 
-		CANCOM *cancom = nullptr;
+		Can *cancom = nullptr;
 };
 
 #endif /*ADCCHANNEL_H*/

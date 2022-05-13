@@ -1,5 +1,5 @@
 #include "../Inc/ECU.h"
-#include "../Inc/CANCOM.h"
+#include "../Inc/Can.h"
 
 #include <cstdio>
 #include <cstring>
@@ -39,7 +39,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	rocket(22, press_1, press_0, press_2, servo_2, servo_0, pyro_igniter0, pyro_igniter1, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	cancom = CANCOM::instance(this);
+	cancom = Can::instance(this);
 	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&press_0);
 	registerChannel(&press_1);
