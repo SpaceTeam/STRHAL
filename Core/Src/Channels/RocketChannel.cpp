@@ -25,7 +25,7 @@ int RocketChannel::init() {
 }
 
 int RocketChannel::exec() {
-	char buf[64];
+	//char buf[64];
 
 	uint64_t time = STRHAL_Systick_GetTick();
 	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
@@ -41,13 +41,14 @@ int RocketChannel::exec() {
 	if(externalNextState != state) { // Prioritize external event - there has to be some kind of priority, because internal could be different to external -> external means CAN -> either Sequence or Abort
 		nextState = externalNextState;
 	} else if(internalNextState != state) {
+		externalNextState = internalNextState; // Incase an internal state change happens, the external state, which is from some previous change would block it, so it is updated here
 		nextState = internalNextState;
 	}
 
 	// Next State Logic
 	if(nextState != state) {
-		sprintf(buf,"next state: %d",nextState);
-		STRHAL_UART_Write(buf, strlen(buf));
+		//sprintf(buf,"next state: %d",nextState);
+		//STRHAL_UART_Write(buf, strlen(buf));
 		nextStateLogic(nextState, time);
 	}
 
@@ -186,24 +187,34 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 				if(cancom == nullptr)
 					return ABORT;
 
-				SetMsg_t setMsg =
+				/*SetMsg_t setMsg =
 				{ 0 };
 				setMsg.variable_id = 1; // servo target position
 				setMsg.value = 65000; // open servo
 				cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
+				*/
 				return POWERED_ASCENT;
 			}
+		} else {
+			chamberPressureGoodCounter = 0;
+			chamberPressureLowCounter = 0;
 		}
 	} else {
 		if(chamberPressureChannel.getMeasurement() >= chamberPressureMin) {
 			if(cancom == nullptr)
 				return ABORT;
 
-			SetMsg_t setMsg =
+			/*SetMsg_t setMsg =
 			{ 0 };
 			setMsg.variable_id = 1; // servo target position
 			setMsg.value = 65000; // open servo
-			cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
+			cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
+			/*SetMsg_t setMsg =
+			{ 0 };
+			setMsg.variable_id = 0; // servo target position
+			setMsg.value = 65000; // open servo
+			cancom->sendAsMaster(7, 12, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
+*/
 			return POWERED_ASCENT;
 		}
 	}
@@ -212,7 +223,7 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 }
 
 ROCKET_STATE RocketChannel::poweredAscent(uint64_t time) {
-	if(time - timeLastTransition > 6000) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
+	if(time - timeLastTransition > 10000) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
 		fuelServoChannel.setTargetPos(0);
 		oxServoChannel.setTargetPos(0);
 		return UNPOWERED_ASCENT;
@@ -221,11 +232,11 @@ ROCKET_STATE RocketChannel::poweredAscent(uint64_t time) {
 }
 
 ROCKET_STATE RocketChannel::depress(uint64_t time) {
-	if(time - timeLastTransition > 6000) { // PMU2 sent end of flight, depress rocket after a short waiting period
+	if(time - timeLastTransition > 3000) { // PMU2 sent end of flight, depress rocket after a short waiting period
 		fuelServoChannel.setTargetPos(65000);
 		oxServoChannel.setTargetPos(65000);
 		// TODO add complete depress sequence and maybe check chamber pressure to eliminate point of failure from wrong end of flight command
-		return UNPOWERED_ASCENT;
+		return PAD_IDLE;
 	}
 	return DEPRESS;
 }
@@ -233,6 +244,8 @@ ROCKET_STATE RocketChannel::depress(uint64_t time) {
 ROCKET_STATE RocketChannel::abort(uint64_t time) {
 	fuelServoChannel.setTargetPos(0);
 	oxServoChannel.setTargetPos(0);
+	(void) igniter0Channel.setState(0);
+	(void) igniter1Channel.setState(0);
 	return ABORT;
 }
 
