@@ -382,12 +382,12 @@ void STRHAL_CAN_Run() {
 		LL_mDelay(100);
 	}
 	if(fdcan2->state == STRHAL_CAN_STATE_INITIALISING) {
-		if(fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX0)) {
+		if(fdcan2->fifo_sub_state & (1U << STRHAL_FDCAN_RX0)) {
 			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO0);
 			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
 			SET_BIT(FDCAN2->IE, FDCAN_IE_RF0NE);
 		}
-		if(fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX0)) {
+		if(fdcan2->fifo_sub_state & (1U << STRHAL_FDCAN_RX0)) {
 			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO1);
 			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
 			SET_BIT(FDCAN2->IE, FDCAN_IE_RF1NE);
