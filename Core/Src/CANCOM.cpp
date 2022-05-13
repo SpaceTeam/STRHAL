@@ -31,10 +31,10 @@ COMState CANCOM::init() {
 	if(STRHAL_CAN_Instance_Init(STRHAL_FDCAN2) != 0)
 		return state = COMState::ERR;
 
-	if(STRHAL_TIM_Burner_Init(STRHAL_TIM_TIM7, 160, 100) != 10000) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
+	if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM7, 160, 100) != 10000) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
 		return state = COMState::ERR;
 
-	if(STRHAL_TIM_Burner_Subscribe(STRHAL_TIM_TIM7, CANCOM::burner) != 0)
+	if(STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_TIM7, CANCOM::burner) != 0)
 		return state = COMState::ERR;
 
 	Can_MessageId_t mask =
@@ -55,8 +55,8 @@ COMState CANCOM::init() {
 	id2.info.node_id = 0;
 
 	STRHAL_FDCAN_Filter_t mainFilter[] = {
-		{.value = id.uint32, .mask = mask.uint32},
-		{.value = id2.uint32, .mask = mask.uint32}
+		{.value_id1 = id.uint32, .mask_id2 = mask.uint32, .type = FDCAN_FILTER_MASK},
+		{.value_id1 = id2.uint32, .mask_id2 = mask.uint32, .type = FDCAN_FILTER_MASK}
 	};
 
 	if(STRHAL_CAN_Subscribe(STRHAL_FDCAN1, STRHAL_FDCAN_RX0, mainFilter, 2, CANCOM::mainReceptor) != 2)
@@ -68,7 +68,7 @@ COMState CANCOM::init() {
 COMState CANCOM::exec() {
 	state = COMState::RUN;
 	STRHAL_CAN_Run();
-	if(STRHAL_TIM_Burner_Start2Burn(STRHAL_TIM_TIM7) != 0)
+	if(STRHAL_TIM_Heartbeat_StartHeartbeat(STRHAL_TIM_TIM7) != 0)
 		return state = COMState::ERR;
 
 	return state;

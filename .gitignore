@@ -39,8 +39,8 @@
 # Debug files
 Debug_H7xx/
 Release_H7xx/
-Debug_G4xx/
-Release_G4xx/
+Debug_G491/
+Release_G491/
 *.dSYM/
 *.su
 *.idb
