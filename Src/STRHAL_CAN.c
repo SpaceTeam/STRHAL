@@ -257,9 +257,9 @@ int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id,
 	uint8_t i;
 	for(i = 0; i < n; i++, fdcan->filter_n++) {
 		can_ram->std_filters[i].S0.bit.SFEC = sfec;
-		can_ram->std_filters[i].S0.bit.SFID1 = filter[i].value;
-		can_ram->std_filters[i].S0.bit.SFID2 = filter[i].mask;
-		can_ram->std_filters[i].S0.bit.SFT = FDCAN_FILTER_MASK;
+		can_ram->std_filters[i].S0.bit.SFID1 = filter[i].value_id1;
+		can_ram->std_filters[i].S0.bit.SFID2 = filter[i].mask_id2;
+		can_ram->std_filters[i].S0.bit.SFT = filter[i].type;
 	}
 	MODIFY_REG(fdcan->can->RXGFC, FDCAN_RXGFC_LSS, (fdcan->filter_n << FDCAN_RXGFC_LSS_Pos)); // Standard filter elements number
 	return n;

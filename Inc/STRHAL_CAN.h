@@ -36,8 +36,9 @@ typedef enum {
 
 
 typedef struct {
-	uint32_t value;
-	uint32_t mask;
+	uint32_t value_id1;
+	uint32_t mask_id2;
+	uint32_t type;
 } STRHAL_FDCAN_Filter_t;
 
 

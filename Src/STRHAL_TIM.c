@@ -959,7 +959,7 @@ int STRHAL_TIM_PWM_Enable(STRHAL_TIM_PWM_Channel_t *pwmChannel, int enable) {
 	return enable;
 }
 
-int32_t STRHAL_TIM_Burner_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res) {
+int32_t STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res) {
 	if(id > STRHAL_TIM_N_BASICTIM || id < 0)
 			return -1;
 
@@ -983,7 +983,7 @@ int32_t STRHAL_TIM_Burner_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint1
 	return freq;
 }
 
-int STRHAL_TIM_Burner_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnable_t burn) {
+int STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnable_t burn) {
 	if(id > STRHAL_TIM_N_BASICTIM || id < 0)
 		return -1;
 
@@ -995,7 +995,7 @@ int STRHAL_TIM_Burner_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnabl
 	return 0;
 }
 
-int STRHAL_TIM_Burner_Start2Burn(STRHAL_TIM_BasicTimerId_t id) {
+int STRHAL_TIM_Heartbeat_StartHeartbeat(STRHAL_TIM_BasicTimerId_t id) {
 	if(id > STRHAL_TIM_N_BASICTIM || id < 0)
 		return -1;
 

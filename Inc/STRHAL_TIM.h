@@ -170,9 +170,9 @@ int STRHAL_TIM_PWM_Enable(STRHAL_TIM_PWM_Channel_t *pwmChannel, int enable);
 
 typedef void (*STRHAL_TIM_Burnable_t) ();
 
-int32_t STRHAL_TIM_Burner_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res);
-int STRHAL_TIM_Burner_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnable_t burn);
-int STRHAL_TIM_Burner_Start2Burn(STRHAL_TIM_BasicTimerId_t id);
+int32_t STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res);
+int STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnable_t burn);
+int STRHAL_TIM_Heartbeat_StartHeartbeat(STRHAL_TIM_BasicTimerId_t id);
 
 #ifdef __cplusplus
 }
