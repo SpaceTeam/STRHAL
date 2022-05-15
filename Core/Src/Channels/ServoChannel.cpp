@@ -58,8 +58,24 @@ int ServoChannel::exec() {
 
 	feedbackPositionLast = feedbackPosition;
 	feedbackPosition = tPosToCanonic(*feedbackMeasurement, adcRef);
-
+	if(step != 0)
+	{
+		if(finalPosition != targetPosition)
+		{
+			targetPosition += step;
+			if(step > 0)
+				targetPosition = (targetPosition > finalPosition) ? finalPosition : targetPosition;
+			else
+				targetPosition = (targetPosition < finalPosition) ? finalPosition : targetPosition;
+		}
+		else
+		{
+			step = 0;
+		}
+	}
 	if(targetPosition != targetPositionLast) {
+
+
 		STRHAL_TIM_PWM_SetDuty(&pwmChannel, tPosFromCanonic(targetPosition, pwmRef));
 		STRHAL_TIM_PWM_Enable(&pwmChannel, true);
 		STRHAL_GPIO_Write(&led, STRHAL_GPIO_VALUE_H);
@@ -214,6 +230,11 @@ int ServoChannel::getVariable(uint8_t variable_id, int32_t &data) const {
 
 void ServoChannel::setTargetPos(uint16_t pos) {
 	targetPosition = pos;
+}
+
+void ServoChannel::moveToPosInInterval(uint16_t position, uint16_t interval) {
+	step = (position - targetPosition) /  interval * EXEC_SAMPLE_TICKS;
+	finalPosition = position;
 }
 
 uint16_t ServoChannel::getTargetPos() const {

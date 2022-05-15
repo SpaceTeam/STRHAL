@@ -133,15 +133,15 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time) {
 			break;
 		case IgnitionSequence::VALVES_TO_20: // T+0.5 - Valves to 20% open
 			if(time - timeLastTransition > 10500) {
-				fuelServoChannel.setTargetPos(15000);
-				oxServoChannel.setTargetPos(15000);
+				fuelServoChannel.moveToPosInInterval(15000, 700);
+				oxServoChannel.moveToPosInInterval(15000, 700);
 				ignitionState = IgnitionSequence::VALVES_TO_40;
 			}
 			break;
-		case IgnitionSequence::VALVES_TO_40: // T+1.2 - Valves to 40% open
+		case IgnitionSequence::VALVES_TO_40: // T+1.2 - Valves to 50% open
 			if(time - timeLastTransition > 11200) {
-				fuelServoChannel.setTargetPos(25000);
-				oxServoChannel.setTargetPos(25000);
+				fuelServoChannel.moveToPosInInterval(32000, 300);
+				oxServoChannel.moveToPosInInterval(32000, 300);
 				ignitionState = IgnitionSequence::IGNITION_OFF;
 			}
 			break;
@@ -179,20 +179,24 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 			// if either event (low or good pressure) occurs exclusively for a specified amount of times -> abort (low)/release(good)
 			if(chamberPressureLowCounter > CHAMBER_PRESSURE_LOW_COUNT_MAX) {
 				chamberPressureLowCounter = 0;
-				return ABORT;
+				SetMsg_t setMsg =
+				{ 0 };
+				setMsg.variable_id = 0; // servo target position
+				setMsg.value = 65000; // open servo
+				cancom->sendAsMaster(7, 16, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
+				//return ABORT;
 			}
 
 			if(chamberPressureGoodCounter > CHAMBER_PRESSURE_GOOD_COUNT_MIN) {
 				//TODO calibrate holddown servo
-				if(cancom == nullptr)
-					return ABORT;
+				//if(cancom == nullptr)
+					//return ABORT;
 
-				/*SetMsg_t setMsg =
+				SetMsg_t setMsg =
 				{ 0 };
-				setMsg.variable_id = 1; // servo target position
+				setMsg.variable_id = 0; // servo target position
 				setMsg.value = 65000; // open servo
-				cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)
-				*/
+				cancom->sendAsMaster(7, 12, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
 				return POWERED_ASCENT;
 			}
 		} else {
@@ -223,7 +227,7 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 }
 
 ROCKET_STATE RocketChannel::poweredAscent(uint64_t time) {
-	if(time - timeLastTransition > 10000) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
+	if(time - timeLastTransition > 30000) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
 		fuelServoChannel.setTargetPos(0);
 		oxServoChannel.setTargetPos(0);
 		return UNPOWERED_ASCENT;

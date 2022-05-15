@@ -33,6 +33,7 @@ class ServoChannel : public AbstractChannel {
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
 		void setTargetPos(uint16_t pos);
+		void moveToPosInInterval(uint16_t position, uint16_t interval);
 		uint16_t getTargetPos() const;
 
 		uint16_t getPos() const;
@@ -78,6 +79,8 @@ class ServoChannel : public AbstractChannel {
 
 		uint16_t targetPosition = 0;
 		uint16_t feedbackPosition = 0;
+		uint16_t finalPosition = 0;
+		int16_t step = 0;
 
 		ServoRefPos adcRef = adc0Ref;
 		ServoRefPos pwmRef = pwm0Ref;
