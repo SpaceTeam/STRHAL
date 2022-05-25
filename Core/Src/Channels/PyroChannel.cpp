@@ -31,7 +31,7 @@ int PyroChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t 
 
 int PyroChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	*out = *adcMeasurement;
+	*out = *adcMeasurement << 4; // shift it to 16bit full scale;
 
 	n += DIGITAL_OUT_DATA_N_BYTES;
 	return 0;
