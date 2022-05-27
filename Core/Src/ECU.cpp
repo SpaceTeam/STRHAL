@@ -36,7 +36,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	x_gyro(25, IMUMeasurement::X_GYRO, imu_0, 1),
 	y_gyro(26, IMUMeasurement::Y_GYRO, imu_0, 1),
 	z_gyro(27, IMUMeasurement::Z_GYRO, imu_0, 1),*/
-	rocket(22, press_1, press_0, press_2, servo_2, servo_0, pyro_igniter0, pyro_igniter1, 1),
+	rocket(22, press_1, press_0, press_2, servo_2, servo_0, pyro_igniter0, pyro_igniter2, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	cancom = Can::instance(this);

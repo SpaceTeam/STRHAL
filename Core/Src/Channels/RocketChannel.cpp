@@ -10,13 +10,7 @@ RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, co
 	  igniter0Channel(igniter0Channel),
 	  igniter1Channel(igniter1Channel),
 	  state(PAD_IDLE),
-	  ignitionState(IgnitionSequence::INIT),
-	  chamberPressureMin(0),
-	  chamberPressureLowCounter(0),
-	  chamberPressureGoodCounter(0),
-	  fuelPressureMin(0),
-	  oxPressureMin(0),
-	  holdDownTimeout(0) {
+	  ignitionState(IgnitionSequence::INIT) {
 }
 
 int RocketChannel::init() {
@@ -25,8 +19,6 @@ int RocketChannel::init() {
 }
 
 int RocketChannel::exec() {
-	//char buf[64];
-
 	uint64_t time = STRHAL_Systick_GetTick();
 	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
 		return 0;
@@ -47,8 +39,6 @@ int RocketChannel::exec() {
 
 	// Next State Logic
 	if(nextState != state) {
-		//sprintf(buf,"next state: %d",nextState);
-		//STRHAL_UART_Write(buf, strlen(buf));
 		nextStateLogic(nextState, time);
 	}
 
@@ -83,7 +73,50 @@ ROCKET_STATE RocketChannel::currentStateLogic(uint64_t time) {
 
 void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 	timeLastTransition = time;
-	this->state = nextState;
+	switch(nextState) {
+		case PAD_IDLE:
+			break;
+		case AUTO_CHECK:
+			break;
+		case IGNITION_SEQUENCE:
+			break;
+		case HOLD_DOWN:
+			break;
+		case POWERED_ASCENT:
+			/*SetMsg_t setMsg =
+			{ 0 };
+			setMsg.variable_id = 1; // servo target position
+			setMsg.value = 65000; // open servo
+			cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
+			/*SetMsg_t setMsg =
+			{ 0 };
+			setMsg.variable_id = 0; // pyro state
+			setMsg.value = 65000; // enable pyro
+			cancom->sendAsMaster(7, 12, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
+			 */
+			break;
+		case UNPOWERED_ASCENT:
+			fuelServoChannel.setTargetPos(0);
+			oxServoChannel.setTargetPos(0);
+			break;
+		case DEPRESS:
+			if(chamberPressureChannel.getMeasurement() > chamberPressureMin)
+				return; // do not set next state to DEPRESS if there is still combustion going on
+
+			fuelServoChannel.setTargetPos(65000);
+			oxServoChannel.setTargetPos(65000);
+			break;
+		case ABORT:
+			fuelServoChannel.setTargetPos(0);
+			oxServoChannel.setTargetPos(0);
+			(void) igniter0Channel.setState(0);
+			(void) igniter1Channel.setState(0);
+			break;
+		default:
+			break;
+	}
+	state = nextState;
+	return;
 }
 
 ROCKET_STATE RocketChannel::autoCheck(uint64_t time) {
@@ -91,17 +124,19 @@ ROCKET_STATE RocketChannel::autoCheck(uint64_t time) {
 		return IGNITION_SEQUENCE;
 	}
 	// TODO check Holddown
-	if(igniter0Channel.getContinuity() == 1) //no continuity
+	if(		igniter0Channel.getContinuity() == 1 || //no continuity
+			igniter1Channel.getContinuity() == 1 || //no continuity
+			oxPressureChannel.getMeasurement() < oxPressureMin ||
+			fuelPressureChannel.getMeasurement() < fuelPressureMin) {
+
+		autoCheckBadCounter++;
+	} else {
+		autoCheckBadCounter = 0;
+	}
+
+	if(autoCheckBadCounter > AUTO_CHECK_BAD_COUNT_MAX)
 		return ABORT;
 
-	if(igniter1Channel.getContinuity() == 1) //no continuity
-		return ABORT;
-
-	if(oxPressureChannel.getMeasurement() < oxPressureMin) //TODO set using CAN interface OR hardcode 35 bar
-		return ABORT;
-
-	if(fuelPressureChannel.getMeasurement() < fuelPressureMin) //TODO set using CAN interface OR hardcode 30 bar
-		return ABORT;
 
 	return AUTO_CHECK;
 }
@@ -131,17 +166,17 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time) {
 				ignitionState = IgnitionSequence::VALVES_TO_20;
 			}
 			break;
-		case IgnitionSequence::VALVES_TO_20: // T+0.5 - Valves to 20% open
+		case IgnitionSequence::VALVES_TO_20: // T+0.5 - Open Valves to just before they start to open (fuel: 22000, ox: 33000)
 			if(time - timeLastTransition > 10500) {
-				fuelServoChannel.moveToPosInInterval(15000, 700);
-				oxServoChannel.moveToPosInInterval(15000, 700);
+				fuelServoChannel.moveToPosInInterval(19000, 700);
+				oxServoChannel.moveToPosInInterval(30000, 700);
 				ignitionState = IgnitionSequence::VALVES_TO_40;
 			}
 			break;
 		case IgnitionSequence::VALVES_TO_40: // T+1.2 - Valves to 50% open
 			if(time - timeLastTransition > 11200) {
 				fuelServoChannel.moveToPosInInterval(32000, 300);
-				oxServoChannel.moveToPosInInterval(32000, 300);
+				oxServoChannel.moveToPosInInterval(43000, 300);
 				ignitionState = IgnitionSequence::IGNITION_OFF;
 			}
 			break;
@@ -189,14 +224,6 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 
 			if(chamberPressureGoodCounter > CHAMBER_PRESSURE_GOOD_COUNT_MIN) {
 				//TODO calibrate holddown servo
-				//if(cancom == nullptr)
-					//return ABORT;
-
-				SetMsg_t setMsg =
-				{ 0 };
-				setMsg.variable_id = 0; // servo target position
-				setMsg.value = 65000; // open servo
-				cancom->sendAsMaster(7, 12, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
 				return POWERED_ASCENT;
 			}
 		} else {
@@ -205,20 +232,6 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 		}
 	} else {
 		if(chamberPressureChannel.getMeasurement() >= chamberPressureMin) {
-			if(cancom == nullptr)
-				return ABORT;
-
-			/*SetMsg_t setMsg =
-			{ 0 };
-			setMsg.variable_id = 1; // servo target position
-			setMsg.value = 65000; // open servo
-			cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
-			/*SetMsg_t setMsg =
-			{ 0 };
-			setMsg.variable_id = 0; // servo target position
-			setMsg.value = 65000; // open servo
-			cancom->sendAsMaster(7, 12, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
-*/
 			return POWERED_ASCENT;
 		}
 	}
@@ -228,28 +241,20 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 
 ROCKET_STATE RocketChannel::poweredAscent(uint64_t time) {
 	if(time - timeLastTransition > 30000) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
-		fuelServoChannel.setTargetPos(0);
-		oxServoChannel.setTargetPos(0);
 		return UNPOWERED_ASCENT;
 	}
 	return POWERED_ASCENT;
 }
 
 ROCKET_STATE RocketChannel::depress(uint64_t time) {
-	if(time - timeLastTransition > 3000) { // PMU2 sent end of flight, depress rocket after a short waiting period
-		fuelServoChannel.setTargetPos(65000);
-		oxServoChannel.setTargetPos(65000);
-		// TODO add complete depress sequence and maybe check chamber pressure to eliminate point of failure from wrong end of flight command
+	if(oxPressureChannel.getMeasurement() < 10 && fuelPressureChannel.getMeasurement() < 10) { // PMU2 sent end of flight, depress rocket and go to idle state once pressures drop below a minimum
+		// TODO: add variable for depress maximum pressures
 		return PAD_IDLE;
 	}
 	return DEPRESS;
 }
 
 ROCKET_STATE RocketChannel::abort(uint64_t time) {
-	fuelServoChannel.setTargetPos(0);
-	oxServoChannel.setTargetPos(0);
-	(void) igniter0Channel.setState(0);
-	(void) igniter1Channel.setState(0);
 	return ABORT;
 }
 
