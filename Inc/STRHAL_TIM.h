@@ -153,7 +153,7 @@ typedef enum {
 } STRHAL_TIM_PWM_ChannelType_t;
 
 typedef struct {
-	STRHAL_TIM_ChannelId_t channeSTRHAL;
+	STRHAL_TIM_ChannelId_t channelId;
 	STRHAL_TIM_PWM_ChannelType_t type;
 } STRHAL_TIM_PWM_Channel_t;
 
@@ -162,7 +162,7 @@ void STRHAL_TIM_Init();
 void STRHAL_TIM_Run();
 
 int32_t STRHAL_TIM_PWM_Init(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res);
-int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channeSTRHAL, STRHAL_TIM_PWM_ChannelType_t pwmType);
+int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channelId, STRHAL_TIM_PWM_ChannelType_t pwmType);
 int32_t STRHAL_TIM_PWM_Read(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t *duty);
 int32_t STRHAL_TIM_PWM_SetFreq(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res);
 int32_t STRHAL_TIM_PWM_SetDuty(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t duty) ;

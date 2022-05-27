@@ -862,11 +862,11 @@ int32_t STRHAL_TIM_PWM_Init(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res)
 	return freq;
 }
 
-int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channeSTRHAL, STRHAL_TIM_PWM_ChannelType_t pwmType) {
-	if(channeSTRHAL > STRHAL_TIM_N_TIM_CHANNELS)
+int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channelId, STRHAL_TIM_PWM_ChannelType_t pwmType) {
+	if(channelId > STRHAL_TIM_N_TIM_CHANNELS)
 		return -1;
 
-	const STRHAL_TIM_Channel_t *ch = &_tim_channels[channeSTRHAL];
+	const STRHAL_TIM_Channel_t *ch = &_tim_channels[channelId];
 	if(pwmType == STRHAL_TIM_PWM_CHANNELTYPE_SO) {
 
 		LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -893,16 +893,16 @@ int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_C
 		//LL_TIM_IC_InitTypeDef IC_InitStruct = {0};
 	}
 
-	pwmChannel->channeSTRHAL = channeSTRHAL;
+	pwmChannel->channelId = channelId;
 	pwmChannel->type = pwmType;
 	return 0;
 }
 
 int32_t STRHAL_TIM_PWM_Read(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t *duty) {
-	if(pwmChannel->channeSTRHAL > STRHAL_TIM_N_TIM_CHANNELS)
+	if(pwmChannel->channelId > STRHAL_TIM_N_TIM_CHANNELS)
 		return -1;
 
-	const STRHAL_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channeSTRHAL];
+	const STRHAL_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channelId];
 	if(ch->tim->utype != STRHAL_TIM_USAGE_PWM)
 		return -1;
 
@@ -929,10 +929,10 @@ int32_t STRHAL_TIM_PWM_SetFreq(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t r
 }
 
 int32_t STRHAL_TIM_PWM_SetDuty(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t duty) {
-	if(pwmChannel->channeSTRHAL > STRHAL_TIM_N_TIM_CHANNELS)
+	if(pwmChannel->channelId > STRHAL_TIM_N_TIM_CHANNELS)
 		return -1;
 
-	const STRHAL_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channeSTRHAL];
+	const STRHAL_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channelId];
 	if(ch->tim->utype != STRHAL_TIM_USAGE_PWM)
 		return -1;
 
@@ -941,10 +941,10 @@ int32_t STRHAL_TIM_PWM_SetDuty(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t du
 }
 
 int STRHAL_TIM_PWM_Enable(STRHAL_TIM_PWM_Channel_t *pwmChannel, int enable) {
-	if(pwmChannel->channeSTRHAL > STRHAL_TIM_N_TIM_CHANNELS)
+	if(pwmChannel->channelId > STRHAL_TIM_N_TIM_CHANNELS)
 		return -1;
 
-	const STRHAL_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channeSTRHAL];
+	const STRHAL_TIM_Channel_t *ch = &_tim_channels[pwmChannel->channelId];
 	if(ch->tim->utype != STRHAL_TIM_USAGE_PWM)
 		return -1;
 

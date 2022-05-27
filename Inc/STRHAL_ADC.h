@@ -56,7 +56,7 @@ typedef enum {
 	STRHAL_ADC_CHANNEL_18,
 
 	STRHAL_ADC_CHANNEL_LAST
-} STRHAL_ADC_ChanneSTRHAL_t;
+} STRHAL_ADC_ChannelId_t;
 
 typedef enum {
 	STRHAL_ADC_INTYPE_REGULAR,
@@ -72,7 +72,7 @@ typedef struct {
 
 typedef struct {
 	ADC_TypeDef *ADCx;
-	STRHAL_ADC_ChanneSTRHAL_t channeSTRHAL;
+	STRHAL_ADC_ChannelId_t channelId;
 } STRHAL_ADC_Channel_t;
 
 typedef volatile uint16_t STRHAL_ADC_Data_t;

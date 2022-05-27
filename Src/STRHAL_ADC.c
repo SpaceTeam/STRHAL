@@ -41,34 +41,34 @@ LL_ADC_REG_SEQ_SCAN_ENABLE_16RANKS };
 
 const static STRHAL_ADC_AnalogPin_t gpioMapping[3][STRHAL_ADC_CHANNEL_LAST] = {
 		{
-			[STRHAL_ADC_CHANNEL_1] = { .port = GPIOA,	.pin = LL_GPIO_PIN_15,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_1 },	//STRHAL_ADC_SERVO_0_CURR
-			[STRHAL_ADC_CHANNEL_2] = { .port = GPIOA,	.pin = LL_GPIO_PIN_1,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_2 },	//STRHAL_ADC_SERVO_1_FDBK
-			[STRHAL_ADC_CHANNEL_3] = { .port = GPIOA,	.pin = LL_GPIO_PIN_2,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_3 },	//STRHAL_ADC_SERVO_1_CURR
-			[STRHAL_ADC_CHANNEL_4] = { .port = GPIOA,	.pin = LL_GPIO_PIN_3,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_4 },	//STRHAL_ADC_SERVO_2_FDBK
-			[STRHAL_ADC_CHANNEL_5] = { .port = GPIOB,	.pin = LL_GPIO_PIN_14,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },	//STRHAL_ADC_PRESS_4
-			[STRHAL_ADC_CHANNEL_6] = { .port = GPIOC,	.pin = LL_GPIO_PIN_0,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_6 },	//STRHAL_ADC_TEMP_0
-			[STRHAL_ADC_CHANNEL_7] = { .port = GPIOC,	.pin = LL_GPIO_PIN_1,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_7 },	//STRHAL_ADC_TEMP_1
-			[STRHAL_ADC_CHANNEL_8] = { .port = GPIOC,	.pin = LL_GPIO_PIN_2,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_8 },	//STRHAL_ADC_TEMP_2
-			[STRHAL_ADC_CHANNEL_9] = { .port = GPIOC,	.pin = LL_GPIO_PIN_3,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_9 },	//STRHAL_ADC_SERVO_0_FDBK
-			[STRHAL_ADC_CHANNEL_11] = { .port = GPIOB,	.pin = LL_GPIO_PIN_12,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_11 },	//STRHAL_ADC_PRESS_5
-			[STRHAL_ADC_CHANNEL_12] = { .port = GPIOB,	.pin = LL_GPIO_PIN_1,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_12 },	//STRHAL_ADC_PYRO_SENSE
-			[STRHAL_ADC_CHANNEL_14] = { .port = GPIOB,	.pin = LL_GPIO_PIN_11,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_14 }	//STRHAL_ADC_PRESS_2
+			[STRHAL_ADC_CHANNEL_1] = { .port = GPIOA,	.pin = LL_GPIO_PIN_15,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_1 },
+			[STRHAL_ADC_CHANNEL_2] = { .port = GPIOA,	.pin = LL_GPIO_PIN_1,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_2 },
+			[STRHAL_ADC_CHANNEL_3] = { .port = GPIOA,	.pin = LL_GPIO_PIN_2,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_3 },
+			[STRHAL_ADC_CHANNEL_4] = { .port = GPIOA,	.pin = LL_GPIO_PIN_3,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_4 },
+			[STRHAL_ADC_CHANNEL_5] = { .port = GPIOB,	.pin = LL_GPIO_PIN_14,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },
+			[STRHAL_ADC_CHANNEL_6] = { .port = GPIOC,	.pin = LL_GPIO_PIN_0,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_6 },
+			[STRHAL_ADC_CHANNEL_7] = { .port = GPIOC,	.pin = LL_GPIO_PIN_1,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_7 },
+			[STRHAL_ADC_CHANNEL_8] = { .port = GPIOC,	.pin = LL_GPIO_PIN_2,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_8 },
+			[STRHAL_ADC_CHANNEL_9] = { .port = GPIOC,	.pin = LL_GPIO_PIN_3,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_9 },
+			[STRHAL_ADC_CHANNEL_11] = { .port = GPIOB,	.pin = LL_GPIO_PIN_12,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_11 },
+			[STRHAL_ADC_CHANNEL_12] = { .port = GPIOB,	.pin = LL_GPIO_PIN_1,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_12 },
+			[STRHAL_ADC_CHANNEL_14] = { .port = GPIOB,	.pin = LL_GPIO_PIN_11,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_14 }
 		},
 		{
-			[STRHAL_ADC_CHANNEL_3] = { .port = GPIOA,	.pin = LL_GPIO_PIN_6,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_3 },	//STRHAL_ADC_12V_SENSE
-			[STRHAL_ADC_CHANNEL_5] = { .port = GPIOC,	.pin = LL_GPIO_PIN_4,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },	//STRHAL_ADC_5V_SENSE
-			[STRHAL_ADC_CHANNEL_11] = { .port = GPIOC,	.pin = LL_GPIO_PIN_5,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_11 },	//STRHAL_ADC_12VA_SENSE
-			[STRHAL_ADC_CHANNEL_15] = { .port = GPIOB,	.pin = LL_GPIO_PIN_15,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_15 },	//STRHAL_ADC_PRESS_0
-			[STRHAL_ADC_CHANNEL_16] = { .port = GPIOA,	.pin = 0x00000000,		.type = STRHAL_ADC_INTYPE_OPAMP, 	.channel = LL_ADC_CHANNEL_VOPAMP2 },	//STRHAL_ADC_SOLENOID_0_CURR
-			[STRHAL_ADC_CHANNEL_17] = { .port = GPIOA,	.pin = LL_GPIO_PIN_4,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_17 },	//STRHAL_ADC_SERVO_2_CURR
-			[STRHAL_ADC_CHANNEL_18] = { .port = GPIOB,	.pin = 0x00000000,		.type = STRHAL_ADC_INTYPE_OPAMP, 	.channel = LL_ADC_CHANNEL_VOPAMP3_ADC2 }	//STRHAL_ADC_SOLENOID_1_CURR
+			[STRHAL_ADC_CHANNEL_3] = { .port = GPIOA,	.pin = LL_GPIO_PIN_6,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_3 },
+			[STRHAL_ADC_CHANNEL_5] = { .port = GPIOC,	.pin = LL_GPIO_PIN_4,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },
+			[STRHAL_ADC_CHANNEL_11] = { .port = GPIOC,	.pin = LL_GPIO_PIN_5,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_11 },
+			[STRHAL_ADC_CHANNEL_15] = { .port = GPIOB,	.pin = LL_GPIO_PIN_15,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_15 },
+			[STRHAL_ADC_CHANNEL_16] = { .port = GPIOA,	.pin = 0x00000000,		.type = STRHAL_ADC_INTYPE_OPAMP, 	.channel = LL_ADC_CHANNEL_VOPAMP2 },
+			[STRHAL_ADC_CHANNEL_17] = { .port = GPIOA,	.pin = LL_GPIO_PIN_4,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_17 },
+			[STRHAL_ADC_CHANNEL_18] = { .port = GPIOB,	.pin = 0x00000000,		.type = STRHAL_ADC_INTYPE_OPAMP, 	.channel = LL_ADC_CHANNEL_VOPAMP3_ADC2 }
 		},
 		{
-			[STRHAL_ADC_CHANNEL_2] = { .port = GPIOE,	.pin = LL_GPIO_PIN_9,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_2 },	//STRHAL_ADC_PYRO_0_CURR
-			[STRHAL_ADC_CHANNEL_4] = { .port = GPIOE,	.pin = LL_GPIO_PIN_7,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_4 },	//STRHAL_ADC_PYRO_2_CURR
-			[STRHAL_ADC_CHANNEL_5] = { .port = GPIOB,	.pin = LL_GPIO_PIN_13,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },	//STRHAL_ADC_PRESS_1
-			[STRHAL_ADC_CHANNEL_6] = { .port = GPIOE,	.pin = LL_GPIO_PIN_8,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_6 },	//STRHAL_ADC_PYRO_1_CURR
-			[STRHAL_ADC_CHANNEL_7] = { .port = GPIOD,	.pin = LL_GPIO_PIN_10,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_7 }	//STRHAL_ADC_PRESS_3
+			[STRHAL_ADC_CHANNEL_2] = { .port = GPIOE,	.pin = LL_GPIO_PIN_9,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_2 },
+			[STRHAL_ADC_CHANNEL_4] = { .port = GPIOE,	.pin = LL_GPIO_PIN_7,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_4 },
+			[STRHAL_ADC_CHANNEL_5] = { .port = GPIOB,	.pin = LL_GPIO_PIN_13,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_5 },
+			[STRHAL_ADC_CHANNEL_6] = { .port = GPIOE,	.pin = LL_GPIO_PIN_8,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_6 },
+			[STRHAL_ADC_CHANNEL_7] = { .port = GPIOD,	.pin = LL_GPIO_PIN_10,	.type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_7 }
 		}
 };
 
@@ -182,23 +182,23 @@ STRHAL_ADC_Data_t * STRHAL_ADC_SubscribeChannel(STRHAL_ADC_Channel_t *channel, S
 	uint32_t dmaChannel = 0;
 	uint64_t adcChannelMsk = 0;
 	if(channel->ADCx == ADC1) {
-		analogPin = gpioMapping[0][channel->channeSTRHAL];
+		analogPin = gpioMapping[0][channel->channelId];
 		data_ptr = adc1_buf.data;
 		length_ptr = &adc1_buf.length;
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL;
-		adcChannelMsk = (1U) << (channel->channeSTRHAL);
+		adcChannelMsk = (1U) << (channel->channelId);
 	} else if (channel->ADCx == ADC2) {
-		analogPin = gpioMapping[1][channel->channeSTRHAL];
+		analogPin = gpioMapping[1][channel->channelId];
 		data_ptr = adc2_buf.data;
 		length_ptr = &adc2_buf.length;
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL+1;
-		adcChannelMsk = (1U) << (STRHAL_ADC_CHANNEL_LAST + channel->channeSTRHAL);
+		adcChannelMsk = (1U) << (STRHAL_ADC_CHANNEL_LAST + channel->channelId);
 	} else if (channel->ADCx == ADC3) {
-		analogPin = gpioMapping[2][channel->channeSTRHAL];
+		analogPin = gpioMapping[2][channel->channelId];
 		data_ptr = adc3_buf.data;
 		length_ptr = &adc3_buf.length;
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL+2;
-		adcChannelMsk = (1U) << (2*STRHAL_ADC_CHANNEL_LAST + channel->channeSTRHAL);
+		adcChannelMsk = (1U) << (2*STRHAL_ADC_CHANNEL_LAST + channel->channelId);
 	} else {
 		return NULL;
 	}
