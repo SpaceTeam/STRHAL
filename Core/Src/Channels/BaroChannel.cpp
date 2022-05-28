@@ -21,11 +21,11 @@ int BaroChannel::init() {
 		return -1;
 
 	if(!writeReg(BaroAddr::CTRL_REG1, 0x44, 50)
-			 ||	!writeReg(BaroAddr::CTRL_REG2, 0x48, 50)
+			 ||	!writeReg(BaroAddr::CTRL_REG2, 0x08, 50)
 			 || !writeReg(BaroAddr::CTRL_REG3, 0x00, 50)
 			 || !writeReg(BaroAddr::CTRL_REG4, 0x00, 50)
-			 || !writeReg(BaroAddr::FIFO_CTRL, 0x20, 50)
-			 || !writeReg(BaroAddr::RES_CONF, 0x0A, 50)
+			 //|| !writeReg(BaroAddr::FIFO_CTRL, 0x20, 50)
+			 || !writeReg(BaroAddr::RES_CONF, 0x07, 50)
 			)
 		return -1;
 
@@ -75,13 +75,10 @@ int BaroChannel::exec() {
 
 	//measData[i].temp = tmp[0] << 8 | tmp[1]; discarding temperature measurement
 
-	if(!readReg(BaroAddr::WHO_AM_I, &tmp[0], 1))
-		return -1;
-
 	measDataNum++;
 	measDataNum %= BUF_DATA_SIZE;
 
-	sprintf(buf,"%li - %d\n",(int32_t) tmpPressure, tmp[0]);
+	sprintf(buf,"%li\n",measData[i]);
 	STRHAL_UART_Write(buf, strlen(buf));
 
 	return 0;
