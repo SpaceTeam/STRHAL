@@ -75,7 +75,7 @@ int BaroChannel::exec() {
 
 	//measData[i].temp = tmp[0] << 8 | tmp[1]; discarding temperature measurement
 
-	if(!readReg(BaroAddr::CTRL_REG1, &tmp[0], 1))
+	if(!readReg(BaroAddr::WHO_AM_I, &tmp[0], 1))
 		return -1;
 
 	measDataNum++;

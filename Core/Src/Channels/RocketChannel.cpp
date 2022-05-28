@@ -82,7 +82,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 			break;
 		case HOLD_DOWN:
 			break;
-		case POWERED_ASCENT:
+		case POWERED_ASCENT: {
 			SetMsg_t setMsg =
 			{ 0 };
 			setMsg.variable_id = 1; // servo target position
@@ -95,6 +95,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 			cancom->sendAsMaster(7, 12, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
 			 */
 			break;
+		}
 		case UNPOWERED_ASCENT:
 			fuelServoChannel.setTargetPos(0);
 			oxServoChannel.setTargetPos(0);
