@@ -16,10 +16,9 @@ enum class IgnitionSequence : int {
 	INIT = 0,
 	IGNITION_ON,
 	T_0,
-	VALVES_TO_20,
-	VALVES_TO_40,
-	IGNITION_OFF,
-	VALVES_TO_100
+	VALVES_SLOWLY_OPEN,
+	VALVES_FULLY_OPEN,
+	IGNITION_OFF
 };
 
 class RocketChannel : public AbstractChannel {

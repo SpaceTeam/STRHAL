@@ -83,7 +83,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 		case HOLD_DOWN:
 			break;
 		case POWERED_ASCENT:
-			/*SetMsg_t setMsg =
+			SetMsg_t setMsg =
 			{ 0 };
 			setMsg.variable_id = 1; // servo target position
 			setMsg.value = 65000; // open servo
@@ -121,7 +121,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 
 ROCKET_STATE RocketChannel::autoCheck(uint64_t time) {
 	if(time - timeLastTransition > 2000) {
-		return IGNITION_SEQUENCE;
+		return PAD_IDLE;
 	}
 	// TODO check Holddown
 	if(		igniter0Channel.getContinuity() == 1 || //no continuity
@@ -161,22 +161,22 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time) {
 			break;
 		case IgnitionSequence::T_0: // T - Valves to 0
 			if(time - timeLastTransition > 10000) {
-				fuelServoChannel.setTargetPos(0);
-				oxServoChannel.setTargetPos(0);
-				ignitionState = IgnitionSequence::VALVES_TO_20;
+				fuelServoChannel.setTargetPos(19000);
+				oxServoChannel.setTargetPos(30000);
+				ignitionState = IgnitionSequence::VALVES_SLOWLY_OPEN;
 			}
 			break;
-		case IgnitionSequence::VALVES_TO_20: // T+0.5 - Open Valves to just before they start to open (fuel: 22000, ox: 33000)
+		case IgnitionSequence::VALVES_SLOWLY_OPEN: // T+0.5 -> T+1.2 Slowly move valves across the opening point (fuel: 22000, ox: 33000)
 			if(time - timeLastTransition > 10500) {
-				fuelServoChannel.moveToPosInInterval(19000, 700);
-				oxServoChannel.moveToPosInInterval(30000, 700);
-				ignitionState = IgnitionSequence::VALVES_TO_40;
+				fuelServoChannel.moveToPosInInterval(32000, 700);
+				oxServoChannel.moveToPosInInterval(43000, 700);
+				ignitionState = IgnitionSequence::VALVES_FULLY_OPEN;
 			}
 			break;
-		case IgnitionSequence::VALVES_TO_40: // T+1.2 - Valves to 50% open
+		case IgnitionSequence::VALVES_FULLY_OPEN: // T+1.2 -> T+1.7 Valves to 100% open
 			if(time - timeLastTransition > 11200) {
-				fuelServoChannel.moveToPosInInterval(32000, 300);
-				oxServoChannel.moveToPosInInterval(43000, 300);
+				fuelServoChannel.moveToPosInInterval(65000, 500);
+				oxServoChannel.moveToPosInInterval(65000, 500);
 				ignitionState = IgnitionSequence::IGNITION_OFF;
 			}
 			break;
@@ -184,13 +184,6 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time) {
 			if(time - timeLastTransition > 11500) {
 				(void) igniter0Channel.setState(0);
 				(void) igniter1Channel.setState(0);
-				ignitionState = IgnitionSequence::VALVES_TO_100;
-			}
-			break;
-		case IgnitionSequence::VALVES_TO_100: // T+1.7 - Valves to 100% open
-			if(time - timeLastTransition > 11700) {
-				fuelServoChannel.setTargetPos(65000);
-				oxServoChannel.setTargetPos(65000);
 				return HOLD_DOWN;
 			}
 			break;
@@ -213,13 +206,7 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 
 			// if either event (low or good pressure) occurs exclusively for a specified amount of times -> abort (low)/release(good)
 			if(chamberPressureLowCounter > CHAMBER_PRESSURE_LOW_COUNT_MAX) {
-				chamberPressureLowCounter = 0;
-				SetMsg_t setMsg =
-				{ 0 };
-				setMsg.variable_id = 0; // servo target position
-				setMsg.value = 65000; // open servo
-				cancom->sendAsMaster(7, 16, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to pmu pyro (channelId 12) on oxcart node (nodeId 7)
-				//return ABORT;
+				//return ABORT; do not abort in test environment
 			}
 
 			if(chamberPressureGoodCounter > CHAMBER_PRESSURE_GOOD_COUNT_MIN) {
@@ -268,7 +255,7 @@ int RocketChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_
 	switch(commandId) {
 		case ROCKET_REQ_INTERNAL_CONTROL:
 			if(state == PAD_IDLE) {
-				externalNextState = AUTO_CHECK;
+				externalNextState = IGNITION_SEQUENCE;
 			}
 			return 0;
 		case ROCKET_REQ_ABORT:
@@ -284,6 +271,11 @@ int RocketChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_
 			return 0;
 		case ROCKET_REQ_GET_ROCKET_STATE:
 			getRocketState(returnData,n);
+			return 0;
+		case ROCKET_REQ_AUTO_CHECK:
+			if(state == PAD_IDLE) {
+				externalNextState = AUTO_CHECK;
+			}
 			return 0;
 		default:
 			return AbstractChannel::processMessage(commandId, returnData, n);
