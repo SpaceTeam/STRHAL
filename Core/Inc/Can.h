@@ -18,7 +18,10 @@ class Can : public AbstractCom {
 		static Can* instance(GenericChannel *genericChannel = nullptr);
 
 		COMState init() override;
+
 		COMState exec() override;
+
+		COMState init(COMMode mode);
 
 		void sendAsMaster(uint8_t receiverNodeId, uint8_t receiverChannelId, uint8_t commandId, uint8_t *data, uint8_t n);
 
@@ -28,7 +31,11 @@ class Can : public AbstractCom {
 		Can(GenericChannel *genericChannel);
 
 		static GenericChannel *genericChannel;
-		static void mainReceptor(uint32_t id, uint8_t *data, uint32_t n);
+		static void standardReceptor(uint32_t id, uint8_t *data, uint32_t n);
+		static void bridgeReceptor(STRHAL_FDCAN_Id_t bus_id, uint32_t id, uint8_t *data, uint32_t n);
+		static void internalReceptor(uint32_t id, uint8_t *data, uint32_t n);
+		static void externalReceptor(uint32_t id, uint8_t *data, uint32_t n);
+
 		static void heartbeat();
 
 		static Can *cancom;

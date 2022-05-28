@@ -14,7 +14,6 @@
 #include <Channels/RocketChannel.h>
 #include <W25Qxx_Flash.h>
 #include <Speaker.h>
-
 #include <STRHAL.h>
 
 class ECU : public GenericChannel {

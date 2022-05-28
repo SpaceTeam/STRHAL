@@ -1,15 +1,21 @@
 #include <Channels/DigitalOutChannel.h>
 
 DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t & adcChannel, const STRHAL_GPIO_t &cntrlPin, uint32_t refreshDivider)
-	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, id, refreshDivider), adcChannel(adcChannel), cntrlPin(cntrlPin) {
+	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, id, refreshDivider), adcChannel(adcChannel), cntrlPin(cntrlPin), hasFeedback(true) {
+}
+
+DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_GPIO_t &cntrlPin, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, id, refreshDivider), cntrlPin(cntrlPin) {
 }
 
 int DigitalOutChannel::init() {
-	adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_OPAMP);
-	STRHAL_GPIO_SingleInit(&cntrlPin,STRHAL_GPIO_TYPE_OPP);
+	if(hasFeedback) {
+		adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_OPAMP);
+		STRHAL_GPIO_SingleInit(&cntrlPin,STRHAL_GPIO_TYPE_OPP);
 
-	if(adcMeasurement == nullptr)
-		return -1;
+		if(adcMeasurement == nullptr)
+			return -1;
+	}
 
 	return 0;
 }
@@ -31,7 +37,7 @@ int DigitalOutChannel::processMessage(uint8_t commandId, uint8_t *returnData, ui
 
 int DigitalOutChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
-	*out = *adcMeasurement << 4; // shift to 16bit full scale
+	*out = (hasFeedback) ? (*adcMeasurement << 4) : 0; // shift to 16bit full scale, if no feedback is present return 0
 
 	n += DIGITAL_OUT_DATA_N_BYTES;
 	return 0;

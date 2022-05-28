@@ -101,13 +101,6 @@ bool IMUChannel::getMeasurement(IMUData &x) {
 }
 
 int IMUChannel::getSensorData(uint8_t *data, uint8_t &n) {
-	/*if(measDataNum > 0) {
-		std::memcpy(data, &measData[measDataTail++], 12);
-		measDataTail %= BUF_DATA_SIZE;
-		measDataNum--;
-	}
-
-	n += IMU_DATA_N_BYTES;*/
 	return -1;
 }
 

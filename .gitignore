@@ -40,11 +40,14 @@
 Debug_H7xx/
 Release_H7xx/
 Debug_G491/
+Debug_G491_ECU/
+Debug_G491_PMU/
 Release_G491/
 *.dSYM/
 *.su
 *.idb
 *.pdb
+*.launch
 
 # Kernel Module Compile Results
 *.mod*

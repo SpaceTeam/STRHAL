@@ -1,79 +1,58 @@
-#include "../Inc/ECU.h"
+#include "../Inc/PMU.h"
 #include "../Inc/Can.h"
 
 #include <cstdio>
 #include <cstring>
 
-ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
+PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	GenericChannel(node_id, fw_version, refresh_divider),
 	ledRed({GPIOD, 1, STRHAL_GPIO_TYPE_OPP}),
 	ledGreen({GPIOD, 2, STRHAL_GPIO_TYPE_OPP}),
-	press_0(0, {ADC2, STRHAL_ADC_CHANNEL_15}, 1),
-	press_1(1, {ADC3, STRHAL_ADC_CHANNEL_5}, 1),
-	press_2(2, {ADC1, STRHAL_ADC_CHANNEL_14}, 1),
-	press_3(3, {ADC3, STRHAL_ADC_CHANNEL_7}, 1),
-	press_4(4, {ADC1, STRHAL_ADC_CHANNEL_5}, 1),
-	press_5(5, {ADC1, STRHAL_ADC_CHANNEL_11}, 1),
-	temp_0(6, {ADC1, STRHAL_ADC_CHANNEL_6}, 1),
-	temp_1(7, {ADC1, STRHAL_ADC_CHANNEL_7}, 1),
-	temp_2(8, {ADC1, STRHAL_ADC_CHANNEL_8}, 1),
-	servo_0(9, 0, STRHAL_TIM_TIM4, STRHAL_TIM_TIM4_CH2_PB7, {ADC1, STRHAL_ADC_CHANNEL_9}, {ADC1, STRHAL_ADC_CHANNEL_1}, {GPIOC, 13, STRHAL_GPIO_TYPE_OPP}, 1),
-	servo_1(10, 1, STRHAL_TIM_TIM4, STRHAL_TIM_TIM4_CH3_PB8, {ADC1, STRHAL_ADC_CHANNEL_2}, {ADC1, STRHAL_ADC_CHANNEL_3}, {GPIOC, 14, STRHAL_GPIO_TYPE_OPP}, 1),
-	servo_2(11, 2, STRHAL_TIM_TIM4, STRHAL_TIM_TIM4_CH4_PB9, {ADC1, STRHAL_ADC_CHANNEL_4}, {ADC2, STRHAL_ADC_CHANNEL_17}, {GPIOC, 15, STRHAL_GPIO_TYPE_OPP}, 1),
-	pyro0_cont(13, {GPIOA, 10, STRHAL_GPIO_TYPE_IHZ}, 1),
-	pyro1_cont(15, {GPIOA, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
-	pyro2_cont(17, {GPIOC, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
-	pyro_igniter0(12, {ADC3, STRHAL_ADC_CHANNEL_2}, {GPIOA, 9, STRHAL_GPIO_TYPE_OPP}, pyro0_cont, 1),
-	pyro_igniter1(14, {ADC3, STRHAL_ADC_CHANNEL_6}, {GPIOC, 9, STRHAL_GPIO_TYPE_OPP}, pyro1_cont, 1),
-	pyro_igniter2(16, {ADC3, STRHAL_ADC_CHANNEL_4}, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}, pyro2_cont, 1),
-	solenoid_0(18, {ADC2, STRHAL_ADC_CHANNEL_16}, {GPIOD, 9, STRHAL_GPIO_TYPE_OPP}, 1),
-	solenoid_1(19, {ADC2, STRHAL_ADC_CHANNEL_18}, {GPIOD, 8, STRHAL_GPIO_TYPE_OPP}, 1),
-	pressure_control(20, press_1, solenoid_0, 1),
-	/*imu_0(21, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
-	x_accel(22, IMUMeasurement::X_ACCEL, imu_0, 1),
-	y_accel(23, IMUMeasurement::Y_ACCEL, imu_0, 1),
-	z_accel(24, IMUMeasurement::Z_ACCEL, imu_0, 1),
-	x_gyro(25, IMUMeasurement::X_GYRO, imu_0, 1),
-	y_gyro(26, IMUMeasurement::Y_GYRO, imu_0, 1),
-	z_gyro(27, IMUMeasurement::Z_GYRO, imu_0, 1),*/
-	rocket(22, press_1, press_0, press_2, servo_2, servo_0, pyro_igniter0, pyro_igniter2, 1),
+
+	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
+	sense_5VP(1, {ADC1, STRHAL_ADC_CHANNEL_9}, 1),
+	sense_12V(2, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
+	umbilical(3, {GPIOA, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
+	charging(4, {GPIOA, 9, STRHAL_GPIO_TYPE_IHZ}, 1),
+	out0(5, {GPIOC, 6, STRHAL_GPIO_TYPE_OPP}, 1),
+	out1(6, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}, 1),
+	out2(7, {GPIOC, 8, STRHAL_GPIO_TYPE_OPP}, 1),
+	out3(8, {GPIOC, 9, STRHAL_GPIO_TYPE_OPP}, 1),
+	payload(9, {GPIOC, 1, STRHAL_GPIO_TYPE_OPP}, 1),
+	barometer(10, STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
+	imu_0(11, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
+	x_accel(12, IMUMeasurement::X_ACCEL, imu_0, 1),
+	y_accel(13, IMUMeasurement::Y_ACCEL, imu_0, 1),
+	z_accel(14, IMUMeasurement::Z_ACCEL, imu_0, 1),
+	x_gyro(15, IMUMeasurement::X_GYRO, imu_0, 1),
+	y_gyro(16, IMUMeasurement::Y_GYRO, imu_0, 1),
+	z_gyro(17, IMUMeasurement::Z_GYRO, imu_0, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	cancom = Can::instance(this);
 	flash = W25Qxx_Flash::instance(0x1F);
-	registerChannel(&press_0);
-	registerChannel(&press_1);
-	registerChannel(&press_2);
-	registerChannel(&press_3);
-	registerChannel(&press_4);
-	registerChannel(&press_5);
-	registerChannel(&temp_0);
-	registerChannel(&temp_1);
-	registerChannel(&temp_2);
-	registerChannel(&servo_0);
-	registerChannel(&servo_1);
-	registerChannel(&servo_2);
-	registerChannel(&pyro0_cont);
-	registerChannel(&pyro1_cont);
-	registerChannel(&pyro2_cont);
-	registerChannel(&pyro_igniter0);
-	registerChannel(&pyro_igniter1);
-	registerChannel(&pyro_igniter2);
-	registerChannel(&solenoid_0);
-	registerChannel(&solenoid_1);
-	registerChannel(&pressure_control);
-	/*registerChannel(&imu_0);
+	registerChannel(&sense_5V);
+	registerChannel(&sense_5VP);
+	registerChannel(&sense_12V);
+	registerChannel(&umbilical);
+	registerChannel(&charging);
+	registerChannel(&out0);
+	registerChannel(&out1);
+	registerChannel(&out2);
+	registerChannel(&out3);
+	registerChannel(&payload);
+	registerChannel(&barometer);
+	registerChannel(&imu_0);
 	registerChannel(&x_accel);
 	registerChannel(&y_accel);
-	registerChannel(&zx_accel);
+	registerChannel(&z_accel);
 	registerChannel(&x_gyro);
 	registerChannel(&y_gyro);
-	registerChannel(&z_gyro);*/
-	registerChannel(&rocket);
+	registerChannel(&z_gyro);
 
 }
 
-int ECU::init() {
+int PMU::init() {
 	if(STRHAL_Init(STRHAL_SYSCLK_SRC_EXT, 8000000) != STRHAL_NOICE)
 		return -1;
 
@@ -104,7 +83,7 @@ int ECU::init() {
 	return 0;
 }
 
-int ECU::exec() {
+int PMU::exec() {
 	STRHAL_OPAMP_Run();
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
@@ -128,34 +107,7 @@ int ECU::exec() {
 	return 0;
 }
 
-void ECU::testServo(ServoChannel &servo) {
-	servo.setTargetPos(0);
-	servo.getPos();
-
-	char buf[64];
-	uint64_t t_last_sample = 0;
-	uint8_t state = 0;
-	while(1) {
-		uint64_t t = STRHAL_Systick_GetTick();
-		if((t - t_last_sample) > 3000) {
-			t_last_sample = t;
-			if(state == 0) {
-				servo.setTargetPos(63000);
-				state = 1;
-			} else {
-				servo.setTargetPos(0);
-				state = 0;
-			}
-
-		}
-		sprintf(buf,"%d, %d, %d\n",servo.getCurrentMeasurement(),servo.getFeedbackMeasurement(), servo.getPos());
-		STRHAL_UART_Write(buf, strlen(buf));
-		if(GenericChannel::exec() != 0)
-			return;
-	}
-}
-
-void ECU::testChannels() {
+void PMU::testChannels() {
 	char read[256], write[256];
 	uint8_t state = 0;
 	STRHAL_UART_Listen();
