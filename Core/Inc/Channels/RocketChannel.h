@@ -14,7 +14,8 @@
 
 enum class IgnitionSequence : int {
 	INIT = 0,
-	IGNITION_ON,
+	IGNITION0_ON,
+	IGNITION1_ON,
 	T_0,
 	VALVES_SLOWLY_OPEN,
 	VALVES_FULLY_OPEN,

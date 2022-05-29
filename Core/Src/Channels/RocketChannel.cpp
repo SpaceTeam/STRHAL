@@ -150,12 +150,17 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time) {
 				oxServoChannel.setTargetPos(0);
 				(void) igniter0Channel.setState(0);
 				(void) igniter1Channel.setState(0);
-				ignitionState = IgnitionSequence::IGNITION_ON;
+				ignitionState = IgnitionSequence::IGNITION0_ON;
 			}
 			break;
-		case IgnitionSequence::IGNITION_ON: // T-1.5 - Ignition
+		case IgnitionSequence::IGNITION0_ON: // T-2.5 - Ignition
+				if(time - timeLastTransition > 7500) {
+					(void) igniter0Channel.setState(65000);
+					ignitionState = IgnitionSequence::IGNITION1_ON;
+				}
+				break;
+		case IgnitionSequence::IGNITION1_ON: // T-1.5 - Ignition
 			if(time - timeLastTransition > 8500) {
-				(void) igniter0Channel.setState(65000);
 				(void) igniter1Channel.setState(65000);
 				ignitionState = IgnitionSequence::T_0;
 			}
@@ -298,13 +303,13 @@ int RocketChannel::setVariable(uint8_t variableId, int32_t data) {
 			refreshCounter = 0;
 			return 0;
 		case ROCKET_MINIMUM_CHAMBER_PRESSURE:
-			chamberPressureMin = data;
+			chamberPressureMin = data*4095/UINT16_MAX; // convert from 16 to 12bit scale
 			return 0;
 		case ROCKET_MINIMUM_FUEL_PRESSURE:
-			fuelPressureMin = data;
+			fuelPressureMin = data*4095/UINT16_MAX;
 			return 0;
 		case ROCKET_MINIMUM_OX_PRESSURE:
-			oxPressureMin = data;
+			oxPressureMin = data*4095/UINT16_MAX;
 			return 0;
 		case ROCKET_HOLDDOWN_TIMEOUT:
 			holdDownTimeout = data;
@@ -320,13 +325,13 @@ int RocketChannel::getVariable(uint8_t variableId, int32_t &data) const {
 			data = (int32_t) refreshDivider;
 			return 0;
 		case ROCKET_MINIMUM_CHAMBER_PRESSURE:
-			data = (int32_t) chamberPressureMin;
+			data = (int32_t) chamberPressureMin*UINT16_MAX/4095;
 			return 0;
 		case ROCKET_MINIMUM_FUEL_PRESSURE:
-			data = (int32_t) fuelPressureMin;
+			data = (int32_t) fuelPressureMin*UINT16_MAX/4095;
 			return 0;
 		case ROCKET_MINIMUM_OX_PRESSURE:
-			data = (int32_t) oxPressureMin;
+			data = (int32_t) oxPressureMin*UINT16_MAX/4095;
 			return 0;
 		case ROCKET_HOLDDOWN_TIMEOUT:
 			data = (int32_t) holdDownTimeout;
