@@ -44,7 +44,7 @@ int main(void) {
 	if(lcb.init() != 0)
 			return -1;
 
-	STRHAL_UART_Write("IOB STARTED\n",12);
+	STRHAL_UART_Write("LCB STARTED\n",12);
 	lcb.exec();
 #endif
 
