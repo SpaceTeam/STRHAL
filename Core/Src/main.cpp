@@ -1,6 +1,8 @@
 #include <STRHAL.h>
 #include "ECU.h"
 #include "PMU.h"
+#include "RCU.h"
+#include "IOB.h"
 
 int main(void) {
 
@@ -20,6 +22,22 @@ int main(void) {
 
 	STRHAL_UART_Write("PMU STARTED\n",12);
 	pmu.exec();
+#elif defined(RCU_BOARD)
+	RCU rcu(10,0xDEADBEEF,100);
+
+	if(rcu.init() != 0)
+			return -1;
+
+	STRHAL_UART_Write("RCU STARTED\n",12);
+	rcu.exec();
+#elif defined(IOB_BOARD)
+	IOB iob(10,0xDEADBEEF,100);
+
+	if(iob.init() != 0)
+			return -1;
+
+	STRHAL_UART_Write("IOB STARTED\n",12);
+	iob.exec();
 #endif
 
 	while(1);
