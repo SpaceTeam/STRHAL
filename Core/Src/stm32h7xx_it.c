@@ -1,4 +1,3 @@
-#include "main.h"
 #include "stm32h7xx_it.h"
 
 
@@ -49,9 +48,4 @@ void DebugMon_Handler(void)
 
 void PendSV_Handler(void)
 {
-}
-
-void SysTick_Handler(void)
-{
-
 }

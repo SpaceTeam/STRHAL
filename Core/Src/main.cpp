@@ -3,6 +3,7 @@
 #include "PMU.h"
 #include "RCU.h"
 #include "IOB.h"
+#include "LCB.h"
 
 int main(void) {
 
