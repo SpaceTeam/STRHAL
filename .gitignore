@@ -44,6 +44,7 @@ Debug_G491_ECU/
 Debug_G491_PMU/
 Debug_G491_RCU/
 Debug_H7xx_IOB/
+Debug_H7xx_LCB/
 Release_G491/
 *.dSYM/
 *.su

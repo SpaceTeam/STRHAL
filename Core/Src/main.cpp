@@ -31,13 +31,21 @@ int main(void) {
 	STRHAL_UART_Write("RCU STARTED\n",12);
 	rcu.exec();
 #elif defined(IOB_BOARD)
-	IOB iob(10,0xDEADBEEF,100);
+	IOB iob(10,0xDEADBEEF,100); // TODO disregard node ID and read dipswitches in IOB/LCB class
 
 	if(iob.init() != 0)
 			return -1;
 
 	STRHAL_UART_Write("IOB STARTED\n",12);
 	iob.exec();
+#elif defined(LCB_BOARD)
+	LCB lcb(10,0xDEADBEEF,100);
+
+	if(lcb.init() != 0)
+			return -1;
+
+	STRHAL_UART_Write("IOB STARTED\n",12);
+	lcb.exec();
 #endif
 
 	while(1);
