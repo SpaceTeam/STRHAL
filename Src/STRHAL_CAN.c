@@ -1,5 +1,5 @@
+#include "../Inc/STRHAL_CAN.h"
 #include <string.h>
-#include <STRHAL_CAN.h>
 
 
 static const uint8_t Can_DlcToLength[] =
@@ -90,9 +90,20 @@ typedef struct {
 } STRHAL_CAN_Handle_t;
 
 static STRHAL_CAN_Handle_t _fdcans[2] = {
-	[STRHAL_FDCAN1] = { .can = FDCAN1, .can_ram = FDCAN1_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0},
-	[STRHAL_FDCAN2] = { .can = FDCAN2, .can_ram = FDCAN2_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0}
+	[STRHAL_FDCAN1] = { .can = FDCAN1, .can_ram = FDCAN_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0},
+	[STRHAL_FDCAN2] = { .can = FDCAN2, .can_ram = FDCAN_MESSAGE_RAM + sizeof(Can_Message_RAM), .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0}
 };
+
+static void STRHAL_CAN_ClockCalibration(void)
+{
+
+	// Bypass clock calibration
+	SET_BIT(FDCAN_CCU->CCFG, FDCANCCU_CCFG_BCC);
+
+	// Configure clock divider
+	MODIFY_REG(FDCAN_CCU->CCFG, FDCANCCU_CCFG_CDIV, FDCAN_CLOCK_DIV1);
+
+}
 
 static void STRHAL_CAN_Init_GPIO(void)
 {
@@ -100,11 +111,12 @@ static void STRHAL_CAN_Init_GPIO(void)
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
 	{ 0 };
 
-	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PCLK1);
+	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PLL2Q);
+	STRHAL_CAN_ClockCalibration();
 
-	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_FDCAN);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+	LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_FDCAN);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOA);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
 
 	//FDCAN1 GPIO Configuration
 	//PA11     ------> FDCAN1_RX
@@ -133,6 +145,36 @@ static void STRHAL_CAN_Init_GPIO(void)
 
 }
 
+static void STRHAL_CAN_Init_Ram(STRHAL_FDCAN_Id_t fdcan_id)
+{
+	FDCAN_GlobalTypeDef *can = _fdcans[fdcan_id].can;
+	Can_Message_RAM *can_ram = _fdcans[fdcan_id].can_ram;
+	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_FLSSA, ((uint32_t)can_ram->std_filters - FDCAN_MESSAGE_RAM_BASE));	// Standard filter list start address
+	MODIFY_REG(can->SIDFC, FDCAN_SIDFC_LSS, (FDCAN_STD_FILTER_NUMBER << FDCAN_SIDFC_LSS_Pos)); // Standard filter elements number
+
+	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_FLESA, ((uint32_t)can_ram->ext_filters - FDCAN_MESSAGE_RAM_BASE));	// Extended filter list start address
+	MODIFY_REG(can->XIDFC, FDCAN_XIDFC_LSE, (FDCAN_EXT_FILTER_NUMBER << FDCAN_XIDFC_LSE_Pos)); // Extended filter elements number
+
+	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0SA, ((uint32_t)can_ram->rx_fifo0 - FDCAN_MESSAGE_RAM_BASE)); // Rx FIFO 0 start address
+	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0S, (FDCAN_RX_FIFO0_ELMTS_NUMBER << FDCAN_RXF0C_F0S_Pos)); // Rx FIFO 0 elements number
+
+	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1SA, ((uint32_t)can_ram->rx_fifo1 - FDCAN_MESSAGE_RAM_BASE)); // Rx FIFO 1 start address
+	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1S, (FDCAN_RX_FIFO1_ELMTS_NUMBER << FDCAN_RXF1C_F1S_Pos)); // Rx FIFO 1 elements number
+
+	MODIFY_REG(can->RXF0C, FDCAN_RXF0C_F0OM, (FDCAN_RX_FIFO_BLOCKING << FDCAN_RXF0C_F0OM_Pos)); // FIFO 0 operation mode
+	MODIFY_REG(can->RXF1C, FDCAN_RXF1C_F1OM, (FDCAN_RX_FIFO_BLOCKING << FDCAN_RXF1C_F1OM_Pos)); // FIFO 1 operation mode
+
+	MODIFY_REG(can->RXBC, FDCAN_RXBC_RBSA, ((uint32_t)can_ram->rx_buffer - FDCAN_MESSAGE_RAM_BASE)); // Rx buffer list start address
+
+	MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFSA, ((uint32_t)can_ram->tx_fifo - FDCAN_MESSAGE_RAM_BASE)); // Tx event FIFO start address
+	MODIFY_REG(can->TXEFC, FDCAN_TXEFC_EFS, (FDCAN_TX_EVENT_NUMBER << FDCAN_TXEFC_EFS_Pos)); // Tx event FIFO elements number
+
+	MODIFY_REG(can->TXBC, FDCAN_TXBC_TBSA, ((uint32_t)can_ram->tx_buffer - FDCAN_MESSAGE_RAM_BASE)); // Tx buffer list start address
+	MODIFY_REG(can->TXBC, FDCAN_TXBC_NDTB, (FDCAN_TX_BUFFER_NUMBER << FDCAN_TXBC_NDTB_Pos)); // Dedicated Tx buffers number
+	MODIFY_REG(can->TXBC, FDCAN_TXBC_TFQS, (FDCAN_TX_FIFO_QUEUE_ELMTS_NUMBER << FDCAN_TXBC_TFQS_Pos)); // Tx FIFO/Queue elements number
+	CLEAR_BIT(can->TXBC, FDCAN_TXBC_TFQM); //???
+	//MODIFY_REG(can->TXBC, FDCAN_TXBC_TFQM, FDCAN_TX_FIFO_QUEUE_MODE);
+}
 
 int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 	if(fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN)
@@ -142,7 +184,9 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 
 	FDCAN_GlobalTypeDef *can = _fdcans[fdcan_id].can;
 	//Can_Message_RAM *can_ram = handles[can_handle_index].can_ram;
-	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PCLK1);
+	LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PLL2Q);
+
+	STRHAL_CAN_ClockCalibration();
 
 	CLEAR_BIT(can->CCCR, FDCAN_CCCR_CSR);
 
@@ -182,12 +226,16 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 
 	SET_BIT(can->CCCR, FDCAN_FRAME_FD_BRS); //FD mode with BitRate Switching
 
+	//SET_BIT(can->CCCR, FDCAN_CCCR_FDOE);
+
 	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
 	CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
 
+	/*
 	if(fdcan_id == STRHAL_FDCAN1) {
 		MODIFY_REG(FDCAN_CONFIG->CKDIV, FDCAN_CKDIV_PDIV, FDCAN_CLOCK_DIV2);
 	}
+	*/
 
 	// Set the nominal bit timing register
 	can->NBTP = ((((uint32_t) FDCAN_NOMINAL_SYNC_JUMP_WIDTH - 1U) << FDCAN_NBTP_NSJW_Pos) | (((uint32_t) FDCAN_NOMINAL_TIMESEG_1 - 1U) << FDCAN_NBTP_NTSEG1_Pos) | (((uint32_t) FDCAN_NOMINAL_TIMESEG_2 - 1U) << FDCAN_NBTP_NTSEG2_Pos) | (((uint32_t) FDCAN_NOMINAL_PRESCALER - 1U) << FDCAN_NBTP_NBRP_Pos));
@@ -195,16 +243,14 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 	// Bit Rate Switching Enable
 	can->DBTP = ((((uint32_t) FDCAN_DATA_SYNC_JUMP_WIDTH - 1U) << FDCAN_DBTP_DSJW_Pos) | (((uint32_t) FDCAN_DATA_TIMESEG_1 - 1U) << FDCAN_DBTP_DTSEG1_Pos) | (((uint32_t) FDCAN_DATA_TIMESEG_2 - 1U) << FDCAN_DBTP_DTSEG2_Pos) | (((uint32_t) FDCAN_DATA_PRESCALER - 1U) << FDCAN_DBTP_DBRP_Pos));
 
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_LSS, (STRHAL_CAN_STD_FILTER_NUMBER << FDCAN_RXGFC_LSS_Pos)); // Standard filter elements number
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_LSE, (STRHAL_CAN_EXT_FILTER_NUMBER << FDCAN_RXGFC_LSE_Pos)); // Extended filter elements number
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_F0OM, (FDCAN_RX_FIFO_BLOCKING << FDCAN_RXGFC_F0OM_Pos)); // FIFO 0 operation mode
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_F1OM, (FDCAN_RX_FIFO_BLOCKING << FDCAN_RXGFC_F1OM_Pos)); // FIFO 1 operation mode
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_ANFS, (FDCAN_REJECT << FDCAN_RXGFC_ANFS_Pos)); // Accept Non-matching Frames Standard
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_ANFE, (FDCAN_REJECT << FDCAN_RXGFC_ANFE_Pos)); // Accept Non-matching Frames Extended
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_RRFS, (FDCAN_FILTER_REMOTE << FDCAN_RXGFC_RRFS_Pos)); // Reject Remote Frames Standard
-	MODIFY_REG(can->RXGFC, FDCAN_RXGFC_RRFE, (FDCAN_REJECT_REMOTE << FDCAN_RXGFC_RRFE_Pos)); // Reject Remote Frames Extended
+	STRHAL_CAN_Init_Ram(fdcan_id);
 
-	CLEAR_BIT(can->TXBC, FDCAN_TXBC_TFQM); // Tx FIFO/Queue Mode
+	MODIFY_REG(can->GFC, FDCAN_GFC_ANFS, (FDCAN_REJECT << FDCAN_GFC_ANFS_Pos)); // Accept Non-matching Frames Standard
+	MODIFY_REG(can->GFC, FDCAN_GFC_ANFE, (FDCAN_REJECT << FDCAN_GFC_ANFE_Pos)); // Accept Non-matching Frames Extended
+
+	MODIFY_REG(can->GFC, FDCAN_GFC_RRFS, (FDCAN_FILTER_REMOTE << FDCAN_GFC_RRFS_Pos)); // Reject Remote Frames Standard
+	MODIFY_REG(can->GFC, FDCAN_GFC_RRFE, (FDCAN_REJECT_REMOTE << FDCAN_GFC_RRFE_Pos)); // Reject Remote Frames Extended
+
 
 	//Config TxDelayCompensation
 	can->TDCR = ((FDCAN_TDC_FILTER << FDCAN_TDCR_TDCF_Pos) | (FDCAN_TDC_OFFSET << FDCAN_TDCR_TDCO_Pos));
@@ -219,7 +265,7 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 
 int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id, STRHAL_FDCAN_Filter_t *filter, uint8_t n, STRHAL_CAN_Receptor_t receptor){
 	/* Error handling for user inputs */
-	if(fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN) // invaSTRHAL fdcan instance
+	if(fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN) // invalid fdcan instance
 		return -1;
 
 	STRHAL_CAN_Handle_t *fdcan = &_fdcans[fdcan_id];
@@ -261,7 +307,7 @@ int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id,
 		can_ram->std_filters[i].S0.bit.SFID2 = filter[i].mask_id2;
 		can_ram->std_filters[i].S0.bit.SFT = filter[i].type;
 	}
-	MODIFY_REG(fdcan->can->RXGFC, FDCAN_RXGFC_LSS, (fdcan->filter_n << FDCAN_RXGFC_LSS_Pos)); // Standard filter elements number
+	//MODIFY_REG(fdcan->can->RXGFC, FDCAN_RXGFC_LSS, (fdcan->filter_n << FDCAN_RXGFC_LSS_Pos)); // Standard filter elements number
 	return n;
 }
 
@@ -340,11 +386,6 @@ int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *
 	frame->T1.bit.EFCC = 0;
 	frame->T1.bit.MM = 0;
 
-	/*if(frame->T0.bit.ID == 0 || frame->T1.bit.DLC == 0) {
-		uint8_t temp = 1;
-		(void) temp;
-	}*/
-
 	uint32_t j = 0;
 	for (uint32_t c = 0; c < n; c += 4)
 		frame->data.word[j++] = data[c] | data[c + 1] << 8 | data[c + 2] << 16 | data[c + 3] << 24;
@@ -363,12 +404,12 @@ void STRHAL_CAN_Run() {
 	STRHAL_CAN_Handle_t *fdcan2 = &_fdcans[STRHAL_FDCAN2];
 	if(fdcan1->state == STRHAL_CAN_STATE_INITIALISING) {
 		if(fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX0)) {
-			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO0);
+			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RF0NL);
 			SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
 			SET_BIT(FDCAN1->IE, FDCAN_IE_RF0NE);
 		}
 		if(fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX1)) {
-			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO1);
+			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RF1NL);
 			SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
 			SET_BIT(FDCAN1->IE, FDCAN_IE_RF1NE);
 		}
@@ -383,12 +424,12 @@ void STRHAL_CAN_Run() {
 	}
 	if(fdcan2->state == STRHAL_CAN_STATE_INITIALISING) {
 		if(fdcan2->fifo_sub_state & (1U << STRHAL_FDCAN_RX0)) {
-			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO0);
+			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RF0NL);
 			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
 			SET_BIT(FDCAN2->IE, FDCAN_IE_RF0NE);
 		}
 		if(fdcan2->fifo_sub_state & (1U << STRHAL_FDCAN_RX1)) {
-			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO1);
+			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RF1NL);
 			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
 			SET_BIT(FDCAN2->IE, FDCAN_IE_RF1NE);
 		}
@@ -493,3 +534,8 @@ void FDCAN2_IT0_IRQHandler(void) {
 		FDCAN2->RXF1A = i & 0x7;
 	}
 }
+
+
+
+
+

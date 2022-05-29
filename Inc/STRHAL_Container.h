@@ -1,5 +1,6 @@
-#ifndef STRHAL_CONTAINER_H
-#define STRHAL_CONTAINER_H
+
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_CONTAINER_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_CONTAINER_H_
 
 #include <stdint.h>
 
@@ -46,4 +47,6 @@ void STRHAL_CircularBuffer_Flush(STRHAL_CircularBuffer_t *buf);
 }
 #endif
 
-#endif /*STRHAL_CONTAINER_H*/
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_CONTAINER_H_ */

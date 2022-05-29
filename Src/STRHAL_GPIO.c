@@ -1,17 +1,17 @@
+#include <stm32h7xx_ll_gpio.h>
+#include <stm32h7xx_ll_rcc.h>
+#include <stm32h7xx_ll_bus.h>
+
 #include "../Inc/STRHAL_GPIO.h"
-#include <stm32g4xx_ll_bus.h>
-#include <stm32g4xx_ll_gpio.h>
-#include <stm32g4xx_ll_rcc.h>
-#include <STRHAL_GPIO.h>
 
 void STRHAL_GPIO_Init() {
   /* GPIO Ports Clock Enable */
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOF);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOA);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOC);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOD);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOE);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOF);
 }
 
 void STRHAL_GPIO_SingleInit(STRHAL_GPIO_t *gpio, STRHAL_GPIO_Type_t type) {

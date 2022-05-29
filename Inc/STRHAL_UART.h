@@ -1,5 +1,6 @@
-#ifndef STRHAL_UART_H
-#define STRHAL_UART_H
+
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_UART_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_UART_H_
 
 #include <stdint.h>
 
@@ -38,4 +39,6 @@ STRHAL_UART_State_t STRHAL_UART_GetState();
 }
 #endif
 
-#endif /*STRHAL_UART_H*/
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_UART_H_ */

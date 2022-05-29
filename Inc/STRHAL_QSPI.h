@@ -1,10 +1,12 @@
-#ifndef STRHAL_QSPI_H
-#define STRHAL_QSPI_H
 
-#include <stm32g4xx_ll_bus.h>
-#include <stm32g4xx_ll_dma.h>
-#include <stm32g4xx_ll_dmamux.h>
-#include <stm32g4xx_ll_gpio.h>
+
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_QSPI_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_QSPI_H_
+
+#include <stm32h7xx_ll_bus.h>
+#include <stm32h7xx_ll_gpio.h>
+#include <stm32h7xx_ll_mdma.h>
+
 
 
 #ifdef __cplusplus
@@ -54,4 +56,6 @@ uint32_t STRHAL_QSPI_Indirect_Read(const STRHAL_QSPI_Command_t *cmd, uint8_t *da
 }
 #endif
 
-#endif
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_QSPI_H_ */

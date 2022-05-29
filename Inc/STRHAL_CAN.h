@@ -1,13 +1,15 @@
-#ifndef STRHAL_CAN_H
-#define STRHAL_CAN_H
 
-#include <stm32g4xx.h>
-#include <stm32g4xx_ll_bus.h>
-#include <stm32g4xx_ll_rcc.h>
-#include <stm32g4xx_ll_utils.h>
-#include <STRHAL.h>
-#include <STRHAL_CAN_Def.h>
-#include <STRHAL_Oof.h>
+
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_CAN_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_CAN_H_
+
+#include "STRHAL_CAN_Def.h"
+#include "STRHAL.h"
+#include "STRHAL_Oof.h"
+#include <stm32h7xx.h>
+#include <stm32h7xx_ll_bus.h>
+#include <stm32h7xx_ll_rcc.h>
+#include <stm32h7xx_ll_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +44,7 @@ typedef struct {
 } STRHAL_FDCAN_Filter_t;
 
 
+
 typedef void (*STRHAL_CAN_Receptor_t) (uint32_t id, uint8_t *data, uint32_t n);
 
 STRHAL_Oof_t STRHAL_CAN_Init();
@@ -56,4 +59,7 @@ int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *
 }
 #endif
 
-#endif
+
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_CAN_H_ */

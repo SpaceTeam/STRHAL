@@ -1,7 +1,7 @@
-#include <stm32g4xx_ll_utils.h>
-#include <stm32g4xx_ll_cortex.h>
-#include <stm32g4xx_ll_utils.h>
-#include <STRHAL_SysTick.h>
+#include "../Inc/STRHAL_SysTick.h"
+
+#include <stm32h7xx_ll_utils.h>
+#include <stm32h7xx_ll_cortex.h>
 
 static volatile uint64_t systick_count = 0;
 

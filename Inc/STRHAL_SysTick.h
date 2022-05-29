@@ -1,6 +1,6 @@
-#ifndef STRHAL_SYSTICK_H_
-#define STRHAL_SYSTICK_H_
 
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_SYSTICK_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_SYSTICK_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,4 +17,6 @@ uint64_t STRHAL_Systick_GetTick(void);
 }
 #endif
 
-#endif /* STRHAL_SYSTICK_H_ */
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_SYSTICK_H_ */

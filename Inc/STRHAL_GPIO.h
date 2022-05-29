@@ -1,8 +1,9 @@
-#ifndef STRHAL_GPIO_H_
-#define STRHAL_GPIO_H_
 
-#include <stm32g4xx.h>
-#include <stm32g4xx_ll_gpio.h>
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_GPIO_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_GPIO_H_
+
+#include <stm32h7xx.h>
+#include <stm32h7xx_ll_gpio.h>
 
 
 #ifdef __cplusplus
@@ -53,4 +54,5 @@ void STRHAL_GPIO_GroupRead(const STRHAL_GPIO_Group_t *gpios, STRHAL_GPIO_Value_t
 #endif
 
 
-#endif /* STRHAL_GPIO_H_ */
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_GPIO_H_ */

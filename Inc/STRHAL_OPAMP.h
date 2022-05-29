@@ -1,11 +1,12 @@
-#ifndef STRHAL_OPAMP_H
-#define STRHAL_OPAMP_H
 
-#include <stm32g4xx.h>
-#include <stm32g4xx_ll_bus.h>
-#include <stm32g4xx_ll_gpio.h>
-#include <stm32g4xx_ll_opamp.h>
-#include <stm32g4xx_ll_rcc.h>
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_OPAMP_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_OPAMP_H_
+
+#include <stm32h7xx.h>
+#include <stm32h7xx_ll_bus.h>
+#include <stm32h7xx_ll_gpio.h>
+#include <stm32h7xx_ll_rcc.h>
+#include <stm32h7xx_ll_opamp.h>
 
 
 #ifdef __cplusplus
@@ -25,4 +26,6 @@ void STRHAL_OPAMP_Run();
 }
 #endif
 
-#endif
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_OPAMP_H_ */

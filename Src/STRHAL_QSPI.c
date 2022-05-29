@@ -1,15 +1,16 @@
 #include <string.h>
 #include <math.h>
 
-#include <stm32g4xx_ll_utils.h>
-#include <STRHAL_QSPI.h>
-#include <STRHAL_SysTick.h>
+#include "../Inc/STRHAL_QSPI.h"
+#include "../Inc/STRHAL_SysTick.h"
+
+#include <stm32h7xx_ll_utils.h>
 
 #define STRHAL_QSPI_FIFO_THRESH 0    // NEED TO DETERMINE RIGHT VALUE, when <value> amount of bytes in fifo, start dma transfer
 
-#define STRHAL_QSPI_DMA DMA1
-#define STRHAL_QSPI_DMA_CHANNEL LL_DMA_CHANNEL_6
-#define STRHAL_QSPI_DMA_PRIORITY LL_DMA_PRIORITY_MEDIUM
+// qspi uses mdma on h7
+#define STRHAL_QSPI_MDMA_CHANNEL LL_MDMA_CHANNEL_6
+#define STRHAL_QSPI_MDMA_PRIORITY LL_MDMA_PRIORITY_MEDIUM
 
 //static uint8_t _rx_buf[STRHAL_QSPI_RX_BUF_SIZE];
 static inline int _wait_for_status(uint32_t flag, uint16_t tot);
@@ -17,20 +18,41 @@ static inline int _wait_for_status_clear(uint32_t flag, uint16_t);
 static inline void _clear_status(uint32_t flags);
 
 static void _init_GPIO() {
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+	//from flash.c
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_10 | LL_GPIO_PIN_11 | LL_GPIO_PIN_12| LL_GPIO_PIN_13 | LL_GPIO_PIN_14 | LL_GPIO_PIN_15;
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOE);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOD);
+	LL_GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+
+	//PE2 = QUADSPI_ BK1_IO2
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_2;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-	GPIO_InitStruct.Alternate = LL_GPIO_AF_10;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = LL_GPIO_AF_9;
 	LL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+	//PB2 = QUADSPI_ CLK, PB10 = QUADSPI_ BK1_NCS
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_2 | LL_GPIO_PIN_10;
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = LL_GPIO_AF_9;
+	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+	//PD11 = QUADSPI_BK1_IO0, PD12 = QUADSPI_BK1_IO1, PD13 = QUADSPI_ BK1_IO3,
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_11 | LL_GPIO_PIN_12 | LL_GPIO_PIN_13;
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = LL_GPIO_AF_9;
+	LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 }
 
 void STRHAL_QSPI_Init() {
 	LL_AHB3_GRP1_EnableClock(LL_AHB3_GRP1_PERIPH_QSPI);
+	//LL_RCC_SetQSPIClockSource(LL_RCC_QSPI_CLKSOURCE_PLL2R);
 }
 
 int STRHAL_QSPI_Flash_Init(const STRHAL_QSPI_Config_t *config) {
@@ -69,7 +91,7 @@ void STRHAL_QSPI_Run() {
 }
 
 void STRHAL_QSPI_Stop() {
-	QUADSPI->CR &= ~QUADSPI_CR_EN;  // Enable QSPI
+	QUADSPI->CR &= ~QUADSPI_CR_EN;  // Disable QSPI
 }
 
 uint32_t STRHAL_QSPI_Indirect_Write(const STRHAL_QSPI_Command_t *cmd, const uint8_t *data, uint32_t n, uint16_t tot) {

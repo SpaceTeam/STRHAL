@@ -1,12 +1,12 @@
-#include <stm32g4xx_ll_bus.h>
-#include <stm32g4xx_ll_cortex.h>
-#include <stm32g4xx_ll_dma.h>
-#include <stm32g4xx_ll_dmamux.h>
-#include <stm32g4xx_ll_gpio.h>
-#include <stm32g4xx_ll_rcc.h>
-#include <stm32g4xx_ll_usart.h>
-#include <STRHAL_Oof.h>
-#include <STRHAL_UART.h>
+#include "../Inc/STRHAL_Oof.h"
+#include "../Inc/STRHAL_UART.h"
+#include <stm32h7xx_ll_rcc.h>
+#include <stm32h7xx_ll_bus.h>
+#include <stm32h7xx_ll_cortex.h>
+#include <stm32h7xx_ll_gpio.h>
+#include <stm32h7xx_ll_usart.h>
+#include <stm32h7xx_ll_dma.h>
+#include <stm32h7xx_ll_dmamux.h>
 
 static struct {
 	struct {
@@ -26,9 +26,10 @@ static struct {
 
 void STRHAL_UART_Init() {
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
+	LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
+
+	LL_RCC_SetUSARTClockSource(LL_RCC_USART234578_CLKSOURCE_PLL2Q);
 
 	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 	GPIO_InitStruct.Pin = LL_GPIO_PIN_3 | LL_GPIO_PIN_4;
@@ -67,18 +68,18 @@ void STRHAL_UART_Init() {
 	DMA_InitStruct.PeriphOrM2MSrcAddress = (uint32_t) &USART2->RDR;
 	DMA_InitStruct.PeriphOrM2MSrcDataSize = (uint32_t) LL_DMA_PDATAALIGN_BYTE;
 	DMA_InitStruct.PeriphOrM2MSrcIncMode = LL_DMA_MEMORY_NOINCREMENT;
-	DMA_InitStruct.PeriphRequest = LL_DMAMUX_REQ_USART2_RX;
+	DMA_InitStruct.PeriphRequest = LL_DMAMUX1_REQ_USART2_RX;
 	DMA_InitStruct.Priority = LL_DMA_PRIORITY_HIGH;
 
-	LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &DMA_InitStruct);
+	LL_DMA_Init(DMA1, LL_DMA_STREAM_1, &DMA_InitStruct);
 
 	LL_USART_EnableDMAReq_RX(USART2);
 
-	LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-	LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
+	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_1);
+	LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_1);
 
-    NVIC_SetPriority(DMA1_Channel1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 1));
-    NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+    NVIC_SetPriority(DMA1_Stream1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 1));
+    NVIC_EnableIRQ(DMA1_Stream1_IRQn);
 
 
 	/*DMA configuration for TX */
@@ -91,17 +92,17 @@ void STRHAL_UART_Init() {
 	DMA_InitStruct.PeriphOrM2MSrcAddress = (uint32_t) &USART2->TDR;
 	DMA_InitStruct.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_BYTE;
 	DMA_InitStruct.PeriphOrM2MSrcIncMode = LL_DMA_MEMORY_NOINCREMENT;
-	DMA_InitStruct.PeriphRequest = LL_DMAMUX_REQ_USART2_TX;
+	DMA_InitStruct.PeriphRequest = LL_DMAMUX1_REQ_USART2_TX;
 	DMA_InitStruct.Priority = LL_DMA_PRIORITY_HIGH;
-	LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &DMA_InitStruct);
+	LL_DMA_Init(DMA1, LL_DMA_STREAM_2, &DMA_InitStruct);
 
 	LL_USART_EnableDMAReq_TX(USART2);
 
-	LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
-	LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_2);
+	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2);
+	LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_2);
 
-    NVIC_SetPriority(DMA1_Channel2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 2));
-    NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+    NVIC_SetPriority(DMA1_Stream2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 2));
+    NVIC_EnableIRQ(DMA1_Stream2_IRQn);
 
     LL_USART_EnableDirectionTx(USART2);
 	LL_USART_EnableDirectionRx(USART2);
@@ -124,8 +125,8 @@ int32_t STRHAL_UART_Write(const char *data, uint32_t n) {
 
 	_uart.tx_buf.n = n;
 
-	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-	while(LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_2))
+	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
+	while(LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2))
 		;
 
 
@@ -135,11 +136,11 @@ int32_t STRHAL_UART_Write(const char *data, uint32_t n) {
     _uart.state &= ~STRHAL_UART_STATE_TC;
     _uart.state |= STRHAL_UART_STATE_TX;
 
-	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t) _uart.tx_buf.data);
-	LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, n);
+	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) _uart.tx_buf.data);
+	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, n);
 
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-    while(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_2))
+    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
+    while(!LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_2))
     	;
 
 	return n;
@@ -152,11 +153,11 @@ int32_t STRHAL_UART_Read(char *data, uint32_t n) {
 	if(!(_uart.state & (STRHAL_UART_STATE_RX | STRHAL_UART_STATE_RC)))
 		return 0;
 
-	LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-	LL_DMA_DisableIT_TE(DMA1, LL_DMA_CHANNEL_1);
+	LL_DMA_DisableIT_TC(DMA1, LL_DMA_STREAM_1);
+	LL_DMA_DisableIT_TE(DMA1, LL_DMA_STREAM_1);
 
 	if(_uart.rx_buf.n == 0) {
-		uint32_t res = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_1);
+		uint32_t res = LL_DMA_GetDataLength(DMA1, LL_DMA_STREAM_1);
 		uint32_t ava =  _uart.rx_buf.n_dma - res;
 
 		if(ava > STRHAL_UART_BUF_SIZE) {
@@ -190,28 +191,28 @@ int32_t STRHAL_UART_Read(char *data, uint32_t n) {
 	_uart.rx_buf.h %= STRHAL_UART_BUF_SIZE;
 	_uart.rx_buf.n -= n;
 
-	LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-	LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_1);
+	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_1);
+	LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_1);
 
 	return n;
 }
 
 STRHAL_UART_State_t STRHAL_UART_Listen() {
 	if(!(_uart.state & STRHAL_UART_STATE_RE) && !(_uart.state & STRHAL_UART_STATE_RX)) {
-        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
+        LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_1);
 
-	    while(LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1))
+	    while(LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_1))
 		;
 
-	    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t) _uart.rx_buf.data);
-	    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, STRHAL_UART_BUF_SIZE);
+	    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_1, (uint32_t) _uart.rx_buf.data);
+	    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, STRHAL_UART_BUF_SIZE);
 
 	    LL_DMA_ClearFlag_TC1(DMA1);
 	    LL_DMA_ClearFlag_TE1(DMA1);
 
-	    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+	    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
 
-	    while(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1));
+	    while(!LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_1));
 
 	    _uart.state &= ~(STRHAL_UART_STATE_RC | STRHAL_UART_STATE_RE);
 	    _uart.state |= STRHAL_UART_STATE_RX;
@@ -221,9 +222,9 @@ STRHAL_UART_State_t STRHAL_UART_Listen() {
 }
 
 void STRHAL_UART_FlushReception() {
-	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
+	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_1);
 
-	while(LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1))
+	while(LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_1))
 	;
 
 	_uart.rx_buf.n = 0;
@@ -233,15 +234,15 @@ void STRHAL_UART_FlushReception() {
 	_uart.state &= ~(STRHAL_UART_STATE_RX | STRHAL_UART_STATE_RO | STRHAL_UART_STATE_RC);
 
 
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t) _uart.rx_buf.data);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, STRHAL_UART_BUF_SIZE);
+    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_1, (uint32_t) _uart.rx_buf.data);
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, STRHAL_UART_BUF_SIZE);
 
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TE1(DMA1);
 
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
 
-    while(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1))
+    while(!LL_DMA_IsEnabledStream(DMA1, LL_DMA_STREAM_1))
     	;
 }
 
@@ -249,8 +250,8 @@ STRHAL_UART_State_t STRHAL_UART_GetState() {
 	return _uart.state;
 }
 
-void DMA1_Channel1_IRQHandler(void) {
-	if(LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_1) && LL_DMA_IsActiveFlag_TC1(DMA1)) {
+void DMA1_Stream1_IRQHandler(void) {
+	if(LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_STREAM_1) && LL_DMA_IsActiveFlag_TC1(DMA1)) {
 	    LL_DMA_ClearFlag_TC1(DMA1);
 		_uart.rx_buf.n += _uart.rx_buf.n_dma;
 		_uart.rx_buf.n_dma = STRHAL_UART_BUF_SIZE;
@@ -263,9 +264,9 @@ void DMA1_Channel1_IRQHandler(void) {
 		}
 	}
 
-	else if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_1) && LL_DMA_IsActiveFlag_TE1(DMA1)) {
+	else if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_STREAM_1) && LL_DMA_IsActiveFlag_TE1(DMA1)) {
 	    LL_DMA_ClearFlag_TE1(DMA1);
-		_uart.rx_buf.n = STRHAL_UART_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_1);
+		_uart.rx_buf.n = STRHAL_UART_BUF_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_STREAM_1);
 
 		_uart.state &= ~STRHAL_UART_STATE_RX;
 		_uart.state &= ~STRHAL_UART_STATE_RC;
@@ -275,14 +276,14 @@ void DMA1_Channel1_IRQHandler(void) {
 	}
 }
 
-void DMA1_Channel2_IRQHandler(void) {
-	if(LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_2) && LL_DMA_IsActiveFlag_TC2(DMA1)) {
+void DMA1_Stream2_IRQHandler(void) {
+	if(LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_STREAM_2) && LL_DMA_IsActiveFlag_TC2(DMA1)) {
 		LL_DMA_ClearFlag_TC2(DMA1);
 		_uart.state &= ~STRHAL_UART_STATE_TX;
 		_uart.state |= STRHAL_UART_STATE_TC;
 	}
 
-	else if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_CHANNEL_2) && LL_DMA_IsActiveFlag_TE2(DMA1)) {
+	else if(LL_DMA_IsEnabledIT_TE(DMA1, LL_DMA_STREAM_2) && LL_DMA_IsActiveFlag_TE2(DMA1)) {
 		LL_DMA_ClearFlag_TE2(DMA1);
 		_uart.state &= ~STRHAL_UART_STATE_TX;
 		_uart.state &= ~STRHAL_UART_STATE_TC;

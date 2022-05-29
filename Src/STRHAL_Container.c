@@ -1,4 +1,4 @@
-#include <STRHAL_Container.h>
+#include "../Inc/STRHAL_Container.h"
 
 void STRHAL_LinearBuffer_Init(STRHAL_LinearBuffer_t *buf, uint8_t *mem, uint32_t size) {
 	buf->state = STRHAL_BUFFER_STATE_0;

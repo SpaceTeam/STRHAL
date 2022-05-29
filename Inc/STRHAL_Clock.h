@@ -1,6 +1,6 @@
-#ifndef STRHAL_CLOCK_H_
-#define STRHAL_CLOCK_H_
 
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_CLOCK_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_CLOCK_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,4 +13,6 @@ void STRHAL_Clock_Init();
 }
 #endif
 
-#endif /* STRHAL_CLOCK_H_ */
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_CLOCK_H_ */

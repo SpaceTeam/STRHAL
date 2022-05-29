@@ -1,24 +1,28 @@
-#ifndef STRHAL_H_
-#define STRHAL_H_
 
-#include <STRHAL_ADC.h>
-#include <STRHAL_CAN.h>
-#include <STRHAL_Clock.h>
-#include <STRHAL_GPIO.h>
-#include <STRHAL_Oof.h>
-#include <STRHAL_OPAMP.h>
-#include <STRHAL_QSPI.h>
-#include <STRHAL_SPI.h>
-#include <STRHAL_SysTick.h>
-#include <STRHAL_TIM.h>
-#include <STRHAL_UART.h>
+
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_H_
+
+
+#include "STRHAL_Oof.h"
+#include "STRHAL_Clock.h"
+#include "STRHAL_GPIO.h"
+#include "STRHAL_ADC.h"
+#include "STRHAL_OPAMP.h"
+#include "STRHAL_UART.h"
+#include "STRHAL_TIM.h"
+#include "STRHAL_SPI.h"
+#include "STRHAL_QSPI.h"
+#include "STRHAL_CAN.h"
+#include "STRHAL_SysTick.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define STRHAL_SYSCLK_FREQ 160000000
+//when increasing frequency, peripheral clock configuration must be changed!
+#define STRHAL_SYSCLK_FREQ 100000000
 
 typedef enum {
 	STRHAL_SYSCLK_SRC_BKP, //Backup SYSCLK SRC = ever working internal HSI without PLL
@@ -33,4 +37,5 @@ STRHAL_Oof_t STRHAL_Init(STRHAL_SysClk_Src_t src, uint32_t freq);
 }
 #endif
 
-#endif /* STRHAL_H_ */
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_H_ */

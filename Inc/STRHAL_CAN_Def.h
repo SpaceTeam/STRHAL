@@ -1,9 +1,11 @@
-#ifndef STRHAL_CAN_DEF_H
-#define STRHAL_CAN_DEF_H
 
+
+#ifndef STM32H7XX_STRHAL_INC_STRHAL_CAN_DEF_H_
+#define STM32H7XX_STRHAL_INC_STRHAL_CAN_DEF_H_
+
+#include <stm32h7xx.h>
 #include <stdint.h>
-#include <stm32g4xx.h>
-
+#include "STRHAL_CAN_Config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,22 +15,53 @@ extern "C" {
 #define FDCAN_FRAME_FD_NO_BRS ((uint32_t)FDCAN_CCCR_FDOE)                     /*!< FD mode without BitRate Switching */
 #define FDCAN_FRAME_FD_BRS    ((uint32_t)(FDCAN_CCCR_FDOE | FDCAN_CCCR_BRSE)) /*!< FD mode with BitRate Switching    */
 
+#define FDCAN_CLOCK_CALIBRATION_DISABLE ((uint32_t)0x00000000U) /*!< Disable Clock Calibration */
+#define FDCAN_CLOCK_CALIBRATION_ENABLE  ((uint32_t)0x00000001U) /*!< Enable Clock Calibration  */
+
 #define FDCAN_CLOCK_DIV1  ((uint32_t)0x00000000U) /*!< Divide kernel clock by 1  */
-#define FDCAN_CLOCK_DIV2  ((uint32_t)0x00000001U) /*!< Divide kernel clock by 2  */
-#define FDCAN_CLOCK_DIV4  ((uint32_t)0x00000002U) /*!< Divide kernel clock by 4  */
-#define FDCAN_CLOCK_DIV6  ((uint32_t)0x00000003U) /*!< Divide kernel clock by 6  */
-#define FDCAN_CLOCK_DIV8  ((uint32_t)0x00000004U) /*!< Divide kernel clock by 8  */
-#define FDCAN_CLOCK_DIV10 ((uint32_t)0x00000005U) /*!< Divide kernel clock by 10 */
-#define FDCAN_CLOCK_DIV12 ((uint32_t)0x00000006U) /*!< Divide kernel clock by 12 */
-#define FDCAN_CLOCK_DIV14 ((uint32_t)0x00000007U) /*!< Divide kernel clock by 14 */
-#define FDCAN_CLOCK_DIV16 ((uint32_t)0x00000008U) /*!< Divide kernel clock by 16 */
-#define FDCAN_CLOCK_DIV18 ((uint32_t)0x00000009U) /*!< Divide kernel clock by 18 */
-#define FDCAN_CLOCK_DIV20 ((uint32_t)0x0000000AU) /*!< Divide kernel clock by 20 */
-#define FDCAN_CLOCK_DIV22 ((uint32_t)0x0000000BU) /*!< Divide kernel clock by 22 */
-#define FDCAN_CLOCK_DIV24 ((uint32_t)0x0000000CU) /*!< Divide kernel clock by 24 */
-#define FDCAN_CLOCK_DIV26 ((uint32_t)0x0000000DU) /*!< Divide kernel clock by 26 */
-#define FDCAN_CLOCK_DIV28 ((uint32_t)0x0000000EU) /*!< Divide kernel clock by 28 */
-#define FDCAN_CLOCK_DIV30 ((uint32_t)0x0000000FU) /*!< Divide kernel clock by 30 */
+#define FDCAN_CLOCK_DIV2  ((uint32_t)0x00010000U) /*!< Divide kernel clock by 2  */
+#define FDCAN_CLOCK_DIV4  ((uint32_t)0x00020000U) /*!< Divide kernel clock by 4  */
+#define FDCAN_CLOCK_DIV6  ((uint32_t)0x00030000U) /*!< Divide kernel clock by 6  */
+#define FDCAN_CLOCK_DIV8  ((uint32_t)0x00040000U) /*!< Divide kernel clock by 8  */
+#define FDCAN_CLOCK_DIV10 ((uint32_t)0x00050000U) /*!< Divide kernel clock by 10 */
+#define FDCAN_CLOCK_DIV12 ((uint32_t)0x00060000U) /*!< Divide kernel clock by 12 */
+#define FDCAN_CLOCK_DIV14 ((uint32_t)0x00070000U) /*!< Divide kernel clock by 14 */
+#define FDCAN_CLOCK_DIV16 ((uint32_t)0x00080000U) /*!< Divide kernel clock by 16 */
+#define FDCAN_CLOCK_DIV18 ((uint32_t)0x00090000U) /*!< Divide kernel clock by 18 */
+#define FDCAN_CLOCK_DIV20 ((uint32_t)0x000A0000U) /*!< Divide kernel clock by 20 */
+#define FDCAN_CLOCK_DIV22 ((uint32_t)0x000B0000U) /*!< Divide kernel clock by 22 */
+#define FDCAN_CLOCK_DIV24 ((uint32_t)0x000C0000U) /*!< Divide kernel clock by 24 */
+#define FDCAN_CLOCK_DIV26 ((uint32_t)0x000D0000U) /*!< Divide kernel clock by 26 */
+#define FDCAN_CLOCK_DIV28 ((uint32_t)0x000E0000U) /*!< Divide kernel clock by 28 */
+#define FDCAN_CLOCK_DIV30 ((uint32_t)0x000F0000U) /*!< Divide kernel clock by 30 */
+
+#define FDCAN_CALIB_FIELD_LENGTH_32 ((uint32_t)0x00000000U)       /*!< Calibration field length is 32 bits */
+#define FDCAN_CALIB_FIELD_LENGTH_64 ((uint32_t)FDCANCCU_CCFG_CFL) /*!< Calibration field length is 64 bits */
+
+#define FDCAN_CLOCK_NOT_CALIBRATED       ((uint32_t)0x00000000U) /*!< Clock not calibrated       */
+#define FDCAN_CLOCK_BASIC_CALIBRATED     ((uint32_t)0x40000000U) /*!< Clock basic calibrated     */
+#define FDCAN_CLOCK_PRECISION_CALIBRATED ((uint32_t)0x80000000U) /*!< Clock precision calibrated */
+
+#define FDCAN_CALIB_TIME_QUANTA_COUNTER  ((uint32_t)0x00000000U) /*!< Time Quanta Counter             */
+#define FDCAN_CALIB_CLOCK_PERIOD_COUNTER ((uint32_t)0x00000001U) /*!< Oscillator Clock Period Counter */
+#define FDCAN_CALIB_WATCHDOG_COUNTER     ((uint32_t)0x00000002U) /*!< Calibration Watchdog Counter    */
+
+#define FDCAN_DATA_BYTES_8  ((uint32_t)0x00000004U) /*!< 8 bytes data field  */
+#define FDCAN_DATA_BYTES_12 ((uint32_t)0x00000005U) /*!< 12 bytes data field */
+#define FDCAN_DATA_BYTES_16 ((uint32_t)0x00000006U) /*!< 16 bytes data field */
+#define FDCAN_DATA_BYTES_20 ((uint32_t)0x00000007U) /*!< 20 bytes data field */
+#define FDCAN_DATA_BYTES_24 ((uint32_t)0x00000008U) /*!< 24 bytes data field */
+#define FDCAN_DATA_BYTES_32 ((uint32_t)0x0000000AU) /*!< 32 bytes data field */
+#define FDCAN_DATA_BYTES_48 ((uint32_t)0x0000000EU) /*!< 48 bytes data field */
+#define FDCAN_DATA_BYTES_64 ((uint32_t)0x00000012U) /*!< 64 bytes data field */
+
+#define FDCAN_TX_FIFO_OPERATION  ((uint32_t)0x00000000U)     /*!< FIFO mode  */
+#define FDCAN_TX_QUEUE_OPERATION ((uint32_t)FDCAN_TXBC_TFQM) /*!< Queue mode */
+
+#define FDCAN_FILTER_RANGE         ((uint32_t)0x00000000U) /*!< Range filter from FilterID1 to FilterID2                        */
+#define FDCAN_FILTER_DUAL          ((uint32_t)0x00000001U) /*!< Dual ID filter for FilterID1 or FilterID2                       */
+#define FDCAN_FILTER_MASK          ((uint32_t)0x00000002U) /*!< Classic filter: FilterID1 = filter, FilterID2 = mask            */
+#define FDCAN_FILTER_RANGE_NO_EIDM ((uint32_t)0x00000003U) /*!< Range filter from FilterID1 to FilterID2, EIDM mask not applied */
 
 #define FDCAN_FILTER_DISABLE       ((uint32_t)0x00000000U) /*!< Disable filter element                                    */
 #define FDCAN_FILTER_TO_RXFIFO0    ((uint32_t)0x00000001U) /*!< Store in Rx FIFO 0 if filter matches                      */
@@ -37,9 +70,10 @@ extern "C" {
 #define FDCAN_FILTER_HP            ((uint32_t)0x00000004U) /*!< Set high priority if filter matches                       */
 #define FDCAN_FILTER_TO_RXFIFO0_HP ((uint32_t)0x00000005U) /*!< Set high priority and store in FIFO 0 if filter matches   */
 #define FDCAN_FILTER_TO_RXFIFO1_HP ((uint32_t)0x00000006U) /*!< Set high priority and store in FIFO 1 if filter matches   */
+#define FDCAN_FILTER_TO_RXBUFFER   ((uint32_t)0x00000007U) /*!< Store into Rx Buffer, configuration of FilterType ignored */
 
 #define FDCAN_RX_FIFO_BLOCKING  ((uint32_t)0x00000000U) /*!< Rx FIFO blocking mode  */
-#define FDCAN_RX_FIFO_OVERWRITE ((uint32_t)0x00000001U) /*!< Rx FIFO overwrite mode */
+#define FDCAN_RX_FIFO_OVERWRITE ((uint32_t)0x80000000U) /*!< Rx FIFO overwrite mode */
 
 #define FDCAN_ACCEPT_IN_RX_FIFO0 ((uint32_t)0x00000000U) /*!< Accept in Rx FIFO 0 */
 #define FDCAN_ACCEPT_IN_RX_FIFO1 ((uint32_t)0x00000001U) /*!< Accept in Rx FIFO 1 */
@@ -48,33 +82,11 @@ extern "C" {
 #define FDCAN_FILTER_REMOTE ((uint32_t)0x00000000U) /*!< Filter remote frames */
 #define FDCAN_REJECT_REMOTE ((uint32_t)0x00000001U) /*!< Reject all remote frames */
 
-#define FDCAN_FILTER_RANGE         ((uint32_t)0x00000000U) //!< Range filter from FilterID1 to FilterID2
-#define FDCAN_FILTER_DUAL          ((uint32_t)0x00000001U) //!< Dual ID filter for FilterID1 or FilterID2
-#define FDCAN_FILTER_MASK          ((uint32_t)0x00000002U) //!< Classic filter: FilterID1 = filter, FilterID2 = mask
-#define FDCAN_FILTER_RANGE_NO_EIDM ((uint32_t)0x00000003U) //!< Range filter from FilterID1 to FilterID2, EIDM mask not applied
-
-#define FDCAN_ELMTS_ARRAY_SIZE			64
-#define FDCAN_NOMINAL_PRESCALER			8
-#define FDCAN_NOMINAL_SYNC_JUMP_WIDTH	1
-#define FDCAN_NOMINAL_TIMESEG_1			7
-#define FDCAN_NOMINAL_TIMESEG_2			2
-
-#define FDCAN_DATA_PRESCALER			1
-#define FDCAN_DATA_SYNC_JUMP_WIDTH		1
-#define FDCAN_DATA_TIMESEG_1			7
-#define FDCAN_DATA_TIMESEG_2			2
-
-#define FDCAN_TDC_OFFSET				5
-#define FDCAN_TDC_FILTER				0
 
 //#define FDCAN_MESSAGE_RAM_BASE		((uint32_t)0x4000AC00U)
 #define FDCAN_MESSAGE_RAM_BASE		SRAMCAN_BASE
-#define FDCAN1_MESSAGE_RAM_OFFSET	((uint32_t)0x00000000U)
-#define FDCAN2_MESSAGE_RAM_OFFSET	((uint32_t)0x00000354U)
-#define FDCAN1_MESSAGE_RAM_START	((uint32_t)(FDCAN1_MESSAGE_RAM_OFFSET + FDCAN_MESSAGE_RAM_BASE))
-#define FDCAN2_MESSAGE_RAM_START	((uint32_t)(FDCAN2_MESSAGE_RAM_OFFSET + FDCAN_MESSAGE_RAM_BASE))
-#define FDCAN1_MESSAGE_RAM			((Can_Message_RAM *) FDCAN1_MESSAGE_RAM_START)
-#define FDCAN2_MESSAGE_RAM			((Can_Message_RAM *) FDCAN2_MESSAGE_RAM_START)
+#define FDCAN_MESSAGE_RAM			((Can_Message_RAM *) FDCAN_MESSAGE_RAM_BASE)
+
 
 typedef union {
 	struct __attribute__((__packed__)) {
@@ -183,8 +195,8 @@ typedef union {
 
 typedef union
 {
-	uint8_t byte[64];
-	uint32_t word[64 / 4];
+	uint8_t byte[FDCAN_ELMTS_ARRAY_SIZE];
+	uint32_t word[FDCAN_ELMTS_ARRAY_SIZE / 4];
 } CAN_RX_ELEMENT_DATA_Type;
 
 typedef struct {
@@ -194,8 +206,8 @@ typedef struct {
 } Can_Rx_Element;
 
 typedef union {
-	uint8_t byte[64];
-	uint32_t word[64 / 4];
+	uint8_t byte[FDCAN_ELMTS_ARRAY_SIZE];
+	uint32_t word[FDCAN_ELMTS_ARRAY_SIZE / 4];
 } CAN_TX_ELEMENT_DATA_Type;
 
 typedef volatile struct {
@@ -209,13 +221,15 @@ typedef volatile struct {
 	CAN_TX_EVENT_ELEMENT_E1_Type E1;
 } Can_Tx_Event_Element;
 
-typedef struct {
-	__attribute__((__aligned__(4))) Can_Standard_Filter_Element std_filters[28];
-	__attribute__((__aligned__(4))) Can_Extended_Filter_Element ext_filters[8];
-	__attribute__((__aligned__(4))) Can_Rx_Element rx_fifo0[3];
-	__attribute__((__aligned__(4))) Can_Rx_Element rx_fifo1[3];
-	__attribute__((__aligned__(4))) Can_Tx_Event_Element tx_event_fifo[3];
-	__attribute__((__aligned__(4))) Can_Tx_Element tx_buffer[3];
+typedef struct
+{
+	__attribute__((__aligned__(4))) Can_Standard_Filter_Element std_filters[FDCAN_STD_FILTER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Extended_Filter_Element ext_filters[FDCAN_EXT_FILTER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Rx_Element rx_buffer[FDCAN_RX_BUFFER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Rx_Element rx_fifo0[FDCAN_RX_FIFO0_ELMTS_NUMBER];
+	__attribute__((__aligned__(4))) Can_Rx_Element rx_fifo1[FDCAN_RX_FIFO1_ELMTS_NUMBER];
+	__attribute__((__aligned__(4))) Can_Tx_Element tx_buffer[FDCAN_TX_BUFFER_NUMBER];
+	__attribute__((__aligned__(4))) Can_Tx_Element tx_fifo[FDCAN_TX_FIFO_QUEUE_ELMTS_NUMBER];
 
 } Can_Message_RAM;
 
@@ -224,4 +238,6 @@ typedef struct {
 }
 #endif
 
-#endif
+
+
+#endif /* STM32H7XX_STRHAL_INC_STRHAL_CAN_DEF_H_ */
