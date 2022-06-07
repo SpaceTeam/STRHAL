@@ -5,11 +5,9 @@
 #include <Channels/DigitalOutChannel.h>
 #include <Channels/DigitalInChannel.h>
 #include <Channels/GenericChannel.h>
-#include <Channels/IMUChannel.h>
-#include <Channels/IMUSingleChannel.h>
 #include <Channels/BaroChannel.h>
 #include <Can.h>
-#include <W25Qxx_Flash.h>
+#include <Channels/IMUChannel.h>
 #include <Speaker.h>
 
 #include <STRHAL.h>
@@ -24,8 +22,6 @@ class PMU : public GenericChannel {
 		//int reset() override;
 		int exec() override;
 
-		void testChannels();
-
 	private:
 		Can *cancom;
 		COMState CANState;
@@ -33,12 +29,15 @@ class PMU : public GenericChannel {
 		W25Qxx_Flash *flash;
 
 		STRHAL_GPIO_t ledRed, ledGreen;
+		// Modules
+		LPS25HB_Baro baro;
+		ICM20602_IMU imu;
 
+		// Channels
 		ADCChannel sense_5V, sense_5VP, sense_12V;
 		DigitalInChannel umbilical, charging;
 		DigitalOutChannel out0, out1, out2, out3, payload;
-		BaroChannel barometer;
-		IMUChannel imu_0;
+		BaroChannel baro_channel;
 		IMUSingleChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
 		Speaker speaker;
 };

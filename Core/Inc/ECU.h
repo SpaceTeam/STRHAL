@@ -9,10 +9,8 @@
 #include <Channels/PressureControlChannel.h>
 #include <Channels/ServoChannel.h>
 #include <Channels/GenericChannel.h>
-#include <Channels/IMUChannel.h>
-#include <Channels/IMUSingleChannel.h>
 #include <Channels/RocketChannel.h>
-#include <W25Qxx_Flash.h>
+#include "../Modules/W25Qxx_Flash.h"
 #include <Speaker.h>
 #include <STRHAL.h>
 
@@ -44,8 +42,6 @@ class ECU : public GenericChannel {
 		PyroChannel pyro_igniter0, pyro_igniter1, pyro_igniter2;
 		DigitalOutChannel solenoid_0, solenoid_1;
 		PressureControlChannel pressure_control;
-		//IMUChannel imu_0;
-		//IMUSingleChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
 		RocketChannel rocket;
 
 		Speaker speaker;

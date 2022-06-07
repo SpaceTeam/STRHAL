@@ -6,7 +6,7 @@
 
 #include <can_houbolt/channels/servo_channel_def.h>
 #include <STRHAL.h>
-#include <W25Qxx_Flash.h>
+#include "../Modules/W25Qxx_Flash.h"
 
 struct ServoRefPos {
 	uint16_t start;

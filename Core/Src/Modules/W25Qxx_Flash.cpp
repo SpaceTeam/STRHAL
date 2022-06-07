@@ -1,4 +1,4 @@
-#include "../Inc/W25Qxx_Flash.h"
+#include "../../Inc/Modules/W25Qxx_Flash.h"
 
 #include <STRHAL_QSPI.h>
 #include <STRHAL_SysTick.h>

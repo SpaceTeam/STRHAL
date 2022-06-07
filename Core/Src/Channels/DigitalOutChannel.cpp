@@ -1,7 +1,7 @@
 #include <Channels/DigitalOutChannel.h>
 
-DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t & adcChannel, const STRHAL_GPIO_t &cntrlPin, uint32_t refreshDivider)
-	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, id, refreshDivider), adcChannel(adcChannel), cntrlPin(cntrlPin), hasFeedback(true) {
+DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t & adcChannel, const STRHAL_GPIO_t &cntrlPin, STRHAL_ADC_InType_t adcInType, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_DIGITAL_OUT, id, refreshDivider), adcChannel(adcChannel), cntrlPin(cntrlPin), adcInType(adcInType), hasFeedback(true) {
 }
 
 DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_GPIO_t &cntrlPin, uint32_t refreshDivider)
@@ -10,7 +10,7 @@ DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_GPIO_t &cntrlPin, 
 
 int DigitalOutChannel::init() {
 	if(hasFeedback) {
-		adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_REGULAR);
+		adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, adcInType);
 		STRHAL_GPIO_SingleInit(&cntrlPin,STRHAL_GPIO_TYPE_OPP);
 
 		if(adcMeasurement == nullptr)

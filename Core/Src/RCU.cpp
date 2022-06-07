@@ -8,25 +8,24 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	GenericChannel(node_id, fw_version, refresh_divider),
 	ledRed({GPIOD, 1, STRHAL_GPIO_TYPE_OPP}),
 	ledGreen({GPIOD, 2, STRHAL_GPIO_TYPE_OPP}),
-
+	baro(STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOA, 3, STRHAL_GPIO_TYPE_IHZ}),
+	imu(STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOD, 0, STRHAL_GPIO_TYPE_IHZ}),
 	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
 	sense_12V(2, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
-	barometer(10, STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
-	imu_0(11, STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0}, 1),
-	x_accel(12, IMUMeasurement::X_ACCEL, imu_0, 1),
-	y_accel(13, IMUMeasurement::Y_ACCEL, imu_0, 1),
-	z_accel(14, IMUMeasurement::Z_ACCEL, imu_0, 1),
-	x_gyro(15, IMUMeasurement::X_GYRO, imu_0, 1),
-	y_gyro(16, IMUMeasurement::Y_GYRO, imu_0, 1),
-	z_gyro(17, IMUMeasurement::Z_GYRO, imu_0, 1),
+	baro_channel(10, baro, 1),
+	x_accel(11, imu, IMUMeasurement::X_ACCEL, 1),
+	y_accel(12, imu, IMUMeasurement::Y_ACCEL, 1),
+	z_accel(13, imu, IMUMeasurement::Z_ACCEL, 1),
+	x_gyro(14, imu, IMUMeasurement::X_GYRO, 1),
+	y_gyro(15, imu, IMUMeasurement::Y_GYRO, 1),
+	z_gyro(16, imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	cancom = Can::instance(this);
 	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&sense_5V);
 	registerChannel(&sense_12V);
-	registerChannel(&barometer);
-	registerChannel(&imu_0);
+	registerChannel(&baro_channel);
 	registerChannel(&x_accel);
 	registerChannel(&y_accel);
 	registerChannel(&z_accel);
@@ -53,10 +52,15 @@ int RCU::init() {
 	if(cancom == nullptr)
 		return -1;
 
+	if(imu.init() != 0)
+		return -1;
+
+	if(baro.init() != 0)
+		return -1;
+
 	CANState = cancom->init();
 	if(CANState != COMState::SBY)
 		return -1;
-
 
 	if(GenericChannel::init() != 0)
 		return -1;
@@ -89,69 +93,4 @@ int RCU::exec() {
 	speaker.beep(6, 100, 100);
 
 	return 0;
-}
-
-void RCU::testChannels() {
-	char read[256], write[256];
-	uint8_t state = 0;
-	STRHAL_UART_Listen();
-	while(1) {
-		int32_t n = STRHAL_UART_Read(read, 2);
-		if(n > 0) {
-			AbstractChannel *channel = GenericChannel::channels[state];
-			CHANNEL_TYPE type = channel->getChannelType();
-			if(type == CHANNEL_TYPE_ADC16) {
-				ADCChannel * adc = (ADCChannel *) channel;
-				int nn = 0;
-				while(nn == 0) {
-					nn = STRHAL_UART_Read(read, 2);
-					std::sprintf(write,"ChannelId: %d, ChannelType: %d, Measurement: %d\n",channel->getChannelId(),type,adc->getMeasurement());
-					STRHAL_UART_Write(write, strlen(write));
-					STRHAL_Systick_BusyWait(500);
-				}
-			} else if(type == CHANNEL_TYPE_DIGITAL_OUT) {
-				SetMsg_t set_msg =
-				{ 0 };
-				set_msg.variable_id = DIGITAL_OUT_STATE;
-				set_msg.value = 1;
-				uint8_t ret_n = 0;
-				std::sprintf(write,"ChannelId: %d, ChannelType: %d\n",state,type);
-				STRHAL_UART_Write(write, strlen(write));
-				STRHAL_Systick_BusyWait(1000);
-				STRHAL_UART_Write("..Setting Output for 10s in\n", 28);
-				STRHAL_Systick_BusyWait(500);
-				STRHAL_UART_Write("..3s\n", 5);
-				STRHAL_Systick_BusyWait(1000);
-				STRHAL_UART_Write("..2s\n", 5);
-				STRHAL_Systick_BusyWait(1000);
-				STRHAL_UART_Write("..1s\n", 5);
-				STRHAL_Systick_BusyWait(1000);
-				channel->processMessage(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
-				for(int i = 0; i < 5; i++) {
-					uint8_t n = 0;
-					uint8_t meas[2];
-					channel->getSensorData(meas, n);
-					std::sprintf(write,"...Output ON, Measurement: %d\n",meas[0] << 8 | meas[1]);
-					STRHAL_UART_Write(write, strlen(write));
-					STRHAL_Systick_BusyWait(2000);
-				}
-				set_msg.variable_id = DIGITAL_OUT_STATE;
-				set_msg.value = 0;
-				channel->processMessage(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
-				STRHAL_UART_Write("..Output OFF\n", 13);
-			} else if(type == CHANNEL_TYPE_PNEUMATIC_VALVE) {
-				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
-				STRHAL_UART_Write(write, strlen(write));
-				STRHAL_UART_Write("Channel not implemented\n", 24);
-			} else if(type == CHANNEL_TYPE_SERVO) {
-				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
-				STRHAL_UART_Write(write, strlen(write));
-			} else {
-				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
-				STRHAL_UART_Write(write, strlen(write));
-			}
-			state = (state == 20) ? 0 : (state+1);
-		}
-		STRHAL_Systick_BusyWait(500);
-	}
 }

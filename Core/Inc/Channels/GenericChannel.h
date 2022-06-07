@@ -5,7 +5,7 @@
 #include <can_houbolt/channels/generic_channel_def.h>
 #include <Can.h>
 #include <STRHAL.h>
-#include <W25Qxx_Flash.h>
+#include "../Modules/W25Qxx_Flash.h"
 
 class GenericChannel : public AbstractChannel {
 	public:

@@ -7,6 +7,7 @@
 
 int main(void) {
 
+// TODO use git_version.h for firmware version control
 #ifdef ECU_BOARD
 	ECU ecu(6,0xDEADBEEF,100); //6 ECU, 7 PMU, 9 TW
 
