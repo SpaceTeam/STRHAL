@@ -81,7 +81,7 @@ int RCU::exec() {
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
-	STRHAL_UART_Write("RUNNING\n",8);
+	STRHAL_UART_Debug_Write("RUNNING\n",8);
 
 	speaker.beep(2, 400, 300);
 
