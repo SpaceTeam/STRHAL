@@ -43,6 +43,10 @@ int RCU::init() {
 	STRHAL_GPIO_SingleInit(&ledRed, STRHAL_GPIO_TYPE_OPP);
 	STRHAL_GPIO_SingleInit(&ledGreen, STRHAL_GPIO_TYPE_OPP);
 
+	// init debug uart
+	if(STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
+		return -1;
+
 	if(flash == nullptr)
 		return -1;
 
