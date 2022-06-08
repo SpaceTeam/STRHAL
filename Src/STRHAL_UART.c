@@ -82,9 +82,9 @@ void STRHAL_UART_Init() {
 	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
-void STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id) {
+int STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id) {
 	if(uart_id < 0 || uart_id >= STRHAL_N_UART)
-		return;
+		return -1;
 
 	STRHAL_UART_Handle_t _uart = _uarts[uart_id];
 
@@ -160,6 +160,7 @@ void STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id) {
     _uart.rx_buf.h = _uart.rx_buf.n = _uart.tx_buf.n = 0;
     _uart.rx_buf.n_dma = STRHAL_UART_BUF_SIZE;
     _uart.tx_buf.n = 0;
+    return 0;
 }
 
 int32_t STRHAL_UART_Debug_Write(const char *data, uint32_t n) {
@@ -184,7 +185,6 @@ int32_t STRHAL_UART_Write(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n
 	LL_DMA_DisableChannel(DMA1, _uart.dma_tx_channel);
 	while(LL_DMA_IsEnabledChannel(DMA1, _uart.dma_tx_channel))
 		;
-
 
     LL_DMA_ClearFlag_TC2(DMA1);
     LL_DMA_ClearFlag_TE2(DMA1);
@@ -287,9 +287,9 @@ STRHAL_UART_State_t STRHAL_UART_Listen(STRHAL_UART_Id_t uart_id) {
 	return _uart.state;
 }
 
-void STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id) {
+int STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id) {
 	if(uart_id < 0 || uart_id >= STRHAL_N_UART)
-		return;
+		return -1;
 
 	STRHAL_UART_Handle_t _uart = _uarts[uart_id];
 
@@ -304,7 +304,6 @@ void STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id) {
 
 	_uart.state &= ~(STRHAL_UART_STATE_RX | STRHAL_UART_STATE_RO | STRHAL_UART_STATE_RC);
 
-
     LL_DMA_SetMemoryAddress(DMA1, _uart.dma_rx_channel, (uint32_t) _uart.rx_buf.data);
     LL_DMA_SetDataLength(DMA1, _uart.dma_rx_channel, STRHAL_UART_BUF_SIZE);
 
@@ -315,6 +314,8 @@ void STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id) {
 
     while(!LL_DMA_IsEnabledChannel(DMA1, _uart.dma_rx_channel))
     	;
+
+    return 0;
 }
 
 STRHAL_UART_State_t STRHAL_UART_GetState(STRHAL_UART_Id_t uart_id) {

@@ -45,13 +45,13 @@ typedef enum {
 } STRHAL_UART_State_t;
 
 void STRHAL_UART_Init();
-void STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id);
+int STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id);
 
 int32_t STRHAL_UART_Debug_Write(const char *data, uint32_t n);
 int32_t STRHAL_UART_Write(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n);
 int32_t STRHAL_UART_Read(STRHAL_UART_Id_t uart_id, char *data, uint32_t n);
 
-void STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id);
+int STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id);
 
 STRHAL_UART_State_t STRHAL_UART_Listen(STRHAL_UART_Id_t uart_id);
 STRHAL_UART_State_t STRHAL_UART_GetState(STRHAL_UART_Id_t uart_id);
