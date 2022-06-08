@@ -10,6 +10,27 @@ extern "C" {
 #define STRHAL_UART_BUF_SIZE 256
 #define STRHAL_UART_BAUDRATE 115200
 
+#define STRHAL_UART_DEBUG STRHAL_UART2
+
+typedef enum {
+	STRHAL_UART1,
+	STRHAL_UART2,
+
+	STRHAL_N_UART
+} STRHAL_UART_Id_t;
+
+typedef struct {
+	char data[STRHAL_UART_BUF_SIZE];
+	uint32_t n;
+} STRHAL_UART_Tx_Buf_t;
+
+typedef struct {
+	char data[STRHAL_UART_BUF_SIZE];
+	uint32_t h;
+	uint32_t n;
+	uint32_t n_dma;
+} STRHAL_UART_Rx_Buf_t;
+
 typedef enum {
 	STRHAL_UART_STATE_00 = 0,
 
@@ -24,15 +45,16 @@ typedef enum {
 } STRHAL_UART_State_t;
 
 void STRHAL_UART_Init();
+void STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id);
 
-int32_t STRHAL_UART_Write(const char *data, uint32_t n);
-int32_t STRHAL_UART_Read(char *data, uint32_t n);
+int32_t STRHAL_UART_Debug_Write(const char *data, uint32_t n);
+int32_t STRHAL_UART_Write(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n);
+int32_t STRHAL_UART_Read(STRHAL_UART_Id_t uart_id, char *data, uint32_t n);
 
-void STRHAL_UART_FlushReception();
+void STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id);
 
-STRHAL_UART_State_t STRHAL_UART_Listen();
-STRHAL_UART_State_t STRHAL_UART_GetState();
-
+STRHAL_UART_State_t STRHAL_UART_Listen(STRHAL_UART_Id_t uart_id);
+STRHAL_UART_State_t STRHAL_UART_GetState(STRHAL_UART_Id_t uart_id);
 
 #ifdef __cplusplus
 }
