@@ -9,6 +9,8 @@
 #include <Can.h>
 #include <Channels/IMUChannel.h>
 #include "../Modules/W25Qxx_Flash.h"
+#include "../Modules/LoRa1276F30_Radio.h"
+#include "../Modules/SAM_M8Q_GNSS.h"
 #include <Speaker.h>
 
 #include <STRHAL.h>
@@ -34,11 +36,13 @@ class RCU : public GenericChannel {
 		// Modules
 		LPS25HB_Baro baro;
 		ICM20602_IMU imu;
+		LoRa1276F30_Radio lora;
+		SAM_M8Q_GNSS gnss;
 
 		// Channels
 		ADCChannel sense_5V, sense_12V;
 		BaroChannel baro_channel;
-		IMUSingleChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
+		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
 		Speaker speaker;
 };
 

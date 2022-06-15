@@ -28,6 +28,7 @@ enum class IMUAddr : uint8_t {
 	PWR_MGMT_2 = 0x6C,
 	I2C_IF = 0x70,
 	INT_PIN_CFG = 0x37,
+	INT_ENABLE = 0x38,
 	ACCEL_XOUT_H = 0x3B,
 	TEMP_OUT_H = 0x41,
 	GYRO_XOUT_H = 0x43,

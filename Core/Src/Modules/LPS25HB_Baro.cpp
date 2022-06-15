@@ -1,4 +1,9 @@
 #include "../../Inc/Modules/LPS25HB_Baro.h"
+#include <stm32g4xx_ll_exti.h>
+#include <stm32g4xx_ll_system.h>
+
+#include <cstring>
+#include <cstdio>
 
 LPS25HB_Baro::LPS25HB_Baro(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin) :
 	spiId(spiId),
@@ -7,6 +12,22 @@ LPS25HB_Baro::LPS25HB_Baro(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config
 }
 
 int LPS25HB_Baro::init() {
+	// Uncomment if baro interrupt should be used
+	/*STRHAL_GPIO_SingleInit(&dataReadyPin, STRHAL_GPIO_TYPE_IHZ);
+	LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
+	EXTI_InitStruct.Line_0_31 = LL_EXTI_LINE_3;
+	EXTI_InitStruct.Line_32_63 = LL_EXTI_LINE_NONE;
+	EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
+	EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_RISING;
+	EXTI_InitStruct.LineCommand = ENABLE;
+	if(LL_EXTI_Init(&EXTI_InitStruct) != 0)
+		return -1;
+
+	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE3);
+
+	NVIC_SetPriority(EXTI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 3, 1));
+	NVIC_EnableIRQ(EXTI3_IRQn);*/
+
 	if(STRHAL_SPI_Master_Init(spiId, &spiConf) < 0)
 		return -1;
 
@@ -81,10 +102,6 @@ uint8_t LPS25HB_Baro::whoAmI() const {
 	return imuId;
 }
 
-bool LPS25HB_Baro::dataReady() {
-	return (STRHAL_GPIO_Read(&dataReadyPin) == STRHAL_GPIO_VALUE_L) ? false : true;
-}
-
 bool LPS25HB_Baro::measurementReady() {
 	return (measDataNum == 0) ? false : true;
 }
@@ -111,6 +128,10 @@ int LPS25HB_Baro::read() {
 
 	//measData[i].temp = tmp[0] << 8 | tmp[1]; discarding temperature measurement
 
+	/*char buf[64];
+	sprintf(buf,"%ld\n",measData[i]);
+	STRHAL_UART_Debug_Write(buf, strlen(buf));*/
+
 	measDataNum++;
 	measDataNum %= BUF_DATA_SIZE;
 
@@ -122,3 +143,10 @@ void LPS25HB_Baro::getMeasurement(int32_t &measurement) {
 	measDataTail %= BUF_DATA_SIZE;
 	measDataNum--;
 }
+
+/*
+void EXTI3_IRQHandler(void) {
+	if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_3)) {
+		LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_3);
+	}
+}*/

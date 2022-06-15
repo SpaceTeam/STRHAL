@@ -10,6 +10,8 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	ledGreen({GPIOD, 2, STRHAL_GPIO_TYPE_OPP}),
 	baro(STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOA, 3, STRHAL_GPIO_TYPE_IHZ}),
 	imu(STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOD, 0, STRHAL_GPIO_TYPE_IHZ}),
+	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ}),
+	gnss(STRHAL_UART1),
 	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
 	sense_12V(2, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
 	baro_channel(10, baro, 1),
@@ -56,10 +58,14 @@ int RCU::init() {
 	if(cancom == nullptr)
 		return -1;
 
+	// TODO find out why IMU is dead
 	if(imu.init() != 0)
 		return -1;
 
 	if(baro.init() != 0)
+		return -1;
+
+	if(gnss.init() != 0)
 		return -1;
 
 	CANState = cancom->init();
@@ -85,11 +91,37 @@ int RCU::exec() {
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
-	STRHAL_UART_Debug_Write("RUNNING\n",8);
+	STRHAL_UART_Debug_Write_Blocking("RUNNING\n", 8, 50);
 
 	speaker.beep(2, 400, 300);
 
+	//STRHAL_UART_Listen(STRHAL_UART1);
+	char readBuf[256];
+	char writeBuf[256];
+	STRHAL_UART_FlushReception(STRHAL_UART1);
 	while(1) {
+		/*int nn = 0;
+		//char readBuf[256];
+		//char writeBuf[256];
+		do {
+			nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 1);
+			for(int i = 0; i < nn-1; i++) {
+				sprintf(writeBuf + strlen(writeBuf),"%d,",readBuf[i]);
+			}
+			sprintf(writeBuf + strlen(writeBuf),"%d,",readBuf[nn-1]);
+			STRHAL_UART_Debug_Write_Blocking(writeBuf, strlen(writeBuf),100);
+			STRHAL_Systick_BusyWait(20);
+		} while (nn != 0);*/
+		/*
+		int32_t n = STRHAL_UART_Read(STRHAL_UART1, readBuf, STRHAL_UART_BUF_SIZE);
+		if(n > 0) {
+			if(gnss.processData((uint8_t *) readBuf, n)) {
+				sprintf(writeBuf,"%d, %ld, %ld\n",gnss.position.Status,gnss.position.Longitude,gnss.position.Latitude);
+				STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, writeBuf, strlen(writeBuf), 200);
+			} else {
+				STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "NOFIX\n", 6, 200);
+			}
+		}*/
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}

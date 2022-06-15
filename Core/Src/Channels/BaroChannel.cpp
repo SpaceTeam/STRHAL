@@ -18,8 +18,7 @@ int BaroChannel::exec() {
 
 	timeLastSample = time;
 
-	if(baro.dataReady())
-		(void) baro.read();
+	(void) baro.read();
 
 	return 0;
 }

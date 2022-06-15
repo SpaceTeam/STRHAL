@@ -38,7 +38,7 @@ class PMU : public GenericChannel {
 		DigitalInChannel umbilical, charging;
 		DigitalOutChannel out0, out1, out2, out3, payload;
 		BaroChannel baro_channel;
-		IMUSingleChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
+		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
 		Speaker speaker;
 };
 

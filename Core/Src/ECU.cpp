@@ -103,7 +103,7 @@ int ECU::exec() {
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
-	STRHAL_UART_Debug_Write("RUNNING\n",8);
+	STRHAL_UART_Debug_Write_Blocking("RUNNING\n", 8, 50);
 
 	speaker.beep(2, 400, 300);
 
@@ -138,7 +138,7 @@ void ECU::testServo(ServoChannel &servo) {
 
 		}
 		sprintf(buf,"%d, %d, %d\n",servo.getCurrentMeasurement(),servo.getFeedbackMeasurement(), servo.getPos());
-		STRHAL_UART_Debug_Write(buf, strlen(buf));
+		STRHAL_UART_Debug_Write_DMA(buf, strlen(buf));
 		if(GenericChannel::exec() != 0)
 			return;
 	}
@@ -159,7 +159,7 @@ void ECU::testChannels() {
 				while(nn == 0) {
 					nn = STRHAL_UART_Read(STRHAL_UART_DEBUG, read, 2);
 					std::sprintf(write,"ChannelId: %d, ChannelType: %d, Measurement: %d\n",channel->getChannelId(),type,adc->getMeasurement());
-					STRHAL_UART_Debug_Write(write, strlen(write));
+					STRHAL_UART_Debug_Write_Blocking(write, strlen(write), 50);
 					STRHAL_Systick_BusyWait(500);
 				}
 			} else if(type == CHANNEL_TYPE_DIGITAL_OUT) {
@@ -169,15 +169,15 @@ void ECU::testChannels() {
 				set_msg.value = 1;
 				uint8_t ret_n = 0;
 				std::sprintf(write,"ChannelId: %d, ChannelType: %d\n",state,type);
-				STRHAL_UART_Debug_Write(write, strlen(write));
+				STRHAL_UART_Debug_Write_Blocking(write, strlen(write), 50);
 				STRHAL_Systick_BusyWait(1000);
-				STRHAL_UART_Debug_Write("..Setting Output for 10s in\n", 28);
+				STRHAL_UART_Debug_Write_Blocking("..Setting Output for 10s in\n", 28, 50);
 				STRHAL_Systick_BusyWait(500);
-				STRHAL_UART_Debug_Write("..3s\n", 5);
+				STRHAL_UART_Debug_Write_Blocking("..3s\n", 5, 50);
 				STRHAL_Systick_BusyWait(1000);
-				STRHAL_UART_Debug_Write("..2s\n", 5);
+				STRHAL_UART_Debug_Write_Blocking("..2s\n", 5, 50);
 				STRHAL_Systick_BusyWait(1000);
-				STRHAL_UART_Debug_Write("..1s\n", 5);
+				STRHAL_UART_Debug_Write_Blocking("..1s\n", 5, 50);
 				STRHAL_Systick_BusyWait(1000);
 				channel->processMessage(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
 				for(int i = 0; i < 5; i++) {
@@ -185,23 +185,23 @@ void ECU::testChannels() {
 					uint8_t meas[2];
 					channel->getSensorData(meas, n);
 					std::sprintf(write,"...Output ON, Measurement: %d\n",meas[0] << 8 | meas[1]);
-					STRHAL_UART_Debug_Write(write, strlen(write));
+					STRHAL_UART_Debug_Write_Blocking(write, strlen(write), 50);
 					STRHAL_Systick_BusyWait(2000);
 				}
 				set_msg.variable_id = DIGITAL_OUT_STATE;
 				set_msg.value = 0;
 				channel->processMessage(COMMON_REQ_SET_VARIABLE, (uint8_t *) &set_msg, ret_n);
-				STRHAL_UART_Debug_Write("..Output OFF\n", 13);
+				STRHAL_UART_Debug_Write_Blocking("..Output OFF\n", 13, 50);
 			} else if(type == CHANNEL_TYPE_PNEUMATIC_VALVE) {
 				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
-				STRHAL_UART_Debug_Write(write, strlen(write));
-				STRHAL_UART_Debug_Write("Channel not implemented\n", 24);
+				STRHAL_UART_Debug_Write_Blocking(write, strlen(write), 50);
+				STRHAL_UART_Debug_Write_Blocking("Channel not implemented\n", 24, 50);
 			} else if(type == CHANNEL_TYPE_SERVO) {
 				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
-				STRHAL_UART_Debug_Write(write, strlen(write));
+				STRHAL_UART_Debug_Write_Blocking(write, strlen(write), 50);
 			} else {
 				std::sprintf(write,"Channel %d/type: %d not implemented\n",state,type);
-				STRHAL_UART_Debug_Write(write, strlen(write));
+				STRHAL_UART_Debug_Write_Blocking(write, strlen(write), 50);
 			}
 			state = (state == 20) ? 0 : (state+1);
 		}

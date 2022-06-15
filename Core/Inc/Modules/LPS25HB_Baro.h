@@ -32,7 +32,6 @@ class LPS25HB_Baro {
 		int init();
 		int reset();
 
-		bool dataReady();
 		int read();
 		bool measurementReady();
 		void getMeasurement(int32_t &measurement);

@@ -1,5 +1,8 @@
 #include "../../Inc/Modules/ICM20602_IMU.h"
 
+#include <cstdio>
+#include <cstring>
+
 ICM20602_IMU::ICM20602_IMU(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin) :
 	spiId(spiId),
 	spiConf(spiConf),
@@ -7,6 +10,8 @@ ICM20602_IMU::ICM20602_IMU(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config
 }
 
 int ICM20602_IMU::init() {
+	STRHAL_GPIO_SingleInit(&dataReadyPin, STRHAL_GPIO_TYPE_IHZ);
+
 	if(STRHAL_SPI_Master_Init(spiId, &spiConf) < 0)
 		return -1;
 
@@ -21,6 +26,7 @@ int ICM20602_IMU::init() {
 			 || !writeReg(IMUAddr::ACCEL_CONFIG, 0x18, 50)
 			 || !writeReg(IMUAddr::ACCEL_CONFIG_2, 0x04, 50)
 			 || !writeReg(IMUAddr::INT_PIN_CFG, 0x30, 50)
+			 || !writeReg(IMUAddr::INT_ENABLE, 0x01, 50)
 			 || !writeReg(IMUAddr::PWR_MGMT_2, 0x00, 50)
 			) {
 		return -1;
@@ -98,6 +104,10 @@ int ICM20602_IMU::read() {
 	measData[i].alpha.x = tmp[0] << 8 | tmp[1];
 	measData[i].alpha.y = tmp[2] << 8 | tmp[3];
 	measData[i].alpha.z = tmp[4] << 8 | tmp[5];
+
+	//char buf[64];
+	//sprintf(buf,"%d\n",measData[i].accel.z);
+	//STRHAL_UART_Debug_Write(buf, strlen(buf));
 
 	measDataNum++;
 	measDataNum %= BUF_DATA_SIZE;
