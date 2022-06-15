@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define STRHAL_UART_BUF_SIZE 256
-#define STRHAL_UART_BAUDRATE 115200
+//#define STRHAL_UART_BAUDRATE 115200 // not used since it's set inside the uart struct
 
 #define STRHAL_UART_DEBUG STRHAL_UART2
 
@@ -47,9 +47,14 @@ typedef enum {
 void STRHAL_UART_Init();
 int STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id);
 
-int32_t STRHAL_UART_Debug_Write(const char *data, uint32_t n);
-int32_t STRHAL_UART_Write(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n);
+// non-blocking IO
+int32_t STRHAL_UART_Debug_Write_DMA(const char *data, uint32_t n);
+int32_t STRHAL_UART_Write_DMA(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n);
 int32_t STRHAL_UART_Read(STRHAL_UART_Id_t uart_id, char *data, uint32_t n);
+
+// blocking IO
+int32_t STRHAL_UART_Debug_Write_Blocking(const char *data, uint32_t n, uint16_t timeout);
+int32_t STRHAL_UART_Write_Blocking(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n, uint16_t timeout);
 
 int STRHAL_UART_FlushReception(STRHAL_UART_Id_t uart_id);
 

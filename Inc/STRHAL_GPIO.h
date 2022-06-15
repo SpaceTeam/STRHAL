@@ -36,7 +36,7 @@ typedef enum {
 
 void STRHAL_GPIO_Init();
 
-void STRHAL_GPIO_SingleInit(STRHAL_GPIO_t *gpio, STRHAL_GPIO_Type_t type);
+void STRHAL_GPIO_SingleInit(const STRHAL_GPIO_t *gpio, STRHAL_GPIO_Type_t type);
 void STRHAL_GPIO_GroupInit(STRHAL_GPIO_Group_t *gpios, STRHAL_GPIO_Type_t type);
 
 void STRHAL_GPIO_Write(const STRHAL_GPIO_t *gpio, STRHAL_GPIO_Value_t value);

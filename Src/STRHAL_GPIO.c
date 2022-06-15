@@ -14,7 +14,8 @@ void STRHAL_GPIO_Init() {
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
 }
 
-void STRHAL_GPIO_SingleInit(STRHAL_GPIO_t *gpio, STRHAL_GPIO_Type_t type) {
+// requires the type parameter and the gpio type to be the same TODO: find a better way to enforce that!
+void STRHAL_GPIO_SingleInit(const STRHAL_GPIO_t *gpio, STRHAL_GPIO_Type_t type) {
 	if(gpio->pin > 0x1F)
 		return;
 
@@ -52,7 +53,7 @@ void STRHAL_GPIO_SingleInit(STRHAL_GPIO_t *gpio, STRHAL_GPIO_Type_t type) {
 			break;
 	}
 	LL_GPIO_Init(gpio->port, &GPIO_InitStruct);
-	gpio->type = type;
+	//gpio->type = type;
 }
 
 void STRHAL_GPIO_GroupInit(STRHAL_GPIO_Group_t *gpios, STRHAL_GPIO_Type_t type) {
