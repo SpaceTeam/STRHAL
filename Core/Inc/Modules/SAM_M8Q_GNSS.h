@@ -128,12 +128,13 @@ class SAM_M8Q_GNSS {
 
 		int processData(uint8_t *buffer, uint32_t length);
 
+		int sendConfiguration(GNSSConstellation constellation, GNSSSbasConstellation sbas, GNSSDynamicsMode mode);
+
 		GPSPositionData position = { .Status = GPSPOSITION_STATUS_NOFIX };
 	private:
 		void resetChecksum();
 		void updateChecksum(uint8_t c);
 
-		int sendConfiguration(GNSSConstellation constellation, GNSSSbasConstellation sbas, GNSSDynamicsMode mode);
 		int sendConfigDataChecksummed(const uint8_t * data, uint16_t length, uint32_t retries);
 		int waitForACK(uint32_t delay);
 		int enableMessage(uint8_t msgClass, uint8_t msgId, uint8_t rate);
@@ -143,6 +144,7 @@ class SAM_M8Q_GNSS {
 		int setSbas(GNSSSbasConstellation sbas);
 		int pollVersion();
 		int setConstellation(GNSSConstellation constellation, GNSSSbasConstellation sbas);
+		int clearConfig();
 		//void setBaudrate(uintptr_t gps_port, GNSSBaudRate baud)
 
 		const STRHAL_UART_Id_t uartId;

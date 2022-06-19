@@ -18,8 +18,8 @@ int SAM_M8Q_GNSS::init() {
 
 	STRHAL_UART_Listen(uartId);
 
-	if(!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
-		return -1;
+	//if(!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
+		//return -1;
 
 	LL_mDelay(100);
 
@@ -72,7 +72,8 @@ int SAM_M8Q_GNSS::processData(uint8_t *buffer, uint32_t length) {
 int SAM_M8Q_GNSS::sendConfiguration(GNSSConstellation constellation, GNSSSbasConstellation sbas, GNSSDynamicsMode mode) {
 	int ret = 1;
 
-	ret &= setTimepulse();
+	ret &= clearConfig();
+	/*ret &= setTimepulse();
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_VELNED, 1);    // NAV-VELNED
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_POSLLH, 1);    // NAV-POSLLH
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_SOL, 1);       // NAV-SOL
@@ -88,7 +89,7 @@ int SAM_M8Q_GNSS::sendConfiguration(GNSSConstellation constellation, GNSSSbasCon
 	else {
 		ret &= setMessageRate((uint16_t) 100);
 	}
-	ret &= setConstellation(constellation, sbas);
+	ret &= setConstellation(constellation, sbas);*/
 	return ret;
 }
 
@@ -378,4 +379,23 @@ int SAM_M8Q_GNSS::setConstellation(GNSSConstellation constellation, GNSSSbasCons
 		enable_glonass
 	};
 	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
+}
+
+int SAM_M8Q_GNSS::clearConfig() {
+    // Reset the messges and navigation settings
+    const uint32_t MASK = 0b00001110;
+    const uint8_t msg[] = {
+        UBLOX_CFG_CLASS, // CFG
+        UBLOX_CFG_CFG,   // CFG-CFG
+        0x0C,            // length lsb
+        0x00,            // length msb
+        MASK,            // clear mask (U4)
+        MASK >> 8,
+        MASK >> 16,
+        MASK >> 24,
+        0, 0, 0, 0,         // load mask
+        0, 0, 0, 0          // save mask
+    };
+
+    return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }

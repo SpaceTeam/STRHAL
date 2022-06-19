@@ -13,14 +13,14 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ}),
 	gnss(STRHAL_UART1),
 	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
-	sense_12V(2, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
-	baro_channel(10, baro, 1),
-	x_accel(11, imu, IMUMeasurement::X_ACCEL, 1),
-	y_accel(12, imu, IMUMeasurement::Y_ACCEL, 1),
-	z_accel(13, imu, IMUMeasurement::Z_ACCEL, 1),
-	x_gyro(14, imu, IMUMeasurement::X_GYRO, 1),
-	y_gyro(15, imu, IMUMeasurement::Y_GYRO, 1),
-	z_gyro(16, imu, IMUMeasurement::Z_GYRO, 1),
+	sense_12V(1, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
+	baro_channel(2, baro, 1),
+	x_accel(3, imu, IMUMeasurement::X_ACCEL, 1),
+	y_accel(4, imu, IMUMeasurement::Y_ACCEL, 1),
+	z_accel(5, imu, IMUMeasurement::Z_ACCEL, 1),
+	x_gyro(6, imu, IMUMeasurement::X_GYRO, 1),
+	y_gyro(7, imu, IMUMeasurement::Y_GYRO, 1),
+	z_gyro(8, imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	cancom = Can::instance(this);
@@ -68,6 +68,9 @@ int RCU::init() {
 	if(gnss.init() != 0)
 		return -1;
 
+	if(lora.init() != 0)
+		return -1;
+
 	CANState = cancom->init();
 	if(CANState != COMState::SBY)
 		return -1;
@@ -95,23 +98,22 @@ int RCU::exec() {
 
 	speaker.beep(2, 400, 300);
 
-	//STRHAL_UART_Listen(STRHAL_UART1);
-	char readBuf[256];
-	char writeBuf[256];
-	STRHAL_UART_FlushReception(STRHAL_UART1);
+	int counter = 0;
+	uint8_t loraData[103];
 	while(1) {
-		/*int nn = 0;
-		//char readBuf[256];
-		//char writeBuf[256];
-		do {
-			nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 1);
+		/*
+		int nn = 0;
+		char readBuf[256] = { 0 };
+		char writeBuf[256] = { 0 };
+		nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 256);
+		if(nn > 0) {
 			for(int i = 0; i < nn-1; i++) {
-				sprintf(writeBuf + strlen(writeBuf),"%d,",readBuf[i]);
+				sprintf(writeBuf + strlen(writeBuf),"%c,",readBuf[i]);
 			}
-			sprintf(writeBuf + strlen(writeBuf),"%d,",readBuf[nn-1]);
+			sprintf(writeBuf + strlen(writeBuf),"%c\n",readBuf[nn-1]);
 			STRHAL_UART_Debug_Write_Blocking(writeBuf, strlen(writeBuf),100);
-			STRHAL_Systick_BusyWait(20);
-		} while (nn != 0);*/
+		};
+		*/
 		/*
 		int32_t n = STRHAL_UART_Read(STRHAL_UART1, readBuf, STRHAL_UART_BUF_SIZE);
 		if(n > 0) {
@@ -122,6 +124,24 @@ int RCU::exec() {
 				STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "NOFIX\n", 6, 200);
 			}
 		}*/
+		counter++;
+		if(counter == 100000) {
+			counter = 0;
+			uint64_t time = STRHAL_Systick_GetTick();
+			loraData[0] = (uint8_t) time;
+			loraData[1] = (uint8_t) (time >> 8);
+			loraData[2] = (uint8_t) (time >> 16);
+			loraData[3] = (uint8_t) (time >> 24);
+			loraData[4] = (uint8_t) (time >> 32);
+			loraData[5] = (uint8_t) (time >> 40);
+			loraData[6] = (uint8_t) (time >> 48);
+			loraData[7] = (uint8_t) (time >> 56);
+			//gnss.sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G);
+			int sent = lora.sendBytes(loraData, 103);
+			char buf[32];
+			sprintf(buf,"sent %d\n",sent);
+			STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf),100);
+		}
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}
