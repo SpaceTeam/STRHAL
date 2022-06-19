@@ -191,6 +191,9 @@ int ServoChannel::setVariable(uint8_t variable_id, int32_t data) {
 		case SERVO_POSITION:
 			return -2;
 
+		case SERVO_POSITION_RAW:
+			return -2;
+
 		case SERVO_SENSOR_REFRESH_DIVIDER:
 			refreshDivider = data;
 			refreshCounter = 0;
@@ -205,6 +208,10 @@ int ServoChannel::getVariable(uint8_t variable_id, int32_t &data) const {
 	switch(variable_id) {
 	case SERVO_POSITION:
 		data = feedbackPosition;
+		return 0;
+
+	case SERVO_POSITION_RAW:
+		data = *feedbackMeasurement << 4;
 		return 0;
 
 	case SERVO_TARGET_POSITION:
