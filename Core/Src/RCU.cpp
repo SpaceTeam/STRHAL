@@ -10,7 +10,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	ledGreen({GPIOD, 2, STRHAL_GPIO_TYPE_OPP}),
 	baro(STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOA, 3, STRHAL_GPIO_TYPE_IHZ}),
 	imu(STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOD, 0, STRHAL_GPIO_TYPE_IHZ}),
-	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ}),
+	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_LL, 0x5, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ},{GPIOB, 11, STRHAL_GPIO_TYPE_IHZ}),
 	gnss(STRHAL_UART1),
 	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
 	sense_12V(1, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
@@ -65,8 +65,8 @@ int RCU::init() {
 	if(baro.init() != 0)
 		return -1;
 
-	if(gnss.init() != 0)
-		return -1;
+	//if(gnss.init() != 0)
+		//return -1;
 
 	if(lora.init() != 0)
 		return -1;
@@ -127,7 +127,7 @@ int RCU::exec() {
 		counter++;
 		if(counter == 100000) {
 			counter = 0;
-			uint64_t time = STRHAL_Systick_GetTick();
+			/*uint64_t time = STRHAL_Systick_GetTick();
 			loraData[0] = (uint8_t) time;
 			loraData[1] = (uint8_t) (time >> 8);
 			loraData[2] = (uint8_t) (time >> 16);
@@ -140,6 +140,12 @@ int RCU::exec() {
 			int sent = lora.sendBytes(loraData, 103);
 			char buf[32];
 			sprintf(buf,"sent %d\n",sent);
+			STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf),100);*/
+			while(lora.isBusy());
+
+			uint8_t who = lora.whoAmI();
+			char buf[32];
+			sprintf(buf,"ID: %d\n",who);
 			STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf),100);
 		}
 		if(GenericChannel::exec() != 0)

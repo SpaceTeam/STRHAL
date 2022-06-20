@@ -5,11 +5,12 @@
 #include <cstring>
 #include <cstdio>
 
-LoRa1276F30_Radio::LoRa1276F30_Radio(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dio1, const STRHAL_GPIO_t &dio3) :
+LoRa1276F30_Radio::LoRa1276F30_Radio(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dio1, const STRHAL_GPIO_t &dio3, const STRHAL_GPIO_t &busyPin) :
 	spiId(spiId),
 	spiConf(spiConf),
 	dio1(dio1),
-	dio3(dio3) {
+	dio3(dio3),
+	busyPin(busyPin) {
 }
 
 int LoRa1276F30_Radio::init() {
@@ -29,6 +30,10 @@ int LoRa1276F30_Radio::init() {
 	NVIC_SetPriority(EXTI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 3, 1));
 	NVIC_EnableIRQ(EXTI3_IRQn);*/
 
+	STRHAL_GPIO_SingleInit(&dio1, STRHAL_GPIO_TYPE_IHZ);
+	STRHAL_GPIO_SingleInit(&dio3, STRHAL_GPIO_TYPE_IHZ);
+	STRHAL_GPIO_SingleInit(&busyPin, STRHAL_GPIO_TYPE_IHZ);
+
 	if(STRHAL_SPI_Master_Init(spiId, &spiConf) < 0)
 		return -1;
 
@@ -36,7 +41,7 @@ int LoRa1276F30_Radio::init() {
 
 	LL_mDelay(10);
 
-	if(whoAmI() != 0xc8)
+	/*if(whoAmI() != 0x12)
 		return -1;
 
 	//lora_reset(); TODO solder bridge for reset
@@ -63,13 +68,17 @@ int LoRa1276F30_Radio::init() {
 	ret &= setState(LoraState::RECEIVING);
 
 	if(!ret)
-		return -1;
+		return -1;*/
 
 	return 0;
 }
 
 int LoRa1276F30_Radio::reset() {
 	return 0;
+}
+
+bool LoRa1276F30_Radio::isBusy() {
+	return (STRHAL_GPIO_Read(&busyPin) == STRHAL_GPIO_VALUE_L) ? false : true;
 }
 
 uint8_t LoRa1276F30_Radio::whoAmI() {

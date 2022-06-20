@@ -62,7 +62,7 @@ enum class LoraState : uint8_t {
 
 class LoRa1276F30_Radio {
 	public:
-		LoRa1276F30_Radio(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dio1, const STRHAL_GPIO_t &dio3);
+		LoRa1276F30_Radio(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dio1, const STRHAL_GPIO_t &dio3, const STRHAL_GPIO_t &busyPin);
 		//LPS25HB_Baro(const LPS25HB_Baro &other) = delete;
 		//LPS25HB_Baro& operator=(const LPS25HB_Baro &other) = delete;
 
@@ -74,6 +74,7 @@ class LoRa1276F30_Radio {
 		LoraState getState();
 		bool setState(LoraState state);
 		bool ready();
+		bool isBusy();
 
 		int sendBytes(uint8_t* buffer, uint8_t length);
 		int16_t read();
@@ -111,7 +112,7 @@ class LoRa1276F30_Radio {
 
 		STRHAL_SPI_Id_t spiId;
 		STRHAL_SPI_Config_t spiConf;
-		const STRHAL_GPIO_t dio1, dio3;
+		const STRHAL_GPIO_t dio1, dio3, busyPin;
 		uint16_t _packetIndex = 0;
 
 };

@@ -28,6 +28,8 @@ int LPS25HB_Baro::init() {
 	NVIC_SetPriority(EXTI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 3, 1));
 	NVIC_EnableIRQ(EXTI3_IRQn);*/
 
+	STRHAL_GPIO_SingleInit(&dataReadyPin, STRHAL_GPIO_TYPE_IHZ);
+
 	if(STRHAL_SPI_Master_Init(spiId, &spiConf) < 0)
 		return -1;
 

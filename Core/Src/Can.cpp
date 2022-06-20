@@ -35,7 +35,7 @@ COMState Can::init(COMMode mode) {
 	if(STRHAL_CAN_Instance_Init(STRHAL_FDCAN2) != 0)
 		return state = COMState::ERR;
 
-	if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM7, 160, 100) != 10000) //TODO: create Interface for burn interval calculation based on maximal bus bandwidth
+	if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM7, 160, 100) != 10000)
 		return state = COMState::ERR;
 
 	if(STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_TIM7, Can::heartbeat) != 0)
