@@ -3,7 +3,7 @@
 
 #include "AbstractChannel.h"
 #include <can_houbolt/channels/generic_channel_def.h>
-#include <Can.h>
+#include <Communication.h>
 #include <STRHAL.h>
 #include "../Modules/W25Qxx_Flash.h"
 

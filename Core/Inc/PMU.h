@@ -6,7 +6,7 @@
 #include <Channels/DigitalInChannel.h>
 #include <Channels/GenericChannel.h>
 #include <Channels/BaroChannel.h>
-#include <Can.h>
+#include <Communication.h>
 #include <Channels/IMUChannel.h>
 #include <Speaker.h>
 
@@ -23,8 +23,7 @@ class PMU : public GenericChannel {
 		int exec() override;
 
 	private:
-		Can *cancom;
-		COMState CANState;
+		Communication *com;
 
 		W25Qxx_Flash *flash;
 

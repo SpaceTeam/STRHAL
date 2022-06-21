@@ -14,7 +14,7 @@ RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, co
 }
 
 int RocketChannel::init() {
-	cancom = Can::instance(nullptr); // works because the generic channel (e.g. ECU) has already initialized CANCOM
+	can = Can::instance(0); // works because the generic channel (e.g. ECU) has already initialized CANCOM
 	return 0;
 }
 
@@ -87,7 +87,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 			{ 0 };
 			setMsg.variable_id = 1; // servo target position
 			setMsg.value = 65000; // open servo
-			cancom->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
+			can->sendAsMaster(9, 11, 4, (uint8_t *) &setMsg, 5+sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
 			/*SetMsg_t setMsg =
 			{ 0 };
 			setMsg.variable_id = 0; // pyro state

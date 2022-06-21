@@ -73,7 +73,7 @@ int SAM_M8Q_GNSS::sendConfiguration(GNSSConstellation constellation, GNSSSbasCon
 	int ret = 1;
 
 	ret &= clearConfig();
-	/*ret &= setTimepulse();
+	ret &= setTimepulse();
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_VELNED, 1);    // NAV-VELNED
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_POSLLH, 1);    // NAV-POSLLH
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_SOL, 1);       // NAV-SOL
@@ -89,7 +89,7 @@ int SAM_M8Q_GNSS::sendConfiguration(GNSSConstellation constellation, GNSSSbasCon
 	else {
 		ret &= setMessageRate((uint16_t) 100);
 	}
-	ret &= setConstellation(constellation, sbas);*/
+	ret &= setConstellation(constellation, sbas);
 	return ret;
 }
 

@@ -25,7 +25,7 @@ int main(void) {
 	STRHAL_UART_Debug_Write_Blocking("PMU STARTED\n", 12, 50);
 	pmu.exec();
 #elif defined(RCU_BOARD)
-	RCU rcu(10,0xDEADBEEF,100);
+	RCU rcu(8,0xDEADBEEF,100);
 
 	if(rcu.init() != 0)
 			return -1;

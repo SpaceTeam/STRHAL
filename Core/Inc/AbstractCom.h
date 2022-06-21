@@ -3,30 +3,24 @@
 
 #include <cstdint>
 
-enum class COMState : int {
-	INI,
-	SBY,
-	RUN,
-	ERR,
-};
-
 enum class COMMode : int {
 	STANDARD_COM_MODE,
-	BRIDGE_COM_MODE
+	BRIDGE_COM_MODE,
+	LISTENER_COM_MODE
 };
+
+typedef void (*Com_Receptor_t) (uint32_t id, uint8_t *data, uint32_t n);
+typedef void (*Com_Heartbeat_t) ();
 
 class AbstractCom {
 	public:
 		AbstractCom(uint32_t nodeId);
-		virtual ~AbstractCom() {}
-		virtual COMState init() = 0;
-		virtual COMState exec() = 0;
-
-		COMState getState() const;
+		virtual int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) = 0;
+		virtual int exec() = 0;
+		virtual int send(uint32_t id, uint8_t* data, uint8_t n) = 0;
 
 	protected:
 		uint32_t nodeId;
-		COMState state;
 };
 
 #endif /*ABSTRACTCOM_H*/

@@ -5,7 +5,7 @@
 #include <Channels/DigitalOutChannel.h>
 #include <Channels/DigitalInChannel.h>
 #include <Channels/GenericChannel.h>
-#include <Can.h>
+#include <Communication.h>
 #include <Speaker.h>
 
 #include <STRHAL.h>
@@ -21,8 +21,7 @@ class IOB : public GenericChannel {
 		int exec() override;
 
 	private:
-		Can *cancom;
-		COMState CANState;
+		Communication *com;
 
 		W25Qxx_Flash *flash;
 

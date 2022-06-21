@@ -74,63 +74,6 @@ enum class LoraAddr : uint16_t {
 	DIO3_OUTPUT_VOLT_CNTRL	= 0x0920,
 	EVENT_MASK				= 0x0944,
 };
-/*
-enum class LoraAddr : uint8_t {
-	FIFO                 = 0x00,
-	OP_MODE              = 0x01,
-	FRF_MSB              = 0x06,
-	FRF_MID              = 0x07,
-	FRF_LSB              = 0x08,
-	PA_CONFIG            = 0x09,
-	LNA                  = 0x0c,
-	FIFO_ADDR_PTR        = 0x0d,
-	FIFO_TX_BASE_ADDR    = 0x0e,
-	FIFO_RX_BASE_ADDR    = 0x0f,
-	FIFO_RX_CURRENT_ADDR = 0x10,
-	IRQ_FLAGS            = 0x12,
-	RX_NB_BYTES          = 0x13,
-	PKT_RSSI_VALUE       = 0x1a,
-	PKT_SNR_VALUE        = 0x1b,
-	MODEM_CONFIG_1       = 0x1d,
-	MODEM_CONFIG_2       = 0x1e,
-	PREAMBLE_MSB         = 0x20,
-	PREAMBLE_LSB         = 0x21,
-	PAYLOAD_LENGTH       = 0x22,
-	RSSI_WIDEBAND        = 0x2c,
-	DETECTION_OPTIMIZE   = 0x31,
-	DETECTION_THRESHOLD  = 0x37,
-	ERRATA1				 = 0x36,
-	ERRATA2              = 0x3A,
-	SYNC_WORD            = 0x39,
-	DIO_MAPPING_1        = 0x40,
-	VERSION              = 0x42,
-	TEMP				 = 0x3C,
-	OCP					 = 0x0B,
-	LR_RegHopPeriod      = 0x24,
-};
-
-enum class LoraMode : uint8_t {
-	LONG_RANGE_MODE     = 0x80,
-	SLEEP               = 0x00,
-	STDBY               = 0x01,
-	TX                  = 0x03,
-	RX_CONTINUOUS       = 0x05,
-	RX_SINGLE           = 0x06,
-};
-
-enum class LoraIRQ : uint8_t {
-	TX_DONE_MASK           = 0x08,
-	PAYLOAD_CRC_ERROR_MASK = 0x21,
-	RX_DONE_MASK           = 0x40,
-};
-
-enum class LoraState : uint8_t {
-	SENDING,
-	RECEIVING,
-	IDLE,
-	DISCONNECTED,
-	SLEEPING,
-};*/
 
 class LoRa1276F30_Radio {
 	public:
@@ -146,13 +89,14 @@ class LoRa1276F30_Radio {
 		bool readReg(const LoraAddr &address, uint8_t *reg, uint8_t n = 0);
 		uint8_t getReg(const LoraAddr &address);
 		uint8_t getStatus();
+		uint8_t getErrors();
 		bool writeReg(const LoraAddr &address, uint8_t reg, uint16_t delay = 0);
 		bool writeCommand(const LoraOpcode &opcode, uint8_t *parameter, uint8_t n, uint16_t delay = 0);
 
 		bool sendBytes(uint8_t* buffer, uint8_t n);
 
 		static constexpr uint32_t MAX_PKT_LENGTH = 255;
-		static constexpr uint32_t PKT_LENGTH = 101; // 3 + 31 + 25 + 47
+		static constexpr uint32_t PKT_LENGTH = 12; // 3 + 31+4(PMU) + 25+4(RCU) + 47+4(ECU)
 		static constexpr uint32_t FREQUENCY = 433E6;
 		static constexpr uint16_t PREAMBLE_LENGTH = 8;
 		static constexpr uint8_t SPREADING_FACTOR = 7;

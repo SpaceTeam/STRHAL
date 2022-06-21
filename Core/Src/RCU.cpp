@@ -1,8 +1,8 @@
 #include "../Inc/RCU.h"
-#include "../Inc/Can.h"
 
 #include <cstdio>
 #include <cstring>
+#include <stm32g4xx_ll_usart.h>
 
 RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	GenericChannel(node_id, fw_version, refresh_divider),
@@ -23,7 +23,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	z_gyro(8, imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	cancom = Can::instance(this);
+	com = Communication::instance(this, &lora);
 	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&sense_5V);
 	registerChannel(&sense_12V);
@@ -55,7 +55,7 @@ int RCU::init() {
 	if(flash->init() != 0)
 		return -1;
 
-	if(cancom == nullptr)
+	if(com == nullptr)
 		return -1;
 
 	// TODO find out why IMU is dead
@@ -71,8 +71,7 @@ int RCU::init() {
 	if(lora.init() != 0)
 		return -1;
 
-	CANState = cancom->init();
-	if(CANState != COMState::SBY)
+	if(com->init(COMMode::LISTENER_COM_MODE) != 0)
 		return -1;
 
 	if(GenericChannel::init() != 0)
@@ -89,8 +88,7 @@ int RCU::exec() {
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
 
-	CANState = cancom->exec();
-	if(CANState != COMState::RUN)
+	if(com->exec() != 0)
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
@@ -98,12 +96,11 @@ int RCU::exec() {
 
 	speaker.beep(2, 400, 300);
 
-	int counter = 0;
-	uint8_t loraData[101];
-	memset(loraData,0,101);
+	//int counter = 0;
+	//uint8_t loraData[101];
+	//memset(loraData,0,101);
 	while(1) {
-		/*
-		int nn = 0;
+		/*int nn = 0;
 		char readBuf[256] = { 0 };
 		char writeBuf[256] = { 0 };
 		nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 256);
@@ -113,8 +110,8 @@ int RCU::exec() {
 			}
 			sprintf(writeBuf + strlen(writeBuf),"%c\n",readBuf[nn-1]);
 			STRHAL_UART_Debug_Write_Blocking(writeBuf, strlen(writeBuf),100);
-		};
-		*/
+		};*/
+
 		/*
 		int32_t n = STRHAL_UART_Read(STRHAL_UART1, readBuf, STRHAL_UART_BUF_SIZE);
 		if(n > 0) {
@@ -125,18 +122,9 @@ int RCU::exec() {
 				STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "NOFIX\n", 6, 200);
 			}
 		}*/
-		counter++;
+		/*counter++;
 		if(counter == 100000) {
 			counter = 0;
-			uint64_t time = STRHAL_Systick_GetTick();
-			/*loraData[0] = (uint8_t) time;
-			loraData[1] = (uint8_t) (time >> 8);
-			loraData[2] = (uint8_t) (time >> 16);
-			loraData[3] = (uint8_t) (time >> 24);
-			loraData[4] = (uint8_t) (time >> 32);
-			loraData[5] = (uint8_t) (time >> 40);
-			loraData[6] = (uint8_t) (time >> 48);
-			loraData[7] = (uint8_t) (time >> 56);*/
 			sprintf((char *)loraData,"geh scheissen markus!");
 			//gnss.sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G);
 			bool sent = lora.sendBytes(loraData, 101);
@@ -149,7 +137,7 @@ int RCU::exec() {
 			char buf2[32];
 			sprintf(buf2,"ID: %d\n",who);
 			STRHAL_UART_Debug_Write_Blocking(buf2, strlen(buf2),100);
-		}
+		}*/
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}

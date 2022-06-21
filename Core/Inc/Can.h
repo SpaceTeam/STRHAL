@@ -1,11 +1,10 @@
-#ifndef CANCOM_H
-#define CANCOM_H
+#ifndef CAN_H
+#define CAN_H
 
-class GenericChannel; // Forward declaration to avoid cyclic dependency
-
-#include <AbstractCom.h>
 #include "Channels/AbstractChannel.h"
 #include "STRHAL.h"
+#include <AbstractCom.h>
+//#include <Communication.h>
 
 class Can : public AbstractCom {
 	public:
@@ -13,33 +12,26 @@ class Can : public AbstractCom {
 		Can& operator=(const Can &other) = delete;
 		Can(const Can &&other) = delete;
 		Can& operator=(const Can &&other) = delete;
-		~Can();
 
-		static Can* instance(GenericChannel *genericChannel = nullptr);
+		static Can* instance(uint32_t nodeId = 0);
 
-		COMState init() override;
+		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) override;
+		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode);
+		int exec() override;
 
-		COMState exec() override;
-
-		COMState init(COMMode mode);
-
+		int send(uint32_t id, uint8_t* data, uint8_t n) override;
 		void sendAsMaster(uint8_t receiverNodeId, uint8_t receiverChannelId, uint8_t commandId, uint8_t *data, uint8_t n);
 
-		COMState subscribe2Node(uint8_t nodeId, AbstractChannel & channel);
-
 	private:
-		Can(GenericChannel *genericChannel);
+		Can(uint32_t nodeId);
 
-		static GenericChannel *genericChannel;
-		static void standardReceptor(uint32_t id, uint8_t *data, uint32_t n);
 		static void bridgeReceptor(STRHAL_FDCAN_Id_t bus_id, uint32_t id, uint8_t *data, uint32_t n);
 		static void internalReceptor(uint32_t id, uint8_t *data, uint32_t n);
 		static void externalReceptor(uint32_t id, uint8_t *data, uint32_t n);
 
-		static void heartbeat();
-
 		static Can *cancom;
+		static Com_Receptor_t standardReceptor;
 
 };
 
-#endif /*CANCOM_H*/
+#endif /*CAN_H*/

@@ -57,10 +57,10 @@ int LoRa1276F30_Radio::init() {
 	waitForBusy();
 	ret &= setPacketParams();
 	waitForBusy();
-	uint8_t txModReg = getReg(LoraAddr::TX_MODULATION);
-	waitForBusy();
-	ret &= writeReg(LoraAddr::TX_MODULATION, txModReg & 0xFB, 1);
-	waitForBusy();
+	//uint8_t txModReg = getReg(LoraAddr::TX_MODULATION);
+	//waitForBusy();
+	//ret &= writeReg(LoraAddr::TX_MODULATION, txModReg & 0xFB, 1);
+	//waitForBusy();
 	uint8_t txClampConfig = getReg(LoraAddr::TX_CLAMP_CONFIG);
 	waitForBusy();
 	ret &= writeReg(LoraAddr::TX_CLAMP_CONFIG, txClampConfig | 0x1E, 1);
@@ -84,16 +84,44 @@ void LoRa1276F30_Radio::waitForBusy() {
 }
 
 bool LoRa1276F30_Radio::sendBytes(uint8_t* buffer, uint8_t n) {
-	setTx();
+	if(!SetBufferBaseAddress())
+		return -1;
 	waitForBusy();
 
 	uint8_t cmd[256];
+	memset(cmd,0,256);
 	cmd[0] = static_cast<uint8_t>(LoraOpcode::WRITE_BUFFER);
 	cmd[1] = 0x00; // Offset
 	memcpy(&cmd[2], buffer, n);
 
 	if(STRHAL_SPI_Master_Transceive(spiId, cmd, n + 2, n + 2, nullptr, 0, 100) != 0)
 		return false;
+	waitForBusy();
+	/*uint8_t rec[256];
+	memset(rec,0,256);
+	uint8_t read[] = {0x1E, 0x00, 0x00};
+	if(STRHAL_SPI_Master_Transceive(spiId, read, 3, 3, rec, 12, 100) != 12)
+		return false;
+	waitForBusy();*/
+	//uint8_t stat = getErrors();
+	//waitForBusy();
+	//STRHAL_UART_Write_DMA(STRHAL_UART_DEBUG, (char *) &stat, 1);
+
+	if(!setModulationParams())
+		return -1;
+	waitForBusy();
+	if(!setPacketParams())
+		return -1;
+	waitForBusy();
+
+	//uint8_t txModReg = getReg(LoraAddr::TX_MODULATION);
+	//waitForBusy();
+	//if(!writeReg(LoraAddr::TX_MODULATION, txModReg & 0xFB, 1))
+		//return -1;
+	//waitForBusy();
+	if(!setTx())
+		return -1;
+	waitForBusy();
 
 	uint8_t state = 0;
 	while(!state) {
@@ -155,6 +183,18 @@ uint8_t LoRa1276F30_Radio::getStatus() {
 	return state;
 }
 
+uint8_t LoRa1276F30_Radio::getErrors() {
+	uint8_t cmd[2];
+	cmd[0] = static_cast<uint8_t>(LoraOpcode::GET_DEVICE_ERRORS);
+	cmd[1] = 0;
+	uint8_t errors = 0;
+
+	if(STRHAL_SPI_Master_Transceive(spiId, cmd, 2, 2, &errors, 1, 100) != 1)
+		return 0;
+
+	return errors;
+}
+
 uint8_t LoRa1276F30_Radio::getReg(const LoraAddr &address) {
 	uint8_t reg = 0;
 	(void) readReg(address, &reg, 1);
@@ -162,12 +202,12 @@ uint8_t LoRa1276F30_Radio::getReg(const LoraAddr &address) {
 }
 
 bool LoRa1276F30_Radio::setPacketType() {
-	uint8_t parameter = 0x01;
+	uint8_t parameter = 0x01; // Lora Packet
 	return writeCommand(LoraOpcode::SET_PACKET_TYPE, &parameter, 1, 10);
 }
 
 bool LoRa1276F30_Radio::calibrateImage() {
-	uint8_t parameter[2] = { 0x6B, 0x6F };
+	uint8_t parameter[2] = { 0x6B, 0x6F }; // Calibrate for 433MHz
 	return writeCommand(LoraOpcode::CALIBRATE_IMAGE, parameter, 2, 10);
 }
 
@@ -179,27 +219,29 @@ bool LoRa1276F30_Radio::setRFFrequency() {
 }
 
 bool LoRa1276F30_Radio::setPAConfig() {
-	uint8_t parameter[4] = { 0x04, 0x07, 0x00, 0x01 };
+	//uint8_t parameter[4] = { 0x04, 0x07, 0x00, 0x01 }; // optimal PA settings for +22dBm
+	uint8_t parameter[4] = { 0x02, 0x02, 0x00, 0x01 };
 	return writeCommand(LoraOpcode::SET_PA_CONFIG, parameter, 4, 10);
 }
 
 bool LoRa1276F30_Radio::SetTxParams() {
-	uint8_t parameter[2] = { 0x16, 0x02 };
+	//uint8_t parameter[2] = { 0x16, 0x02 }; // +22dBm and 40us ramp up/down
+	uint8_t parameter[2] = { 0xEF, 0x02 };
 	return writeCommand(LoraOpcode::SET_TX_PARAMS, parameter, 2, 10);
 }
 
 bool LoRa1276F30_Radio::SetBufferBaseAddress() {
-	uint8_t parameter[2] = { 0x00, 0x00 };
+	uint8_t parameter[2] = { 0x00, 0x00 }; // set addresses to 0
 	return writeCommand(LoraOpcode::SET_BUFFER_BASE_ADDR, parameter, 2, 10);
 }
 
 bool LoRa1276F30_Radio::setModulationParams() {
-	uint8_t parameter[4] = { SPREADING_FACTOR, 0x06, 0x02, 0x00 };
+	uint8_t parameter[4] = { SPREADING_FACTOR, 0x05, 0x02, 0x00 }; // SF7, BW500kHz, CR4/6, no low data optimize
 	return writeCommand(LoraOpcode::SET_MODULATION_PARAM, parameter, 4, 10);
 }
 
 bool LoRa1276F30_Radio::setPacketParams() {
-	uint8_t parameter[6] = { 0x00, PREAMBLE_LENGTH, 0x01, PKT_LENGTH, CRC_ENABLED, 0x00 };
+	uint8_t parameter[6] = { 0x00, PREAMBLE_LENGTH, 0x01, PKT_LENGTH, CRC_ENABLED, 0x00 }; // 8bit preamble, fixed length header, paket length, crc, normal iq
 	return writeCommand(LoraOpcode::SET_PACKET_PARAM, parameter, 6, 10);
 }
 

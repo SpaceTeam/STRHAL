@@ -1,5 +1,4 @@
 #include "../Inc/PMU.h"
-#include "../Inc/Can.h"
 
 #include <cstdio>
 #include <cstring>
@@ -29,7 +28,7 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	z_gyro(14, imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	cancom = Can::instance(this);
+	com = Communication::instance(this, nullptr);
 	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&sense_5V);
 	registerChannel(&sense_5VP);
@@ -69,7 +68,7 @@ int PMU::init() {
 	if(flash->init() != 0)
 		return -1;
 
-	if(cancom == nullptr)
+	if(com == nullptr)
 		return -1;
 
 	if(imu.init() != 0)
@@ -78,8 +77,7 @@ int PMU::init() {
 	if(baro.init() != 0)
 		return -1;
 
-	CANState = cancom->init();
-	if(CANState != COMState::SBY)
+	if(com->init() != 0)
 		return -1;
 
 	if(GenericChannel::init() != 0)
@@ -96,8 +94,7 @@ int PMU::exec() {
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
 
-	CANState = cancom->exec();
-	if(CANState != COMState::RUN)
+	if(com->exec() != 0)
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
