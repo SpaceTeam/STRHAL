@@ -13,20 +13,20 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
 	sense_5VP(1, {ADC1, STRHAL_ADC_CHANNEL_9}, 1),
 	sense_12V(2, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
-	umbilical(3, {GPIOA, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
-	charging(4, {GPIOA, 9, STRHAL_GPIO_TYPE_IHZ}, 1),
-	out0(5, {GPIOC, 6, STRHAL_GPIO_TYPE_OPP}, 1),
-	out1(6, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}, 1),
-	out2(7, {GPIOC, 8, STRHAL_GPIO_TYPE_OPP}, 1),
-	out3(8, {GPIOC, 9, STRHAL_GPIO_TYPE_OPP}, 1),
-	payload(9, {GPIOC, 1, STRHAL_GPIO_TYPE_OPP}, 1),
-	baro_channel(10, baro, 1),
-	x_accel(11, imu, IMUMeasurement::X_ACCEL, 1),
-	y_accel(12, imu, IMUMeasurement::Y_ACCEL, 1),
-	z_accel(13, imu, IMUMeasurement::Z_ACCEL, 1),
-	x_gyro(14, imu, IMUMeasurement::X_GYRO, 1),
-	y_gyro(15, imu, IMUMeasurement::Y_GYRO, 1),
-	z_gyro(16, imu, IMUMeasurement::Z_GYRO, 1),
+	//umbilical(3, {GPIOA, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
+	//charging(4, {GPIOA, 9, STRHAL_GPIO_TYPE_IHZ}, 1),
+	out0(3, {GPIOC, 6, STRHAL_GPIO_TYPE_OPP}, 1),
+	out1(4, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}, 1),
+	out2(5, {GPIOC, 8, STRHAL_GPIO_TYPE_OPP}, 1),
+	out3(6, {GPIOC, 9, STRHAL_GPIO_TYPE_OPP}, 1),
+	payload(7, {GPIOC, 1, STRHAL_GPIO_TYPE_OPP}, 1),
+	baro_channel(8, baro, 1),
+	x_accel(9, imu, IMUMeasurement::X_ACCEL, 1),
+	y_accel(10, imu, IMUMeasurement::Y_ACCEL, 1),
+	z_accel(11, imu, IMUMeasurement::Z_ACCEL, 1),
+	x_gyro(12, imu, IMUMeasurement::X_GYRO, 1),
+	y_gyro(13, imu, IMUMeasurement::Y_GYRO, 1),
+	z_gyro(14, imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	cancom = Can::instance(this);
@@ -34,8 +34,8 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&sense_5V);
 	registerChannel(&sense_5VP);
 	registerChannel(&sense_12V);
-	registerChannel(&umbilical);
-	registerChannel(&charging);
+	//registerChannel(&umbilical);
+	//registerChannel(&charging);
 	registerChannel(&out0);
 	registerChannel(&out1);
 	registerChannel(&out2);

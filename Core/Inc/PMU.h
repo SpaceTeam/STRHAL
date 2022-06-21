@@ -35,7 +35,7 @@ class PMU : public GenericChannel {
 
 		// Channels
 		ADCChannel sense_5V, sense_5VP, sense_12V;
-		DigitalInChannel umbilical, charging;
+		//DigitalInChannel umbilical, charging;
 		DigitalOutChannel out0, out1, out2, out3, payload;
 		BaroChannel baro_channel;
 		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
