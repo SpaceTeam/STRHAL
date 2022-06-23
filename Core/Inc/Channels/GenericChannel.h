@@ -19,6 +19,8 @@ class GenericChannel : public AbstractChannel {
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n, uint8_t channelId);
 		int getSensorData(uint8_t *data, uint8_t &n);
 		int getNodeInfo(uint8_t *data, uint8_t &n);
+		int getFlashClearInfo(uint8_t *data, uint8_t &n);
+		int flashClear(uint8_t *data, uint8_t &n);
 
 		uint32_t getNodeId() const;
 
@@ -34,6 +36,7 @@ class GenericChannel : public AbstractChannel {
 		 uint32_t nodeId;
 		 uint32_t firmwareVersion;
 		 uint32_t channelMask;
+		 uint8_t loggingEnabled = 0;
 
 		 W25Qxx_Flash *flash;
 };

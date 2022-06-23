@@ -49,15 +49,6 @@ int RCU::init() {
 	if(STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
 		return -1;
 
-	if(flash == nullptr)
-		return -1;
-
-	if(flash->init() != 0)
-		return -1;
-
-	if(com == nullptr)
-		return -1;
-
 	// TODO find out why IMU is dead
 	if(imu.init() != 0)
 		return -1;
@@ -71,7 +62,16 @@ int RCU::init() {
 	if(lora.init() != 0)
 		return -1;
 
+	if(com == nullptr)
+		return -1;
+
 	if(com->init(COMMode::LISTENER_COM_MODE) != 0)
+		return -1;
+
+	if(flash == nullptr)
+		return -1;
+
+	if(flash->init() != 0) //has to be init after Com
 		return -1;
 
 	if(GenericChannel::init() != 0)
@@ -99,6 +99,7 @@ int RCU::exec() {
 	//int counter = 0;
 	//uint8_t loraData[101];
 	//memset(loraData,0,101);
+	//STRHAL_UART_Listen(STRHAL_UART1);
 	while(1) {
 		/*int nn = 0;
 		char readBuf[256] = { 0 };
@@ -111,7 +112,9 @@ int RCU::exec() {
 			sprintf(writeBuf + strlen(writeBuf),"%c\n",readBuf[nn-1]);
 			STRHAL_UART_Debug_Write_Blocking(writeBuf, strlen(writeBuf),100);
 		};*/
-
+		/*if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
+			USART2->TDR = USART1->RDR;
+		}*/
 		/*
 		int32_t n = STRHAL_UART_Read(STRHAL_UART1, readBuf, STRHAL_UART_BUF_SIZE);
 		if(n > 0) {
@@ -138,8 +141,12 @@ int RCU::exec() {
 			sprintf(buf2,"ID: %d\n",who);
 			STRHAL_UART_Debug_Write_Blocking(buf2, strlen(buf2),100);
 		}*/
+		if(flash->exec() != 0)
+			return -1;
 		if(GenericChannel::exec() != 0)
 			return -1;
+		//com->heartbeatLora();
+		//LL_mDelay(1000);
 	}
 
 	speaker.beep(6, 100, 100);

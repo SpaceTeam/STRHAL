@@ -15,6 +15,8 @@ RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, co
 
 int RocketChannel::init() {
 	can = Can::instance(0); // works because the generic channel (e.g. ECU) has already initialized CANCOM
+	if(can == nullptr)
+		return -1;
 	return 0;
 }
 

@@ -65,6 +65,8 @@ enum class LoraAddr : uint16_t {
 	CRC_INIT_LSB			= 0x06BD,
 	CRC_POLY_MSB			= 0x06BE,
 	CRC_POLY_LSB			= 0x06BF,
+	SYNC_WORD_MSB			= 0x0740,
+	SYNC_WORD_LSB			= 0x0741,
 	TX_MODULATION			= 0x0889,
 	RX_GAIN					= 0x08AC,
 	TX_CLAMP_CONFIG			= 0x08D8,
@@ -97,10 +99,10 @@ class LoRa1276F30_Radio {
 
 		static constexpr uint32_t MAX_PKT_LENGTH = 255;
 		static constexpr uint32_t PKT_LENGTH = 12; // 3 + 31+4(PMU) + 25+4(RCU) + 47+4(ECU)
-		static constexpr uint32_t FREQUENCY = 433E6;
+		static constexpr float FREQUENCY = 433.0;
 		static constexpr uint16_t PREAMBLE_LENGTH = 8;
 		static constexpr uint8_t SPREADING_FACTOR = 7;
-		static constexpr uint32_t SIGNAL_BANDWIDTH = 500E3;
+		static constexpr uint32_t SIGNAL_BANDWIDTH = 250E3;
 		static constexpr uint8_t TX_POWER = 17;
 		static constexpr uint8_t SYNC_WORD = 0xE4;
 		static constexpr uint8_t CODING_RATE = 6;

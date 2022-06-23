@@ -109,10 +109,10 @@ int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode) 
 			{ .value_id1 = 0x00, .mask_id2 = 0xFFFF, .type = FDCAN_FILTER_RANGE }
 		};
 
-		if (STRHAL_CAN_Subscribe(STRHAL_FDCAN1, STRHAL_FDCAN_RX0, mainFilter, 1, Can::internalReceptor) != 2)
+		if (STRHAL_CAN_Subscribe(STRHAL_FDCAN1, STRHAL_FDCAN_RX0, mainFilter, 1, Can::internalReceptor) != 1)
 			return -1;
 
-		if (STRHAL_CAN_Subscribe(STRHAL_FDCAN2, STRHAL_FDCAN_RX0, mainFilter, 1, Can::externalReceptor) != 2)
+		if (STRHAL_CAN_Subscribe(STRHAL_FDCAN2, STRHAL_FDCAN_RX0, mainFilter, 1, Can::externalReceptor) != 1)
 			return -1;
 	}
 
@@ -132,7 +132,11 @@ int Can::send(uint32_t id, uint8_t* data, uint8_t n) {
 	{ 0 };
 	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
 	msgId.info.direction = NODE2MASTER_DIRECTION;
-	msgId.info.node_id = id;
+	if(id == 0) {
+		msgId.info.node_id = Can::nodeId;
+	} else {
+		msgId.info.node_id = id;
+	}
 	msgId.info.priority = STANDARD_PRIORITY;
 
 	Can_MessageData_t msgData =

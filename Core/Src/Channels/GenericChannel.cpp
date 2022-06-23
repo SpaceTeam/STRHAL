@@ -1,9 +1,10 @@
 #include "../Inc/Channels/GenericChannel.h"
 #include <cstring>
 #include <cstdio>
+#include <git_version.h>
 
 GenericChannel::GenericChannel(uint32_t nodeId, uint32_t firmwareVersion, uint32_t refreshDivider)
-	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refreshDivider), nodeId(nodeId), firmwareVersion(firmwareVersion) {
+	: AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refreshDivider), nodeId(nodeId), firmwareVersion(GIT_COMMIT_HASH_VALUE) {
 }
 
 uint32_t GenericChannel::getNodeId() const {
@@ -35,6 +36,7 @@ int GenericChannel::exec() {
 }
 
 int GenericChannel::reset() {
+	(void) flash->reset();
 	return 0;
 }
 
@@ -45,7 +47,17 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 		case GENERIC_REQ_DATA:
 			return this->getSensorData(returnData, n);
 		case GENERIC_REQ_RESET_ALL_SETTINGS:
-			return ((flash->configReset()) ? 0 : -1);
+			(void) flash->configReset();
+			for(AbstractChannel *channel : channels) {
+				if(channel == nullptr)
+					continue;
+
+				channel->reset(); // TODO implement good reset for every channel
+			}
+			return 0;
+		case GENERIC_REQ_FLASH_CLEAR:
+			(void) flash->setState(FlashState::CLEARING);
+			return this->getFlashClearInfo(returnData, n);
 		default:
 			return AbstractChannel::processMessage(commandId, returnData, n);
 	}
@@ -69,6 +81,14 @@ int GenericChannel::setVariable(uint8_t variableId, int32_t data) {
 			refreshDivider = data;
 			refreshCounter = 0;
 			return 0;
+		case GENERIC_LOGGING_ENABLED:
+			loggingEnabled = data;
+			if(loggingEnabled == 0) {
+				flash->setState(FlashState::IDLE);
+			} else {
+				flash->setState(FlashState::LOGGING);
+			}
+			return 0;
 		default:
 			return -1;
 	}
@@ -79,9 +99,20 @@ int GenericChannel::getVariable(uint8_t variableId, int32_t &data) const {
 		case GENERIC_REFRESH_DIVIDER:
 			data = (int32_t) refreshDivider;
 			return 0;
+		case GENERIC_LOGGING_ENABLED:
+			data = (int32_t) loggingEnabled;
+			return 0;
 		default:
 			return -1;
 	}
+}
+
+int GenericChannel::flashClear(uint8_t *data, uint8_t &n) {
+	FlashClearMsg_t *dataMsg = (FlashClearMsg_t *) data;
+
+	dataMsg->status = INITIATED;
+	n = sizeof(FlashClearMsg_t);
+	return 0;
 }
 
 int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
@@ -98,6 +129,26 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 		dataMsg->channel_mask |= 1 << channel->getChannelId();
 	}
 	n += 1 * sizeof(uint32_t);
+
+	if(loggingEnabled && !flash->lock)
+		flash->addLog(data, n);
+	return 0;
+}
+
+int GenericChannel::getFlashClearInfo(uint8_t *data, uint8_t &n) {
+
+	FlashClearMsg_t *info = (FlashClearMsg_t *) data;
+
+	FlashState flashState = flash->getState();
+	if(flashState == FlashState::IDLE || flashState == FlashState::CLEARING) { //TODO actually check if clearing has initiated
+		info->status = INITIATED;
+	} else if(flashState == FlashState::READY) {
+		info->status = COMPLETED;
+	} else {
+		info->status = INITIATED;
+	}
+
+	n = sizeof(FlashClearMsg_t);
 	return 0;
 }
 

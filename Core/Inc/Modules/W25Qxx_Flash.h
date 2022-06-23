@@ -2,8 +2,10 @@
 #define W25QXX_FLASH_H
 
 #include <stdint.h>
+#include <Communication.h>
 
 #define PAGE_SIZE			256 //in bytes
+#define SECTOR_COUNT		8192 //in bytes
 /*!< W25Qxx memory map */
 #define CONFIG_BASE			0x00000000						//1st sector
 #define LOGGING_BASE		(CONFIG_BASE + 0x00001000UL)	//2nd sector
@@ -30,6 +32,14 @@ enum class Config : int {
 	SERVO2_PWM_END,
 };
 
+enum class FlashState : int {
+	IDLE = 0,
+	CLEARING,
+	READY,
+	LOGGING,
+	FULL,
+};
+
 class W25Qxx_Flash {
 	public:
 		W25Qxx_Flash(const W25Qxx_Flash &other) = delete;
@@ -41,6 +51,8 @@ class W25Qxx_Flash {
 		static W25Qxx_Flash* instance(uint8_t size_2n);
 
 		int init();
+		int exec();
+		int reset();
 
 		bool readSREGs(uint8_t &sreg1, uint8_t &sreg2, uint8_t &sreg3) const;
 		bool readSREG1(uint8_t &sreg1) const;
@@ -61,6 +73,7 @@ class W25Qxx_Flash {
 		bool writeConfigRegsFromAddr(uint32_t startAddress, uint32_t *val, uint16_t n);
 		bool writeConfigRegs(Config *reg, uint32_t *val, uint16_t n);
 		bool writeConfigReg(Config reg, uint32_t val);
+		bool writeConfig();
 		uint32_t readConfigReg(Config reg);
 		uint32_t readConfigReg(uint32_t regAddr);
 		bool readConfig();
@@ -75,7 +88,16 @@ class W25Qxx_Flash {
 		uint32_t getPageCount();
 		uint32_t getSectorCount();
 
+		void setState(FlashState nextState);
+		FlashState getState();
+		bool sendClearDone();
+		void addLog(uint8_t *data, uint8_t n);
+
+		bool lock = false;
+
+		static constexpr uint16_t EXEC_SAMPLE_TICKS = 10;
 	private:
+		FlashState state;
 		uint8_t size_2n;
 
 		uint32_t pageCount;
@@ -83,11 +105,23 @@ class W25Qxx_Flash {
 
 		ConfigData_t config;
 
+		uint64_t timeLastSample = 0;
+		uint64_t timeLastTransition = 0;
+		FlashState internalNextState = FlashState::IDLE;
+		FlashState externalNextState = FlashState::IDLE;
+
+		uint8_t loggingBuffer[256];
+		uint8_t loggingIndex = 0;
+
 		W25Qxx_Flash(uint8_t size_2n);
 
 		int waitForSREGFlag(uint8_t flag, bool state, uint16_t tot);
 
+		FlashState currentStateLogic(uint64_t time);
+		void nextStateLogic(FlashState nextState, uint64_t time);
+
 		static W25Qxx_Flash *flash;
+		static Communication *com;
 };
 
 #endif /*W25QXX_FLASH_H*/

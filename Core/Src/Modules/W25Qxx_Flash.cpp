@@ -3,10 +3,14 @@
 #include <STRHAL_QSPI.h>
 #include <STRHAL_SysTick.h>
 #include <STRHAL.h>
+#include <channels/generic_channel_def.h>
+
+#include <cstring>
 
 W25Qxx_Flash* W25Qxx_Flash::flash = nullptr;
+Communication* W25Qxx_Flash::com = nullptr;
 
-W25Qxx_Flash::W25Qxx_Flash(uint8_t size_2n) : size_2n(size_2n & 0x3F), pageCount(0), sectorCount(0) {
+W25Qxx_Flash::W25Qxx_Flash(uint8_t size_2n) : state(FlashState::IDLE), size_2n(size_2n & 0x3F), pageCount(0), sectorCount(0) {
 }
 
 W25Qxx_Flash* W25Qxx_Flash::instance(uint8_t size_2n) {
@@ -18,6 +22,12 @@ W25Qxx_Flash* W25Qxx_Flash::instance(uint8_t size_2n) {
 }
 
 int W25Qxx_Flash::init() {
+	com = Communication::instance(0); // works because the generic channel (e.g. ECU) has already initialized com
+	if(com == nullptr)
+		return -1;
+
+	memset(loggingBuffer,0,256);
+
 	STRHAL_QSPI_Config_t qspi_conf;
 	qspi_conf.clk_level = 0x0;
 	qspi_conf.flash_size = size_2n;
@@ -44,6 +54,142 @@ int W25Qxx_Flash::init() {
 	LL_mDelay(10);
 
 	return 0;
+}
+
+int W25Qxx_Flash::exec() {
+	uint64_t time = STRHAL_Systick_GetTick();
+	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
+		return 0;
+
+	timeLastSample = time;
+
+	// Current State Logic - executes state logic, also returns new state if transition conditions are met
+	internalNextState = currentStateLogic(time);
+
+	FlashState nextState = state;
+
+	if(externalNextState != state) { // Prioritize external event - there has to be some kind of priority, because internal could be different to external -> external means CAN -> either Sequence or Abort
+		nextState = externalNextState;
+	} else if(internalNextState != state) {
+		externalNextState = internalNextState; // Incase an internal state change happens, the external state, which is from some previous change would block it, so it is updated here
+		nextState = internalNextState;
+	}
+
+	// Next State Logic
+	if(nextState != state) {
+		nextStateLogic(nextState, time);
+	}
+
+	return 0;
+}
+
+int W25Qxx_Flash::reset() {
+	state = FlashState::IDLE;
+	pageCount = 0;
+	sectorCount = 0;
+	return 0;
+}
+
+FlashState W25Qxx_Flash::currentStateLogic(uint64_t time) {
+	switch(state) {
+		case FlashState::IDLE:
+			break;
+		case FlashState::CLEARING: {
+			uint8_t sreg1;
+			if(!readSREG1(sreg1))
+				break;
+			if(!(sreg1 & 0x01))
+				return FlashState::READY;
+			break;
+		}
+		case FlashState::READY:
+			break;
+		case FlashState::LOGGING:
+			if(loggingIndex + 64 >= 256) {
+				lock = true;
+				writeNextPage(loggingBuffer, 256);
+				loggingIndex = 0;
+				lock = false;
+			}
+			break;
+		case FlashState::FULL:
+			break;
+		default:
+			break;
+	}
+	return state;
+}
+
+void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time) {
+	timeLastTransition = time;
+	switch(nextState) {
+		case FlashState::IDLE:
+			if(state != FlashState::LOGGING) {
+				return;
+			}
+			pageCount = 0;
+			sectorCount = 0;
+			break;
+		case FlashState::CLEARING:
+			if(state != FlashState::IDLE) {
+				return;
+			}
+			if(!readConfig())
+				return;
+
+			if(!chipErase())
+				return;
+			break;
+		case FlashState::READY:
+			if(state != FlashState::CLEARING) {
+				return;
+			}
+			if(!writeConfig())
+				return;
+			if(!sendClearDone())
+				return;
+
+			break;
+		case FlashState::LOGGING:
+			if(state != FlashState::READY) {
+				return;
+			}
+			break;
+		case FlashState::FULL:
+			break;
+		default:
+			break;
+	}
+	state = nextState;
+	return;
+}
+
+void W25Qxx_Flash::setState(FlashState nextState) {
+	externalNextState = state;
+}
+
+FlashState W25Qxx_Flash::getState() {
+	return state;
+}
+
+bool W25Qxx_Flash::sendClearDone() {
+	Can_MessageData_t msgData =
+	{ 0 };
+	msgData.bit.cmd_id = GENERIC_RES_FLASH_CLEAR;
+	msgData.bit.info.channel_id = GENERIC_CHANNEL_ID;
+	msgData.bit.info.buffer = DIRECT_BUFFER;
+	msgData.bit.data.uint8[0] = COMPLETED;
+
+	return (com->can->send(0, (uint8_t *) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
+}
+
+void W25Qxx_Flash::addLog(uint8_t *data, uint8_t n) {
+	if(state != FlashState::LOGGING)
+		return;
+	if(loggingIndex + n >= 256)
+		return;
+	memcpy(&loggingBuffer[loggingIndex], data, n);
+	loggingIndex += n;
 }
 
 bool W25Qxx_Flash::readSREG1(uint8_t &sreg1) const {
@@ -225,17 +371,17 @@ uint32_t W25Qxx_Flash::writeNextPage(const uint8_t * data, uint32_t n) {
 		return 0;
 	}
 
-	if(pageCount == 0) {
+	/*if(pageCount == 0) {
 		if(!writeEnable())
 			return 0;
 		if(!sectorErase(sectorCount))
 			return 0;
-	}
+	}*/
 
 	uint32_t numWritten = write((pageCount << 8) | (sectorCount << 12),data,n);
-
-	if(numWritten == n)
-		return 0;
+	(void) numWritten;
+	/*if(numWritten == n)
+		return 0;*/
 
 	if(pageCount == 15) {
 		pageCount = 0;
@@ -292,6 +438,13 @@ uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n) {
 	return n;
 }
 
+bool W25Qxx_Flash::writeConfig() {
+	if(!readConfig())
+		return false;
+
+	return write(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
+}
+
 bool W25Qxx_Flash::writeConfigReg(Config reg, uint32_t val) {
 	return writeConfigRegs(&reg, &val, 1);
 }
@@ -317,7 +470,7 @@ bool W25Qxx_Flash::writeConfigRegsFromAddr(uint32_t startAddress, uint32_t *val,
 		return false;
 
 	for(int i = 0; i < n; i++) {
-		config.reg[startAddress+i] = val[i];
+		config.reg[startAddress+i] = val[i];  //TODO maybe a bug
 	}
 
 	if(!configErase()) {
@@ -396,8 +549,8 @@ bool W25Qxx_Flash::chipErase() {
 	if(STRHAL_QSPI_Indirect_Write(&cmd, nullptr, 0, 100) != 0)
 		return false;
 
-	if(waitForSREGFlag(0x01, false, 100) < 0)
-		return false;
+	//if(waitForSREGFlag(0x01, false, 100) < 0)
+		//return false;
 
 	return true;
 }
