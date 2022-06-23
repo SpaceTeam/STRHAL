@@ -21,6 +21,8 @@ class GenericChannel : public AbstractChannel {
 		int getNodeInfo(uint8_t *data, uint8_t &n);
 		int getFlashClearInfo(uint8_t *data, uint8_t &n);
 		int flashClear(uint8_t *data, uint8_t &n);
+		void printLog();
+		void detectReadoutMode();
 
 		uint32_t getNodeId() const;
 

@@ -91,6 +91,7 @@ class W25Qxx_Flash {
 		void setState(FlashState nextState);
 		FlashState getState();
 		bool sendClearDone();
+		bool sendFull();
 		void addLog(uint8_t *data, uint8_t n);
 
 		bool lock = false;

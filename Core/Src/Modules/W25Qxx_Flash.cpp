@@ -156,6 +156,8 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time) {
 			}
 			break;
 		case FlashState::FULL:
+			if(!sendFull())
+				return;
 			break;
 		default:
 			break;
@@ -175,10 +177,21 @@ FlashState W25Qxx_Flash::getState() {
 bool W25Qxx_Flash::sendClearDone() {
 	Can_MessageData_t msgData =
 	{ 0 };
-	msgData.bit.cmd_id = GENERIC_RES_FLASH_CLEAR;
+	msgData.bit.cmd_id = GENERIC_RES_FLASH_STATUS;
 	msgData.bit.info.channel_id = GENERIC_CHANNEL_ID;
 	msgData.bit.info.buffer = DIRECT_BUFFER;
 	msgData.bit.data.uint8[0] = COMPLETED;
+
+	return (com->can->send(0, (uint8_t *) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
+}
+
+bool W25Qxx_Flash::sendFull() {
+	Can_MessageData_t msgData =
+	{ 0 };
+	msgData.bit.cmd_id = GENERIC_RES_FLASH_STATUS;
+	msgData.bit.info.channel_id = GENERIC_CHANNEL_ID;
+	msgData.bit.info.buffer = DIRECT_BUFFER;
+	msgData.bit.data.uint8[0] = FULL;
 
 	return (com->can->send(0, (uint8_t *) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
 }

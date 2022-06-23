@@ -55,7 +55,7 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 				channel->reset(); // TODO implement good reset for every channel
 			}
 			return 0;
-		case GENERIC_REQ_FLASH_CLEAR:
+		case GENERIC_REQ_FLASH_STATUS:
 			(void) flash->setState(FlashState::CLEARING);
 			return this->getFlashClearInfo(returnData, n);
 		default:
@@ -108,10 +108,10 @@ int GenericChannel::getVariable(uint8_t variableId, int32_t &data) const {
 }
 
 int GenericChannel::flashClear(uint8_t *data, uint8_t &n) {
-	FlashClearMsg_t *dataMsg = (FlashClearMsg_t *) data;
+	FlashStatusMsg_t *dataMsg = (FlashStatusMsg_t *) data;
 
 	dataMsg->status = INITIATED;
-	n = sizeof(FlashClearMsg_t);
+	n = sizeof(FlashStatusMsg_t);
 	return 0;
 }
 
@@ -137,7 +137,7 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 
 int GenericChannel::getFlashClearInfo(uint8_t *data, uint8_t &n) {
 
-	FlashClearMsg_t *info = (FlashClearMsg_t *) data;
+	FlashStatusMsg_t *info = (FlashStatusMsg_t *) data;
 
 	FlashState flashState = flash->getState();
 	if(flashState == FlashState::IDLE || flashState == FlashState::CLEARING) { //TODO actually check if clearing has initiated
@@ -148,7 +148,7 @@ int GenericChannel::getFlashClearInfo(uint8_t *data, uint8_t &n) {
 		info->status = INITIATED;
 	}
 
-	n = sizeof(FlashClearMsg_t);
+	n = sizeof(FlashStatusMsg_t);
 	return 0;
 }
 
@@ -182,5 +182,30 @@ void GenericChannel::registerChannel(AbstractChannel *channel) {
 void GenericChannel::registerChannels(AbstractChannel **channels, uint8_t n) {
 	for(uint8_t i = 0; i < (n > MAX_CHANNELS ? MAX_CHANNELS : n); i++) {
 		registerChannel(channels[i]);
+	}
+}
+
+void GenericChannel::printLog() {
+	char kartoffel_buffer[64];
+	uint8_t readData[256];
+	for(int i = LOGGING_BASE >> 8; i < 8192*16; i++) {
+		if(flash->read(i << 8, readData, 252) != 252) {
+			sprintf(kartoffel_buffer, "UNABLE TO READ PAGE!\n");
+			STRHAL_UART_Debug_Write_Blocking(kartoffel_buffer, strlen(kartoffel_buffer), 100);
+			i--;
+			continue;
+		}
+		STRHAL_UART_Debug_Write_Blocking((char *) readData, 256, 100);
+		LL_mDelay(2);
+	}
+}
+
+
+void GenericChannel::detectReadoutMode() {
+	STRHAL_UART_Listen(STRHAL_UART_DEBUG);
+	char read[16];
+	int32_t n = STRHAL_UART_Read(STRHAL_UART_DEBUG, read, 2);
+	if(n > 0) {
+		printLog();
 	}
 }
