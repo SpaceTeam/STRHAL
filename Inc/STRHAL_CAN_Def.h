@@ -53,6 +53,17 @@ extern "C" {
 #define FDCAN_FILTER_MASK          ((uint32_t)0x00000002U) //!< Classic filter: FilterID1 = filter, FilterID2 = mask
 #define FDCAN_FILTER_RANGE_NO_EIDM ((uint32_t)0x00000003U) //!< Range filter from FilterID1 to FilterID2, EIDM mask not applied
 
+/*#define FDCAN_ELMTS_ARRAY_SIZE			64
+#define FDCAN_NOMINAL_PRESCALER			8
+#define FDCAN_NOMINAL_SYNC_JUMP_WIDTH	1
+#define FDCAN_NOMINAL_TIMESEG_1			7
+#define FDCAN_NOMINAL_TIMESEG_2			2
+
+#define FDCAN_DATA_PRESCALER			1
+#define FDCAN_DATA_SYNC_JUMP_WIDTH		1
+#define FDCAN_DATA_TIMESEG_1			7
+#define FDCAN_DATA_TIMESEG_2			2*/
+
 #define FDCAN_ELMTS_ARRAY_SIZE			64
 #define FDCAN_NOMINAL_PRESCALER			8
 #define FDCAN_NOMINAL_SYNC_JUMP_WIDTH	1
@@ -65,6 +76,7 @@ extern "C" {
 #define FDCAN_DATA_TIMESEG_2			2
 
 #define FDCAN_TDC_OFFSET				5
+//#define FDCAN_TDC_OFFSET				5
 #define FDCAN_TDC_FILTER				0
 
 // From HAL driver

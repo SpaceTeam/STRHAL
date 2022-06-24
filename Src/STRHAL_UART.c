@@ -259,6 +259,11 @@ int32_t STRHAL_UART_Read(STRHAL_UART_Id_t uart_id, char *data, uint32_t n) {
 	if(_uart->state & STRHAL_UART_STATE_RE)
 		return -1;
 
+	if(_uart->state & STRHAL_UART_STATE_RO) {
+		STRHAL_UART_FlushReception(uart_id);
+		STRHAL_UART_Listen(uart_id);
+	}
+
 	if(!(_uart->state & (STRHAL_UART_STATE_RX | STRHAL_UART_STATE_RC)))
 		return 0;
 
@@ -304,6 +309,32 @@ int32_t STRHAL_UART_Read(STRHAL_UART_Id_t uart_id, char *data, uint32_t n) {
 	LL_DMA_EnableIT_TE(DMA1, _uart->dma_rx_channel);
 
 	return n;
+}
+
+int32_t STRHAL_UART_Read_Blocking(STRHAL_UART_Id_t uart_id, char *data, uint32_t n, uint16_t timeout) {
+	if(uart_id < 0 || uart_id >= STRHAL_N_UART)
+		return -1;
+
+	STRHAL_UART_Handle_t *_uart = &_uarts[uart_id];
+
+	if(_uart->state & STRHAL_UART_STATE_RE)
+		return -1;
+
+	int32_t read = 0;
+
+	//while(n > 0) {
+		uint64_t time = STRHAL_Systick_GetTick();
+		while(!LL_USART_IsActiveFlag_RXNE_RXFNE(_uart->uart)) {
+			if(STRHAL_Systick_GetTick() - time > timeout)
+				return read;
+		}
+
+		*data = (uint8_t) (_uart->uart->RDR & 0xFF);
+		data++;
+		read++;
+	//}
+
+	return read;
 }
 
 STRHAL_UART_State_t STRHAL_UART_Listen(STRHAL_UART_Id_t uart_id) {

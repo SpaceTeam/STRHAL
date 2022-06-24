@@ -115,6 +115,7 @@ inline STRHAL_SysClk_Src_t _SysClk_Init(STRHAL_SysClk_Src_t src, uint32_t freq) 
 				2*STRHAL_SYSCLK_FREQ/freq,
 				STRHAL_SYSCLK_EXT_PLL_R
 		);
+
 	    LL_RCC_PLL_EnableDomain_SYS();
 	    LL_RCC_PLL_Enable();
 

@@ -51,6 +51,7 @@ int STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id);
 int32_t STRHAL_UART_Debug_Write_DMA(const char *data, uint32_t n);
 int32_t STRHAL_UART_Write_DMA(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n);
 int32_t STRHAL_UART_Read(STRHAL_UART_Id_t uart_id, char *data, uint32_t n);
+int32_t STRHAL_UART_Read_Blocking(STRHAL_UART_Id_t uart_id, char *data, uint32_t n, uint16_t timeout);
 
 // blocking IO
 int32_t STRHAL_UART_Debug_Write_Blocking(const char *data, uint32_t n, uint16_t timeout);
