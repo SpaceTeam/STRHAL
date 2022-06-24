@@ -12,15 +12,15 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	imu(STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOD, 0, STRHAL_GPIO_TYPE_IHZ}),
 	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_LL, 0x7, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ},{GPIOB, 11, STRHAL_GPIO_TYPE_IHZ}),
 	gnss(STRHAL_UART1),
-	sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
-	sense_12V(1, {ADC2, STRHAL_ADC_CHANNEL_11}, 1),
+	sense_5V(0, {ADC1, STRHAL_ADC_CHANNEL_2}, 1),
+	sense_12V(1, {ADC1, STRHAL_ADC_CHANNEL_3}, 1),
 	baro_channel(2, baro, 1),
-	x_accel(3, imu, IMUMeasurement::X_ACCEL, 1),
-	y_accel(4, imu, IMUMeasurement::Y_ACCEL, 1),
-	z_accel(5, imu, IMUMeasurement::Z_ACCEL, 1),
-	x_gyro(6, imu, IMUMeasurement::X_GYRO, 1),
-	y_gyro(7, imu, IMUMeasurement::Y_GYRO, 1),
-	z_gyro(8, imu, IMUMeasurement::Z_GYRO, 1),
+	x_accel(3, &imu, IMUMeasurement::X_ACCEL, 1),
+	y_accel(4, &imu, IMUMeasurement::Y_ACCEL, 1),
+	z_accel(5, &imu, IMUMeasurement::Z_ACCEL, 1),
+	x_gyro(6, &imu, IMUMeasurement::X_GYRO, 1),
+	y_gyro(7, &imu, IMUMeasurement::Y_GYRO, 1),
+	z_gyro(8, &imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	com = Communication::instance(this, &lora);
@@ -56,8 +56,8 @@ int RCU::init() {
 	if(baro.init() != 0)
 		return -1;
 
-	//if(gnss.init() != 0)
-		//return -1;
+	if(gnss.init() != 0)
+		return -1;
 
 	if(lora.init() != 0)
 		return -1;
@@ -65,7 +65,8 @@ int RCU::init() {
 	if(com == nullptr)
 		return -1;
 
-	if(com->init(COMMode::LISTENER_COM_MODE) != 0)
+	//if(com->init(COMMode::LISTENER_COM_MODE) != 0)
+	if(com->init() != 0)
 		return -1;
 
 	if(flash == nullptr)
@@ -96,10 +97,11 @@ int RCU::exec() {
 
 	speaker.beep(2, 400, 300);
 
-	//int counter = 0;
+	int counter = 0;
 	//uint8_t loraData[101];
 	//memset(loraData,0,101);
 	//STRHAL_UART_Listen(STRHAL_UART1);
+	char canErr[64];
 	while(1) {
 		/*int nn = 0;
 		char readBuf[256] = { 0 };
@@ -140,6 +142,14 @@ int RCU::exec() {
 			char buf2[32];
 			sprintf(buf2,"ID: %d\n",who);
 			STRHAL_UART_Debug_Write_Blocking(buf2, strlen(buf2),100);
+		}*/
+
+		//detectReadoutMode();
+		/*counter++;
+		if(counter == 10000) {
+			counter = 0;
+			sprintf(canErr,"%ld %ld\n",FDCAN1->ECR,FDCAN1->PSR);
+			STRHAL_UART_Debug_Write_Blocking(canErr, strlen(canErr),100);
 		}*/
 		if(flash->exec() != 0)
 			return -1;

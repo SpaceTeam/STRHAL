@@ -4,12 +4,13 @@
 #include "RCU.h"
 #include "IOB.h"
 #include "LCB.h"
+#include "git_version.h"
 
 int main(void) {
 
 // TODO use git_version.h for firmware version control
 #ifdef ECU_BOARD
-	ECU ecu(6,0xDEADBEEF,100); //6 ECU, 7 PMU, 9 TW
+	ECU ecu(6,GIT_COMMIT_HASH_VALUE,100); //6 ECU, 7 PMU, 9 TW
 
 	if(ecu.init() != 0)
 		return -1;
@@ -17,7 +18,7 @@ int main(void) {
 	STRHAL_UART_Debug_Write_Blocking("ECU STARTED\n", 12, 50);
 	ecu.exec();
 #elif defined(PMU_BOARD)
-	PMU pmu(7,0xDEADBEEF,100);
+	PMU pmu(7,GIT_COMMIT_HASH_VALUE,100);
 
 	if(pmu.init() != 0)
 			return -1;
@@ -25,7 +26,7 @@ int main(void) {
 	STRHAL_UART_Debug_Write_Blocking("PMU STARTED\n", 12, 50);
 	pmu.exec();
 #elif defined(RCU_BOARD)
-	RCU rcu(8,0xDEADBEEF,100);
+	RCU rcu(8,GIT_COMMIT_HASH_VALUE,100);
 
 	if(rcu.init() != 0)
 			return -1;

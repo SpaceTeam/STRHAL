@@ -20,12 +20,12 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	out3(6, {GPIOC, 9, STRHAL_GPIO_TYPE_OPP}, 1),
 	payload(7, {GPIOC, 1, STRHAL_GPIO_TYPE_OPP}, 1),
 	baro_channel(8, baro, 1),
-	x_accel(9, imu, IMUMeasurement::X_ACCEL, 1),
-	y_accel(10, imu, IMUMeasurement::Y_ACCEL, 1),
-	z_accel(11, imu, IMUMeasurement::Z_ACCEL, 1),
-	x_gyro(12, imu, IMUMeasurement::X_GYRO, 1),
-	y_gyro(13, imu, IMUMeasurement::Y_GYRO, 1),
-	z_gyro(14, imu, IMUMeasurement::Z_GYRO, 1),
+	x_accel(9, &imu, IMUMeasurement::X_ACCEL, 1),
+	y_accel(10, &imu, IMUMeasurement::Y_ACCEL, 1),
+	z_accel(11, &imu, IMUMeasurement::Z_ACCEL, 1),
+	x_gyro(12, &imu, IMUMeasurement::X_GYRO, 1),
+	y_gyro(13, &imu, IMUMeasurement::Y_GYRO, 1),
+	z_gyro(14, &imu, IMUMeasurement::Z_GYRO, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	com = Communication::instance(this, nullptr);
@@ -71,8 +71,8 @@ int PMU::init() {
 	if(baro.init() != 0)
 		return -1;
 
-	if(com->init() != 0)
-	//if(com->init(COMMode::BRIDGE_COM_MODE) != 0)
+	//if(com->init() != 0)
+	if(com->init(COMMode::BRIDGE_COM_MODE) != 0)
 		return -1;
 
 	if(flash == nullptr)
@@ -102,8 +102,20 @@ int PMU::exec() {
 	STRHAL_UART_Debug_Write_Blocking("RUNNING\n", 8, 50);
 
 	speaker.beep(3, 300, 200);
-
+	int counter = 0;
+	char canErr[64];
 	while(1) {
+		/*counter++;
+		if(counter == 10000) {
+			counter = 0;
+			sprintf(canErr,"%ld %ld\n",FDCAN2->ECR,((FDCAN2->PSR) >> 3) & 3);
+			STRHAL_UART_Debug_Write_Blocking(canErr, strlen(canErr),100);
+		}*/
+		//detectReadoutMode();
+
+		if(flash->exec() != 0)
+			return -1;
+
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}

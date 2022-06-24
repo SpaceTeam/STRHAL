@@ -25,7 +25,7 @@ class Communication {
 
 		static void heartbeatLora();
 
-		static constexpr uint32_t MSG_SIZE = 12;
+		static constexpr uint32_t MSG_SIZE = 118;
 		static constexpr uint8_t ECU_START_ADDR = 0;
 		static constexpr uint8_t ECU_MSG_SIZE = 52;
 		static constexpr uint8_t PMU_START_ADDR = ECU_START_ADDR + ECU_MSG_SIZE;

@@ -16,7 +16,7 @@ int SAM_M8Q_GNSS::init() {
 
 	LL_mDelay(10);
 
-	STRHAL_UART_Listen(uartId);
+	//STRHAL_UART_Listen(uartId);
 
 	//if(!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
 		//return -1;

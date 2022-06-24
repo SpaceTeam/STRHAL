@@ -21,7 +21,7 @@ Radio *Radio::instance(uint32_t nodeId, LoRa1276F30_Radio *lora) {
 
 int Radio::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) {
 	if(heartbeat) {
-		if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM6, 8000, 20000) != 1)
+		if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM6, 8000, 10000) != 2)
 			return -1;
 
 		if(STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_TIM6, heartbeat) != 0)

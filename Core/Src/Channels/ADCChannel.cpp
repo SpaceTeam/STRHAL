@@ -1,4 +1,6 @@
 #include <Channels/ADCChannel.h>
+#include <cstring>
+#include <cstdio>
 
 ADCChannel::ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChanel, uint32_t refreshDivider)
 	: AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), adcChannel(adcChanel) {
@@ -32,6 +34,9 @@ int ADCChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	uint16_t *out = (uint16_t *) (data+n);
 	*out = *adcMeasurement << 4; // shift it to 16bit full scale
 
+	/*char buf[32];
+	sprintf(buf,"%d\n",*adcMeasurement);
+	STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 100);*/
 	n += ADC16_DATA_N_BYTES;
 	return 0;
 }

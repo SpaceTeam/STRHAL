@@ -173,10 +173,14 @@ void Can::bridgeReceptor(STRHAL_FDCAN_Id_t bus_id, uint32_t id, uint8_t *data, u
 	Can_MessageId_t incoming_id;
 	incoming_id.uint32 = id;
 
-	if(incoming_id.info.node_id == cancom->nodeId)
+	if(incoming_id.info.node_id == cancom->nodeId) {
 		Can::standardReceptor(id, data, n);
-	else
+	} else if(incoming_id.info.node_id == 0) {
 		STRHAL_CAN_Send(bus_id, id, data, n);
+		Can::standardReceptor(id, data, n);
+	} else {
+		STRHAL_CAN_Send(bus_id, id, data, n);
+	}
 }
 
 void Can::internalReceptor(uint32_t id, uint8_t *data, uint32_t n) {

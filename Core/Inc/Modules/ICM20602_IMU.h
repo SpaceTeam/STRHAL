@@ -20,6 +20,7 @@ enum class IMUMeasurement : uint8_t {
 };
 
 enum class IMUAddr : uint8_t {
+	SMPLRT_DIV = 0x19,
 	GYRO_CONFIG = 0x1B,
 	ACCEL_CONFIG = 0x1C,
 	ACCEL_CONFIG_2 = 0x1D,
@@ -48,7 +49,7 @@ class ICM20602_IMU {
 		void getMeasurement(uint16_t &measurement, IMUMeasurement measurementType);
 		uint8_t whoAmI() const;
 
-		static constexpr uint32_t BUF_DATA_SIZE = 256 / sizeof(IMUData);
+		static constexpr uint32_t BUF_DATA_SIZE = 256;
 		static constexpr uint8_t READ_BIT = 0x80;
 	private:
 		bool readReg(const IMUAddr &address, uint8_t *reg, uint8_t n = 0);

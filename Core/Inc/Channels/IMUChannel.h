@@ -8,7 +8,7 @@
 
 class IMUChannel : public AbstractChannel {
 	public:
-		IMUChannel(uint8_t id, ICM20602_IMU &imu, IMUMeasurement measurementType, uint32_t refreshDivider);
+		IMUChannel(uint8_t id, ICM20602_IMU *imu, IMUMeasurement measurementType, uint32_t refreshDivider);
 		IMUChannel(const IMUChannel &other) = delete;
 		IMUChannel& operator=(const IMUChannel &other) = delete;
 		IMUChannel(const IMUChannel &&other) = delete;
@@ -21,7 +21,7 @@ class IMUChannel : public AbstractChannel {
 
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
-		static constexpr uint64_t EXEC_SAMPLE_TICKS = 2;
+		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
 
 	protected:
 
@@ -29,7 +29,7 @@ class IMUChannel : public AbstractChannel {
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		ICM20602_IMU imu;
+		ICM20602_IMU *imu;
 		IMUMeasurement measurementType;
 		uint64_t timeLastSample = 0;
 

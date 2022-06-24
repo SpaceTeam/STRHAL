@@ -153,7 +153,7 @@ void Communication::heartbeatCan() {
 		return;
 	}
 
-	if(loraActive) {
+	if(loraActive && n>=23) {
 		radioArray[RCU_START_ADDR] = 1;
 		memcpy(&radioArray[RCU_START_ADDR+1],msgData.bit.data.uint8,RCU_MSG_SIZE-1);
 	}
@@ -163,7 +163,7 @@ void Communication::heartbeatCan() {
 
 void Communication::heartbeatLora() {
 	//sprintf((char *)radioArray,"hello world");
-	//radio->send(0, radioArray, MSG_SIZE);
+	radio->send(0, radioArray, MSG_SIZE);
 	//char *test = "hello world";
 	//radio->send(0, (uint8_t *) test, MSG_SIZE);
 }

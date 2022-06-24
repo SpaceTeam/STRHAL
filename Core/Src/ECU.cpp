@@ -69,18 +69,17 @@ int ECU::init() {
 	if(STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
 		return -1;
 
-	if(flash == nullptr)
-		return -1;
-
-	if(flash->init() != 0)
-		return -1;
-
 	if(com == nullptr)
 		return -1;
 
 	if(com->init() != 0)
 		return -1;
 
+	if(flash == nullptr)
+		return -1;
+
+	if(flash->init() != 0)
+		return -1;
 
 	if(GenericChannel::init() != 0)
 		return -1;
@@ -105,6 +104,12 @@ int ECU::exec() {
 	speaker.beep(2, 400, 300);
 
 	while(1) {
+
+		//detectReadoutMode();
+
+		if(flash->exec() != 0)
+			return -1;
+
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}
