@@ -25,7 +25,7 @@ int ICM20602_IMU::init() {
 			 || !writeReg(IMUAddr::GYRO_CONFIG, 0x19, 50)
 			 || !writeReg(IMUAddr::ACCEL_CONFIG, 0x18, 50)
 			 || !writeReg(IMUAddr::ACCEL_CONFIG_2, 0x04, 50)
-			 || !writeReg(IMUAddr::SMPLRT_DIV, 0x04, 50)
+			 || !writeReg(IMUAddr::SMPLRT_DIV, 0x09, 50)
 			 || !writeReg(IMUAddr::INT_PIN_CFG, 0x30, 50)
 			 || !writeReg(IMUAddr::INT_ENABLE, 0x01, 50)
 			 || !writeReg(IMUAddr::PWR_MGMT_2, 0x00, 50)

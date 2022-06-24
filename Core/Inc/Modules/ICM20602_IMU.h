@@ -49,7 +49,7 @@ class ICM20602_IMU {
 		void getMeasurement(uint16_t &measurement, IMUMeasurement measurementType);
 		uint8_t whoAmI() const;
 
-		static constexpr uint32_t BUF_DATA_SIZE = 256;
+		static constexpr uint32_t BUF_DATA_SIZE = 16;
 		static constexpr uint8_t READ_BIT = 0x80;
 	private:
 		bool readReg(const IMUAddr &address, uint8_t *reg, uint8_t n = 0);

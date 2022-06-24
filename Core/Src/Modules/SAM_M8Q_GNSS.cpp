@@ -5,18 +5,26 @@
 #include <cstring>
 #include <cstdio>
 
-SAM_M8Q_GNSS::SAM_M8Q_GNSS(const STRHAL_UART_Id_t uartId) :
-	uartId(uartId) {
+SAM_M8Q_GNSS::SAM_M8Q_GNSS(const STRHAL_UART_Id_t uartId, const STRHAL_GPIO_t &resetPin) :
+	uartId(uartId), resetPin(resetPin) {
 }
 
 int SAM_M8Q_GNSS::init() {
+	// init reset GPIO
+	STRHAL_GPIO_SingleInit(&resetPin,STRHAL_GPIO_TYPE_OPP);
+	STRHAL_GPIO_Write(&resetPin, STRHAL_GPIO_VALUE_H);
+
 	// init GNSS uart
 	if(STRHAL_UART_Instance_Init(uartId) != 0)
 		return -1;
 
 	LL_mDelay(10);
 
-	//STRHAL_UART_Listen(uartId);
+	STRHAL_UART_Listen(uartId);
+
+	reset();
+
+	LL_mDelay(100);
 
 	//if(!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
 		//return -1;
@@ -27,6 +35,9 @@ int SAM_M8Q_GNSS::init() {
 }
 
 int SAM_M8Q_GNSS::reset() {
+	STRHAL_GPIO_Write(&resetPin, STRHAL_GPIO_VALUE_L);
+	LL_mDelay(2000);
+	STRHAL_GPIO_Write(&resetPin, STRHAL_GPIO_VALUE_H);
 	return 0;
 }
 

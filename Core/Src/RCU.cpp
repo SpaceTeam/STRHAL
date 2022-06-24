@@ -11,7 +11,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	baro(STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOA, 3, STRHAL_GPIO_TYPE_IHZ}),
 	imu(STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOD, 0, STRHAL_GPIO_TYPE_IHZ}),
 	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_LL, 0x7, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ},{GPIOB, 11, STRHAL_GPIO_TYPE_IHZ}),
-	gnss(STRHAL_UART1),
+	gnss(STRHAL_UART1, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}),
 	sense_5V(0, {ADC1, STRHAL_ADC_CHANNEL_2}, 1),
 	sense_12V(1, {ADC1, STRHAL_ADC_CHANNEL_3}, 1),
 	baro_channel(2, baro, 1),
@@ -97,36 +97,13 @@ int RCU::exec() {
 
 	speaker.beep(2, 400, 300);
 
+	LL_mDelay(2000);
 	int counter = 0;
 	//uint8_t loraData[101];
 	//memset(loraData,0,101);
 	//STRHAL_UART_Listen(STRHAL_UART1);
 	char canErr[64];
 	while(1) {
-		/*int nn = 0;
-		char readBuf[256] = { 0 };
-		char writeBuf[256] = { 0 };
-		nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 256);
-		if(nn > 0) {
-			for(int i = 0; i < nn-1; i++) {
-				sprintf(writeBuf + strlen(writeBuf),"%c,",readBuf[i]);
-			}
-			sprintf(writeBuf + strlen(writeBuf),"%c\n",readBuf[nn-1]);
-			STRHAL_UART_Debug_Write_Blocking(writeBuf, strlen(writeBuf),100);
-		};*/
-		/*if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
-			USART2->TDR = USART1->RDR;
-		}*/
-		/*
-		int32_t n = STRHAL_UART_Read(STRHAL_UART1, readBuf, STRHAL_UART_BUF_SIZE);
-		if(n > 0) {
-			if(gnss.processData((uint8_t *) readBuf, n)) {
-				sprintf(writeBuf,"%d, %ld, %ld\n",gnss.position.Status,gnss.position.Longitude,gnss.position.Latitude);
-				STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, writeBuf, strlen(writeBuf), 200);
-			} else {
-				STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "NOFIX\n", 6, 200);
-			}
-		}*/
 		/*counter++;
 		if(counter == 100000) {
 			counter = 0;
@@ -150,6 +127,13 @@ int RCU::exec() {
 			counter = 0;
 			sprintf(canErr,"%ld %ld\n",FDCAN1->ECR,FDCAN1->PSR);
 			STRHAL_UART_Debug_Write_Blocking(canErr, strlen(canErr),100);
+		}*/
+		/*int nn = 0;
+		char readBuf[256] = { 0 };
+		nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 20);
+		//nn = STRHAL_UART_Read_Blocking(STRHAL_UART1, readBuf, 256, 10);
+		if(nn > 0) {
+			STRHAL_UART_Debug_Write_Blocking(readBuf, strlen(readBuf),100);
 		}*/
 		if(flash->exec() != 0)
 			return -1;

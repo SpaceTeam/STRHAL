@@ -121,7 +121,7 @@ typedef struct {
 
 class SAM_M8Q_GNSS {
 	public:
-		SAM_M8Q_GNSS(const STRHAL_UART_Id_t uartId);
+		SAM_M8Q_GNSS(const STRHAL_UART_Id_t uartId, const STRHAL_GPIO_t &resetPin);
 
 		int init();
 		int reset();
@@ -148,6 +148,7 @@ class SAM_M8Q_GNSS {
 		//void setBaudrate(uintptr_t gps_port, GNSSBaudRate baud)
 
 		const STRHAL_UART_Id_t uartId;
+		STRHAL_GPIO_t resetPin;
 		uint8_t checksumTxA = 0;
 		uint8_t checksumTxB = 0;
 

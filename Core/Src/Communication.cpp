@@ -155,7 +155,7 @@ void Communication::heartbeatCan() {
 
 	if(loraActive && n>=23) {
 		radioArray[RCU_START_ADDR] = 1;
-		memcpy(&radioArray[RCU_START_ADDR+1],msgData.bit.data.uint8,RCU_MSG_SIZE-1);
+		memcpy(&radioArray[RCU_START_ADDR+1],msgData.bit.data.uint8,n-4);
 	}
 
 	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);

@@ -130,9 +130,6 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	}
 	n += 1 * sizeof(uint32_t);
 
-	if(n > 8) {
-		return 0;
-	}
 	if(loggingEnabled && !flash->lock)
 		flash->addLog(data, n);
 	return 0;
