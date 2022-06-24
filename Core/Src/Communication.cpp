@@ -131,7 +131,7 @@ void Communication::receptor(uint32_t id, uint8_t *data, uint32_t n) {
 	msgId.info.priority = STANDARD_PRIORITY;
 	msgData.bit.cmd_id = commandId + 1;
 
-	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, CAN_MSG_LENGTH(ret_n));
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN2, msgId.uint32, msgData.uint8, CAN_MSG_LENGTH(ret_n));
 }
 
 void Communication::heartbeatCan() {
@@ -158,7 +158,7 @@ void Communication::heartbeatCan() {
 		memcpy(&radioArray[RCU_START_ADDR+1],msgData.bit.data.uint8,n-4);
 	}
 
-	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN2, msgId.uint32, msgData.uint8, n);
 }
 
 void Communication::heartbeatLora() {
