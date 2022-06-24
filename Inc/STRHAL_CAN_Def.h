@@ -67,10 +67,39 @@ extern "C" {
 #define FDCAN_TDC_OFFSET				5
 #define FDCAN_TDC_FILTER				0
 
+// From HAL driver
+#define SRAMCAN_FLS_NBR                  (28U)         /* Max. Filter List Standard Number      */
+#define SRAMCAN_FLE_NBR                  ( 8U)         /* Max. Filter List Extended Number      */
+#define SRAMCAN_RF0_NBR                  ( 3U)         /* RX FIFO 0 Elements Number             */
+#define SRAMCAN_RF1_NBR                  ( 3U)         /* RX FIFO 1 Elements Number             */
+#define SRAMCAN_TEF_NBR                  ( 3U)         /* TX Event FIFO Elements Number         */
+#define SRAMCAN_TFQ_NBR                  ( 3U)         /* TX FIFO/Queue Elements Number         */
+
+#define SRAMCAN_FLS_SIZE            ( 1U * 4U)         /* Filter Standard Element Size in bytes */
+#define SRAMCAN_FLE_SIZE            ( 2U * 4U)         /* Filter Extended Element Size in bytes */
+#define SRAMCAN_RF0_SIZE            (18U * 4U)         /* RX FIFO 0 Elements Size in bytes      */
+#define SRAMCAN_RF1_SIZE            (18U * 4U)         /* RX FIFO 1 Elements Size in bytes      */
+#define SRAMCAN_TEF_SIZE            ( 2U * 4U)         /* TX Event FIFO Elements Size in bytes  */
+#define SRAMCAN_TFQ_SIZE            (18U * 4U)         /* TX FIFO/Queue Elements Size in bytes  */
+
+#define SRAMCAN_FLSSA ((uint32_t)0)                                                      /* Filter List Standard Start
+                                                                                            Address                  */
+#define SRAMCAN_FLESA ((uint32_t)(SRAMCAN_FLSSA + (SRAMCAN_FLS_NBR * SRAMCAN_FLS_SIZE))) /* Filter List Extended Start
+                                                                                            Address                  */
+#define SRAMCAN_RF0SA ((uint32_t)(SRAMCAN_FLESA + (SRAMCAN_FLE_NBR * SRAMCAN_FLE_SIZE))) /* Rx FIFO 0 Start Address  */
+#define SRAMCAN_RF1SA ((uint32_t)(SRAMCAN_RF0SA + (SRAMCAN_RF0_NBR * SRAMCAN_RF0_SIZE))) /* Rx FIFO 1 Start Address  */
+#define SRAMCAN_TEFSA ((uint32_t)(SRAMCAN_RF1SA + (SRAMCAN_RF1_NBR * SRAMCAN_RF1_SIZE))) /* Tx Event FIFO Start
+                                                                                            Address */
+#define SRAMCAN_TFQSA ((uint32_t)(SRAMCAN_TEFSA + (SRAMCAN_TEF_NBR * SRAMCAN_TEF_SIZE))) /* Tx FIFO/Queue Start
+                                                                                            Address                  */
+#define SRAMCAN_SIZE  ((uint32_t)(SRAMCAN_TFQSA + (SRAMCAN_TFQ_NBR * SRAMCAN_TFQ_SIZE))) /* Message RAM size         */
+
 //#define FDCAN_MESSAGE_RAM_BASE		((uint32_t)0x4000AC00U)
 #define FDCAN_MESSAGE_RAM_BASE		SRAMCAN_BASE
 #define FDCAN1_MESSAGE_RAM_OFFSET	((uint32_t)0x00000000U)
-#define FDCAN2_MESSAGE_RAM_OFFSET	((uint32_t)0x00000354U)
+//#define FDCAN2_MESSAGE_RAM_OFFSET	((uint32_t)0x00000354U)
+#define FDCAN2_MESSAGE_RAM_OFFSET	SRAMCAN_SIZE
+//#define FDCAN2_MESSAGE_RAM_OFFSET	0
 #define FDCAN1_MESSAGE_RAM_START	((uint32_t)(FDCAN1_MESSAGE_RAM_OFFSET + FDCAN_MESSAGE_RAM_BASE))
 #define FDCAN2_MESSAGE_RAM_START	((uint32_t)(FDCAN2_MESSAGE_RAM_OFFSET + FDCAN_MESSAGE_RAM_BASE))
 #define FDCAN1_MESSAGE_RAM			((Can_Message_RAM *) FDCAN1_MESSAGE_RAM_START)

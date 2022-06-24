@@ -1,6 +1,6 @@
 #include <string.h>
 #include <STRHAL_CAN.h>
-
+#include <stdio.h>
 
 static const uint8_t Can_DlcToLength[] =
 { 0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64 };
@@ -185,9 +185,9 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 	CLEAR_BIT(can->CCCR, (FDCAN_CCCR_TEST | FDCAN_CCCR_MON | FDCAN_CCCR_ASM));
 	CLEAR_BIT(can->TEST, FDCAN_TEST_LBCK);
 
-	if(fdcan_id == STRHAL_FDCAN1) {
+	//if(fdcan_id == STRHAL_FDCAN1) { // TODO find out why this is here - it is here because the FDCAN_CONFIG reg needs only to be set once
 		MODIFY_REG(FDCAN_CONFIG->CKDIV, FDCAN_CKDIV_PDIV, FDCAN_CLOCK_DIV2);
-	}
+	//}
 
 	// Set the nominal bit timing register
 	can->NBTP = ((((uint32_t) FDCAN_NOMINAL_SYNC_JUMP_WIDTH - 1U) << FDCAN_NBTP_NSJW_Pos) | (((uint32_t) FDCAN_NOMINAL_TIMESEG_1 - 1U) << FDCAN_NBTP_NTSEG1_Pos) | (((uint32_t) FDCAN_NOMINAL_TIMESEG_2 - 1U) << FDCAN_NBTP_NTSEG2_Pos) | (((uint32_t) FDCAN_NOMINAL_PRESCALER - 1U) << FDCAN_NBTP_NBRP_Pos));
@@ -219,7 +219,7 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id) {
 
 int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id, STRHAL_FDCAN_Filter_t *filter, uint8_t n, STRHAL_CAN_Receptor_t receptor){
 	/* Error handling for user inputs */
-	if(fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN) // invaSTRHAL fdcan instance
+	if(fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN) // invalid fdcan instance
 		return -1;
 
 	STRHAL_CAN_Handle_t *fdcan = &_fdcans[fdcan_id];
@@ -443,7 +443,9 @@ void FDCAN1_IT0_IRQHandler(void) {
 		id = rx_fifo->R0.bit.ID >> 18;
 		l = Can_DlcToLength[rx_fifo->R1.bit.DLC];
 
-		rec(id, rx_fifo->data.byte, l);
+		//rec(id, rx_fifo->data.byte, l);
+		if(rec != NULL)
+			rec(id, rx_fifo->data.byte, l-2);
 		FDCAN1->RXF1A = i & 0x7;
 	}
 }
@@ -466,10 +468,11 @@ void FDCAN2_IT0_IRQHandler(void) {
 		id = rx_fifo->R0.bit.ID >> 18;
 		l = Can_DlcToLength[rx_fifo->R1.bit.DLC];
 
-		rec(id, rx_fifo->data.byte, l);
+		//rec(id, rx_fifo->data.byte, l);
+		if(rec != NULL)
+			rec(id, rx_fifo->data.byte, l-2);
 
 		FDCAN2->RXF0A = i & 0x7;
-
 
 	}
 	if(FDCAN2->IR & FDCAN_IR_RF1N) {
@@ -489,7 +492,9 @@ void FDCAN2_IT0_IRQHandler(void) {
 		id = rx_fifo->R0.bit.ID >> 18;
 		l = Can_DlcToLength[rx_fifo->R1.bit.DLC];
 
-		rec(id, rx_fifo->data.byte, l);
+		//rec(id, rx_fifo->data.byte, l);
+		if(rec != NULL)
+			rec(id, rx_fifo->data.byte, l-2);
 		FDCAN2->RXF1A = i & 0x7;
 	}
 }
