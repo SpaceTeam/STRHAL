@@ -222,14 +222,14 @@ bool LoRa1276F30_Radio::setRFFrequency() {
 }
 
 bool LoRa1276F30_Radio::setPAConfig() {
-	//uint8_t parameter[4] = { 0x04, 0x07, 0x00, 0x01 }; // optimal PA settings for +22dBm
-	uint8_t parameter[4] = { 0x02, 0x02, 0x00, 0x01 };
+	uint8_t parameter[4] = { 0x04, 0x07, 0x00, 0x01 }; // optimal PA settings for +22dBm
+	//uint8_t parameter[4] = { 0x02, 0x02, 0x00, 0x01 };
 	return writeCommand(LoraOpcode::SET_PA_CONFIG, parameter, 4, 10);
 }
 
 bool LoRa1276F30_Radio::SetTxParams() {
-	//uint8_t parameter[2] = { 0x16, 0x00 }; // +22dBm and 40us ramp up/down
-	uint8_t parameter[2] = { 0xEF, 0x02 };
+	uint8_t parameter[2] = { 0x16, 0x00 }; // +22dBm and 40us ramp up/down
+	//uint8_t parameter[2] = { 0xEF, 0x02 };
 	return writeCommand(LoraOpcode::SET_TX_PARAMS, parameter, 2, 10);
 }
 

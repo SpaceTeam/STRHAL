@@ -62,6 +62,9 @@ ROCKET_STATE RocketChannel::currentStateLogic(uint64_t time) {
 			return poweredAscent(time);
 		case UNPOWERED_ASCENT:
 			// wait until end of flight command from PMU2
+			if(time - timeLastTransition > 10000) {
+				return DEPRESS;
+			}
 			break;
 		case DEPRESS:
 			return depress(time);
@@ -99,7 +102,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time) {
 			break;
 		}
 		case UNPOWERED_ASCENT:
-			fuelServoChannel.setTargetPos(0);
+			//fuelServoChannel.setTargetPos(0);
 			oxServoChannel.setTargetPos(0);
 			break;
 		case DEPRESS:
@@ -235,7 +238,7 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time) {
 }
 
 ROCKET_STATE RocketChannel::poweredAscent(uint64_t time) {
-	if(time - timeLastTransition > 30000) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
+	if(time - timeLastTransition > 3500) { // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
 		return UNPOWERED_ASCENT;
 	}
 	return POWERED_ASCENT;

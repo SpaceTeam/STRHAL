@@ -62,7 +62,7 @@ int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode) 
 			{ .value_id1 = id2.uint32, .mask_id2 = mask.uint32, .type = FDCAN_FILTER_MASK }
 		};
 
-		if (STRHAL_CAN_Subscribe(STRHAL_FDCAN2, STRHAL_FDCAN_RX0, mainFilter, 2, receptor) != 2)
+		if (STRHAL_CAN_Subscribe(STRHAL_FDCAN1, STRHAL_FDCAN_RX0, mainFilter, 2, receptor) != 2)
 			return -1;
 	} else if(mode == COMMode::LISTENER_COM_MODE) {
 		Can_MessageId_t mask =
