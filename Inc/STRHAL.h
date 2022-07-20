@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 //when increasing frequency, peripheral clock configuration must be changed!
-#define STRHAL_SYSCLK_FREQ 100000000
+#define STRHAL_SYSCLK_FREQ 240000000
 
 typedef enum {
 	STRHAL_SYSCLK_SRC_BKP, //Backup SYSCLK SRC = ever working internal HSI without PLL

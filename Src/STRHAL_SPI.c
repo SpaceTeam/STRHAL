@@ -353,8 +353,8 @@ void STRHAL_SPI_Master_Run(STRHAL_SPI_Id_t spi_id) {
 		return;
 
 	//LL_SPI_SetTransferSize(_spis[spi_id].spix->spix, 0);
-	//LL_SPI_StartMasterTransfer(_spis[spi_id].spix);
 	LL_SPI_Enable(_spis[spi_id].spix);
+	LL_SPI_StartMasterTransfer(_spis[spi_id].spix);
 }
 
 void STRHAL_SPI_Master_Stop(STRHAL_SPI_Id_t spi_id) {
@@ -362,7 +362,7 @@ void STRHAL_SPI_Master_Stop(STRHAL_SPI_Id_t spi_id) {
 		return;
 
 	//TODO: sequence handling rm s. 2198
-	//LL_SPI_SuspendMasterTransfer(_spis[spi_id].spix);
+	LL_SPI_SuspendMasterTransfer(_spis[spi_id].spix);
 	LL_SPI_Disable(_spis[spi_id].spix);
 }
 
@@ -409,8 +409,8 @@ int32_t STRHAL_SPI_Master_Init(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t
 	SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
 	SPI_InitStruct.CRCPoly = 10;
 	SPI_InitStruct.BaudRate = config->psc << SPI_CFG1_MBR_Pos;
-	SPI_InitStruct.ClockPhase = config->c_pol_phase & 0x1;
-	SPI_InitStruct.ClockPolarity = config->c_pol_phase & 0x2;
+	SPI_InitStruct.ClockPhase = config->c_pol_phase & SPI_CFG2_CPHA_Msk;
+	SPI_InitStruct.ClockPolarity = config->c_pol_phase & SPI_CFG2_CPOL_Msk;
 
 	LL_SPI_Init(_spis[spi_id].spix, &SPI_InitStruct);
 
@@ -422,431 +422,110 @@ int32_t STRHAL_SPI_Master_Init(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t
 
 	return SystemCoreClock / ((uint32_t) 1<<config->psc);
 }
-/*
-int32_t STRHAL_SPI_Master_Transceive24(STRHAL_SPI_Id_t spi_id, const int32_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, int32_t *rx_data, uint32_t rx_n, uint8_t word_size, uint16_t tot) {
 
-	static uint32_t i;
-	i=0;
-
-	STRHAL_SPI_t *spi = &_spis[spi_id];
-	if(spi->mode != STRHAL_SPI_MODE_MASTER)
-		return -1;
-
-	if(rx_skip_n + rx_n < tx_n) {
-		return -1;
-	}
-
-	if(rx_skip_n > tx_n) {
-		rx_skip_n = tx_n;
-		rx_n = 0;
-	}
-
-	LL_SPI_SetTransferSize(spi->spix, rx_skip_n + rx_n);
-	LL_SPI_StartMasterTransfer(spi->spix);
-	STRHAL_SPI_Master_Run(spi_id);
-
-	LL_GPIO_ResetOutputPin(spi->nss->port, spi->nss->pin);
-
-	uint32_t rx_n0 = rx_n;
-
-	while((tx_n + rx_n) > 0) {
-		LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA); // reset FIFO threshold to common full 16bit transceptions
-
-		if(_wait_for_txp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(_spis[spi_id].nss->port, _spis[spi_id].nss->pin);
-			return -1;
-		}
-
-		if(tx_n >= 1) {
-			//more than one byte left to transmit
-			LL_SPI_TransmitData8(spi->spix, ((uint8_t) ((*tx_data)>>((word_size*8-8)-(i%word_size)*8)) & 0xFF));
-			tx_n -= 1; //decrement tx byte counter by 2 bytes
-
-			if(tx_n == 1 && (rx_n + rx_skip_n) > 1) {
-				LL_SPI_TransmitData16(spi->spix, (uint16_t) *(tx_data++) | 0x69);
-			}
-		}
-		else if(tx_n == 1){
-			//last tx byte left to transmit
-			if((rx_n + rx_skip_n) > 1) {
-				//there is still data left to read without specified tx data => append dummy byte filling 2byte DR
-				LL_SPI_TransmitData16(spi->spix, (uint16_t) *(tx_data++) | 0x6900);
-			} else {
-				//last transmission is tx only byte => reset FIFO Threshold to monitor reception of single byte
-				LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA);
-				LL_SPI_TransmitData8(spi->spix, *tx_data++);
-			}
-			tx_n --; //decrement tx_n <=> tx_n = 0
-		}
-		else if(rx_n > 1) {
-			//there is are more than two bytes ready to ONLY READ (without corresponding tx data) => load DR with dummy data for transmission
-			LL_SPI_TransmitData16(spi->spix, 0x6969);
-		}
-		else {
-			//there is only one byte left to ONLY READ (without corresponding tx data) => reset FIFO Threshold to monitor reception of single byte and load dummy byte for transmission
-			LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA);
-			LL_SPI_TransmitData8(spi->spix, 0x69);
-		}
-
-		//wait for reception of 1 or 2 bytes depending on FIFO-threshold
-		if(_wait_for_rxp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-			return -1;
-		}
-
-		//full read on DR regardless of actual reception size (1 or 2 bytes)
-
-		if(rx_skip_n > 1) {
-			uint16_t waste = LL_SPI_ReceiveData16(spi->spix);
-			(void) waste;
-			rx_skip_n -= sizeof(uint16_t);
-		}
-		else if(rx_skip_n == 1) {
-			rx_skip_n--;
-			if(rx_n > 0) {
-				*(rx_data++) = (uint8_t) ((LL_SPI_ReceiveData16(spi->spix) >> 8) & 0xFF);
-				rx_n --;
-			} else {
-				uint8_t waste = *((__IO uint8_t *) &spi->spix->RXDR);
-				(void) waste;
-			}
-		}
-		else if(rx_skip_n == 0 && rx_n > 1) {
-			*((uint16_t *) rx_data) =  LL_SPI_ReceiveData16(spi->spix);
-			rx_data += 2;
-			rx_n -= 2;
-		}
-		else if(rx_skip_n == 0 && rx_n == 1) {
-			*(rx_data++) = LL_SPI_ReceiveData8(spi->spix);
-			rx_n --;
-		}
-		i++;
-		if(i%word_size == 0) {
-			tx_data++;//increment data address head
-		}
-
-	}
-
-	if(_wait_for_eot(spi->spix, tot) < 0) {
-		LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-		return -1;
-	}
-
-	LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-	LL_SPI_SuspendMasterTransfer(spi->spix);
-	STRHAL_SPI_Master_Stop(spi_id);
-	return (int32_t) rx_n0;
-}
-*//*
+//TODO: test this
 int32_t STRHAL_SPI_Master_Transceive(STRHAL_SPI_Id_t spi_id, const uint8_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, uint8_t *rx_data, uint32_t rx_n, uint16_t tot) {
 	STRHAL_SPI_t *spi = &_spis[spi_id];
-	if(spi->mode != STRHAL_SPI_MODE_MASTER)
-		return -1;
 
-	if(rx_skip_n + rx_n < tx_n) {
-		return -1;
-	}
-
-	if(rx_skip_n > tx_n) {
-		rx_skip_n = tx_n;
-		rx_n = 0;
-	}
-
-	uint32_t rx_n0 = rx_n;
-
-	//TODO: insert start master transfer
-
-	while((tx_n + rx_n) > 0) {
-		LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_02DATA); // reset FIFO threshold to common full 16bit transceptions
-
-		if(_wait_for_txp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(_spis[spi_id].nss->port, _spis[spi_id].nss->pin);
+	if(LL_SPI_IsEnabled(spi->spix))
 			return -1;
-		}
 
-		if(tx_n > 1) {
-			//more than one byte left to transmit
-			LL_SPI_TransmitData16(spi->spix, *((uint16_t *) tx_data));
-			LL_SPI_StartMasterTransfer(spi->spix);
-			tx_n -= 2; //decrement tx byte counter by 2 bytes
-			tx_data += 2;//increment data address head
-		}
-		else if(tx_n == 1){
-			//last tx byte left to transmit
-			if((rx_n + rx_skip_n) > 1) {
-				//there is still data left to read without specified tx data => append dummy byte filling 2byte DR
-				LL_SPI_TransmitData16(spi->spix, (uint16_t) *(tx_data++) | 0x6900);
-			} else {
-				//last transmission is tx only byte => reset FIFO Threshold to monitor reception of single byte
-				LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA);
-				LL_SPI_TransmitData8(spi->spix, *tx_data++);
-			}
-			tx_n --; //decrement tx_n <=> tx_n = 0
-		}
-		else if(rx_n > 1) {
-			//there is are more than two bytes ready to ONLY READ (without corresponding tx data) => load DR with dummy data for transmission
-			LL_SPI_TransmitData16(spi->spix, 0x6969);
-		}
-		else {
-			//there is only one byte left to ONLY READ (without corresponding tx data) => reset FIFO Threshold to monitor reception of single byte and load dummy byte for transmission
-			LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA);
-			LL_SPI_TransmitData8(spi->spix, 0x69);
-		}
-
-		//wait for reception of 1 or 2 bytes depending on FIFO-threshold
-		if(_wait_for_rxp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-			return -1;
-		}
-
-		//full read on DR regardless of actual reception size (1 or 2 bytes)
-
-		if(rx_skip_n > 1) {
-			uint16_t waste = LL_SPI_ReceiveData16(spi->spix);
-			(void) waste;
-			rx_skip_n -= sizeof(uint16_t);
-		}
-		else if(rx_skip_n == 1) {
-			rx_skip_n--;
-			if(rx_n > 0) {
-				*(rx_data++) = (uint8_t) ((LL_SPI_ReceiveData16(spi->spix) >> 8) & 0xFF);
-				rx_n --;
-			} else {
-				uint8_t waste = *((__IO uint8_t *) &spi->spix->RXDR);
-				(void) waste;
-			}
-		}
-		else if(rx_skip_n == 0 && rx_n > 1) {
-			*((uint16_t *) rx_data) =  LL_SPI_ReceiveData16(spi->spix);
-			rx_data += 2;
-			rx_n -= 2;
-		}
-		else if(rx_skip_n == 0 && rx_n == 1) {
-			*(rx_data++) = LL_SPI_ReceiveData8(spi->spix);
-			rx_n --;
-		}
-	}
-
-
-	return (int32_t) rx_n0;
-}*/
-/*
-int32_t STRHAL_SPI_Master_Transceive(STRHAL_SPI_Id_t spi_id, const uint8_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, uint8_t *rx_data, uint32_t rx_n, uint16_t tot) {
-	STRHAL_SPI_t *spi = &_spis[spi_id];
-	if(spi->mode != STRHAL_SPI_MODE_MASTER)
-		return -1;
-
-	if(rx_skip_n + rx_n < tx_n) {
-		return -1;
-	}
-
-	if(rx_skip_n > tx_n) {
-		rx_skip_n = tx_n;
-		rx_n = 0;
-	}
-
-	uint32_t rx_n0 = rx_n;
-
-	//TODO: insert start master transfer
-
-	while((tx_n + rx_n) > 0) {
-
-		if(_wait_for_txp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(_spis[spi_id].nss->port, _spis[spi_id].nss->pin);
-			return -1;
-		}
-
-		if(tx_n > 1) {
-			//more than one byte left to transmit
-			LL_SPI_TransmitData8(spi->spix, *(tx_data));
-			LL_SPI_StartMasterTransfer(spi->spix);
-			tx_n -= 1; //decrement tx byte counter by 2 bytes
-			tx_data ++;//increment data address head
-		}
-		else if(tx_n == 1){
-			//last tx byte left to transmit
-			if((rx_n + rx_skip_n) > 1) {
-				//there is still data left to read without specified tx data => append dummy byte filling 2byte DR
-				LL_SPI_TransmitData16(spi->spix, (uint16_t) *(tx_data++) | 0x69);
-			} else {
-				//last transmission is tx only byte => reset FIFO Threshold to monitor reception of single byte
-
-				LL_SPI_TransmitData8(spi->spix, *tx_data++);
-			}
-			tx_n --; //decrement tx_n <=> tx_n = 0
-		}
-		else if(rx_n > 1) {
-			//there is are more than two bytes ready to ONLY READ (without corresponding tx data) => load DR with dummy data for transmission
-			LL_SPI_TransmitData16(spi->spix, 0x6969);
-		}
-		else {
-			//there is only one byte left to ONLY READ (without corresponding tx data)
-			LL_SPI_TransmitData8(spi->spix, 0x69);
-		}
-
-		//wait for reception of 1 or 2 bytes depending on FIFO-threshold
-		if(_wait_for_rxp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-			return -1;
-		}
-
-		//full read on DR regardless of actual reception size (1 or 2 bytes)
-
-		if(rx_skip_n > 1) {
-			uint16_t waste = LL_SPI_ReceiveData16(spi->spix);
-			(void) waste;
-			rx_skip_n -= sizeof(uint16_t);
-		}
-		else if(rx_skip_n == 1) {
-			rx_skip_n--;
-			if(rx_n > 0) {
-				*(rx_data++) = (uint8_t) ((LL_SPI_ReceiveData16(spi->spix) >> 8) & 0xFF);
-				rx_n --;
-			} else {
-				uint8_t waste = *((__IO uint8_t *) &spi->spix->RXDR);
-				(void) waste;
-			}
-		}
-		else if(rx_skip_n == 0 && rx_n > 1) {
-			*((uint16_t *) rx_data) =  LL_SPI_ReceiveData16(spi->spix);
-			rx_data += 2;
-			rx_n -= 2;
-		}
-		else if(rx_skip_n == 0 && rx_n == 1) {
-			*(rx_data++) = LL_SPI_ReceiveData8(spi->spix);
-			rx_n --;
-		}
-	}
-
-
-	return (int32_t) rx_n0;
-}
-
-//transcieve 24bit frames via 3*8bit frames, MSB first
-int32_t STRHAL_SPI_Master_Transceive24(STRHAL_SPI_Id_t spi_id, const int32_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, int32_t *rx_data, uint32_t rx_n, uint16_t tot) {
-	static uint8_t txdata8[3] = {0};
-	static uint8_t rxdata8[3] = {0};
-
-	STRHAL_SPI_t *spi = &_spis[spi_id];
-	LL_SPI_SetTransferSize(spi->spix, (rx_skip_n + rx_n)*3);
-	LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA); // reset FIFO threshold to common full 8bit transceptions
-
+	LL_SPI_SetDataWidth(spi->spix, LL_SPI_DATAWIDTH_8BIT);
+	LL_SPI_SetTransferSize(spi->spix, (rx_skip_n + rx_n));
+	LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA);
 
 	STRHAL_SPI_Master_Run(spi_id);
 
 	LL_GPIO_ResetOutputPin(spi->nss->port, spi->nss->pin);
 
-	for(uint32_t i=0; i<rx_n+rx_skip_n; i++) {
-
-		rxdata8[0] = 0;
-		rxdata8[1] = 0;
-		rxdata8[2] = 0;
-		if(i<tx_n) {
-
-			txdata8[0] = (tx_data[i]>>16) & 0xFF;
-			txdata8[1] = (tx_data[i]>>8) & 0xFF;
-			txdata8[2] = (tx_data[i]) & 0xFF;
+	uint32_t tx_counter=0, rx_counter=0, rx_n0=rx_n;
+	uint64_t start = STRHAL_Systick_GetTick();
+	while((rx_n+rx_skip_n) > 0) {
+		if(LL_SPI_IsActiveFlag_TXP(spi->spix) && tx_n>0) {
+			LL_SPI_TransmitData8(spi->spix, tx_data[tx_counter]);
+			tx_n--;
+			tx_counter++;
 		}
-		else {
-			txdata8[0] = 0;
-			txdata8[1] = 0;
-			txdata8[2] = 0;
+		else if(tx_n == 0 && rx_n > 0) {
+			LL_SPI_TransmitData8(spi->spix, 0);
 		}
 
-		if(STRHAL_SPI_Master_Transceive(spi_id, txdata8, 3, 0, rxdata8, 3, tot) != 3)
+		if((LL_SPI_IsActiveFlag_RXWNE(spi->spix) || LL_SPI_IsActiveFlag_EOT(spi->spix)) && rx_n>0) {
+			if(rx_skip_n == 0) {
+				rx_data[rx_counter] = LL_SPI_ReceiveData8(spi->spix);
+				rx_n--;
+				rx_counter++;
+			}
+			else {
+				uint32_t waste = LL_SPI_ReceiveData8(spi->spix);
+				(void) waste;
+				rx_skip_n--;
+			}
+		}
+
+		if(STRHAL_Systick_GetTick() - start >= tot) {
+			LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
 			return -1;
-
-		if(i>=rx_skip_n) {
-			rx_data[i-rx_skip_n] = (rxdata8[0]<<16) | (rxdata8[1]<<8) | (rxdata8[2]);
 		}
-		else {
-			uint32_t waste = (rxdata8[0]<<16) | (rxdata8[1]<<8) | (rxdata8[2]);
-			(void) waste;
-		}
-	}
-	if(_wait_for_eot(spi->spix, tot) < 0) {
-		LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-		return -1;
 	}
 
 	LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-	LL_SPI_SuspendMasterTransfer(spi->spix);
+	LL_SPI_ClearFlag_EOT(spi->spix);
+	LL_SPI_ClearFlag_TXTF(spi->spix);
 	STRHAL_SPI_Master_Stop(spi_id);
 
-	return rx_n;
+	return rx_n0;
 }
-*/
-//transcieve 24bit frames via 3*8bit frames, MSB first
+
+//this works
 int32_t STRHAL_SPI_Master_Transceive24(STRHAL_SPI_Id_t spi_id, const int32_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, int32_t *rx_data, uint32_t rx_n, uint16_t tot) {
-	static uint8_t txdata8[3] = {0};
-	static uint8_t rxdata8[3] = {0};
-
-	uint32_t rx_n0 = rx_n;
-
 	STRHAL_SPI_t *spi = &_spis[spi_id];
-	LL_SPI_SetTransferSize(spi->spix, (rx_skip_n + rx_n)*3);
-	LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA); // reset FIFO threshold to common full 24bit transceptions
 
+	if(LL_SPI_IsEnabled(spi->spix))
+		return -1;
+
+	LL_SPI_SetDataWidth(spi->spix, LL_SPI_DATAWIDTH_24BIT);
+	LL_SPI_SetTransferSize(spi->spix, (rx_skip_n + rx_n));
+	LL_SPI_SetFIFOThreshold(spi->spix, LL_SPI_FIFO_TH_01DATA);
 
 	STRHAL_SPI_Master_Run(spi_id);
 
 	LL_GPIO_ResetOutputPin(spi->nss->port, spi->nss->pin);
 
-	for(uint32_t i=0; i<rx_n+rx_skip_n; i++) {
-
-		rxdata8[0] = 0;
-		rxdata8[1] = 0;
-		rxdata8[2] = 0;
-		if(i<tx_n) {
-
-			txdata8[0] = (tx_data[i]>>16) & 0xFF;
-			txdata8[1] = (tx_data[i]>>8) & 0xFF;
-			txdata8[2] = (tx_data[i]) & 0xFF;
+	uint32_t tx_counter=0, rx_counter=0, rx_n0=rx_n;
+	uint64_t start = STRHAL_Systick_GetTick();
+	while((rx_n+rx_skip_n) > 0) {
+		if(LL_SPI_IsActiveFlag_TXP(spi->spix) && tx_n>0) {
+			LL_SPI_TransmitData32(spi->spix, tx_data[tx_counter]);
+			tx_n--;
+			tx_counter++;
 		}
-		else {
-			txdata8[0] = 0;
-			txdata8[1] = 0;
-			txdata8[2] = 0;
-		}
-		//----------------------
-		if(_wait_for_txp(spi->spix, tot) < 0) {
-			LL_GPIO_SetOutputPin(_spis[spi_id].nss->port, _spis[spi_id].nss->pin);
-			return -1;
+		else if(tx_n == 0 && rx_n > 0) {
+			LL_SPI_TransmitData32(spi->spix, 0);
 		}
 
-		LL_SPI_TransmitData8(spi->spix, *(txdata8));
-		LL_SPI_TransmitData8(spi->spix, *(txdata8+1));
-		LL_SPI_TransmitData8(spi->spix, *(txdata8+2));
-		LL_SPI_StartMasterTransfer(spi->spix);
+		if((LL_SPI_IsActiveFlag_RXWNE(spi->spix) || LL_SPI_IsActiveFlag_EOT(spi->spix)) && rx_n>0) {
+			if(rx_skip_n == 0) {
+				rx_data[rx_counter] = LL_SPI_ReceiveData32(spi->spix);
+				rx_n--;
+				rx_counter++;
+			}
+			else {
+				uint32_t waste = LL_SPI_ReceiveData32(spi->spix);
+				(void) waste;
+				rx_skip_n--;
+			}
+		}
 
-
-
-		if(_wait_for_rxp(spi->spix, tot) < 0) {
+		if(STRHAL_Systick_GetTick() - start >= tot) {
 			LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
 			return -1;
 		}
-
-
-		*(rxdata8) = LL_SPI_ReceiveData8(spi->spix);
-		*(rxdata8+1) = LL_SPI_ReceiveData8(spi->spix);
-		*(rxdata8+2) = LL_SPI_ReceiveData8(spi->spix);
-
-		//----------------------
-		if(i>=rx_skip_n) {
-			rx_data[i-rx_skip_n] = (rxdata8[0]<<16) | (rxdata8[1]<<8) | (rxdata8[2]);
-		}
-		else {
-			uint32_t waste = (rxdata8[0]<<16) | (rxdata8[1]<<8) | (rxdata8[2]);
-			(void) waste;
-		}
-	}
-	if(_wait_for_eot(spi->spix, tot) < 0) {
-		LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-		return -1;
 	}
 
 	LL_GPIO_SetOutputPin(spi->nss->port, spi->nss->pin);
-	LL_SPI_SuspendMasterTransfer(spi->spix);
+	LL_SPI_ClearFlag_EOT(spi->spix);
+	LL_SPI_ClearFlag_TXTF(spi->spix);
 	STRHAL_SPI_Master_Stop(spi_id);
 
 	return rx_n0;

@@ -97,10 +97,10 @@ typedef enum {
 } STRHAL_SPI_Mode_t;
 
 typedef enum {
-	STRHAL_SPI_CPOL_CPHASE_LL = 0<<0,
-	STRHAL_SPI_CPOL_CPHASE_LH = 1<<0,
-	STRHAL_SPI_CPOL_CPHASE_HL = 1<<1,
-	STRHAL_SPI_CPOL_CPHASE_HH = 1<<1 | 1<<0,
+	STRHAL_SPI_CPOL_CPHASE_LL = 0,
+	STRHAL_SPI_CPOL_CPHASE_LH = SPI_CFG2_CPHA,
+	STRHAL_SPI_CPOL_CPHASE_HL = SPI_CFG2_CPOL,
+	STRHAL_SPI_CPOL_CPHASE_HH = SPI_CFG2_CPOL | SPI_CFG2_CPHA,
 } STRHAL_SPI_CPOL_CPHASE_t;
 
 typedef struct {
@@ -110,7 +110,7 @@ typedef struct {
 	STRHAL_SPI_NSSId_t nss;
 
 	STRHAL_SPI_Mode_t mode;
-	STRHAL_SPI_CPOL_CPHASE_t c_pol_phase : 2;
+	STRHAL_SPI_CPOL_CPHASE_t c_pol_phase;
 
 	uint8_t psc : 3;
 	uint8_t lsb_first : 1;
