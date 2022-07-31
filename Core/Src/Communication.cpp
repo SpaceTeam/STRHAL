@@ -131,6 +131,16 @@ void Communication::receptor(uint32_t id, uint8_t *data, uint32_t n) {
 	msgId.info.priority = STANDARD_PRIORITY;
 	msgData.bit.cmd_id = commandId + 1;
 
+#ifdef UART_DEBUG
+	uint8_t msgBuf[66] =
+	{ 0 };
+	msgBuf[0] = 0x3A;
+	msgBuf[1] = Communication::genericChannel->getNodeId();
+	memcpy(&msgBuf[2], msgData.uint8, CAN_MSG_LENGTH(ret_n));
+	msgBuf[CAN_MSG_LENGTH(ret_n) + 2] = 0x0A;
+	STRHAL_UART_Debug_Write_DMA((char *) msgBuf, CAN_MSG_LENGTH(ret_n) + 3);
+#endif
+
 	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, CAN_MSG_LENGTH(ret_n));
 }
 
@@ -158,12 +168,22 @@ void Communication::heartbeatCan() {
 		memcpy(&radioArray[RCU_START_ADDR+1],msgData.bit.data.uint8,n-4);
 	}
 
+#ifdef UART_DEBUG
+	uint8_t msgBuf[66] =
+	{ 0 };
+	msgBuf[0] = 0x3A;
+	msgBuf[1] = Communication::genericChannel->getNodeId();
+	memcpy(&msgBuf[2], msgData.uint8, n);
+	msgBuf[n + 2] = 0x0A;
+	STRHAL_UART_Debug_Write_DMA((char *) msgBuf, n + 3);
+#endif
+
 	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);
 }
 
 void Communication::heartbeatLora() {
 	//sprintf((char *)radioArray,"hello world");
-	radio->send(0, radioArray, MSG_SIZE);
+	//radio->send(0, radioArray, MSG_SIZE);
 	//char *test = "hello world";
 	//radio->send(0, (uint8_t *) test, MSG_SIZE);
 }

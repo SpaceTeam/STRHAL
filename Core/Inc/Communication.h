@@ -24,6 +24,7 @@ class Communication {
 		int exec();
 
 		static void heartbeatLora();
+		static void receptor(uint32_t id, uint8_t *data, uint32_t n);
 
 		static constexpr uint32_t MSG_SIZE = 118;
 		static constexpr uint8_t ECU_START_ADDR = 0;
@@ -39,7 +40,7 @@ class Communication {
 	private:
 		Communication(GenericChannel *genericChannel, LoRa1276F30_Radio *lora);
 
-		static void receptor(uint32_t id, uint8_t *data, uint32_t n);
+		//static void receptor(uint32_t id, uint8_t *data, uint32_t n);
 		static void receptorLora(uint32_t id, uint8_t *data, uint32_t n);
 		static void heartbeatCan();
 		//static void heartbeatLora();

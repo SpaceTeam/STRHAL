@@ -103,10 +103,49 @@ int ECU::exec() {
 
 	speaker.beep(2, 400, 300);
 
+#ifdef UART_DEBUG
+	STRHAL_UART_Listen(STRHAL_UART_DEBUG);
+
+	uint8_t msgBuf[128] =
+	{ 0 };
+	uint8_t bufIndex = 0;
+	bool msgStarted = false;
+#endif
 	while(1) {
 
 		//detectReadoutMode();
+#ifdef UART_DEBUG
 
+		uint8_t tempBuf[64] =
+		{ 0 };
+		int32_t ret = STRHAL_UART_Read(STRHAL_UART_DEBUG, (char *) tempBuf, 64);
+		if(ret > 0) {
+			if(msgStarted) {
+				memcpy(&msgBuf[bufIndex-1], tempBuf, ret);
+				bufIndex += ret;
+				if(tempBuf[ret-1] == 0x0A) { // msg ended
+					msgStarted = false;
+					bufIndex = 0;
+					Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
+					memset(msgBuf, 0, 128);
+				}
+			} else {
+				if(tempBuf[0] == 0x3A) { // start byte
+					if(tempBuf[ret-1] == 0x0A) { // msg ended
+						memcpy(msgBuf, tempBuf, ret - 1);
+						Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
+						memset(msgBuf, 0, 128);
+					}
+					bufIndex += ret;
+					msgStarted = true;
+					if(ret > 1)
+						memcpy(msgBuf, &tempBuf[1], ret-1);
+				}
+				// else ignore msg
+			}
+
+		}
+#endif
 		if(flash->exec() != 0)
 			return -1;
 

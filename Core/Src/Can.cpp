@@ -33,7 +33,7 @@ int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode) 
 	if(STRHAL_CAN_Instance_Init(STRHAL_FDCAN2) != 0)
 		return -1;
 
-	if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM7, 160, 100) != 10000)
+	if(STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM7, 1600, 1000) != 100)
 		return -1;
 
 	if(STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_TIM7, heartbeat) != 0)
