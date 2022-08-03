@@ -26,7 +26,7 @@ extern "C" {
 #define STRHAL_ADC_COMMONCLOCK LL_ADC_CLOCK_SYNC_PCLK_DIV4
 //DMA
 #define STRHAL_ADC_DMA DMA1
-#define STRHAL_ADC_DMA_CHANNEL LL_DMA_CHANNEL_3 // the 3 DMA channels start here
+#define STRHAL_ADC_DMA_CHANNEL LL_DMA_CHANNEL_5 // the 3 DMA channels start here
 #define STRHAL_ADC_DMA_PRIORITY LL_DMA_PRIORITY_VERYHIGH
 
 typedef enum {
