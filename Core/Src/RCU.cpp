@@ -24,6 +24,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	com = Communication::instance(this, &lora);
+	//com = Communication::instance(this);
 	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&sense_5V);
 	registerChannel(&sense_12V);
@@ -50,17 +51,17 @@ int RCU::init() {
 		return -1;
 
 	// TODO find out why IMU is dead
-	if(imu.init() != 0)
-		return -1;
+	//if(imu.init() != 0)
+		//return -1;
 
-	if(baro.init() != 0)
+	/*if(baro.init() != 0)
 		return -1;
 
 	if(gnss.init() != 0)
 		return -1;
 
 	if(lora.init() != 0)
-		return -1;
+		return -1;*/
 
 	if(com == nullptr)
 		return -1;
@@ -98,43 +99,49 @@ int RCU::exec() {
 	speaker.beep(2, 400, 300);
 
 	LL_mDelay(2000);
-	int counter = 0;
-	//uint8_t loraData[101];
-	//memset(loraData,0,101);
-	//STRHAL_UART_Listen(STRHAL_UART1);
-	char canErr[64];
+
+#ifdef UART_DEBUG
+	STRHAL_UART_Listen(STRHAL_UART_DEBUG);
+
+	uint8_t msgBuf[128] =
+	{ 0 };
+	uint8_t bufIndex = 0;
+	bool msgStarted = false;
+#endif
+
 	while(1) {
-		/*counter++;
-		if(counter == 100000) {
-			counter = 0;
-			sprintf((char *)loraData,"geh scheissen markus!");
-			//gnss.sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G);
-			bool sent = lora.sendBytes(loraData, 101);
-			char buf[32];
-			sprintf(buf,"sent %d\n",sent);
-			STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf),100);
-			//while(lora.isBusy());
+#ifdef UART_DEBUG
 
-			uint8_t who = lora.getStatus();
-			char buf2[32];
-			sprintf(buf2,"ID: %d\n",who);
-			STRHAL_UART_Debug_Write_Blocking(buf2, strlen(buf2),100);
-		}*/
+		uint8_t tempBuf[64] =
+		{ 0 };
+		int32_t ret = STRHAL_UART_Read(STRHAL_UART_DEBUG, (char *) tempBuf, 64);
+		if(ret > 0) {
+			if(msgStarted) {
+				memcpy(&msgBuf[bufIndex-1], tempBuf, ret);
+				bufIndex += ret;
+				if(tempBuf[ret-1] == 0x0A) { // msg ended
+					msgStarted = false;
+					bufIndex = 0;
+					Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
+					memset(msgBuf, 0, 128);
+				}
+			} else {
+				if(tempBuf[0] == 0x3A) { // start byte
+					if(tempBuf[ret-1] == 0x0A) { // msg ended
+						memcpy(msgBuf, tempBuf, ret - 1);
+						Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
+						memset(msgBuf, 0, 128);
+					}
+					bufIndex += ret;
+					msgStarted = true;
+					if(ret > 1)
+						memcpy(msgBuf, &tempBuf[1], ret-1);
+				}
+				// else ignore msg
+			}
 
-		//detectReadoutMode();
-		/*counter++;
-		if(counter == 10000) {
-			counter = 0;
-			sprintf(canErr,"%ld %ld\n",FDCAN1->ECR,FDCAN1->PSR);
-			STRHAL_UART_Debug_Write_Blocking(canErr, strlen(canErr),100);
-		}*/
-		/*int nn = 0;
-		char readBuf[256] = { 0 };
-		nn = STRHAL_UART_Read(STRHAL_UART1, readBuf, 20);
-		//nn = STRHAL_UART_Read_Blocking(STRHAL_UART1, readBuf, 256, 10);
-		if(nn > 0) {
-			STRHAL_UART_Debug_Write_Blocking(readBuf, strlen(readBuf),100);
-		}*/
+		}
+#endif
 		if(flash->exec() != 0)
 			return -1;
 		if(GenericChannel::exec() != 0)

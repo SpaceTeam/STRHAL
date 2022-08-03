@@ -173,9 +173,9 @@ void Communication::heartbeatCan() {
 	{ 0 };
 	msgBuf[0] = 0x3A;
 	msgBuf[1] = Communication::genericChannel->getNodeId();
-	memcpy(&msgBuf[2], msgData.uint8, n);
-	msgBuf[n + 2] = 0x0A;
-	STRHAL_UART_Debug_Write_DMA((char *) msgBuf, n + 3);
+	memcpy(&msgBuf[2], msgData.uint8, CAN_MSG_LENGTH(n));
+	msgBuf[CAN_MSG_LENGTH(n) + 2] = 0x0A;
+	STRHAL_UART_Debug_Write_DMA((char *) msgBuf, CAN_MSG_LENGTH(n) + 3);
 #endif
 
 	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);

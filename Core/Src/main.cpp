@@ -10,7 +10,11 @@ int main(void) {
 
 // TODO use git_version.h for firmware version control
 #ifdef ECU_BOARD
+#ifdef UART_DEBUG
 	ECU ecu(6,GIT_COMMIT_HASH_VALUE,100); //6 ECU, 7 PMU, 9 TW
+#else
+	ECU ecu(6,GIT_COMMIT_HASH_VALUE,1);
+#endif
 
 	if(ecu.init() != 0)
 		return -1;
@@ -18,15 +22,22 @@ int main(void) {
 	STRHAL_UART_Debug_Write_Blocking("ECU STARTED\n", 12, 50);
 	ecu.exec();
 #elif defined(PMU_BOARD)
+#ifdef UART_DEBUG
 	PMU pmu(7,GIT_COMMIT_HASH_VALUE,100);
-
+#else
+	PMU pmu(7,GIT_COMMIT_HASH_VALUE,1);
+#endif
 	if(pmu.init() != 0)
 			return -1;
 
 	STRHAL_UART_Debug_Write_Blocking("PMU STARTED\n", 12, 50);
 	pmu.exec();
 #elif defined(RCU_BOARD)
+#ifdef UART_DEBUG
 	RCU rcu(8,GIT_COMMIT_HASH_VALUE,100);
+#else
+	RCU rcu(8,GIT_COMMIT_HASH_VALUE,1);
+#endif
 
 	if(rcu.init() != 0)
 			return -1;
