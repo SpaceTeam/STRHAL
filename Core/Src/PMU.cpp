@@ -48,6 +48,8 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&y_gyro);
 	registerChannel(&z_gyro);
 
+	registerModule(flash);
+
 }
 
 int PMU::init() {
@@ -105,10 +107,6 @@ int PMU::exec() {
 
 	while(1) {
 		//detectReadoutMode();
-
-		if(flash->exec() != 0)
-			return -1;
-
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}

@@ -26,6 +26,13 @@ int GenericChannel::init() {
 }
 
 int GenericChannel::exec() {
+	for(AbstractModule *module : modules) {
+		if(module == nullptr)
+			continue;
+		if(module->exec() != 0)
+			return -1;
+	}
+
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;
@@ -182,6 +189,13 @@ void GenericChannel::registerChannel(AbstractChannel *channel) {
 void GenericChannel::registerChannels(AbstractChannel **channels, uint8_t n) {
 	for(uint8_t i = 0; i < (n > MAX_CHANNELS ? MAX_CHANNELS : n); i++) {
 		registerChannel(channels[i]);
+	}
+}
+
+void GenericChannel::registerModule(AbstractModule *module) {
+	if(moduleIndex < MAX_MODULES) {
+		modules[moduleIndex] = module;
+		moduleIndex++;
 	}
 }
 

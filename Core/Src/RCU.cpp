@@ -39,6 +39,9 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&y_gyro);
 	registerChannel(&z_gyro);
 
+	registerModule(flash);
+	registerModule(&gnss);
+
 }
 
 int RCU::init() {
@@ -144,15 +147,6 @@ int RCU::exec() {
 
 		}
 #endif
-
-		uint8_t gnssBuf[64] =
-		{ 0 };
-		int32_t gnssRet = STRHAL_UART_Read(STRHAL_UART1, (char *) gnssBuf, 64);
-		if(gnssRet > 0) {
-			gnss.processData(gnssBuf, gnssRet);
-		}
-		if(flash->exec() != 0)
-			return -1;
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}

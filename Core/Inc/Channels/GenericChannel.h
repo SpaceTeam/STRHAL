@@ -26,19 +26,24 @@ class GenericChannel : public AbstractChannel {
 
 		uint32_t getNodeId() const;
 
+		static constexpr uint8_t MAX_MODULES = 8;
+
 	protected:
 		int setVariable(uint8_t variableId, int32_t data) override;
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 		void registerChannel(AbstractChannel *channel);
 		void registerChannels(AbstractChannel **channels, uint8_t n);
+		void registerModule(AbstractModule *module);
 
 		AbstractChannel *channels[MAX_CHANNELS] = {nullptr};
+		AbstractModule *modules[MAX_MODULES] = {nullptr};
 
 	private:
 		 uint32_t nodeId;
 		 uint32_t firmwareVersion;
 		 uint32_t channelMask;
 		 uint8_t loggingEnabled = 0;
+		 uint8_t moduleIndex = 0;
 
 		 W25Qxx_Flash *flash;
 };

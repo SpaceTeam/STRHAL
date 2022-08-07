@@ -32,6 +32,16 @@ int SAM_M8Q_GNSS::init() {
 	return 0;
 }
 
+int SAM_M8Q_GNSS::exec() {
+	uint8_t gnssBuf[64] =
+	{ 0 };
+	int32_t gnssRet = STRHAL_UART_Read(STRHAL_UART1, (char *) gnssBuf, 64);
+	if(gnssRet > 0) {
+		processData(gnssBuf, gnssRet);
+	}
+	return 0;
+}
+
 int SAM_M8Q_GNSS::reset() {
 	STRHAL_GPIO_Write(&resetPin, STRHAL_GPIO_VALUE_L);
 	LL_mDelay(2000);

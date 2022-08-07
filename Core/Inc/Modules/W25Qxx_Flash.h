@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <Communication.h>
+#include "./Modules/AbstractModule.h"
 
 #define PAGE_SIZE			256 //in bytes
 #define SECTOR_COUNT		8192 //in bytes
@@ -40,7 +41,7 @@ enum class FlashState : int {
 	FULL,
 };
 
-class W25Qxx_Flash {
+class W25Qxx_Flash : public AbstractModule {
 	public:
 		W25Qxx_Flash(const W25Qxx_Flash &other) = delete;
 		W25Qxx_Flash& operator=(const W25Qxx_Flash &other) = delete;
@@ -50,9 +51,9 @@ class W25Qxx_Flash {
 
 		static W25Qxx_Flash* instance(uint8_t size_2n);
 
-		int init();
-		int exec();
-		int reset();
+		int init() override;
+		int exec() override;
+		int reset() override;
 
 		bool readSREGs(uint8_t &sreg1, uint8_t &sreg2, uint8_t &sreg3) const;
 		bool readSREG1(uint8_t &sreg1) const;

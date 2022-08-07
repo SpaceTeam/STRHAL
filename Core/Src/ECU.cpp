@@ -55,6 +55,8 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&solenoid_1);
 	registerChannel(&pressure_control);
 	registerChannel(&rocket);
+
+	registerModule(flash);
 }
 
 int ECU::init() {
@@ -146,9 +148,6 @@ int ECU::exec() {
 
 		}
 #endif
-		if(flash->exec() != 0)
-			return -1;
-
 		if(GenericChannel::exec() != 0)
 			return -1;
 	}

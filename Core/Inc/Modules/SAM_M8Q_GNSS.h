@@ -3,6 +3,7 @@
 
 #include <STRHAL.h>
 #include "../Ubx.h"
+#include "./Modules/AbstractModule.h"
 
 #define UBLOX_SYNC1     0xB5
 #define UBLOX_SYNC2     0x62
@@ -108,12 +109,13 @@ typedef struct {
     uint16_t altitude;
 } GNSSData_t;
 
-class SAM_M8Q_GNSS {
+class SAM_M8Q_GNSS : public AbstractModule {
 	public:
 		SAM_M8Q_GNSS(const STRHAL_UART_Id_t uartId, const STRHAL_GPIO_t &resetPin);
 
-		int init();
-		int reset();
+		int init() override;
+		int exec() override;
+		int reset() override;
 
 		int processData(uint8_t *buffer, uint32_t length);
 
