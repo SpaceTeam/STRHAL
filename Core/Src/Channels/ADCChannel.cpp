@@ -6,8 +6,13 @@ ADCChannel::ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChanel, uint32_
 	: AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), adcChannel(adcChanel) {
 }
 
+ADCChannel::ADCChannel(uint8_t id, STRHAL_ADC_Data_t *adcPtr, uint32_t refreshDivider)
+	: AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), adcMeasurement(adcPtr) {
+}
+
 int ADCChannel::init() {
-	adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_REGULAR);
+	if(adcMeasurement == nullptr)
+		adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, STRHAL_ADC_INTYPE_REGULAR);
 
 	if(adcMeasurement == nullptr)
 		return -1;

@@ -102,15 +102,8 @@ int PMU::exec() {
 	STRHAL_UART_Debug_Write_Blocking("RUNNING\n", 8, 50);
 
 	speaker.beep(3, 300, 200);
-	int counter = 0;
-	char canErr[64];
+
 	while(1) {
-		/*counter++;
-		if(counter == 10000) {
-			counter = 0;
-			sprintf(canErr,"%ld %ld\n",FDCAN2->ECR,((FDCAN2->PSR) >> 3) & 3);
-			STRHAL_UART_Debug_Write_Blocking(canErr, strlen(canErr),100);
-		}*/
 		//detectReadoutMode();
 
 		if(flash->exec() != 0)

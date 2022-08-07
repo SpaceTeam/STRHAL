@@ -8,6 +8,7 @@
 class ADCChannel : public AbstractChannel {
 	public:
 		ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChannel, uint32_t refreshDivider);
+		ADCChannel(uint8_t id, STRHAL_ADC_Data_t *adcPtr, uint32_t refreshDivider);
 
 		ADCChannel(const ADCChannel &other) = delete;
 		ADCChannel& operator=(const ADCChannel &other) = delete;
@@ -29,7 +30,7 @@ class ADCChannel : public AbstractChannel {
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		STRHAL_ADC_Channel_t adcChannel;
+		STRHAL_ADC_Channel_t adcChannel = { nullptr, STRHAL_ADC_CHANNEL_0 }; // init with nullptr as ADC to handle non-ADC channels
 		STRHAL_ADC_Data_t *adcMeasurement = nullptr;
 
 };

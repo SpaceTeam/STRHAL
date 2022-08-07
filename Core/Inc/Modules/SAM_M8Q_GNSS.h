@@ -103,21 +103,10 @@ enum class GNSSBaudRate : uint8_t {
 };
 
 typedef struct {
-    float lat;
-    float lon;
-    float altitude;
-
-    uint8_t hours;
-    uint8_t minutes;
-    uint8_t seconds;
-    uint8_t day;
-
-    uint8_t month;
-    uint8_t year;
-    uint8_t satellites;
-    uint8_t fix_quality;
-    uint32_t timeofweek;
-} gnss_data_t;
+	uint16_t longitude;
+    uint16_t latitude;
+    uint16_t altitude;
+} GNSSData_t;
 
 class SAM_M8Q_GNSS {
 	public:
@@ -131,6 +120,7 @@ class SAM_M8Q_GNSS {
 		int sendConfiguration(GNSSConstellation constellation, GNSSSbasConstellation sbas, GNSSDynamicsMode mode);
 
 		GPSPositionData position = { .Status = GPSPOSITION_STATUS_NOFIX };
+		GNSSData_t gnssData = { 0 };
 	private:
 		void resetChecksum();
 		void updateChecksum(uint8_t c);
@@ -154,7 +144,6 @@ class SAM_M8Q_GNSS {
 
 		char gps_rx_buff[sizeof(struct UBXPacket)];
 		struct GPS_RX_STATS rx_stats = { 0 };
-		gnss_data_t gnssData = { 0 };
 
 };
 

@@ -24,12 +24,10 @@ int SAM_M8Q_GNSS::init() {
 
 	reset();
 
-	LL_mDelay(100);
+	LL_mDelay(1000);
 
-	//if(!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
-		//return -1;
-
-	LL_mDelay(100);
+	if(!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
+		return -1;
 
 	return 0;
 }
@@ -46,35 +44,22 @@ int SAM_M8Q_GNSS::processData(uint8_t *buffer, uint32_t length) {
 	uint8_t ret = 0;
 	for(uint32_t i = 0; i < length; i++) {
 		if(Ubx::parseStream(buffer[i], gps_rx_buff, &position, &rx_stats, &id) == PARSER_COMPLETE) {
-
-			// prevent reading from memory while it is written from the main loop
-			//gnss_block_is_being_written = 1;
-
 			if(position.Satellites < 0) {
 				position.Satellites = 0;
 			}
-			//data_raw.block_gnss.body.gnss_data.satellites = position.Satellites;
-
 			// Check if we received a valid position solution and the solution is valid
 			if(id == UBX_ID_POSLLH) {
 				if(position.Status > GPSPOSITION_STATUS_NOFIX) {
 					// Update the timestamp for the last valid solution
 					//status.not_stored.body.gnss_last_fix_timestamp = status.main.body.timestamp;
+					gnssData.longitude = (uint16_t) (position.Longitude >> 16);
+					gnssData.latitude = (uint16_t) (position.Latitude >> 16);
+					gnssData.altitude = (uint16_t) position.Altitude;
 					ret = 1;
-					//status.main.body.gnss_fix = 1;
-					gnssData.altitude = position.Altitude;
-					gnssData.lat = position.Latitude * 1e-7;
-					gnssData.lon = position.Longitude * 1e-7;
-					gnssData.fix_quality = position.Status;
-					gnssData.timeofweek = position.TimeOfWeek;
 				} else {
-					// NOFIX, clear flag immediately
-					//status.main.body.gnss_fix = 0;
+					// NOFIX
 				}
 			}
-
-			// enable reading from memory
-			//gnss_block_is_being_written = 0;
 		}
 	}
 	return ret;
@@ -84,7 +69,7 @@ int SAM_M8Q_GNSS::sendConfiguration(GNSSConstellation constellation, GNSSSbasCon
 	int ret = 1;
 
 	ret &= clearConfig();
-	ret &= setTimepulse();
+	//ret &= setTimepulse();
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_VELNED, 1);    // NAV-VELNED
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_POSLLH, 1);    // NAV-POSLLH
 	ret &= enableMessage(UBLOX_NAV_CLASS, UBLOX_NAV_SOL, 1);       // NAV-SOL
@@ -130,7 +115,7 @@ int SAM_M8Q_GNSS::sendConfigDataChecksummed(const uint8_t * data, uint16_t lengt
 	STRHAL_UART_Write_Blocking(uartId, (const char *) checksum, sizeof(checksum), 50);
 
 	for(uint32_t i = 0; i < retries; i++) {
-		if(waitForACK(100) == 1) {
+		if(waitForACK(1000) == 1) {
 			return 1;
 		}
 	}

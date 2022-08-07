@@ -21,6 +21,9 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	x_gyro(6, &imu, IMUMeasurement::X_GYRO, 1),
 	y_gyro(7, &imu, IMUMeasurement::Y_GYRO, 1),
 	z_gyro(8, &imu, IMUMeasurement::Z_GYRO, 1),
+	gps_longitude(9, &gnss.gnssData.longitude, 1),
+	gps_latitude(10, &gnss.gnssData.latitude, 1),
+	gps_altitude(11, &gnss.gnssData.altitude, 1),
 	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	com = Communication::instance(this, &lora);
@@ -54,14 +57,14 @@ int RCU::init() {
 	//if(imu.init() != 0)
 		//return -1;
 
-	/*if(baro.init() != 0)
+	if(baro.init() != 0)
 		return -1;
 
 	if(gnss.init() != 0)
 		return -1;
 
 	if(lora.init() != 0)
-		return -1;*/
+		return -1;
 
 	if(com == nullptr)
 		return -1;
@@ -108,7 +111,6 @@ int RCU::exec() {
 	uint8_t bufIndex = 0;
 	bool msgStarted = false;
 #endif
-
 	while(1) {
 #ifdef UART_DEBUG
 
@@ -142,12 +144,17 @@ int RCU::exec() {
 
 		}
 #endif
+
+		uint8_t gnssBuf[64] =
+		{ 0 };
+		int32_t gnssRet = STRHAL_UART_Read(STRHAL_UART1, (char *) gnssBuf, 64);
+		if(gnssRet > 0) {
+			gnss.processData(gnssBuf, gnssRet);
+		}
 		if(flash->exec() != 0)
 			return -1;
 		if(GenericChannel::exec() != 0)
 			return -1;
-		//com->heartbeatLora();
-		//LL_mDelay(1000);
 	}
 
 	speaker.beep(6, 100, 100);

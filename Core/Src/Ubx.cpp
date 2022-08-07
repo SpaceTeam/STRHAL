@@ -211,15 +211,13 @@ void Ubx::parseNavDop(const struct UBX_NAV_DOP * dop, GPSPositionData * GpsPosit
 
 
 void Ubx::parseNavVelned(const struct UBX_NAV_VELNED * velned, GPSPositionData * GpsPosition) {
-    GPSVelocityData GpsVelocity;
-
     if(checkMsgtracker(velned->iTOW, VELNED_RECEIVED)) {
         if(GpsPosition->Status != GPSPOSITION_STATUS_NOFIX) {
-            GpsVelocity.North = (float) velned->velN / 100.0f;
+        	// gps velocity unused
+            /*GpsVelocity.North = (float) velned->velN / 100.0f;
             GpsVelocity.East = (float) velned->velE / 100.0f;
             GpsVelocity.Down = (float) velned->velD / 100.0f;
-            GpsVelocity.Accuracy = (float) velned->sAcc / 100.0f;
-            // GPSVelocitySet(&GpsVelocity);
+            GpsVelocity.Accuracy = (float) velned->sAcc / 100.0f;*/
             GpsPosition->Groundspeed = (float) velned->gSpeed * 0.01f;
             GpsPosition->Heading = (float) velned->heading * 1.0e-5f;
         }
@@ -246,7 +244,8 @@ void Ubx::parseNavTimeutc(const struct UBX_NAV_TIMEUTC * timeutc) {
 
 
 void Ubx::parseNavSvinfo(const struct UBX_NAV_SVINFO * svinfo) {
-	uint8_t chan = 0;
+	// Sv info unused
+	/*uint8_t chan = 0;
 	GPSSatellitesData svdata;
 
 	bool skipped = false;
@@ -270,10 +269,9 @@ void Ubx::parseNavSvinfo(const struct UBX_NAV_SVINFO * svinfo) {
 		svdata.Elevation[chan] = svinfo->sv[i].elev;
 		svdata.PRN[chan] = svinfo->sv[i].svid;
 
-		/* Scale to the range used by NMEA GPSes.. a cno >50 is
-		 * extremely improbable.  This makes the display in GCS more
-		 * consistent between NMEA and UBX GPSes.
-		 */
+		// Scale to the range used by NMEA GPSes.. a cno >50 is
+		// extremely improbable.  This makes the display in GCS more
+		//consistent between NMEA and UBX GPSes.
 		if(svinfo->sv[chan].cno < 66) {
 			svdata.SNR[chan] = svinfo->sv[i].cno * 3 / 2;
 		} else {
@@ -305,6 +303,7 @@ void Ubx::parseNavSvinfo(const struct UBX_NAV_SVINFO * svinfo) {
 	}
 
 	// GPSSatellitesSet(&svdata);
+	 */
 }
 
 
