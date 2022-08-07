@@ -2,6 +2,7 @@
 #define LPS25HB_BARO_H
 
 #include <STRHAL.h>
+#include "./Modules/AbstractModule.h"
 
 enum class BaroAddr : uint8_t {
 	REF_P_XL = 0x08,
@@ -23,14 +24,15 @@ enum class BaroAddr : uint8_t {
 	FIFO_CTRL = 0x2E,
 };
 
-class LPS25HB_Baro {
+class LPS25HB_Baro : public AbstractModule {
 	public:
 		LPS25HB_Baro(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin);
 		//LPS25HB_Baro(const LPS25HB_Baro &other) = delete;
 		//LPS25HB_Baro& operator=(const LPS25HB_Baro &other) = delete;
 
-		int init();
-		int reset();
+		int init() override;
+		int exec() override;
+		int reset() override;
 
 		int read();
 		bool measurementReady();
@@ -39,6 +41,9 @@ class LPS25HB_Baro {
 
 		static constexpr uint32_t BUF_DATA_SIZE = 64;
 		static constexpr uint8_t READ_BIT = 0x80;
+
+		static constexpr uint64_t EXEC_SAMPLE_TICKS = 40;
+
 	private:
 		bool readReg(const BaroAddr &address, uint8_t *reg, uint8_t n = 0);
 		bool writeReg(const BaroAddr &address, uint8_t reg, uint16_t delay = 0);
@@ -50,6 +55,8 @@ class LPS25HB_Baro {
 		int32_t measData[BUF_DATA_SIZE] = {0};
 		uint32_t measDataTail = 0;
 		uint32_t measDataNum = 0;
+
+		uint64_t timeLastSample = 0;
 
 };
 

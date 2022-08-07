@@ -12,19 +12,11 @@ int BaroChannel::init() {
 }
 
 int BaroChannel::exec() {
-	uint64_t time = STRHAL_Systick_GetTick();
-	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
-		return 0;
-
-	timeLastSample = time;
-
-	(void) baro.read();
-
 	return 0;
 }
 
 int BaroChannel::reset() {
-	return baro.read();
+	return baro.reset();
 }
 
 int BaroChannel::getSensorData(uint8_t *data, uint8_t &n) {

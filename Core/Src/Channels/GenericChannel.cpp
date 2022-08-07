@@ -12,6 +12,13 @@ uint32_t GenericChannel::getNodeId() const {
 }
 
 int GenericChannel::init() {
+	for(AbstractModule *module : modules) {
+		if(module == nullptr)
+			continue;
+		if(module->init() != 0)
+			return -1;
+	}
+
 	for(AbstractChannel *channel : channels) {
 		if(channel == nullptr)
 			continue;

@@ -2,6 +2,7 @@
 #define ICM20602_IMU_H
 
 #include <STRHAL.h>
+#include "./Modules/AbstractModule.h"
 
 struct IMUData {
 	struct {
@@ -36,12 +37,13 @@ enum class IMUAddr : uint8_t {
 	WHO_AM_I = 0x75,
 };
 
-class ICM20602_IMU {
+class ICM20602_IMU : public AbstractModule {
 	public:
 		ICM20602_IMU(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin);
 
-		int init();
-		int reset();
+		int init() override;
+		int exec() override;
+		int reset() override;
 
 		bool dataReady();
 		int read();
@@ -51,6 +53,8 @@ class ICM20602_IMU {
 
 		static constexpr uint32_t BUF_DATA_SIZE = 16;
 		static constexpr uint8_t READ_BIT = 0x80;
+
+		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
 	private:
 		bool readReg(const IMUAddr &address, uint8_t *reg, uint8_t n = 0);
 		bool writeReg(const IMUAddr &address, uint8_t reg, uint16_t delay = 0);
@@ -62,6 +66,8 @@ class ICM20602_IMU {
 		IMUData measData[BUF_DATA_SIZE] = {0};
 		uint32_t measDataTail = 0;
 		uint32_t measDataNum = 0;
+
+		uint64_t timeLastSample = 0;
 
 };
 

@@ -49,6 +49,8 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&z_gyro);
 
 	registerModule(flash);
+	registerModule(&baro);
+	registerModule(&imu);
 
 }
 
@@ -67,20 +69,11 @@ int PMU::init() {
 	if(com == nullptr)
 		return -1;
 
-	if(imu.init() != 0)
-		return -1;
-
-	if(baro.init() != 0)
-		return -1;
-
 	if(com->init() != 0)
 	//if(com->init(COMMode::BRIDGE_COM_MODE) != 0)
 		return -1;
 
 	if(flash == nullptr)
-		return -1;
-
-	if(flash->init() != 0)
 		return -1;
 
 	if(GenericChannel::init() != 0)

@@ -80,9 +80,6 @@ int ECU::init() {
 	if(flash == nullptr)
 		return -1;
 
-	if(flash->init() != 0)
-		return -1;
-
 	if(GenericChannel::init() != 0)
 		return -1;
 

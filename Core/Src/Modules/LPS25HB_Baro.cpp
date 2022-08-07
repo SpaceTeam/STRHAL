@@ -66,6 +66,18 @@ int LPS25HB_Baro::init() {
 	return 0;
 }
 
+int LPS25HB_Baro::exec() {
+	uint64_t time = STRHAL_Systick_GetTick();
+	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
+		return 0;
+
+	timeLastSample = time;
+
+	(void) read();
+
+	return 0;
+}
+
 int LPS25HB_Baro::reset() {
 	measDataTail = 0;
 	measDataNum = 0;

@@ -21,8 +21,6 @@ class IMUChannel : public AbstractChannel {
 
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
-		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
-
 	protected:
 
 		int setVariable(uint8_t variableId, int32_t data) override;

@@ -39,6 +39,17 @@ int ICM20602_IMU::init() {
 	return 0;
 }
 
+int ICM20602_IMU::exec() {
+	uint64_t time = STRHAL_Systick_GetTick();
+	if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
+		return 0;
+
+	timeLastSample = time;
+	if(dataReady())
+		(void) read();
+	return 0;
+}
+
 int ICM20602_IMU::reset() {
 	measDataTail = 0;
 	measDataNum = 0;

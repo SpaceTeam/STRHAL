@@ -12,15 +12,6 @@ int IMUChannel::init() {
 }
 
 int IMUChannel::exec() {
-	if(measurementType == IMUMeasurement::X_ACCEL) {
-		uint64_t time = STRHAL_Systick_GetTick();
-		if((time - timeLastSample) < EXEC_SAMPLE_TICKS)
-			return 0;
-
-		timeLastSample = time;
-		if(imu->dataReady())
-			(void) imu->read();
-	}
 	return 0;
 }
 

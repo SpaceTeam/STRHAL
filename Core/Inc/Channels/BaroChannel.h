@@ -25,15 +25,12 @@ class BaroChannel : public AbstractChannel {
 
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 
-		static constexpr uint64_t EXEC_SAMPLE_TICKS = 40;
-
 	protected:
 		int setVariable(uint8_t variableId, int32_t data) override;
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
 		LPS25HB_Baro baro;
-		uint64_t timeLastSample = 0;
 };
 
 #endif /*BAROCHANNEL_H*/

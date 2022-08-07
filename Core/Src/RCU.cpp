@@ -41,6 +41,8 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 
 	registerModule(flash);
 	registerModule(&gnss);
+	registerModule(&baro);
+	registerModule(&imu);
 
 }
 
@@ -56,16 +58,6 @@ int RCU::init() {
 	if(STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
 		return -1;
 
-	// TODO find out why IMU is dead
-	//if(imu.init() != 0)
-		//return -1;
-
-	if(baro.init() != 0)
-		return -1;
-
-	if(gnss.init() != 0)
-		return -1;
-
 	if(lora.init() != 0)
 		return -1;
 
@@ -77,9 +69,6 @@ int RCU::init() {
 		return -1;
 
 	if(flash == nullptr)
-		return -1;
-
-	if(flash->init() != 0) //has to be init after Com
 		return -1;
 
 	if(GenericChannel::init() != 0)
