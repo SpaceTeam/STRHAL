@@ -6,7 +6,8 @@
 #include <can_houbolt/channels/adc16_channel_def.h>
 #include <STRHAL.h>
 
-class IMUChannel : public AbstractChannel {
+class IMUChannel: public AbstractChannel
+{
 	public:
 		IMUChannel(uint8_t id, ICM20602_IMU *imu, IMUMeasurement measurementType, uint32_t refreshDivider);
 		IMUChannel(const IMUChannel &other) = delete;

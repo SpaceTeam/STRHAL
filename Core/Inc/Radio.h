@@ -6,7 +6,8 @@
 #include <AbstractCom.h>
 #include "STRHAL.h"
 
-class Radio : public AbstractCom{
+class Radio: public AbstractCom
+{
 	public:
 		Radio(const Radio &other) = delete;
 		Radio& operator=(const Radio &other) = delete;
@@ -18,7 +19,7 @@ class Radio : public AbstractCom{
 		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) override;
 		int exec() override;
 
-		int send(uint32_t id, uint8_t* data, uint8_t n) override;
+		int send(uint32_t id, uint8_t *data, uint8_t n) override;
 
 	private:
 		static LoRa1276F30_Radio *lora;

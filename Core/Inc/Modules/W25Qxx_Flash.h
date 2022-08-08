@@ -13,12 +13,14 @@
 #define SERVOCONFIG_OFFSET	0								//Offset from Config Base
 #define SERVOCONFIG_N_EACH	4								//Number of registers per servo
 
-typedef union {
-	uint32_t reg[PAGE_SIZE/4];
-	uint8_t bytes[PAGE_SIZE];
+typedef union
+{
+		uint32_t reg[PAGE_SIZE / 4];
+		uint8_t bytes[PAGE_SIZE];
 } ConfigData_t;
 
-enum class Config : int {
+enum class Config : int
+{
 	SERVO0_ADC_START = SERVOCONFIG_OFFSET,
 	SERVO0_ADC_END,
 	SERVO0_PWM_START,
@@ -33,7 +35,8 @@ enum class Config : int {
 	SERVO2_PWM_END,
 };
 
-enum class FlashState : int {
+enum class FlashState : int
+{
 	IDLE = 0,
 	CLEARING,
 	READY,
@@ -41,7 +44,8 @@ enum class FlashState : int {
 	FULL,
 };
 
-class W25Qxx_Flash : public AbstractModule {
+class W25Qxx_Flash: public AbstractModule
+{
 	public:
 		W25Qxx_Flash(const W25Qxx_Flash &other) = delete;
 		W25Qxx_Flash& operator=(const W25Qxx_Flash &other) = delete;
@@ -68,7 +72,7 @@ class W25Qxx_Flash : public AbstractModule {
 		bool exit4ByteAddrMode();
 		bool disableWPS();
 
-		uint32_t writeNextPage(const uint8_t * data, uint32_t n);
+		uint32_t writeNextPage(const uint8_t *data, uint32_t n);
 		uint32_t write(uint32_t address, const uint8_t *data, uint32_t n);
 		uint32_t read(uint32_t address, uint8_t *data, uint32_t n);
 		bool writeConfigRegsFromAddr(uint32_t startAddress, uint32_t *val, uint16_t n);

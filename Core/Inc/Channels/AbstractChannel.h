@@ -4,7 +4,8 @@
 #include <can_houbolt/can_cmds.h>
 #include <can_houbolt/cmds.h>
 
-class AbstractChannel {
+class AbstractChannel
+{
 	public:
 		AbstractChannel(CHANNEL_TYPE type, uint8_t id, uint32_t refreshDivider);
 		virtual ~AbstractChannel();

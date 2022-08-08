@@ -6,7 +6,8 @@
 #include <can_houbolt/channels/digital_out_channel_def.h>
 #include <STRHAL.h>
 
-class PyroChannel : public AbstractChannel {
+class PyroChannel: public AbstractChannel
+{
 	public:
 		PyroChannel(uint8_t id, const STRHAL_ADC_Channel_t &adcChannel, const STRHAL_GPIO_t &cntrlPin, const DigitalInChannel &continuityChannel, uint32_t refreshDivider);
 

@@ -10,7 +10,8 @@
 
 #include <STRHAL.h>
 
-class LCB : public GenericChannel {
+class LCB: public GenericChannel
+{
 	public:
 		LCB(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider);
 		LCB(const LCB &other) = delete;

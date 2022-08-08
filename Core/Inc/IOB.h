@@ -10,7 +10,8 @@
 
 #include <STRHAL.h>
 
-class IOB : public GenericChannel {
+class IOB: public GenericChannel
+{
 	public:
 		IOB(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider);
 		IOB(const IOB &other) = delete;

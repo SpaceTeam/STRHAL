@@ -6,7 +6,8 @@
 #include "LCB.h"
 #include "git_version.h"
 
-int main(void) {
+int main(void)
+{
 
 // TODO use git_version.h for firmware version control
 #ifdef ECU_BOARD
@@ -36,11 +37,11 @@ int main(void) {
 #ifdef UART_DEBUG
 	RCU rcu(8,GIT_COMMIT_HASH_VALUE,100);
 #else
-	RCU rcu(8,GIT_COMMIT_HASH_VALUE,1);
+	RCU rcu(8, GIT_COMMIT_HASH_VALUE, 1);
 #endif
 
-	if(rcu.init() != 0)
-			return -1;
+	if (rcu.init() != 0)
+		return -1;
 
 	STRHAL_UART_Debug_Write_Blocking("RCU STARTED\n", 12, 50);
 	rcu.exec();
@@ -62,9 +63,12 @@ int main(void) {
 	lcb.exec();
 #endif
 
-	while(1);
+	while (1);
 }
 
-void STRHAL_OofHandler(STRHAL_Oof_t oof, char *msg) {
-	do{}while(0);
+void STRHAL_OofHandler(STRHAL_Oof_t oof, char *msg)
+{
+	do
+	{
+	} while (0);
 }

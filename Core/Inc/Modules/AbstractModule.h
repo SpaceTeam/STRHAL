@@ -1,7 +1,8 @@
 #ifndef ABSTRACTMODULE_H
 #define ABSTRACTMODULE_H
 
-class AbstractModule {
+class AbstractModule
+{
 	public:
 		virtual int init() = 0;
 		virtual int reset() = 0;

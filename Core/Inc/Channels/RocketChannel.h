@@ -12,7 +12,8 @@
 #include <cstring>
 #include <cstdio>
 
-enum class IgnitionSequence : int {
+enum class IgnitionSequence : int
+{
 	INIT = 0,
 	IGNITION0_ON,
 	IGNITION1_ON,
@@ -22,7 +23,8 @@ enum class IgnitionSequence : int {
 	IGNITION_OFF
 };
 
-class RocketChannel : public AbstractChannel {
+class RocketChannel: public AbstractChannel
+{
 	public:
 		RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, const ADCChannel &fuelPressureChannel, const ADCChannel &chamberPressureChannel, ServoChannel &oxServoChannel, ServoChannel &fuelServoChannel, PyroChannel &igniter0Channel, PyroChannel &igniter1Channel, uint32_t refreshDivider);
 

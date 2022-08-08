@@ -7,7 +7,8 @@
 #include <can_houbolt/channels/control_channel_def.h>
 #include <STRHAL.h>
 
-class PressureControlChannel : public AbstractChannel {
+class PressureControlChannel: public AbstractChannel
+{
 	public:
 		PressureControlChannel(uint8_t id, const ADCChannel &pressureChannel, DigitalOutChannel &solenoidChannel, uint32_t refreshDivider);
 

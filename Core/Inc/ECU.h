@@ -14,7 +14,8 @@
 #include <Speaker.h>
 #include <STRHAL.h>
 
-class ECU : public GenericChannel {
+class ECU: public GenericChannel
+{
 	public:
 		ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider);
 		ECU(const ECU &other) = delete;

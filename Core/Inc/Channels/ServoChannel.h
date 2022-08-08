@@ -8,12 +8,14 @@
 #include <STRHAL.h>
 #include "../Modules/W25Qxx_Flash.h"
 
-struct ServoRefPos {
-	uint16_t start;
-	uint16_t end;
+struct ServoRefPos
+{
+		uint16_t start;
+		uint16_t end;
 };
 
-enum class ServoState : int {
+enum class ServoState : int
+{
 	IDLE = 0,
 	READY,
 	FAULT,
@@ -21,7 +23,8 @@ enum class ServoState : int {
 	CALIB,
 };
 
-class ServoChannel : public AbstractChannel {
+class ServoChannel: public AbstractChannel
+{
 	public:
 		ServoChannel(uint8_t id, uint8_t servoId, const STRHAL_TIM_TimerId_t &pwmTimer, const STRHAL_TIM_ChannelId_t &control, const STRHAL_ADC_Channel_t &feedbackChannel, const STRHAL_ADC_Channel_t &currentChannel, const STRHAL_GPIO_t &led, uint32_t refreshDivider);
 
@@ -41,7 +44,7 @@ class ServoChannel : public AbstractChannel {
 		uint16_t getCurrentMeasurement() const;
 
 		static constexpr uint16_t PWM_FREQ = 50;
-		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ)*1800; //36.000
+		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ) * 1800; //36.000
 		static constexpr uint16_t PWM_PSC = STRHAL_SYSCLK_FREQ / PWM_RES / PWM_FREQ;
 
 		static constexpr uint16_t POS_DEV = (UINT16_MAX / 180);
@@ -51,9 +54,12 @@ class ServoChannel : public AbstractChannel {
 		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
 
 		//static constexpr ServoRefPos pwm0Ref = {1800, 3600};
-		static constexpr ServoRefPos pwm0Ref = {900, 4500};
-		static constexpr ServoRefPos com0Ref = {0, UINT16_MAX};
-		static constexpr ServoRefPos adc0Ref = {0, 0xFFF};
+		static constexpr ServoRefPos pwm0Ref =
+		{ 900, 4500 };
+		static constexpr ServoRefPos com0Ref =
+		{ 0, UINT16_MAX };
+		static constexpr ServoRefPos adc0Ref =
+		{ 0, 0xFFF };
 
 		static uint16_t tPosFromCanonic(uint16_t pos, const ServoRefPos &frame);
 		static uint16_t tPosToCanonic(uint16_t pos, const ServoRefPos &frame);

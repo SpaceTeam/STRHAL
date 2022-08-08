@@ -12,7 +12,8 @@
 
 #include <STRHAL.h>
 
-class PMU : public GenericChannel {
+class PMU: public GenericChannel
+{
 	public:
 		PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider);
 		PMU(const PMU &other) = delete;

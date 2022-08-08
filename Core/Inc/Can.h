@@ -6,7 +6,8 @@
 #include <AbstractCom.h>
 //#include <Communication.h>
 
-class Can : public AbstractCom {
+class Can: public AbstractCom
+{
 	public:
 		Can(const Can &other) = delete;
 		Can& operator=(const Can &other) = delete;
@@ -19,7 +20,7 @@ class Can : public AbstractCom {
 		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode);
 		int exec() override;
 
-		int send(uint32_t id, uint8_t* data, uint8_t n) override;
+		int send(uint32_t id, uint8_t *data, uint8_t n) override;
 		void sendAsMaster(uint8_t receiverNodeId, uint8_t receiverChannelId, uint8_t commandId, uint8_t *data, uint8_t n);
 
 	private:

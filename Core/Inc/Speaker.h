@@ -3,14 +3,15 @@
 
 #include <STRHAL.h>
 
-class Speaker {
+class Speaker
+{
 	public:
 		Speaker(const STRHAL_TIM_TimerId_t &pwmTimer, const STRHAL_TIM_ChannelId_t &control);
 
 		int init();
 
 		static constexpr uint16_t PWM_FREQ = 500;
-		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ)*1800;
+		static constexpr uint16_t PWM_RES = (1000 / PWM_FREQ) * 1800;
 		static constexpr uint16_t PWM_PSC = STRHAL_SYSCLK_FREQ / PWM_RES / PWM_FREQ;
 
 		int setPWM(uint16_t freq);

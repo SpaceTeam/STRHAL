@@ -4,7 +4,8 @@
 #include <STRHAL.h>
 #include "./Modules/AbstractModule.h"
 
-enum class BaroAddr : uint8_t {
+enum class BaroAddr : uint8_t
+{
 	REF_P_XL = 0x08,
 	REF_P_L = 0x09,
 	REF_P_H = 0x0A,
@@ -24,7 +25,8 @@ enum class BaroAddr : uint8_t {
 	FIFO_CTRL = 0x2E,
 };
 
-class LPS25HB_Baro : public AbstractModule {
+class LPS25HB_Baro: public AbstractModule
+{
 	public:
 		LPS25HB_Baro(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin);
 		//LPS25HB_Baro(const LPS25HB_Baro &other) = delete;
@@ -52,7 +54,8 @@ class LPS25HB_Baro : public AbstractModule {
 		STRHAL_SPI_Config_t spiConf;
 		const STRHAL_GPIO_t dataReadyPin;
 
-		int32_t measData[BUF_DATA_SIZE] = {0};
+		int32_t measData[BUF_DATA_SIZE] =
+		{ 0 };
 		uint32_t measDataTail = 0;
 		uint32_t measDataNum = 0;
 

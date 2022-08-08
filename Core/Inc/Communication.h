@@ -1,7 +1,8 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 
-class GenericChannel; // Forward declaration to avoid cyclic dependency
+class GenericChannel;
+// Forward declaration to avoid cyclic dependency
 
 #include <AbstractCom.h>
 #include "Channels/AbstractChannel.h"
@@ -10,7 +11,8 @@ class GenericChannel; // Forward declaration to avoid cyclic dependency
 #include <Radio.h>
 #include "Modules/LoRa1276F30_Radio.h"
 
-class Communication {
+class Communication
+{
 	public:
 		Communication(const Communication &other) = delete;
 		Communication& operator=(const Communication &other) = delete;

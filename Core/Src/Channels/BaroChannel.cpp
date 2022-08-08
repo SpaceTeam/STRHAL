@@ -4,23 +4,29 @@
 #include <cstdio>
 
 BaroChannel::BaroChannel(uint8_t id, LPS25HB_Baro &baro, uint32_t refreshDivider) :
-	AbstractChannel(CHANNEL_TYPE_ADC24, id, refreshDivider), baro(baro) {
+		AbstractChannel(CHANNEL_TYPE_ADC24, id, refreshDivider), baro(baro)
+{
 }
 
-int BaroChannel::init() {
+int BaroChannel::init()
+{
 	return 0;
 }
 
-int BaroChannel::exec() {
+int BaroChannel::exec()
+{
 	return 0;
 }
 
-int BaroChannel::reset() {
+int BaroChannel::reset()
+{
 	return baro.reset();
 }
 
-int BaroChannel::getSensorData(uint8_t *data, uint8_t &n) {
-	if(baro.measurementReady()) {
+int BaroChannel::getSensorData(uint8_t *data, uint8_t &n)
+{
+	if (baro.measurementReady())
+	{
 		uint8_t *out = data + n;
 		int32_t measurement = 0;
 		baro.getMeasurement(measurement);
@@ -35,12 +41,15 @@ int BaroChannel::getSensorData(uint8_t *data, uint8_t &n) {
 	return -1;
 }
 
-int BaroChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) {
+int BaroChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n)
+{
 	return AbstractChannel::processMessage(commandId, returnData, n);
 }
 
-int BaroChannel::setVariable(uint8_t variableId, int32_t data) {
-	switch(variableId) {
+int BaroChannel::setVariable(uint8_t variableId, int32_t data)
+{
+	switch (variableId)
+	{
 		case ADC24_REFRESH_DIVIDER:
 			refreshDivider = data;
 			refreshCounter = 0;
@@ -50,8 +59,10 @@ int BaroChannel::setVariable(uint8_t variableId, int32_t data) {
 	}
 }
 
-int BaroChannel::getVariable(uint8_t variableId, int32_t &data) const {
-	switch(variableId) {
+int BaroChannel::getVariable(uint8_t variableId, int32_t &data) const
+{
+	switch (variableId)
+	{
 		case ADC24_REFRESH_DIVIDER:
 			data = (int32_t) refreshDivider;
 			return 0;
@@ -60,6 +71,7 @@ int BaroChannel::getVariable(uint8_t variableId, int32_t &data) const {
 	}
 }
 
-BaroChannel::~BaroChannel() {
+BaroChannel::~BaroChannel()
+{
 
 }

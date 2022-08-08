@@ -4,14 +4,17 @@
 #include <STRHAL.h>
 #include "./Modules/AbstractModule.h"
 
-struct IMUData {
-	struct {
-		int16_t x,y,z;
-	} accel,alpha;
-	int16_t temp;
+struct IMUData
+{
+		struct
+		{
+				int16_t x, y, z;
+		} accel, alpha;
+		int16_t temp;
 };
 
-enum class IMUMeasurement : uint8_t {
+enum class IMUMeasurement : uint8_t
+{
 	X_ACCEL = 0,
 	Y_ACCEL,
 	Z_ACCEL,
@@ -20,7 +23,8 @@ enum class IMUMeasurement : uint8_t {
 	Z_GYRO,
 };
 
-enum class IMUAddr : uint8_t {
+enum class IMUAddr : uint8_t
+{
 	SMPLRT_DIV = 0x19,
 	GYRO_CONFIG = 0x1B,
 	ACCEL_CONFIG = 0x1C,
@@ -37,7 +41,8 @@ enum class IMUAddr : uint8_t {
 	WHO_AM_I = 0x75,
 };
 
-class ICM20602_IMU : public AbstractModule {
+class ICM20602_IMU: public AbstractModule
+{
 	public:
 		ICM20602_IMU(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin);
 
@@ -63,7 +68,8 @@ class ICM20602_IMU : public AbstractModule {
 		STRHAL_SPI_Config_t spiConf;
 		const STRHAL_GPIO_t dataReadyPin;
 
-		IMUData measData[BUF_DATA_SIZE] = {0};
+		IMUData measData[BUF_DATA_SIZE] =
+		{ 0 };
 		uint32_t measDataTail = 0;
 		uint32_t measDataNum = 0;
 

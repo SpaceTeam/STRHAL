@@ -5,26 +5,26 @@
 #include <stm32g4xx_ll_usart.h>
 
 RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
-	GenericChannel(node_id, fw_version, refresh_divider),
-	ledRed({GPIOD, 1, STRHAL_GPIO_TYPE_OPP}),
-	ledGreen({GPIOD, 2, STRHAL_GPIO_TYPE_OPP}),
-	baro(STRHAL_SPI_SPI1, {STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOA, 3, STRHAL_GPIO_TYPE_IHZ}),
-	imu(STRHAL_SPI_SPI3, {STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0},{GPIOD, 0, STRHAL_GPIO_TYPE_IHZ}),
-	lora(STRHAL_SPI_SPI2, {STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_LL, 0x7, 0},{GPIOC, 1, STRHAL_GPIO_TYPE_IHZ},{GPIOC, 3, STRHAL_GPIO_TYPE_IHZ},{GPIOB, 11, STRHAL_GPIO_TYPE_IHZ}),
-	gnss(STRHAL_UART1, {GPIOC, 7, STRHAL_GPIO_TYPE_OPP}),
-	sense_5V(0, {ADC1, STRHAL_ADC_CHANNEL_2}, 1),
-	sense_12V(1, {ADC1, STRHAL_ADC_CHANNEL_3}, 1),
-	baro_channel(2, baro, 1),
-	x_accel(3, &imu, IMUMeasurement::X_ACCEL, 1),
-	y_accel(4, &imu, IMUMeasurement::Y_ACCEL, 1),
-	z_accel(5, &imu, IMUMeasurement::Z_ACCEL, 1),
-	x_gyro(6, &imu, IMUMeasurement::X_GYRO, 1),
-	y_gyro(7, &imu, IMUMeasurement::Y_GYRO, 1),
-	z_gyro(8, &imu, IMUMeasurement::Z_GYRO, 1),
-	gps_longitude(9, &gnss.gnssData.longitude, 1),
-	gps_latitude(10, &gnss.gnssData.latitude, 1),
-	gps_altitude(11, &gnss.gnssData.altitude, 1),
-	speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
+		GenericChannel(node_id, fw_version, refresh_divider),
+		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
+		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
+		baro(STRHAL_SPI_SPI1,{ STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOA, 3, STRHAL_GPIO_TYPE_IHZ }),
+		imu(STRHAL_SPI_SPI3,{ STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOD, 0, STRHAL_GPIO_TYPE_IHZ }),
+		lora(STRHAL_SPI_SPI2,{ STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_LL, 0x7, 0 },{ GPIOC, 1, STRHAL_GPIO_TYPE_IHZ },{ GPIOC, 3, STRHAL_GPIO_TYPE_IHZ },{ GPIOB, 11, STRHAL_GPIO_TYPE_IHZ }),
+		gnss(STRHAL_UART1,{ GPIOC, 7, STRHAL_GPIO_TYPE_OPP }),
+		sense_5V(0,{ ADC1, STRHAL_ADC_CHANNEL_2 }, 1),
+		sense_12V(1,{ ADC1, STRHAL_ADC_CHANNEL_3 }, 1),
+		baro_channel(2, baro, 1),
+		x_accel(3, &imu, IMUMeasurement::X_ACCEL, 1),
+		y_accel(4, &imu, IMUMeasurement::Y_ACCEL, 1),
+		z_accel(5, &imu, IMUMeasurement::Z_ACCEL, 1),
+		x_gyro(6, &imu, IMUMeasurement::X_GYRO, 1),
+		y_gyro(7, &imu, IMUMeasurement::Y_GYRO, 1),
+		z_gyro(8, &imu, IMUMeasurement::Z_GYRO, 1),
+		gps_longitude(9, &gnss.gnssData.longitude, 1),
+		gps_latitude(10, &gnss.gnssData.latitude, 1),
+		gps_altitude(11, &gnss.gnssData.altitude, 1),
+		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	com = Communication::instance(this, &lora);
 	//com = Communication::instance(this);
@@ -46,8 +46,9 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 
 }
 
-int RCU::init() {
-	if(STRHAL_Init(STRHAL_SYSCLK_SRC_EXT, 8000000) != STRHAL_NOICE)
+int RCU::init()
+{
+	if (STRHAL_Init(STRHAL_SYSCLK_SRC_EXT, 8000000) != STRHAL_NOICE)
 		return -1;
 
 	// init status LEDs
@@ -55,23 +56,23 @@ int RCU::init() {
 	STRHAL_GPIO_SingleInit(&ledGreen, STRHAL_GPIO_TYPE_OPP);
 
 	// init debug uart
-	if(STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
+	if (STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
 		return -1;
 
-	if(lora.init() != 0)
+	if (lora.init() != 0)
 		return -1;
 
-	if(com == nullptr)
+	if (com == nullptr)
 		return -1;
 
 	//if(com->init(COMMode::LISTENER_COM_MODE) != 0)
-	if(com->init() != 0)
+	if (com->init() != 0)
 		return -1;
 
-	if(flash == nullptr)
+	if (flash == nullptr)
 		return -1;
 
-	if(GenericChannel::init() != 0)
+	if (GenericChannel::init() != 0)
 		return -1;
 
 	speaker.init();
@@ -80,12 +81,13 @@ int RCU::init() {
 	return 0;
 }
 
-int RCU::exec() {
+int RCU::exec()
+{
 	//STRHAL_OPAMP_Run();
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
 
-	if(com->exec() != 0)
+	if (com->exec() != 0)
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
@@ -103,7 +105,8 @@ int RCU::exec() {
 	uint8_t bufIndex = 0;
 	bool msgStarted = false;
 #endif
-	while(1) {
+	while (1)
+	{
 #ifdef UART_DEBUG
 
 		uint8_t tempBuf[64] =
@@ -136,7 +139,7 @@ int RCU::exec() {
 
 		}
 #endif
-		if(GenericChannel::exec() != 0)
+		if (GenericChannel::exec() != 0)
 			return -1;
 	}
 

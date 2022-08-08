@@ -68,7 +68,8 @@
 #define UBLOX_MAX_PAYLOAD   384
 #define UBLOX_WAIT_MS       100
 
-enum class GNSSDynamicsMode : uint8_t {
+enum class GNSSDynamicsMode : uint8_t
+{
 	PORTABLE,
 	PEDESTRIAN,
 	AUTOMOTIVE,
@@ -77,7 +78,8 @@ enum class GNSSDynamicsMode : uint8_t {
 	AIRBORNE4G
 };
 
-enum class GNSSSbasConstellation : uint8_t {
+enum class GNSSSbasConstellation : uint8_t
+{
 	WAAS,
 	EGNOS,
 	MSAS,
@@ -86,13 +88,15 @@ enum class GNSSSbasConstellation : uint8_t {
 	NONE
 };
 
-enum class GNSSConstellation : uint8_t {
+enum class GNSSConstellation : uint8_t
+{
 	GLONASS,
 	ALL,
 	GPS
 };
 
-enum class GNSSBaudRate : uint8_t {
+enum class GNSSBaudRate : uint8_t
+{
 	_2400,
 	_4800,
 	_9600,
@@ -103,13 +107,15 @@ enum class GNSSBaudRate : uint8_t {
 	_230400
 };
 
-typedef struct {
-	uint16_t longitude;
-    uint16_t latitude;
-    uint16_t altitude;
+typedef struct
+{
+		uint16_t longitude;
+		uint16_t latitude;
+		uint16_t altitude;
 } GNSSData_t;
 
-class SAM_M8Q_GNSS : public AbstractModule {
+class SAM_M8Q_GNSS: public AbstractModule
+{
 	public:
 		SAM_M8Q_GNSS(const STRHAL_UART_Id_t uartId, const STRHAL_GPIO_t &resetPin);
 
@@ -121,13 +127,15 @@ class SAM_M8Q_GNSS : public AbstractModule {
 
 		int sendConfiguration(GNSSConstellation constellation, GNSSSbasConstellation sbas, GNSSDynamicsMode mode);
 
-		GPSPositionData position = { .Status = GPSPOSITION_STATUS_NOFIX };
-		GNSSData_t gnssData = { 0 };
+		GPSPositionData position =
+		{ .Status = GPSPOSITION_STATUS_NOFIX };
+		GNSSData_t gnssData =
+		{ 0 };
 	private:
 		void resetChecksum();
 		void updateChecksum(uint8_t c);
 
-		int sendConfigDataChecksummed(const uint8_t * data, uint16_t length, uint32_t retries);
+		int sendConfigDataChecksummed(const uint8_t *data, uint16_t length, uint32_t retries);
 		int waitForACK(uint32_t delay);
 		int enableMessage(uint8_t msgClass, uint8_t msgId, uint8_t rate);
 		int setMessageRate(uint16_t msPeriod);
@@ -145,7 +153,8 @@ class SAM_M8Q_GNSS : public AbstractModule {
 		uint8_t checksumTxB = 0;
 
 		char gps_rx_buff[sizeof(struct UBXPacket)];
-		struct GPS_RX_STATS rx_stats = { 0 };
+		struct GPS_RX_STATS rx_stats =
+		{ 0 };
 
 };
 

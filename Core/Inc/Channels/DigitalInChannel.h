@@ -5,7 +5,8 @@
 #include <can_houbolt/channels/adc16_channel_def.h>
 #include <STRHAL.h>
 
-class DigitalInChannel : public AbstractChannel {
+class DigitalInChannel: public AbstractChannel
+{
 	public:
 		DigitalInChannel(uint8_t id, const STRHAL_GPIO_t &digitalInPin, uint32_t refreshDivider);
 

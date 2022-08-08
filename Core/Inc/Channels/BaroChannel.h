@@ -6,7 +6,8 @@
 #include "../Modules/LPS25HB_Baro.h"
 #include <STRHAL.h>
 
-class BaroChannel : public AbstractChannel {
+class BaroChannel: public AbstractChannel
+{
 	public:
 		BaroChannel(uint8_t id, LPS25HB_Baro &baro, uint32_t refreshDivider);
 

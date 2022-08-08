@@ -15,7 +15,8 @@
 
 #include <STRHAL.h>
 
-class RCU : public GenericChannel {
+class RCU: public GenericChannel
+{
 	public:
 		RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider);
 		RCU(const RCU &other) = delete;
