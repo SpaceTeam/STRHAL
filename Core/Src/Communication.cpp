@@ -8,7 +8,6 @@
 
 Communication *Communication::com = nullptr;
 GenericChannel *Communication::genericChannel = nullptr;
-LoRa1276F30_Radio *Communication::lora = nullptr;
 Can *Communication::can = nullptr;
 Radio *Communication::radio = nullptr;
 uint8_t Communication::radioArray[MSG_SIZE] = { 0 };
@@ -16,7 +15,6 @@ bool Communication::loraActive = false;
 
 Communication::Communication(GenericChannel *genericChannel, LoRa1276F30_Radio *lora) {
 	Communication::genericChannel = genericChannel;
-	Communication::lora = lora;
 	can = Can::instance(genericChannel->getNodeId());
 	if(lora != nullptr)
 		radio = Radio::instance(genericChannel->getNodeId(), lora);

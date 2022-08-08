@@ -46,7 +46,6 @@ class Communication {
 		//static void heartbeatLora();
 
 		static Communication *com;
-		static LoRa1276F30_Radio *lora;
 
 		static uint8_t radioArray[MSG_SIZE];
 		static bool loraActive;
