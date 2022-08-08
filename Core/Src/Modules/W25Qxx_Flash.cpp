@@ -152,6 +152,7 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time)
 			sectorCount = 0;
 			break;
 		case FlashState::CLEARING:
+			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "CLEARING!\n", 10, 100);
 			if (state != FlashState::IDLE)
 			{
 				return;
@@ -163,6 +164,7 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time)
 				return;
 			break;
 		case FlashState::READY:
+			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "READY!\n", 7, 100);
 			if (state != FlashState::CLEARING)
 			{
 				return;
@@ -174,6 +176,7 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time)
 
 			break;
 		case FlashState::LOGGING:
+			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "LOGGING!\n", 9, 100);
 			if (state != FlashState::READY)
 			{
 				return;
@@ -192,7 +195,7 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time)
 
 void W25Qxx_Flash::setState(FlashState nextState)
 {
-	externalNextState = state;
+	externalNextState = nextState;
 }
 
 FlashState W25Qxx_Flash::getState()

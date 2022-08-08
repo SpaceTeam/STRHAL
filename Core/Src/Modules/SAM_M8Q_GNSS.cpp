@@ -28,8 +28,8 @@ int SAM_M8Q_GNSS::init()
 
 	LL_mDelay(1000);
 
-	if (!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
-		return -1;
+	//if (!sendConfiguration(GNSSConstellation::ALL, GNSSSbasConstellation::ALL, GNSSDynamicsMode::AIRBORNE4G))
+		//return -1;
 
 	return 0;
 }

@@ -42,7 +42,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerModule(flash);
 	registerModule(&gnss);
 	registerModule(&baro);
-	registerModule(&imu);
+	//registerModule(&imu);
 
 }
 
@@ -107,24 +107,32 @@ int RCU::exec()
 #endif
 	while (1)
 	{
+		//detectReadoutMode();
 #ifdef UART_DEBUG
 
 		uint8_t tempBuf[64] =
 		{ 0 };
 		int32_t ret = STRHAL_UART_Read(STRHAL_UART_DEBUG, (char *) tempBuf, 64);
-		if(ret > 0) {
-			if(msgStarted) {
+		if(ret > 0)
+		{
+			if(msgStarted)
+			{
 				memcpy(&msgBuf[bufIndex-1], tempBuf, ret);
 				bufIndex += ret;
-				if(tempBuf[ret-1] == 0x0A) { // msg ended
+				if(tempBuf[ret-1] == 0x0A) // msg ended
+				{
 					msgStarted = false;
 					bufIndex = 0;
 					Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
 					memset(msgBuf, 0, 128);
 				}
-			} else {
-				if(tempBuf[0] == 0x3A) { // start byte
-					if(tempBuf[ret-1] == 0x0A) { // msg ended
+			}
+			else
+			{
+				if(tempBuf[0] == 0x3A) // start byte
+				{
+					if(tempBuf[ret-1] == 0x0A) // msg ended
+					{
 						memcpy(msgBuf, tempBuf, ret - 1);
 						Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
 						memset(msgBuf, 0, 128);
