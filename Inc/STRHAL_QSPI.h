@@ -6,9 +6,9 @@
 #include <stm32g4xx_ll_dmamux.h>
 #include <stm32g4xx_ll_gpio.h>
 
-
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #define STRHAL_QSPI_RX_BUF_SIZE 1024
@@ -21,7 +21,8 @@ extern "C" {
  * If they are set to 0, the respective data are ignored.
  * DummyLength directly specifies the number of dummy cycles to send. If set to 0, no dummy cycles are sent.
  */
-typedef struct {
+typedef struct
+{
 		uint8_t instruction;
 		uint8_t instruction_size;
 		uint32_t addr;
@@ -31,14 +32,13 @@ typedef struct {
 		uint8_t dummy_size;
 } STRHAL_QSPI_Command_t;
 
-
-typedef struct {
-	uint8_t psc : 5;
-	uint8_t flash_size : 5;
-	uint8_t ncs_high_time : 3;
-	uint8_t clk_level : 1;
+typedef struct
+{
+		uint8_t psc :5;
+		uint8_t flash_size :5;
+		uint8_t ncs_high_time :3;
+		uint8_t clk_level :1;
 } STRHAL_QSPI_Config_t;
-
 
 void STRHAL_QSPI_Init();
 void STRHAL_QSPI_Run();

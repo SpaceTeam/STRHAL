@@ -4,7 +4,8 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #define STRHAL_UART_BUF_SIZE 256
@@ -12,36 +13,40 @@ extern "C" {
 
 #define STRHAL_UART_DEBUG STRHAL_UART2
 
-typedef enum {
+typedef enum
+{
 	STRHAL_UART1,
 	STRHAL_UART2,
 
 	STRHAL_N_UART
 } STRHAL_UART_Id_t;
 
-typedef struct {
-	char data[STRHAL_UART_BUF_SIZE];
-	uint32_t n;
+typedef struct
+{
+		char data[STRHAL_UART_BUF_SIZE];
+		uint32_t n;
 } STRHAL_UART_Tx_Buf_t;
 
-typedef struct {
-	char data[STRHAL_UART_BUF_SIZE];
-	uint32_t h;
-	uint32_t n;
-	uint32_t n_dma;
+typedef struct
+{
+		char data[STRHAL_UART_BUF_SIZE];
+		uint32_t h;
+		uint32_t n;
+		uint32_t n_dma;
 } STRHAL_UART_Rx_Buf_t;
 
-typedef enum {
+typedef enum
+{
 	STRHAL_UART_STATE_00 = 0,
 
-	STRHAL_UART_STATE_RX = (1<<1),
-	STRHAL_UART_STATE_RC = (1<<2),
-	STRHAL_UART_STATE_RO = (1<<3),
-	STRHAL_UART_STATE_RE = (1<<4),
+	STRHAL_UART_STATE_RX = (1 << 1),
+	STRHAL_UART_STATE_RC = (1 << 2),
+	STRHAL_UART_STATE_RO = (1 << 3),
+	STRHAL_UART_STATE_RE = (1 << 4),
 
-	STRHAL_UART_STATE_TX = (1<<5),
-	STRHAL_UART_STATE_TC = (1<<6),
-	STRHAL_UART_STATE_TE = (1<<7),
+	STRHAL_UART_STATE_TX = (1 << 5),
+	STRHAL_UART_STATE_TC = (1 << 6),
+	STRHAL_UART_STATE_TE = (1 << 7),
 } STRHAL_UART_State_t;
 
 void STRHAL_UART_Init();
