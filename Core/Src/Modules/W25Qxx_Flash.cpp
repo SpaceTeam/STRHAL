@@ -7,35 +7,25 @@
 
 #include <cstring>
 
-W25Qxx_Flash *W25Qxx_Flash::flash = nullptr;
-Communication *W25Qxx_Flash::com = nullptr;
-
-W25Qxx_Flash::W25Qxx_Flash(uint8_t size_2n) :
-		state(FlashState::IDLE), size_2n(size_2n & 0x3F), pageCount(0), sectorCount(0)
+W25Qxx_Flash::W25Qxx_Flash() :
+		state(FlashState::IDLE), pageCount(0), sectorCount(0), can(Can::instance(0))
 {
 }
 
-W25Qxx_Flash* W25Qxx_Flash::instance(uint8_t size_2n)
+W25Qxx_Flash& W25Qxx_Flash::instance()
 {
-	if (W25Qxx_Flash::flash == nullptr)
-	{
-		W25Qxx_Flash::flash = new W25Qxx_Flash(size_2n);
-	}
+	static W25Qxx_Flash instance;
 
-	return W25Qxx_Flash::flash;
+	return instance;
 }
 
 int W25Qxx_Flash::init()
 {
-	com = Communication::instance(0); // works because the generic channel (e.g. ECU) has already initialized com
-	if (com == nullptr)
-		return -1;
-
 	memset(loggingBuffer, 0, 256);
 
 	STRHAL_QSPI_Config_t qspi_conf;
 	qspi_conf.clk_level = 0x0;
-	qspi_conf.flash_size = size_2n;
+	qspi_conf.flash_size = SIZE_2N;
 	qspi_conf.ncs_high_time = 0x7;
 	qspi_conf.psc = 19;
 
@@ -212,7 +202,7 @@ bool W25Qxx_Flash::sendClearDone()
 	msgData.bit.info.buffer = DIRECT_BUFFER;
 	msgData.bit.data.uint8[0] = COMPLETED;
 
-	return (com->can->send(0, (uint8_t*) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
+	return (can.send(0, (uint8_t*) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
 }
 
 bool W25Qxx_Flash::sendFull()
@@ -224,7 +214,7 @@ bool W25Qxx_Flash::sendFull()
 	msgData.bit.info.buffer = DIRECT_BUFFER;
 	msgData.bit.data.uint8[0] = FULL;
 
-	return (com->can->send(0, (uint8_t*) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
+	return (can.send(0, (uint8_t*) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
 }
 
 void W25Qxx_Flash::addLog(uint8_t *data, uint8_t n)
@@ -490,7 +480,7 @@ uint32_t W25Qxx_Flash::read(uint32_t address, uint8_t *data, uint32_t n)
 	cmd.alt_size = 0;
 	cmd.dummy_size = 0;
 
-	if ((uint64_t) address + n > (uint64_t) (1 << size_2n))
+	if ((uint64_t) address + n > (uint64_t) (1 << SIZE_2N))
 		n = 0xFFFFFFFF - address;
 
 	if (waitForSREGFlag(0x01, false, 100) < 0)
@@ -674,9 +664,4 @@ uint32_t W25Qxx_Flash::getPageCount()
 uint32_t W25Qxx_Flash::getSectorCount()
 {
 	return sectorCount;
-}
-
-W25Qxx_Flash::~W25Qxx_Flash()
-{
-
 }

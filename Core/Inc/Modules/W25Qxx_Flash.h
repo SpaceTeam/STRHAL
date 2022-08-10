@@ -2,7 +2,7 @@
 #define W25QXX_FLASH_H
 
 #include <stdint.h>
-#include <Communication.h>
+#include <Can.h>
 #include "./Modules/AbstractModule.h"
 
 #define PAGE_SIZE			256 //in bytes
@@ -47,13 +47,10 @@ enum class FlashState : int
 class W25Qxx_Flash: public AbstractModule
 {
 	public:
-		W25Qxx_Flash(const W25Qxx_Flash &other) = delete;
-		W25Qxx_Flash& operator=(const W25Qxx_Flash &other) = delete;
-		W25Qxx_Flash(const W25Qxx_Flash &&other) = delete;
-		W25Qxx_Flash& operator=(const W25Qxx_Flash &&other) = delete;
-		~W25Qxx_Flash();
+		W25Qxx_Flash(W25Qxx_Flash const&);
+		void operator=(W25Qxx_Flash const&);
 
-		static W25Qxx_Flash* instance(uint8_t size_2n);
+		static W25Qxx_Flash& instance();
 
 		int init() override;
 		int exec() override;
@@ -102,9 +99,9 @@ class W25Qxx_Flash: public AbstractModule
 		bool lock = false;
 
 		static constexpr uint16_t EXEC_SAMPLE_TICKS = 10;
+		static constexpr uint8_t SIZE_2N = 0x1F;
 	private:
 		FlashState state;
-		uint8_t size_2n;
 
 		uint32_t pageCount;
 		uint32_t sectorCount;
@@ -119,15 +116,14 @@ class W25Qxx_Flash: public AbstractModule
 		uint8_t loggingBuffer[256];
 		uint8_t loggingIndex = 0;
 
-		W25Qxx_Flash(uint8_t size_2n);
+		W25Qxx_Flash();
 
 		int waitForSREGFlag(uint8_t flag, bool state, uint16_t tot);
 
 		FlashState currentStateLogic(uint64_t time);
 		void nextStateLogic(FlashState nextState, uint64_t time);
 
-		static W25Qxx_Flash *flash;
-		static Communication *com;
+		Can& can;
 };
 
 #endif /*W25QXX_FLASH_H*/

@@ -4,22 +4,22 @@
 #include <cstring>
 #include <cstdio>
 
-Can *Can::cancom = nullptr;
 Com_Receptor_t Can::standardReceptor = nullptr;
+uint32_t Can::_nodeId = 0; // TODO fix this pfusch
 
 Can::Can(uint32_t nodeId) :
 		AbstractCom(nodeId)
 {
 }
 
-Can* Can::instance(uint32_t nodeId)
+Can& Can::instance(uint32_t nodeId)
 {
-	if (Can::cancom == nullptr)
-	{
-		Can::cancom = new Can(nodeId);
-	}
+	static Can can(nodeId);
 
-	return Can::cancom;
+	if (nodeId != 0)
+		_nodeId = nodeId;
+
+	return can;
 }
 
 int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat)
@@ -188,7 +188,7 @@ void Can::bridgeReceptor(STRHAL_FDCAN_Id_t bus_id, uint32_t id, uint8_t *data, u
 	Can_MessageId_t incoming_id;
 	incoming_id.uint32 = id;
 
-	if (incoming_id.info.node_id == cancom->nodeId)
+	if (incoming_id.info.node_id == _nodeId)
 	{
 		Can::standardReceptor(id, data, n);
 	}

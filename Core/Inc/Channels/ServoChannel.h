@@ -91,7 +91,7 @@ class ServoChannel: public AbstractChannel
 		ServoRefPos adcRef = adc0Ref;
 		ServoRefPos pwmRef = pwm0Ref;
 
-		W25Qxx_Flash *flash;
+		W25Qxx_Flash &flash;
 
 		ServoState servoState;
 		bool reqCalib;

@@ -5,7 +5,7 @@
 #include <Channels/DigitalOutChannel.h>
 #include <Channels/DigitalInChannel.h>
 #include <Channels/GenericChannel.h>
-#include <Communication.h>
+#include <Can.h>
 #include <Speaker.h>
 
 #include <STRHAL.h>
@@ -22,11 +22,11 @@ class IOB: public GenericChannel
 		int exec() override;
 
 	private:
-		Communication *com;
-
-		W25Qxx_Flash *flash;
+		W25Qxx_Flash &flash;
 
 		STRHAL_GPIO_t ledRed, ledGreen;
+		Can& can;
+
 		Speaker speaker;
 };
 

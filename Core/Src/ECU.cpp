@@ -5,6 +5,7 @@
 
 ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
+		flash(W25Qxx_Flash::instance()),
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
 		press_0(0,{ ADC2, STRHAL_ADC_CHANNEL_15 }, 1),
@@ -28,10 +29,9 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		solenoid_0(18,{ ADC2, STRHAL_ADC_CHANNEL_16 },{ GPIOD, 9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		solenoid_1(19,{ ADC2, STRHAL_ADC_CHANNEL_18 },{ GPIOD, 8, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		pressure_control(20, press_1, solenoid_0, 1), rocket(22, press_1, press_0, press_2, servo_0, servo_2, pyro_igniter0, pyro_igniter2, 1),
+		can(Can::instance(node_id)),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	com = Communication::instance(this, nullptr);
-	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&press_0);
 	registerChannel(&press_1);
 	registerChannel(&press_2);
@@ -55,7 +55,7 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&pressure_control);
 	registerChannel(&rocket);
 
-	registerModule(flash);
+	registerModule(&flash);
 }
 
 int ECU::init()
@@ -71,13 +71,7 @@ int ECU::init()
 	if (STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
 		return -1;
 
-	if (com == nullptr)
-		return -1;
-
-	if (com->init() != 0)
-		return -1;
-
-	if (flash == nullptr)
+	if (can.init(receptor, heartbeatCan, COMMode::STANDARD_COM_MODE) != 0)
 		return -1;
 
 	if (GenericChannel::init() != 0)
@@ -95,7 +89,7 @@ int ECU::exec()
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
 
-	if (com->exec() != 0)
+	if (can.exec() != 0)
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
@@ -127,14 +121,14 @@ int ECU::exec()
 				if(tempBuf[ret-1] == 0x0A) { // msg ended
 					msgStarted = false;
 					bufIndex = 0;
-					Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
+					receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
 					memset(msgBuf, 0, 128);
 				}
 			} else {
 				if(tempBuf[0] == 0x3A) { // start byte
 					if(tempBuf[ret-1] == 0x0A) { // msg ended
 						memcpy(msgBuf, tempBuf, ret - 1);
-						Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
+						receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
 						memset(msgBuf, 0, 128);
 					}
 					bufIndex += ret;

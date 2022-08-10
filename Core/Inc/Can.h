@@ -14,7 +14,7 @@ class Can: public AbstractCom
 		Can(const Can &&other) = delete;
 		Can& operator=(const Can &&other) = delete;
 
-		static Can* instance(uint32_t nodeId = 0);
+		static Can& instance(uint32_t nodeId = 0);
 
 		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) override;
 		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode);
@@ -30,8 +30,8 @@ class Can: public AbstractCom
 		static void internalReceptor(uint32_t id, uint8_t *data, uint32_t n);
 		static void externalReceptor(uint32_t id, uint8_t *data, uint32_t n);
 
-		static Can *cancom;
 		static Com_Receptor_t standardReceptor;
+		static uint32_t _nodeId;
 
 };
 

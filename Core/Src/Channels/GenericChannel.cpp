@@ -3,9 +3,13 @@
 #include <cstdio>
 #include <git_version.h>
 
+GenericChannel* GenericChannel::gcPtr = nullptr; // necessary for static callbacks
+bool GenericChannel::loraActive = false;
+
 GenericChannel::GenericChannel(uint32_t nodeId, uint32_t firmwareVersion, uint32_t refreshDivider) :
-		AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refreshDivider), nodeId(nodeId), firmwareVersion(GIT_COMMIT_HASH_VALUE)
+		AbstractChannel(CHANNEL_TYPE_NODE_GENERIC, GENERIC_CHANNEL_ID, refreshDivider), nodeId(nodeId), firmwareVersion(GIT_COMMIT_HASH_VALUE), flash(W25Qxx_Flash::instance())
 {
+	gcPtr = this;
 }
 
 uint32_t GenericChannel::getNodeId() const
@@ -33,8 +37,6 @@ int GenericChannel::init()
 		}
 	}
 
-	flash = W25Qxx_Flash::instance(0x1F);
-
 	return 0;
 }
 
@@ -60,7 +62,7 @@ int GenericChannel::exec()
 
 int GenericChannel::reset()
 {
-	(void) flash->reset();
+	(void) flash.reset();
 	return 0;
 }
 
@@ -73,7 +75,7 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 		case GENERIC_REQ_DATA:
 			return this->getSensorData(returnData, n);
 		case GENERIC_REQ_RESET_ALL_SETTINGS:
-			(void) flash->configReset();
+			(void) flash.configReset();
 			for (AbstractChannel *channel : channels)
 			{
 				if (channel == nullptr)
@@ -83,7 +85,7 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 			}
 			return 0;
 		case GENERIC_REQ_FLASH_STATUS:
-			(void) flash->setState(FlashState::CLEARING);
+			(void) flash.setState(FlashState::CLEARING);
 			return this->getFlashClearInfo(returnData, n);
 		default:
 			return AbstractChannel::processMessage(commandId, returnData, n);
@@ -117,11 +119,11 @@ int GenericChannel::setVariable(uint8_t variableId, int32_t data)
 			loggingEnabled = data;
 			if (loggingEnabled == 0)
 			{
-				flash->setState(FlashState::IDLE);
+				flash.setState(FlashState::IDLE);
 			}
 			else
 			{
-				flash->setState(FlashState::LOGGING);
+				flash.setState(FlashState::LOGGING);
 			}
 			return 0;
 		default:
@@ -170,8 +172,8 @@ int GenericChannel::getSensorData(uint8_t *data, uint8_t &n)
 	}
 	n += 1 * sizeof(uint32_t);
 
-	if (loggingEnabled && !flash->lock)
-		flash->addLog(data, n);
+	if (loggingEnabled && !flash.lock)
+		flash.addLog(data, n);
 	return 0;
 }
 
@@ -180,7 +182,7 @@ int GenericChannel::getFlashClearInfo(uint8_t *data, uint8_t &n)
 
 	FlashStatusMsg_t *info = (FlashStatusMsg_t*) data;
 
-	FlashState flashState = flash->getState();
+	FlashState flashState = flash.getState();
 	if (flashState == FlashState::IDLE || flashState == FlashState::CLEARING)
 	{ //TODO actually check if clearing has initiated
 		info->status = INITIATED;
@@ -251,7 +253,7 @@ void GenericChannel::printLog()
 	uint8_t readData[256];
 	for (int i = LOGGING_BASE >> 8; i < 8192 * 16; i++)
 	{
-		if (flash->read(i << 8, readData, 252) != 252)
+		if (flash.read(i << 8, readData, 252) != 252)
 		{
 			sprintf(kartoffel_buffer, "UNABLE TO READ PAGE!\n");
 			STRHAL_UART_Debug_Write_Blocking(kartoffel_buffer, strlen(kartoffel_buffer), 100);
@@ -272,4 +274,151 @@ void GenericChannel::detectReadoutMode()
 	{
 		printLog();
 	}
+}
+
+void GenericChannel::setLoraActive(bool enable) {
+	loraActive = enable;
+}
+
+void GenericChannel::receptorLora(uint32_t id, uint8_t *data, uint32_t n)
+{
+	Can_MessageId_t msgId =
+	{ 0 };
+	Can_MessageData_t msgData =
+	{ 0 };
+
+	msgId.uint32 = id;
+	memcpy(msgData.uint8, data, 64); //TODO only copy n bytes
+	uint8_t commandId = msgData.bit.cmd_id;
+	uint8_t channelId = msgData.bit.info.channel_id;
+	uint8_t ret_n = 0;
+
+	if (channelId == 6)
+	{ // ECU
+		if (loraActive)
+		{
+			Radio::msgArray[Radio::ECU_START_ADDR] = 1;
+			memcpy(&Radio::msgArray[Radio::ECU_START_ADDR + 1], msgData.bit.data.uint8, Radio::ECU_MSG_SIZE - 1);
+		}
+		return;
+	}
+	else if (channelId == 7)
+	{ // PMU
+		if (loraActive)
+		{
+			Radio::msgArray[Radio::ECU_START_ADDR] = 1;
+			memcpy(&Radio::msgArray[Radio::PMU_START_ADDR + 1], msgData.bit.data.uint8, Radio::PMU_MSG_SIZE - 1);
+		}
+		return;
+	}
+
+	if (channelId == GENERIC_CHANNEL_ID)
+	{
+		if (gcPtr->processMessage(commandId, msgData.bit.data.uint8, ret_n) != 0)
+			return;
+	}
+	else
+	{
+		if (gcPtr->processMessage(commandId, msgData.bit.data.uint8, ret_n, channelId) != 0)
+			return;
+	}
+
+	msgId.info.direction = NODE2MASTER_DIRECTION;
+	msgId.info.node_id = gcPtr->getNodeId();
+	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
+	msgId.info.priority = STANDARD_PRIORITY;
+	msgData.bit.cmd_id = commandId + 1;
+
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, CAN_MSG_LENGTH(ret_n));
+}
+
+void GenericChannel::receptor(uint32_t id, uint8_t *data, uint32_t n)
+{
+	Can_MessageId_t msgId =
+	{ 0 };
+	Can_MessageData_t msgData =
+	{ 0 };
+
+	msgId.uint32 = id;
+	memcpy(msgData.uint8, data, 64); //TODO only copy n bytes
+	uint8_t commandId = msgData.bit.cmd_id;
+	uint8_t channelId = msgData.bit.info.channel_id;
+	uint8_t ret_n = 0;
+
+	if (channelId == GENERIC_CHANNEL_ID)
+	{
+		if (gcPtr->processMessage(commandId, msgData.bit.data.uint8, ret_n) != 0)
+			return;
+	}
+	else
+	{
+		if (gcPtr->processMessage(commandId, msgData.bit.data.uint8, ret_n, channelId) != 0)
+			return;
+	}
+
+	msgId.info.direction = NODE2MASTER_DIRECTION;
+	msgId.info.node_id = gcPtr->getNodeId();
+	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
+	msgId.info.priority = STANDARD_PRIORITY;
+	msgData.bit.cmd_id = commandId + 1;
+
+#ifdef UART_DEBUG
+	uint8_t msgBuf[66] =
+	{ 0 };
+	msgBuf[0] = 0x3A;
+	msgBuf[1] = gcPtr->getNodeId();
+	memcpy(&msgBuf[2], msgData.uint8, CAN_MSG_LENGTH(ret_n));
+	msgBuf[CAN_MSG_LENGTH(ret_n) + 2] = 0x0A;
+	STRHAL_UART_Debug_Write_DMA((char *) msgBuf, CAN_MSG_LENGTH(ret_n) + 3);
+#endif
+
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, CAN_MSG_LENGTH(ret_n));
+}
+
+void GenericChannel::heartbeatCan()
+{
+	Can_MessageId_t msgId =
+	{ 0 };
+	msgId.info.special_cmd = STANDARD_SPECIAL_CMD;
+	msgId.info.direction = NODE2MASTER_DIRECTION;
+	msgId.info.node_id = gcPtr->getNodeId();
+	msgId.info.priority = STANDARD_PRIORITY;
+
+	Can_MessageData_t msgData =
+	{ 0 };
+	msgData.bit.cmd_id = GENERIC_RES_DATA;
+	msgData.bit.info.channel_id = GENERIC_CHANNEL_ID;
+	msgData.bit.info.buffer = DIRECT_BUFFER;
+
+	uint8_t n = 0;
+	if (gcPtr->getSensorData(&msgData.bit.data.uint8[0], n) != 0)
+	{ // Sensor Data collection failed, or Refresh Divider not yet met
+		return;
+	}
+
+	if (loraActive && n >= 23)
+	{
+		Radio::msgArray[Radio::RCU_START_ADDR] = 1;
+		memcpy(&Radio::msgArray[Radio::RCU_START_ADDR + 1], msgData.bit.data.uint8, n - 4);
+	}
+
+#ifdef UART_DEBUG
+	uint8_t msgBuf[66] =
+	{ 0 };
+	msgBuf[0] = 0x3A;
+	msgBuf[1] = gcPtr->getNodeId();
+	memcpy(&msgBuf[2], msgData.uint8, CAN_MSG_LENGTH(n));
+	msgBuf[CAN_MSG_LENGTH(n) + 2] = 0x0A;
+	STRHAL_UART_Debug_Write_DMA((char *) msgBuf, CAN_MSG_LENGTH(n) + 3);
+#endif
+
+	(void) STRHAL_CAN_Send(STRHAL_FDCAN1, msgId.uint32, msgData.uint8, n);
+}
+
+void GenericChannel::heartbeatLora()
+{
+	//sprintf((char *)radioArray,"hello world");
+	//radio->send(0, radioArray, MSG_SIZE);
+	//char *test = "hello world";
+	//radio->send(0, (uint8_t *) test, MSG_SIZE);
 }

@@ -6,6 +6,7 @@
 
 RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
+		flash(W25Qxx_Flash::instance()),
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
 		baro(STRHAL_SPI_SPI1,{ STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOA, 3, STRHAL_GPIO_TYPE_IHZ }),
@@ -24,11 +25,10 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		gps_longitude(9, &gnss.gnssData.longitude, 1),
 		gps_latitude(10, &gnss.gnssData.latitude, 1),
 		gps_altitude(11, &gnss.gnssData.altitude, 1),
+		radio(Radio::instance(node_id, lora)),
+		can(Can::instance(node_id)),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	com = Communication::instance(this, &lora);
-	//com = Communication::instance(this);
-	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&sense_5V);
 	registerChannel(&sense_12V);
 	registerChannel(&baro_channel);
@@ -39,7 +39,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&y_gyro);
 	registerChannel(&z_gyro);
 
-	registerModule(flash);
+	registerModule(&flash);
 	registerModule(&gnss);
 	registerModule(&baro);
 	//registerModule(&imu);
@@ -62,14 +62,10 @@ int RCU::init()
 	if (lora.init() != 0)
 		return -1;
 
-	if (com == nullptr)
+	if (can.init(receptor, heartbeatCan, COMMode::STANDARD_COM_MODE) != 0)
 		return -1;
 
-	//if(com->init(COMMode::LISTENER_COM_MODE) != 0)
-	if (com->init() != 0)
-		return -1;
-
-	if (flash == nullptr)
+	if (radio.init(nullptr, heartbeatLora) != 0)
 		return -1;
 
 	if (GenericChannel::init() != 0)
@@ -87,7 +83,10 @@ int RCU::exec()
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
 
-	if (com->exec() != 0)
+	if (can.exec() != 0)
+		return -1;
+
+	if (radio.exec() != 0)
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
@@ -123,7 +122,7 @@ int RCU::exec()
 				{
 					msgStarted = false;
 					bufIndex = 0;
-					Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
+					receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], bufIndex - 1);
 					memset(msgBuf, 0, 128);
 				}
 			}
@@ -134,7 +133,7 @@ int RCU::exec()
 					if(tempBuf[ret-1] == 0x0A) // msg ended
 					{
 						memcpy(msgBuf, tempBuf, ret - 1);
-						Communication::receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
+						receptor((uint32_t) (msgBuf[0] << 11), &msgBuf[1], ret - 1);
 						memset(msgBuf, 0, 128);
 					}
 					bufIndex += ret;

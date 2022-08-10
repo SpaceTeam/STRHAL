@@ -3,23 +3,21 @@
 #include <cstring>
 #include <cstdio>
 
-Radio *Radio::radio = nullptr;
 LoRa1276F30_Radio *Radio::lora = nullptr;
+uint8_t Radio::msgArray[MSG_SIZE] =
+{ 0 };
 
-Radio::Radio(uint32_t nodeId, LoRa1276F30_Radio *lora) :
+Radio::Radio(uint32_t nodeId, LoRa1276F30_Radio& lora) :
 		AbstractCom(nodeId)
 {
-	Radio::lora = lora;
+	Radio::lora = &lora;
 }
 
-Radio* Radio::instance(uint32_t nodeId, LoRa1276F30_Radio *lora)
+Radio& Radio::instance(uint32_t nodeId, LoRa1276F30_Radio& lora)
 {
-	if (Radio::radio == nullptr && lora != nullptr)
-	{
-		Radio::radio = new Radio(nodeId, lora);
-	}
+	static Radio radio(nodeId, lora);
 
-	return Radio::radio;
+	return radio;
 }
 
 int Radio::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat)

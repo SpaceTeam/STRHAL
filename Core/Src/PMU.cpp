@@ -5,6 +5,7 @@
 
 PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
+		flash(W25Qxx_Flash::instance()),
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
 		baro(STRHAL_SPI_SPI1,{ STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOA, 3, STRHAL_GPIO_TYPE_IHZ }),
@@ -26,10 +27,9 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		x_gyro(12, &imu, IMUMeasurement::X_GYRO, 1),
 		y_gyro(13, &imu, IMUMeasurement::Y_GYRO,1),
 		z_gyro(14, &imu, IMUMeasurement::Z_GYRO, 1),
+		can(Can::instance(node_id)),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	com = Communication::instance(this, nullptr);
-	flash = W25Qxx_Flash::instance(0x1F);
 	registerChannel(&sense_5V);
 	registerChannel(&sense_5VP);
 	registerChannel(&sense_12V);
@@ -48,7 +48,7 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&y_gyro);
 	registerChannel(&z_gyro);
 
-	registerModule(flash);
+	registerModule(&flash);
 	registerModule(&baro);
 	registerModule(&imu);
 
@@ -67,14 +67,7 @@ int PMU::init()
 	if (STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
 		return -1;
 
-	if (com == nullptr)
-		return -1;
-
-	if (com->init() != 0)
-		//if(com->init(COMMode::BRIDGE_COM_MODE) != 0)
-		return -1;
-
-	if (flash == nullptr)
+	if (can.init(receptor, heartbeatCan, COMMode::STANDARD_COM_MODE) != 0)
 		return -1;
 
 	if (GenericChannel::init() != 0)
@@ -92,7 +85,7 @@ int PMU::exec()
 	STRHAL_ADC_Run();
 	STRHAL_QSPI_Run();
 
-	if (com->exec() != 0)
+	if (can.exec() != 0)
 		return -1;
 
 	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);

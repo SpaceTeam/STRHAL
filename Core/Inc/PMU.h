@@ -6,7 +6,7 @@
 #include <Channels/DigitalInChannel.h>
 #include <Channels/GenericChannel.h>
 #include <Channels/BaroChannel.h>
-#include <Communication.h>
+#include <Can.h>
 #include <Channels/IMUChannel.h>
 #include <Speaker.h>
 
@@ -24,9 +24,7 @@ class PMU: public GenericChannel
 		int exec() override;
 
 	private:
-		Communication *com;
-
-		W25Qxx_Flash *flash;
+		W25Qxx_Flash &flash;
 
 		STRHAL_GPIO_t ledRed, ledGreen;
 		// Modules
@@ -39,6 +37,10 @@ class PMU: public GenericChannel
 		DigitalOutChannel out0, out1, out2, out3, payload;
 		BaroChannel baro_channel;
 		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
+
+		// Coms
+		Can &can;
+
 		Speaker speaker;
 };
 

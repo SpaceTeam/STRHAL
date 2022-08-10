@@ -2,16 +2,22 @@
 
 RocketChannel::RocketChannel(uint8_t id, const ADCChannel &oxPressureChannel, const ADCChannel &fuelPressureChannel, const ADCChannel &chamberPressureChannel, ServoChannel &oxServoChannel, ServoChannel &fuelServoChannel, PyroChannel &igniter0Channel, PyroChannel &igniter1Channel,
 		uint32_t refreshDivider) :
-		AbstractChannel(CHANNEL_TYPE_ROCKET, id, refreshDivider), oxPressureChannel(oxPressureChannel), fuelPressureChannel(fuelPressureChannel), chamberPressureChannel(chamberPressureChannel), oxServoChannel(oxServoChannel), fuelServoChannel(fuelServoChannel), igniter0Channel(igniter0Channel), igniter1Channel(
-				igniter1Channel), state(PAD_IDLE), ignitionState(IgnitionSequence::INIT)
+		AbstractChannel(CHANNEL_TYPE_ROCKET, id, refreshDivider),
+		oxPressureChannel(oxPressureChannel),
+		fuelPressureChannel(fuelPressureChannel),
+		chamberPressureChannel(chamberPressureChannel),
+		oxServoChannel(oxServoChannel),
+		fuelServoChannel(fuelServoChannel),
+		igniter0Channel(igniter0Channel),
+		igniter1Channel(igniter1Channel),
+		state(PAD_IDLE),
+		ignitionState(IgnitionSequence::INIT),
+		can(Can::instance(0))
 {
 }
 
 int RocketChannel::init()
 {
-	can = Can::instance(0); // works because the generic channel (e.g. ECU) has already initialized CANCOM
-	if (can == nullptr)
-		return -1;
 	return 0;
 }
 
@@ -98,7 +104,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time)
 			{ 0 };
 			setMsg.variable_id = 1; // servo target position
 			setMsg.value = 65000; // open servo
-			can->sendAsMaster(9, 11, 4, (uint8_t*) &setMsg, 5 + sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
+			can.sendAsMaster(9, 11, 4, (uint8_t*) &setMsg, 5 + sizeof(uint32_t)); // send REQ_SET_VARIABLE (4) command to holddown servo (channelId 11) on oxcart node (nodeId 9)*/
 			/*SetMsg_t setMsg =
 			 { 0 };
 			 setMsg.variable_id = 0; // pyro state

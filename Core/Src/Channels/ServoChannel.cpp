@@ -9,9 +9,8 @@ constexpr ServoRefPos ServoChannel::pwm0Ref;
 constexpr ServoRefPos ServoChannel::adc0Ref;
 
 ServoChannel::ServoChannel(uint8_t id, uint8_t servoId, const STRHAL_TIM_TimerId_t &pwmTimer, const STRHAL_TIM_ChannelId_t &control, const STRHAL_ADC_Channel_t &feedbackChannel, const STRHAL_ADC_Channel_t &currentChannel, const STRHAL_GPIO_t &led, uint32_t refreshDivider) :
-		AbstractChannel(CHANNEL_TYPE_SERVO, id, refreshDivider), servoId(servoId), pwmTimer(pwmTimer), ctrlChannelId(control), feedbackChannel(feedbackChannel), currentChannel(currentChannel), led(led), servoState(ServoState::IDLE), reqCalib(false)
+		AbstractChannel(CHANNEL_TYPE_SERVO, id, refreshDivider), servoId(servoId), pwmTimer(pwmTimer), ctrlChannelId(control), feedbackChannel(feedbackChannel), currentChannel(currentChannel), led(led), flash(W25Qxx_Flash::instance()), servoState(ServoState::IDLE), reqCalib(false)
 {
-
 }
 
 int ServoChannel::init()
@@ -27,20 +26,18 @@ int ServoChannel::init()
 	feedbackMeasurement = STRHAL_ADC_SubscribeChannel(&feedbackChannel, STRHAL_ADC_INTYPE_REGULAR);
 	currentMeasurement = STRHAL_ADC_SubscribeChannel(&currentChannel, STRHAL_ADC_INTYPE_REGULAR);
 
-	flash = W25Qxx_Flash::instance(0x1F);
-
 	// Load and assign config
-	if (!flash->readConfig())
+	if (!flash.readConfig())
 		return -1;
 
 	// Read config values starting from the servos config register start address
 	uint32_t configAddrStart = SERVOCONFIG_OFFSET + servoId * SERVOCONFIG_N_EACH;
-	adcRef.start = flash->readConfigReg(configAddrStart);
-	adcRef.end = flash->readConfigReg(configAddrStart + 1);
-	pwmRef.start = flash->readConfigReg(configAddrStart + 2);
-	pwmRef.end = flash->readConfigReg(configAddrStart + 3);
+	adcRef.start = flash.readConfigReg(configAddrStart);
+	adcRef.end = flash.readConfigReg(configAddrStart + 1);
+	pwmRef.start = flash.readConfigReg(configAddrStart + 2);
+	pwmRef.end = flash.readConfigReg(configAddrStart + 3);
 
-	if (feedbackMeasurement == nullptr || currentMeasurement == nullptr || flash == nullptr)
+	if (feedbackMeasurement == nullptr || currentMeasurement == nullptr)
 		return -1;
 
 	servoState = ServoState::READY;
@@ -131,7 +128,7 @@ int ServoChannel::exec()
 					{ static_cast<Config>(configAddrStart), static_cast<Config>(configAddrStart + 2) };
 					uint32_t vals[2] =
 					{ (uint32_t) adcRef.start, (uint32_t) pwmRef.start };
-					flash->writeConfigRegs(regs, vals, 2);
+					flash.writeConfigRegs(regs, vals, 2);
 				}
 				else
 				{
@@ -140,7 +137,7 @@ int ServoChannel::exec()
 					{ static_cast<Config>(configAddrStart + 1), static_cast<Config>(configAddrStart + 3) };
 					uint32_t vals[2] =
 					{ (uint32_t) adcRef.end, (uint32_t) pwmRef.end };
-					flash->writeConfigRegs(regs, vals, 2);
+					flash.writeConfigRegs(regs, vals, 2);
 				}
 				servoState = ServoState::IDLE;
 				reqCalib = false;
@@ -165,7 +162,7 @@ int ServoChannel::processMessage(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret
 		{
 			uint32_t vals[4] =
 			{ (uint32_t) adc0Ref.start, (uint32_t) adc0Ref.end, (uint32_t) pwm0Ref.start, (uint32_t) pwm0Ref.end };
-			flash->writeConfigRegsFromAddr(SERVOCONFIG_OFFSET + servoId * SERVOCONFIG_N_EACH, vals, 4);
+			flash.writeConfigRegsFromAddr(SERVOCONFIG_OFFSET + servoId * SERVOCONFIG_N_EACH, vals, 4);
 			adcRef = adc0Ref;
 			pwmRef = pwm0Ref;
 			return 0;

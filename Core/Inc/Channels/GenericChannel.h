@@ -3,8 +3,8 @@
 
 #include "AbstractChannel.h"
 #include <can_houbolt/channels/generic_channel_def.h>
-#include <Communication.h>
 #include <STRHAL.h>
+#include <Radio.h>
 #include "../Modules/W25Qxx_Flash.h"
 
 class GenericChannel: public AbstractChannel
@@ -41,6 +41,14 @@ class GenericChannel: public AbstractChannel
 		AbstractModule *modules[MAX_MODULES] =
 		{ nullptr };
 
+		static GenericChannel* gcPtr;
+		static bool loraActive;
+		static void setLoraActive(bool enable);
+		static void heartbeatCan();
+		static void heartbeatLora();
+		static void receptor(uint32_t id, uint8_t *data, uint32_t n);
+		static void receptorLora(uint32_t id, uint8_t *data, uint32_t n);
+
 	private:
 		uint32_t nodeId;
 		uint32_t firmwareVersion;
@@ -48,7 +56,7 @@ class GenericChannel: public AbstractChannel
 		uint8_t loggingEnabled = 0;
 		uint8_t moduleIndex = 0;
 
-		W25Qxx_Flash *flash;
+		W25Qxx_Flash& flash;
 };
 
 #endif /*GENERICCHANNEL_H*/

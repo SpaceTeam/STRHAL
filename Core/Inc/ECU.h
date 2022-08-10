@@ -9,7 +9,7 @@
 #include <Channels/ServoChannel.h>
 #include <Channels/GenericChannel.h>
 #include <Channels/RocketChannel.h>
-#include <Communication.h>
+#include <Can.h>
 #include "../Modules/W25Qxx_Flash.h"
 #include <Speaker.h>
 #include <STRHAL.h>
@@ -29,12 +29,11 @@ class ECU: public GenericChannel
 		void testServo(ServoChannel &servo);
 
 	private:
-		Communication *com;
-
-		W25Qxx_Flash *flash;
+		W25Qxx_Flash &flash;
 
 		STRHAL_GPIO_t ledRed, ledGreen;
 
+		// Channels
 		ADCChannel press_0, press_1, press_2, press_3, press_4, press_5;
 		ADCChannel temp_0, temp_1, temp_2;
 		ServoChannel servo_0, servo_1, servo_2;
@@ -43,6 +42,9 @@ class ECU: public GenericChannel
 		DigitalOutChannel solenoid_0, solenoid_1;
 		PressureControlChannel pressure_control;
 		RocketChannel rocket;
+
+		// Coms
+		Can &can;
 
 		Speaker speaker;
 };
