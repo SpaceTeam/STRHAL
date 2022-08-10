@@ -10,9 +10,9 @@
 #include <STRHAL_Oof.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-
 
 /***** DEFINES *****/
 #define STRHAL_CAN_START_TOT 				16000000
@@ -20,28 +20,30 @@ extern "C" {
 #define STRHAL_CAN_EXT_FILTER_NUMBER		0
 #define STRHAL_CAN_RAM_N_FILTER			28
 
-typedef enum {
+typedef enum
+{
 	STRHAL_FDCAN1,
 	STRHAL_FDCAN2,
 
 	STRHAL_N_FDCAN
 } STRHAL_FDCAN_Id_t;
 
-typedef enum {
+typedef enum
+{
 	STRHAL_FDCAN_RX0,
 	STRHAL_FDCAN_RX1,
 
 	STRHAL_FDCAN_N_RX
 } STRHAL_FDCAN_Rx_Id_t;
 
-
-typedef struct {
-	uint32_t value;
-	uint32_t mask;
+typedef struct
+{
+		uint32_t value_id1;
+		uint32_t mask_id2;
+		uint32_t type;
 } STRHAL_FDCAN_Filter_t;
 
-
-typedef void (*STRHAL_CAN_Receptor_t) (uint32_t id, uint8_t *data, uint32_t n);
+typedef void (*STRHAL_CAN_Receptor_t)(uint32_t id, uint8_t *data, uint32_t n);
 
 STRHAL_Oof_t STRHAL_CAN_Init();
 int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id);
@@ -49,7 +51,6 @@ int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id,
 void STRHAL_CAN_Run();
 int32_t STRHAL_CAN_Receive(STRHAL_FDCAN_Id_t fdcan_id, uint32_t *id, uint8_t *data, uint32_t n);
 int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, uint32_t n);
-
 
 #ifdef __cplusplus
 }

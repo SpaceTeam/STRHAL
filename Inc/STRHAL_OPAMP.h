@@ -7,19 +7,16 @@
 #include <stm32g4xx_ll_opamp.h>
 #include <stm32g4xx_ll_rcc.h>
 
-
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /***** DEFINES *****/
 
-
-
 void STRHAL_OPAMP_Init();
 
 void STRHAL_OPAMP_Run();
-
 
 #ifdef __cplusplus
 }

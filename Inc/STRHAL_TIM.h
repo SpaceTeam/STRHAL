@@ -4,12 +4,13 @@
 #include <stdint.h>
 #include <stm32g4xx.h>
 
-
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef enum {
+typedef enum
+{
 	STRHAL_TIM_TIM1 = 0,
 	STRHAL_TIM_TIM2 = 1,
 	STRHAL_TIM_TIM3 = 2,
@@ -19,14 +20,16 @@ typedef enum {
 	STRHAL_TIM_N_TIM = 5
 } STRHAL_TIM_TimerId_t;
 
-typedef enum {
+typedef enum
+{
 	STRHAL_TIM_TIM6 = 0,
 	STRHAL_TIM_TIM7 = 1,
 
 	STRHAL_TIM_N_BASICTIM = 2
 } STRHAL_TIM_BasicTimerId_t;
 
-typedef enum {
+typedef enum
+{
 	/*TIM1 Channels */
 	STRHAL_TIM_TIM1_CH1N_PA7,
 	STRHAL_TIM_TIM1_CH1_PA8,
@@ -121,7 +124,6 @@ typedef enum {
 	STRHAL_TIM_TIM8_CH2_PA14,
 	STRHAL_TIM_TIM8_CH1_PA15,
 
-
 	STRHAL_TIM_TIM8_CH2N_PB0,
 	STRHAL_TIM_TIM8_CH3N_PB1,
 	STRHAL_TIM_TIM8_CH1N_PB3,
@@ -146,37 +148,36 @@ typedef enum {
 	STRHAL_TIM_N_TIM_CHANNELS
 } STRHAL_TIM_ChannelId_t;
 
-
-typedef enum {
+typedef enum
+{
 	STRHAL_TIM_PWM_CHANNELTYPE_SO, //single out channel
 	STRHAL_TIM_PWM_CHANNELTYPE_IN, //input measure duty cycle
 } STRHAL_TIM_PWM_ChannelType_t;
 
-typedef struct {
-	STRHAL_TIM_ChannelId_t channeSTRHAL;
-	STRHAL_TIM_PWM_ChannelType_t type;
+typedef struct
+{
+		STRHAL_TIM_ChannelId_t channelId;
+		STRHAL_TIM_PWM_ChannelType_t type;
 } STRHAL_TIM_PWM_Channel_t;
-
 
 void STRHAL_TIM_Init();
 void STRHAL_TIM_Run();
 
 int32_t STRHAL_TIM_PWM_Init(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res);
-int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channeSTRHAL, STRHAL_TIM_PWM_ChannelType_t pwmType);
+int STRHAL_TIM_PWM_AddChannel(STRHAL_TIM_PWM_Channel_t *pwmChannel, STRHAL_TIM_ChannelId_t channelId, STRHAL_TIM_PWM_ChannelType_t pwmType);
 int32_t STRHAL_TIM_PWM_Read(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t *duty);
 int32_t STRHAL_TIM_PWM_SetFreq(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res);
-int32_t STRHAL_TIM_PWM_SetDuty(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t duty) ;
+int32_t STRHAL_TIM_PWM_SetDuty(STRHAL_TIM_PWM_Channel_t *pwmChannel, uint16_t duty);
 int STRHAL_TIM_PWM_Enable(STRHAL_TIM_PWM_Channel_t *pwmChannel, int enable);
 
-typedef void (*STRHAL_TIM_Burnable_t) ();
+typedef void (*STRHAL_TIM_Burnable_t)();
 
-int32_t STRHAL_TIM_Burner_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res);
-int STRHAL_TIM_Burner_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnable_t burn);
-int STRHAL_TIM_Burner_Start2Burn(STRHAL_TIM_BasicTimerId_t id);
+int32_t STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_BasicTimerId_t id, uint16_t psc, uint16_t res);
+int STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_BasicTimerId_t id, STRHAL_TIM_Burnable_t burn);
+int STRHAL_TIM_Heartbeat_StartHeartbeat(STRHAL_TIM_BasicTimerId_t id);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /*STRHAL_TIM_H*/

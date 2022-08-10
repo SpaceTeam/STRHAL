@@ -1,14 +1,15 @@
 #ifndef STRHAL_SPI_H
 #define STRHAL_SIP_H
 
-
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include <stdint.h>
 
-typedef enum {
+typedef enum
+{
 	STRHAL_SPI_SPI1 = 0,
 	STRHAL_SPI_SPI2,
 	STRHAL_SPI_SPI3,
@@ -16,7 +17,8 @@ typedef enum {
 	STRHAL_SPI_N_SPI
 } STRHAL_SPI_Id_t;
 
-typedef enum {
+typedef enum
+{
 	STRHAL_SPI_SPI1_SCK_PA5,
 	STRHAL_SPI_SPI1_SCK_PB3,
 
@@ -31,7 +33,8 @@ typedef enum {
 	STRHAL_SPI_N_SCK,
 } STRHAL_SPI_SCKId_t;
 
-typedef enum {
+typedef enum
+{
 	STRHAL_SPI_SPI1_MISO_PA6,
 	STRHAL_SPI_SPI1_MISO_PB4,
 
@@ -44,7 +47,8 @@ typedef enum {
 	STRHAL_SPI_N_MISO,
 } STRHAL_SPI_MISOId_t;
 
-typedef enum {
+typedef enum
+{
 	STRHAL_SPI_SPI1_MOSI_PA7,
 	STRHAL_SPI_SPI1_MOSI_PB5,
 
@@ -57,8 +61,8 @@ typedef enum {
 	STRHAL_SPI_N_MOSI,
 } STRHAL_SPI_MOSIId_t;
 
-
-typedef enum {
+typedef enum
+{
 	STRHAL_SPI_SPI1_NSS_PA4,
 	STRHAL_SPI_SPI1_NSS_PA15,
 
@@ -72,30 +76,32 @@ typedef enum {
 	STRHAL_SPI_N_NSS,
 } STRHAL_SPI_NSSId_t;
 
-
-typedef enum {
+typedef enum
+{
 	STRHAL_SPI_MODE_MASTER,
 	STRHAL_SPI_MODE_SLAVE,
 } STRHAL_SPI_Mode_t;
 
-typedef enum {
-	STRHAL_SPI_CPOL_CPHASE_LL = 0<<0,
-	STRHAL_SPI_CPOL_CPHASE_LH = 1<<0,
-	STRHAL_SPI_CPOL_CPHASE_HL = 1<<1,
-	STRHAL_SPI_CPOL_CPHASE_HH = 1<<1 | 1<<0,
+typedef enum
+{
+	STRHAL_SPI_CPOL_CPHASE_LL = 0 << 0,
+	STRHAL_SPI_CPOL_CPHASE_LH = 1 << 0,
+	STRHAL_SPI_CPOL_CPHASE_HL = 1 << 1,
+	STRHAL_SPI_CPOL_CPHASE_HH = 1 << 1 | 1 << 0,
 } STRHAL_SPI_CPOL_CPHASE_t;
 
-typedef struct {
-	STRHAL_SPI_SCKId_t sck;
-	STRHAL_SPI_MISOId_t miso;
-	STRHAL_SPI_MOSIId_t mosi;
-	STRHAL_SPI_NSSId_t nss;
+typedef struct
+{
+		STRHAL_SPI_SCKId_t sck;
+		STRHAL_SPI_MISOId_t miso;
+		STRHAL_SPI_MOSIId_t mosi;
+		STRHAL_SPI_NSSId_t nss;
 
-	STRHAL_SPI_Mode_t mode;
-	STRHAL_SPI_CPOL_CPHASE_t c_pol_phase : 2;
+		STRHAL_SPI_Mode_t mode;
+		STRHAL_SPI_CPOL_CPHASE_t c_pol_phase :2;
 
-	uint8_t psc : 3;
-	uint8_t lsb_first : 1;
+		uint8_t psc :3;
+		uint8_t lsb_first :1;
 } STRHAL_SPI_Config_t;
 
 void STRHAL_SPI_Init();
