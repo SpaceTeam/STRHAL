@@ -2,12 +2,14 @@
 #define STRHAL_H_
 
 #include <STRHAL_ADC.h>
+#include <STRHAL_I2C.h>
 #include <STRHAL_CAN.h>
 #include <STRHAL_Clock.h>
 #include <STRHAL_GPIO.h>
 #include <STRHAL_Oof.h>
 #include <STRHAL_OPAMP.h>
 #include <STRHAL_QSPI.h>
+#include <STRHAL_I2C.h>
 #include <STRHAL_SPI.h>
 #include <STRHAL_SysTick.h>
 #include <STRHAL_TIM.h>

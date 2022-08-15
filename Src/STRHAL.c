@@ -39,6 +39,7 @@ STRHAL_Oof_t STRHAL_Init(STRHAL_SysClk_Src_t src, uint32_t freq)
 	STRHAL_OPAMP_Init();
 	STRHAL_UART_Init();
 	STRHAL_ADC_Init();
+	STRHAL_I2C_Init();
 	STRHAL_TIM_Init();
 	STRHAL_SPI_Init();
 	_status |= STRHAL_CAN_Init();
