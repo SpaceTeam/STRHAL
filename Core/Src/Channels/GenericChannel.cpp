@@ -4,6 +4,7 @@
 #include <git_version.h>
 
 GenericChannel* GenericChannel::gcPtr = nullptr; // necessary for static callbacks
+Radio* GenericChannel::radioPtr = nullptr; // necessary for static callbacks
 bool GenericChannel::loraActive = false;
 
 GenericChannel::GenericChannel(uint32_t nodeId, uint32_t firmwareVersion, uint32_t refreshDivider) :
@@ -202,7 +203,6 @@ int GenericChannel::getFlashClearInfo(uint8_t *data, uint8_t &n)
 
 int GenericChannel::getNodeInfo(uint8_t *data, uint8_t &n)
 {
-
 	NodeInfoMsg_t *info = (NodeInfoMsg_t*) data;
 
 	info->firmware_version = firmwareVersion;
@@ -396,10 +396,10 @@ void GenericChannel::heartbeatCan()
 		return;
 	}
 
-	if (loraActive && n >= 23)
+	if (loraActive && n >= 0)
 	{
 		Radio::msgArray[Radio::RCU_START_ADDR] = 1;
-		memcpy(&Radio::msgArray[Radio::RCU_START_ADDR + 1], msgData.bit.data.uint8, n - 4);
+		memcpy(&Radio::msgArray[Radio::RCU_START_ADDR + 1], msgData.bit.data.uint8, n);
 	}
 
 #ifdef UART_DEBUG
@@ -417,8 +417,6 @@ void GenericChannel::heartbeatCan()
 
 void GenericChannel::heartbeatLora()
 {
-	//sprintf((char *)radioArray,"hello world");
-	//radio->send(0, radioArray, MSG_SIZE);
-	//char *test = "hello world";
-	//radio->send(0, (uint8_t *) test, MSG_SIZE);
+	if(radioPtr)
+		radioPtr->send(0, Radio::msgArray, Radio::MSG_SIZE);
 }

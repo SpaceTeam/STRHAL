@@ -29,6 +29,10 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		can(Can::instance(node_id)),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
+	// set pointer to radio object for static callbacks, enable Lora
+	radioPtr = &radio;
+	setLoraActive(true);
+
 	registerChannel(&sense_5V);
 	registerChannel(&sense_12V);
 	registerChannel(&baro_channel);
@@ -38,6 +42,9 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&x_gyro);
 	registerChannel(&y_gyro);
 	registerChannel(&z_gyro);
+	registerChannel(&gps_longitude);
+	registerChannel(&gps_latitude);
+	registerChannel(&gps_altitude);
 
 	registerModule(&flash);
 	registerModule(&gnss);
@@ -96,6 +103,8 @@ int RCU::exec()
 
 	LL_mDelay(2000);
 
+	STRHAL_UART_Listen(STRHAL_UART_DEBUG);
+
 #ifdef UART_DEBUG
 	STRHAL_UART_Listen(STRHAL_UART_DEBUG);
 
@@ -146,6 +155,7 @@ int RCU::exec()
 
 		}
 #endif
+
 		if (GenericChannel::exec() != 0)
 			return -1;
 	}

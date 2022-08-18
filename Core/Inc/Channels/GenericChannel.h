@@ -42,6 +42,7 @@ class GenericChannel: public AbstractChannel
 		{ nullptr };
 
 		static GenericChannel* gcPtr;
+		static Radio* radioPtr;
 		static bool loraActive;
 		static void setLoraActive(bool enable);
 		static void heartbeatCan();
