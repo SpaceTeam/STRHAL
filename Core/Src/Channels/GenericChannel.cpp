@@ -85,7 +85,7 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 				channel->reset(); // TODO implement good reset for every channel
 			}
 			return 0;
-		case GENERIC_REQ_FLASH_STATUS:
+		case GENERIC_REQ_FLASH_CLEAR:
 			(void) flash.setState(FlashState::CLEARING);
 			return this->getFlashClearInfo(returnData, n);
 		default:

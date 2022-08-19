@@ -109,9 +109,9 @@ enum class GNSSBaudRate : uint8_t
 
 typedef struct
 {
-		uint16_t longitude;
-		uint16_t latitude;
-		uint16_t altitude;
+		int32_t longitude;
+		int32_t latitude;
+		int32_t altitude;
 } GNSSData_t;
 
 class SAM_M8Q_GNSS: public AbstractModule

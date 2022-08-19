@@ -73,9 +73,9 @@ int SAM_M8Q_GNSS::processData(uint8_t *buffer, uint32_t length)
 				{
 					// Update the timestamp for the last valid solution
 					//status.not_stored.body.gnss_last_fix_timestamp = status.main.body.timestamp;
-					gnssData.longitude = (uint16_t) (position.Longitude >> 16);
-					gnssData.latitude = (uint16_t) (position.Latitude >> 16);
-					gnssData.altitude = (uint16_t) position.Altitude;
+					gnssData.longitude = position.Longitude;
+					gnssData.latitude = position.Latitude;
+					gnssData.altitude = position.Altitude;
 					ret = 1;
 				}
 				else

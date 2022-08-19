@@ -2,6 +2,7 @@
 #define RCU_H
 
 #include <Channels/ADCChannel.h>
+#include <Channels/Data32Channel.h>
 #include <Channels/DigitalOutChannel.h>
 #include <Channels/DigitalInChannel.h>
 #include <Channels/GenericChannel.h>
@@ -42,7 +43,7 @@ class RCU: public GenericChannel
 		ADCChannel sense_5V, sense_12V;
 		BaroChannel baro_channel;
 		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
-		ADCChannel gps_longitude, gps_latitude, gps_altitude;
+		Data32Channel gps_longitude, gps_latitude, gps_altitude;
 
 		// Coms
 		Radio &radio;
