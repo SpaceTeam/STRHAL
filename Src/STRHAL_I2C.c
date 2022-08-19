@@ -76,18 +76,19 @@ int STRHAL_I2C_Instance_Init(STRHAL_I2C_Id_t i2c_id)
 
 	STRHAL_I2C_Handle_t *_i2c = &_i2cs[i2c_id];
 
-	if (STRHAL_I2C_DMA == DMA1)
+	/*if (STRHAL_I2C_DMA == DMA1)
 	{
 		LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 	}
 	else if (STRHAL_I2C_DMA == DMA2)
 	{
 		LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
-	}
+	}*/
 
 	if (i2c_id == STRHAL_I2C3)
 	{
-		LL_RCC_SetI2CClockSource(LL_RCC_I2C3_CLKSOURCE_PCLK1);
+		LL_RCC_SetI2CClockSource(LL_RCC_I2C3_CLKSOURCE_HSI);
+		//LL_RCC_SetI2CClockSource(LL_RCC_I2C3_CLKSOURCE_PCLK1);
 		LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C3);
 	}
 	//else if () TODO Add other I2Cs
@@ -95,7 +96,8 @@ int STRHAL_I2C_Instance_Init(STRHAL_I2C_Id_t i2c_id)
 	LL_I2C_InitTypeDef I2C_InitStruct = {0};
 
 	I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
-	I2C_InitStruct.Timing = 0x00303D5B;
+	//I2C_InitStruct.Timing = 0x00303D5B;
+	I2C_InitStruct.Timing = __LL_I2C_CONVERT_TIMINGS(0x3,0x4,0x2,0xC3,0xC7);
 	I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
 	I2C_InitStruct.DigitalFilter = 0;
 	I2C_InitStruct.OwnAddress1 = 0;
@@ -138,7 +140,7 @@ int32_t STRHAL_I2C_Transmit(STRHAL_I2C_Id_t i2c_id, uint8_t address, uint8_t *da
 	uint32_t tmp = ((uint32_t)(((uint32_t) address & I2C_CR2_SADD) | (((uint32_t) n << I2C_CR2_NBYTES_Pos) & I2C_CR2_NBYTES) | (uint32_t) LL_I2C_MODE_AUTOEND | (uint32_t) LL_I2C_GENERATE_START_WRITE) & (~0x80000000U));
 
 	// Update CR2 for AUTOEND and START GENERATION
-	MODIFY_REG(_i2c->i2c->CR2, ((I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RELOAD | I2C_CR2_AUTOEND | (I2C_CR2_RD_WRN & (uint32_t)(LL_I2C_GENERATE_START_WRITE >> (31U - I2C_CR2_RD_WRN_Pos))) | I2C_CR2_START | I2C_CR2_STOP)), tmp);
+	ATOMIC_MODIFY_REG(_i2c->i2c->CR2, ((I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RELOAD | I2C_CR2_AUTOEND | (I2C_CR2_RD_WRN & (uint32_t)(LL_I2C_GENERATE_START_WRITE >> (31U - I2C_CR2_RD_WRN_Pos))) | I2C_CR2_START | I2C_CR2_STOP)), tmp);
 
 	while(n > 0)
 	{
@@ -176,7 +178,7 @@ int32_t STRHAL_I2C_Receive(STRHAL_I2C_Id_t i2c_id, uint8_t address, uint8_t *dat
 	uint32_t tmp = ((uint32_t)(((uint32_t) address & I2C_CR2_SADD) | (((uint32_t) n << I2C_CR2_NBYTES_Pos) & I2C_CR2_NBYTES) | (uint32_t) LL_I2C_MODE_AUTOEND | (uint32_t) LL_I2C_GENERATE_START_READ) & (~0x80000000U));
 
 	// Update CR2 for AUTOEND and START GENERATION
-	MODIFY_REG(_i2c->i2c->CR2, ((I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RELOAD | I2C_CR2_AUTOEND | (I2C_CR2_RD_WRN & (uint32_t)(LL_I2C_GENERATE_START_READ >> (31U - I2C_CR2_RD_WRN_Pos))) | I2C_CR2_START | I2C_CR2_STOP)), tmp);
+	ATOMIC_MODIFY_REG(_i2c->i2c->CR2, ((I2C_CR2_SADD | I2C_CR2_NBYTES | I2C_CR2_RELOAD | I2C_CR2_AUTOEND | (I2C_CR2_RD_WRN & (uint32_t)(LL_I2C_GENERATE_START_READ >> (31U - I2C_CR2_RD_WRN_Pos))) | I2C_CR2_START | I2C_CR2_STOP)), tmp);
 
 	while(n > 0)
 	{
