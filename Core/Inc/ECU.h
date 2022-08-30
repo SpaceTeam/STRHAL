@@ -29,8 +29,6 @@ class ECU: public GenericChannel
 		void testServo(ServoChannel &servo);
 
 	private:
-		W25Qxx_Flash &flash;
-
 		STRHAL_GPIO_t ledRed, ledGreen;
 
 		// Channels
@@ -42,9 +40,6 @@ class ECU: public GenericChannel
 		DigitalOutChannel solenoid_0, solenoid_1;
 		PressureControlChannel pressure_control;
 		RocketChannel rocket;
-
-		// Coms
-		Can &can;
 
 		Speaker speaker;
 };

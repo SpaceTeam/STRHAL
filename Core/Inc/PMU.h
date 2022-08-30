@@ -24,8 +24,6 @@ class PMU: public GenericChannel
 		int exec() override;
 
 	private:
-		W25Qxx_Flash &flash;
-
 		STRHAL_GPIO_t ledRed, ledGreen;
 		// Modules
 		LPS25HB_Baro baro;
@@ -37,9 +35,6 @@ class PMU: public GenericChannel
 		DigitalOutChannel out0, out1, out2, out3, payload;
 		BaroChannel baro_channel;
 		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
-
-		// Coms
-		Can &can;
 
 		Speaker speaker;
 };

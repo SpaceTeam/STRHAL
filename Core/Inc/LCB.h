@@ -22,10 +22,8 @@ class LCB: public GenericChannel
 		int exec() override;
 
 	private:
-		W25Qxx_Flash &flash;
-
 		STRHAL_GPIO_t ledRed, ledGreen;
-		Can& can;
+
 		Speaker speaker;
 };
 

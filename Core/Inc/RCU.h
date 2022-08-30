@@ -29,8 +29,6 @@ class RCU: public GenericChannel
 		int exec() override;
 
 	private:
-		W25Qxx_Flash &flash;
-
 		STRHAL_GPIO_t ledRed, ledGreen;
 
 		// Modules
@@ -47,7 +45,6 @@ class RCU: public GenericChannel
 
 		// Coms
 		Radio &radio;
-		Can &can;
 
 		Speaker speaker;
 };

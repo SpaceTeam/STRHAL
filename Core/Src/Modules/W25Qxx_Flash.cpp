@@ -8,7 +8,7 @@
 #include <cstring>
 
 W25Qxx_Flash::W25Qxx_Flash() :
-		state(FlashState::IDLE), pageCount(0), sectorCount(0), can(Can::instance(0))
+		state(FlashState::IDLE), pageCount(0), sectorCount(0), can(Can::instance())
 {
 }
 

@@ -5,7 +5,6 @@
 
 PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
-		flash(W25Qxx_Flash::instance()),
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
 		baro(STRHAL_SPI_SPI1,{ STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOA, 3, STRHAL_GPIO_TYPE_IHZ }),
@@ -27,7 +26,6 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		x_gyro(12, &imu, IMUMeasurement::X_GYRO, 1),
 		y_gyro(13, &imu, IMUMeasurement::Y_GYRO,1),
 		z_gyro(14, &imu, IMUMeasurement::Z_GYRO, 1),
-		can(Can::instance(node_id)),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	registerChannel(&sense_5V);

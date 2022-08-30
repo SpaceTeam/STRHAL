@@ -5,7 +5,6 @@
 
 ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
-		flash(W25Qxx_Flash::instance()),
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
 		press_0(0,{ ADC2, STRHAL_ADC_CHANNEL_15 }, 1),
@@ -29,7 +28,6 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		solenoid_0(18,{ ADC2, STRHAL_ADC_CHANNEL_16 },{ GPIOD, 9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		solenoid_1(19,{ ADC2, STRHAL_ADC_CHANNEL_18 },{ GPIOD, 8, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		pressure_control(20, press_1, solenoid_0, 1), rocket(22, press_1, press_0, press_2, servo_0, servo_2, pyro_igniter0, pyro_igniter2, 1),
-		can(Can::instance(node_id)),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	registerChannel(&press_0);

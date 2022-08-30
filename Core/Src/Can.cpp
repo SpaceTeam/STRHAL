@@ -29,6 +29,8 @@ int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat)
 
 int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode)
 {
+	if(nodeId == 0)
+		return -1;
 
 	standardReceptor = receptor;
 
@@ -49,7 +51,7 @@ int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode)
 		Can_MessageId_t mask =
 		{ 0 };
 		mask.info.direction = 0x1;
-		mask.info.node_id = 0x1F;
+		mask.info.node_id = 0x3F;
 		mask.info.special_cmd = 0x3;
 
 		Can_MessageId_t id =

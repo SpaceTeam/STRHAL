@@ -118,8 +118,8 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time)
 			oxServoChannel.setTargetPos(0);
 			break;
 		case DEPRESS:
-			if (chamberPressureChannel.getMeasurement() > chamberPressureMin)
-				return; // do not set next state to DEPRESS if there is still combustion going on
+			//if (chamberPressureChannel.getMeasurement() > chamberPressureMin)
+				//return; // do not set next state to DEPRESS if there is still combustion going on
 
 			fuelServoChannel.setTargetPos(65000);
 			oxServoChannel.setTargetPos(65000);
@@ -301,7 +301,13 @@ ROCKET_STATE RocketChannel::abort(uint64_t time)
 int RocketChannel::reset()
 {
 	externalNextState = PAD_IDLE;
+	internalNextState = PAD_IDLE;
 	ignitionState = IgnitionSequence::INIT;
+	chamberPressureMin = 0;
+	chamberPressureLowCounter = 0;
+	chamberPressureGoodCounter = 0;
+	autoCheckBadCounter = 0;
+	state = PAD_IDLE;
 	return 0;
 }
 

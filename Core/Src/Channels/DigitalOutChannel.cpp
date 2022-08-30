@@ -12,10 +12,10 @@ DigitalOutChannel::DigitalOutChannel(uint8_t id, const STRHAL_GPIO_t &cntrlPin, 
 
 int DigitalOutChannel::init()
 {
+	STRHAL_GPIO_SingleInit(&cntrlPin, STRHAL_GPIO_TYPE_OPP);
 	if (hasFeedback)
 	{
 		adcMeasurement = STRHAL_ADC_SubscribeChannel(&adcChannel, adcInType);
-		STRHAL_GPIO_SingleInit(&cntrlPin, STRHAL_GPIO_TYPE_OPP);
 
 		if (adcMeasurement == nullptr)
 			return -1;
