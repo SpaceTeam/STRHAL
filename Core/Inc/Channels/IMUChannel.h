@@ -2,14 +2,14 @@
 #define IMUSINGLECHANNEL_H
 
 #include "./Channels/AbstractChannel.h"
-#include "../Modules/ICM20602_IMU.h"
 #include <can_houbolt/channels/adc16_channel_def.h>
+#include <Modules/ICM2060x_IMU.h>
 #include <STRHAL.h>
 
 class IMUChannel: public AbstractChannel
 {
 	public:
-		IMUChannel(uint8_t id, ICM20602_IMU *imu, IMUMeasurement measurementType, uint32_t refreshDivider);
+		IMUChannel(uint8_t id, ICM2060x_IMU *imu, IMUMeasurement measurementType, uint32_t refreshDivider);
 		IMUChannel(const IMUChannel &other) = delete;
 		IMUChannel& operator=(const IMUChannel &other) = delete;
 		IMUChannel(const IMUChannel &&other) = delete;
@@ -28,7 +28,7 @@ class IMUChannel: public AbstractChannel
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		ICM20602_IMU *imu;
+		ICM2060x_IMU *imu;
 		IMUMeasurement measurementType;
 		uint64_t timeLastSample = 0;
 

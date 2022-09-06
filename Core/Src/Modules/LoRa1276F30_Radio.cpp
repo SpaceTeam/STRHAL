@@ -115,10 +115,10 @@ bool LoRa1276F30_Radio::sendBytes(uint8_t *buffer, uint8_t n)
 	 STRHAL_UART_Write_DMA(STRHAL_UART_DEBUG, (char *) &stat, 1);*/
 
 	if (!setModulationParams())
-		return -1;
+		return false;
 	waitForBusy();
 	if (!setPacketParams())
-		return -1;
+		return false;
 	waitForBusy();
 
 	//uint8_t txModReg = getReg(LoraAddr::TX_MODULATION);
@@ -127,7 +127,7 @@ bool LoRa1276F30_Radio::sendBytes(uint8_t *buffer, uint8_t n)
 	//return -1;
 	//waitForBusy();
 	if (!setTx())
-		return -1;
+		return false;
 	waitForBusy();
 
 	uint8_t state = 0;

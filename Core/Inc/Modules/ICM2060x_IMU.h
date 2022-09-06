@@ -1,5 +1,5 @@
-#ifndef ICM20602_IMU_H
-#define ICM20602_IMU_H
+#ifndef ICM2060X_IMU_H
+#define ICM2060X_IMU_H
 
 #include <STRHAL.h>
 #include "./Modules/AbstractModule.h"
@@ -41,10 +41,10 @@ enum class IMUAddr : uint8_t
 	WHO_AM_I = 0x75,
 };
 
-class ICM20602_IMU: public AbstractModule
+class ICM2060x_IMU: public AbstractModule
 {
 	public:
-		ICM20602_IMU(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin);
+		ICM2060x_IMU(const STRHAL_SPI_Id_t &spiId, const STRHAL_SPI_Config_t &spiConf, const STRHAL_GPIO_t &dataReadyPin, uint8_t deviceID);
 
 		int init() override;
 		int exec() override;
@@ -59,7 +59,7 @@ class ICM20602_IMU: public AbstractModule
 		static constexpr uint32_t BUF_DATA_SIZE = 16;
 		static constexpr uint8_t READ_BIT = 0x80;
 
-		static constexpr uint64_t EXEC_SAMPLE_TICKS = 5;
+		static constexpr uint64_t EXEC_SAMPLE_TICKS = 10;
 	private:
 		bool readReg(const IMUAddr &address, uint8_t *reg, uint8_t n = 0);
 		bool writeReg(const IMUAddr &address, uint8_t reg, uint16_t delay = 0);
@@ -67,6 +67,7 @@ class ICM20602_IMU: public AbstractModule
 		STRHAL_SPI_Id_t spiId;
 		STRHAL_SPI_Config_t spiConf;
 		const STRHAL_GPIO_t dataReadyPin;
+		uint8_t deviceID;
 
 		IMUData measData[BUF_DATA_SIZE] =
 		{ 0 };
@@ -77,4 +78,4 @@ class ICM20602_IMU: public AbstractModule
 
 };
 
-#endif /*ICM20602_IMU_H*/
+#endif /*ICM2060X_IMU_H*/

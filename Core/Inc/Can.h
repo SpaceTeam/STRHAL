@@ -20,7 +20,7 @@ class Can: public AbstractCom
 		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode);
 		int exec() override;
 
-		int send(uint32_t id, uint8_t *data, uint8_t n) override;
+		static int send(uint32_t id, uint8_t *data, uint8_t n);
 		void sendAsMaster(uint8_t receiverNodeId, uint8_t receiverChannelId, uint8_t commandId, uint8_t *data, uint8_t n);
 
 	private:

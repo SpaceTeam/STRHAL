@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstring>
 
-IMUChannel::IMUChannel(uint8_t id, ICM20602_IMU *imu, IMUMeasurement measurementType, uint32_t refreshDivider) :
+IMUChannel::IMUChannel(uint8_t id, ICM2060x_IMU *imu, IMUMeasurement measurementType, uint32_t refreshDivider) :
 		AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), imu(imu), measurementType(measurementType)
 {
 }

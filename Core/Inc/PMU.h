@@ -27,7 +27,7 @@ class PMU: public GenericChannel
 		STRHAL_GPIO_t ledRed, ledGreen;
 		// Modules
 		LPS25HB_Baro baro;
-		ICM20602_IMU imu;
+		ICM2060x_IMU imu;
 
 		// Channels
 		ADCChannel sense_5V, sense_5VP, sense_12V;

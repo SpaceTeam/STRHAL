@@ -19,7 +19,7 @@ class Radio: public AbstractCom
 		int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) override;
 		int exec() override;
 
-		int send(uint32_t id, uint8_t *data, uint8_t n) override;
+		static int send(uint32_t id, uint8_t *data, uint8_t n);
 
 		static constexpr uint32_t MSG_SIZE = 118;
 		static constexpr uint8_t ECU_START_ADDR = 0;

@@ -44,5 +44,8 @@ int Radio::exec()
 
 int Radio::send(uint32_t id, uint8_t *data, uint8_t n)
 {
-	return (lora->sendBytes(data, n)) ? 0 : -1;
+	if(lora)
+		return (lora->sendBytes(data, n)) ? 0 : -1;
+	else
+		return -1;
 }

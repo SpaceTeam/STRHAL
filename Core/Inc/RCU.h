@@ -33,7 +33,7 @@ class RCU: public GenericChannel
 
 		// Modules
 		LPS25HB_Baro baro;
-		ICM20602_IMU imu;
+		ICM2060x_IMU imu;
 		LoRa1276F30_Radio lora;
 		SAM_M8Q_GNSS gnss;
 

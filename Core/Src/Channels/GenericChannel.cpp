@@ -4,7 +4,6 @@
 #include <git_version.h>
 
 GenericChannel* GenericChannel::gcPtr = nullptr; // necessary for static callbacks
-Radio* GenericChannel::radioPtr = nullptr; // necessary for static callbacks
 bool GenericChannel::loraActive = false;
 
 GenericChannel::GenericChannel(uint32_t nodeId, uint32_t firmwareVersion, uint32_t refreshDivider) :
@@ -420,6 +419,5 @@ void GenericChannel::heartbeatCan()
 
 void GenericChannel::heartbeatLora()
 {
-	if(radioPtr)
-		radioPtr->send(0, Radio::msgArray, Radio::MSG_SIZE);
+	Radio::send(0, Radio::msgArray, Radio::MSG_SIZE);
 }

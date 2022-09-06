@@ -40,7 +40,7 @@ int SAM_M8Q_GNSS::exec()
 	int32_t gnssRet = STRHAL_UART_Read(STRHAL_UART1, (char*) gnssBuf, 64);
 	if (gnssRet > 0)
 	{
-		STRHAL_UART_Debug_Write_Blocking((char*) gnssBuf, strlen((char*) gnssBuf), 100);
+		//STRHAL_UART_Debug_Write_Blocking((char*) gnssBuf, strlen((char*) gnssBuf), 100);
 		processData(gnssBuf, gnssRet);
 	}
 	return 0;
@@ -171,7 +171,10 @@ int SAM_M8Q_GNSS::waitForACK(uint32_t delay)
 		uint16_t received = STRHAL_UART_Read(uartId, (char*) &c, 1);
 		if (received > 0)
 		{
+			//char buf[32] = { 0 };
 			ret = Ubx::parseStream(c, gps_rx_buff, &gpsPosition, &gpsRxStats, 0);
+			//sprintf(buf,"%d %d\n", c, ret);
+			//STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 100);
 			switch (ret)
 			{
 				case PARSER_COMPLETE_ACK:
@@ -199,7 +202,7 @@ int SAM_M8Q_GNSS::enableMessage(uint8_t msgClass, uint8_t msgId, uint8_t rate)
 			msgId,                 // id
 			rate,                  // rate
 			};
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::setMessageRate(uint16_t msPeriod)
@@ -215,7 +218,7 @@ int SAM_M8Q_GNSS::setMessageRate(uint16_t msPeriod)
 			0x01,                  // cycles
 			0x00, 0x01,                  // timeref 1 = GPS time
 			0x00, };
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::setMode(GNSSDynamicsMode mode)
@@ -257,7 +260,7 @@ int SAM_M8Q_GNSS::setMode(GNSSDynamicsMode mode)
 			0x02,                  // fixmode (2 - 3D only)
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,       // padded with 32 zeros
 			};
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::setTimepulse()
@@ -282,7 +285,7 @@ int SAM_M8Q_GNSS::setTimepulse()
 			0x00, 0x00,            // rf group delay
 			0, 0, 0, 0             // user delay
 			};
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::setSbas(GNSSSbasConstellation sbas)
@@ -322,14 +325,14 @@ int SAM_M8Q_GNSS::setSbas(GNSSSbasConstellation sbas)
 			0b011,           // mode
 			3,               // # SBAS tracking channels
 			0, (uint8_t) sv_mask, (uint8_t) (sv_mask >> 8), (uint8_t) (sv_mask >> 16), (uint8_t) (sv_mask >> 24), };
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::pollVersion()
 {
 	const uint8_t msg[] =
 	{ UBLOX_MON_CLASS, UBLOX_MON_VER, 0x00, 0x00 };
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::setConstellation(GNSSConstellation constellation, GNSSSbasConstellation sbas)
@@ -412,7 +415,7 @@ int SAM_M8Q_GNSS::setConstellation(GNSSConstellation constellation, GNSSSbasCons
 			enable_glonass,  // flags, 1 here means enable
 			0, enable_glonass,  // flags, sigcfgmask, GLONASS L1OF
 			enable_glonass };
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }
 
 int SAM_M8Q_GNSS::clearConfig()
@@ -430,5 +433,5 @@ int SAM_M8Q_GNSS::clearConfig()
 			0, 0, 0, 0          // save mask
 			};
 
-	return sendConfigDataChecksummed(msg, sizeof(msg), 2);
+	return sendConfigDataChecksummed(msg, sizeof(msg), 5);
 }

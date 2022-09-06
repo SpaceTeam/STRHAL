@@ -19,7 +19,7 @@ class AbstractCom
 		AbstractCom(uint32_t nodeId);
 		virtual int init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat) = 0;
 		virtual int exec() = 0;
-		virtual int send(uint32_t id, uint8_t *data, uint8_t n) = 0;
+		//virtual int send(uint32_t id, uint8_t *data, uint8_t n) = 0;
 
 	protected:
 		uint32_t nodeId;

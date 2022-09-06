@@ -9,7 +9,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
 		baro(STRHAL_SPI_SPI1,{ STRHAL_SPI_SPI1_SCK_PA5, STRHAL_SPI_SPI1_MISO_PA6, STRHAL_SPI_SPI1_MOSI_PA7, STRHAL_SPI_SPI1_NSS_PA4, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOA, 3, STRHAL_GPIO_TYPE_IHZ }),
-		imu(STRHAL_SPI_SPI3,{ STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOD, 0, STRHAL_GPIO_TYPE_IHZ }),
+		imu(STRHAL_SPI_SPI3,{ STRHAL_SPI_SPI3_SCK_PC10, STRHAL_SPI_SPI3_MISO_PC11, STRHAL_SPI_SPI3_MOSI_PC12, STRHAL_SPI_SPI3_NSS_PA15, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_HH, 0x7, 0 },{ GPIOD, 0, STRHAL_GPIO_TYPE_IHZ }, 0xAF),
 		lora(STRHAL_SPI_SPI2,{ STRHAL_SPI_SPI2_SCK_PB13, STRHAL_SPI_SPI2_MISO_PB14, STRHAL_SPI_SPI2_MOSI_PB15, STRHAL_SPI_SPI2_NSS_PB12, STRHAL_SPI_MODE_MASTER, STRHAL_SPI_CPOL_CPHASE_LL, 0x7, 0 },{ GPIOC, 1, STRHAL_GPIO_TYPE_IHZ },{ GPIOC, 3, STRHAL_GPIO_TYPE_IHZ },{ GPIOB, 11, STRHAL_GPIO_TYPE_IHZ }),
 		gnss(STRHAL_UART1,{ GPIOC, 7, STRHAL_GPIO_TYPE_OPP }),
 		sense_5V(0,{ ADC1, STRHAL_ADC_CHANNEL_2 }, 1),
@@ -28,7 +28,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	// set pointer to radio object for static callbacks, enable Lora
-	radioPtr = &radio;
+	//GenericChannel::radioPtr = &radio; <- this might cause hardfault later on
 	setLoraActive(true);
 
 	registerChannel(&sense_5V);
@@ -45,9 +45,9 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&gps_altitude);
 
 	registerModule(&flash);
-	registerModule(&gnss);
+	//registerModule(&gnss);
 	registerModule(&baro);
-	//registerModule(&imu);
+	registerModule(&imu);
 
 }
 
@@ -111,6 +111,7 @@ int RCU::exec()
 	uint8_t bufIndex = 0;
 	bool msgStarted = false;
 #endif
+	uint64_t prevTime = STRHAL_Systick_GetTick();
 	while (1)
 	{
 		//detectReadoutMode();
@@ -153,6 +154,24 @@ int RCU::exec()
 
 		}
 #endif
+		if(STRHAL_Systick_GetTick() - prevTime > 1000)
+		{
+			prevTime = STRHAL_Systick_GetTick();
+			/*
+			char buf[64] = { 0 };
+			uint16_t measurement = 0;
+			imu.getMeasurement(measurement, IMUMeasurement::X_ACCEL);
+			sprintf(buf, "%d\n", measurement);
+			STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 100);
+			*/
+			/*
+			SetMsg_t setMsg =
+			{ 0 };
+			setMsg.variable_id = 1; // servo target position
+			setMsg.value = 1; // open servo
+			can.sendAsMaster(8, 1, 4, (uint8_t*) &setMsg, 5 + sizeof(uint32_t));
+			*/
+		}
 
 		if (GenericChannel::exec() != 0)
 			return -1;
