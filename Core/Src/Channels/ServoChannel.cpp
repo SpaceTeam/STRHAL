@@ -23,6 +23,7 @@ int ServoChannel::init()
 	if (STRHAL_TIM_PWM_AddChannel(&pwmChannel, ctrlChannelId, STRHAL_TIM_PWM_CHANNELTYPE_SO) < 0)
 		return -1;
 
+
 	feedbackMeasurement = STRHAL_ADC_SubscribeChannel(&feedbackChannel, STRHAL_ADC_INTYPE_REGULAR);
 	currentMeasurement = STRHAL_ADC_SubscribeChannel(&currentChannel, STRHAL_ADC_INTYPE_REGULAR);
 
@@ -36,6 +37,15 @@ int ServoChannel::init()
 	adcRef.end = flash.readConfigReg(configAddrStart + 1);
 	pwmRef.start = flash.readConfigReg(configAddrStart + 2);
 	pwmRef.end = flash.readConfigReg(configAddrStart + 3);
+
+	if (pwmRef.start == 0 && pwmRef.end == 0) // flash never written -> init default
+	{
+		uint32_t vals[4] =
+		{ (uint32_t) adc0Ref.start, (uint32_t) adc0Ref.end, (uint32_t) pwm0Ref.start, (uint32_t) pwm0Ref.end };
+		flash.writeConfigRegsFromAddr(SERVOCONFIG_OFFSET + servoId * SERVOCONFIG_N_EACH, vals, 4);
+		adcRef = adc0Ref;
+		pwmRef = pwm0Ref;
+	}
 
 	if (feedbackMeasurement == nullptr || currentMeasurement == nullptr)
 		return -1;
