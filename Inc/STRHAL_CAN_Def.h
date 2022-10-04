@@ -64,8 +64,8 @@ extern "C" {
 #define FDCAN_DATA_TIMESEG_1			2
 #define FDCAN_DATA_TIMESEG_2			2
 
-#define FDCAN_TDC_OFFSET				5
-#define FDCAN_TDC_FILTER				0
+#define FDCAN_TDC_OFFSET				3
+#define FDCAN_TDC_FILTER				4
 
 //#define FDCAN_MESSAGE_RAM_BASE		((uint32_t)0x4000AC00U)
 #define FDCAN_MESSAGE_RAM_BASE		SRAMCAN_BASE
