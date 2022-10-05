@@ -27,7 +27,8 @@ ECU::ECU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		pyro_igniter2(16,{ ADC3, STRHAL_ADC_CHANNEL_4 },{ GPIOC, 7, STRHAL_GPIO_TYPE_OPP }, pyro2_cont, 1),
 		solenoid_0(18,{ ADC2, STRHAL_ADC_CHANNEL_16 },{ GPIOD, 9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		solenoid_1(19,{ ADC2, STRHAL_ADC_CHANNEL_18 },{ GPIOD, 8, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
-		pressure_control(20, press_1, solenoid_0, 1), rocket(22, press_1, press_0, press_2, servo_0, servo_2, pyro_igniter0, pyro_igniter2, 1),
+		pressure_control(20, press_1, solenoid_0, 1),
+		rocket(22, press_1, press_0, press_2, servo_1, servo_2, pyro_igniter0, pyro_igniter1, 1),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
 	registerChannel(&press_0);
@@ -141,6 +142,7 @@ int ECU::exec()
 #endif
 		if (GenericChannel::exec() != 0)
 			return -1;
+
 	}
 
 	speaker.beep(6, 100, 100);

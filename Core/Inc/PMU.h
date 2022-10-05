@@ -30,9 +30,9 @@ class PMU: public GenericChannel
 		ICM2060x_IMU imu;
 
 		// Channels
-		ADCChannel sense_5V, sense_5VP, sense_12V;
-		//DigitalInChannel umbilical, charging;
-		DigitalOutChannel out0, out1, out2, out3, payload;
+		ADCChannel sense_5V, sense_5VP, sense_12V, sense_battery, sense_pyro, sense_suppy_current;
+		DigitalInChannel umbilical, charging;
+		DigitalOutChannel chargingEna, out0, out1, out2, out3, payload;
 		BaroChannel baro_channel;
 		IMUChannel x_accel, y_accel, z_accel, x_gyro, y_gyro, z_gyro;
 

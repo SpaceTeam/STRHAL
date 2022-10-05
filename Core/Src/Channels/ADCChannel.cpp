@@ -48,8 +48,11 @@ int ADCChannel::getSensorData(uint8_t *data, uint8_t &n)
 	*out = *adcMeasurement << 4; // shift it to 16bit full scale
 
 	/*char buf[32];
-	 sprintf(buf,"%d\n",*adcMeasurement);
-	 STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 100);*/
+	if (channelId == 1)
+	{
+	 sprintf(buf,"%d\n", *adcMeasurement);
+	 STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 100);
+	}*/
 	n += ADC16_DATA_N_BYTES;
 	return 0;
 }

@@ -25,7 +25,7 @@ int main(void)
 #ifdef UART_DEBUG
 	PMU pmu(7,GIT_COMMIT_HASH_VALUE,100);
 #else
-	PMU pmu(7,GIT_COMMIT_HASH_VALUE,1);
+	PMU pmu(7,GIT_COMMIT_HASH_VALUE,2);
 #endif
 	if(pmu.init() != 0)
 			return -1;
@@ -36,7 +36,7 @@ int main(void)
 #ifdef UART_DEBUG
 	RCU rcu(8,GIT_COMMIT_HASH_VALUE,100);
 #else
-	RCU rcu(8, GIT_COMMIT_HASH_VALUE, 1);
+	RCU rcu(8, GIT_COMMIT_HASH_VALUE, 2);
 #endif
 
 	if (rcu.init() != 0)

@@ -45,7 +45,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 	registerChannel(&gps_altitude);
 
 	registerModule(&flash);
-	//registerModule(&gnss);
+	registerModule(&gnss);
 	registerModule(&baro);
 	registerModule(&imu);
 

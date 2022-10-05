@@ -35,6 +35,7 @@ class AbstractChannel
 		const CHANNEL_TYPE channelType;
 		const uint8_t channelId;
 		CHANNEL_STATUS channelStatus;
+
 };
 
 #endif /*ABSTRACTCHANNEL_H*/

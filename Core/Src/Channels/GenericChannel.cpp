@@ -71,6 +71,7 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 	switch (commandId)
 	{
 		case GENERIC_REQ_NODE_INFO:
+			LL_mDelay(100*this->nodeId);
 			return this->getNodeInfo(returnData, n);
 		case GENERIC_REQ_DATA:
 			return this->getSensorData(returnData, n);

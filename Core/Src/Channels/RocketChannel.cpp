@@ -70,7 +70,7 @@ ROCKET_STATE RocketChannel::currentStateLogic(uint64_t time)
 			return poweredAscent(time);
 		case UNPOWERED_ASCENT:
 			// wait until end of flight command from PMU2
-			if (time - timeLastTransition > 10000)
+			if (time - timeLastTransition > 1000)
 			{
 				return DEPRESS;
 			}
@@ -115,7 +115,7 @@ void RocketChannel::nextStateLogic(ROCKET_STATE nextState, uint64_t time)
 		}
 		case UNPOWERED_ASCENT:
 			//fuelServoChannel.setTargetPos(0);
-			oxServoChannel.setTargetPos(0);
+			//oxServoChannel.setTargetPos(0);
 			break;
 		case DEPRESS:
 			//if (chamberPressureChannel.getMeasurement() > chamberPressureMin)
@@ -176,15 +176,15 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time)
 				ignitionState = IgnitionSequence::IGNITION0_ON;
 			}
 			break;
-		case IgnitionSequence::IGNITION0_ON: // T-2.5 - Ignition
-			if (time - timeLastTransition > 7500)
+		case IgnitionSequence::IGNITION0_ON: // T-1.5 - Ignition
+			if (time - timeLastTransition > 8500)
 			{
 				(void) igniter0Channel.setState(65000);
 				ignitionState = IgnitionSequence::IGNITION1_ON;
 			}
 			break;
-		case IgnitionSequence::IGNITION1_ON: // T-1.5 - Ignition
-			if (time - timeLastTransition > 8500)
+		case IgnitionSequence::IGNITION1_ON: // T-0.5 - Ignition
+			if (time - timeLastTransition > 9500)
 			{
 				(void) igniter1Channel.setState(65000);
 				ignitionState = IgnitionSequence::T_0;
@@ -193,16 +193,18 @@ ROCKET_STATE RocketChannel::ignitionSequence(uint64_t time)
 		case IgnitionSequence::T_0: // T - Valves to 0
 			if (time - timeLastTransition > 10000)
 			{
-				fuelServoChannel.setTargetPos(19000);
-				oxServoChannel.setTargetPos(30000);
+				fuelServoChannel.setTargetPos(20000);
+				//oxServoChannel.setTargetPos(30000);
+				oxServoChannel.setTargetPos(22000);
 				ignitionState = IgnitionSequence::VALVES_SLOWLY_OPEN;
 			}
 			break;
 		case IgnitionSequence::VALVES_SLOWLY_OPEN: // T+0.5 -> T+1.2 Slowly move valves across the opening point (fuel: 22000, ox: 33000)
 			if (time - timeLastTransition > 10500)
 			{
-				fuelServoChannel.moveToPosInInterval(32000, 700);
-				oxServoChannel.moveToPosInInterval(43000, 700);
+				fuelServoChannel.moveToPosInInterval(35000, 700);
+				//oxServoChannel.moveToPosInInterval(43000, 700);
+				oxServoChannel.moveToPosInInterval(35000, 700);
 				ignitionState = IgnitionSequence::VALVES_FULLY_OPEN;
 			}
 			break;
@@ -265,8 +267,30 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time)
 	}
 	else
 	{
-		if (chamberPressureChannel.getMeasurement() >= chamberPressureMin)
+		//if (chamberPressureChannel.getMeasurement() >= chamberPressureMin)
+		//{
+		//	return POWERED_ASCENT;
+		//}
+		if (chamberPressureChannel.getMeasurement() < chamberPressureMin)
+		{ // if holddown timeout has passed, still check for chamber pressure
+			chamberPressureGoodCounter = 0;
+			chamberPressureLowCounter++;
+		}
+		else
 		{
+			chamberPressureLowCounter = 0;
+			chamberPressureGoodCounter++;
+		}
+
+		// if either event (low or good pressure) occurs exclusively for a specified amount of times -> abort (low)/release(good)
+		if (chamberPressureLowCounter > CHAMBER_PRESSURE_LOW_COUNT_MAX)
+		{
+			//return ABORT; do not abort in test environment
+		}
+
+		if (chamberPressureGoodCounter > CHAMBER_PRESSURE_GOOD_COUNT_MIN)
+		{
+			//TODO calibrate holddown servo
 			return POWERED_ASCENT;
 		}
 	}
@@ -276,7 +300,7 @@ ROCKET_STATE RocketChannel::holddown(uint64_t time)
 
 ROCKET_STATE RocketChannel::poweredAscent(uint64_t time)
 {
-	if (time - timeLastTransition > 3500)
+	if (time - timeLastTransition > 8500)
 	{ // motor burnout, close valves, IMPORTANT!: total burn time before shutoff is powered + unpowered ascent
 		return UNPOWERED_ASCENT;
 	}

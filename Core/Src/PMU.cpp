@@ -12,27 +12,35 @@ PMU::PMU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		sense_5V(0,{ ADC2, STRHAL_ADC_CHANNEL_5 }, 1),
 		sense_5VP(1,{ ADC1, STRHAL_ADC_CHANNEL_9 }, 1),
 		sense_12V(2,{ ADC2, STRHAL_ADC_CHANNEL_11 }, 1),
-		//umbilical(3, {GPIOA, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
-		//charging(4, {GPIOA, 9, STRHAL_GPIO_TYPE_IHZ}, 1),
-		out0(3,{ GPIOC, 6, STRHAL_GPIO_TYPE_OPP }, 1),
-		out1(4,{ GPIOC, 7, STRHAL_GPIO_TYPE_OPP }, 1),
-		out2(5,{ GPIOC, 8, STRHAL_GPIO_TYPE_OPP }, 1),
-		out3(6,{ GPIOC, 9, STRHAL_GPIO_TYPE_OPP }, 1),
-		payload(7,{ GPIOC, 1, STRHAL_GPIO_TYPE_OPP }, 1),
-		baro_channel(8, baro, 1),
-		x_accel(9, &imu, IMUMeasurement::X_ACCEL, 1),
-		y_accel(10, &imu, IMUMeasurement::Y_ACCEL, 1),
-		z_accel(11, &imu, IMUMeasurement::Z_ACCEL, 1),
-		x_gyro(12, &imu, IMUMeasurement::X_GYRO, 1),
-		y_gyro(13, &imu, IMUMeasurement::Y_GYRO,1),
-		z_gyro(14, &imu, IMUMeasurement::Z_GYRO, 1),
+		sense_battery(3,{ ADC1, STRHAL_ADC_CHANNEL_8 }, 1),
+		sense_pyro(4,{ ADC3, STRHAL_ADC_CHANNEL_7 }, 1),
+		sense_suppy_current(5,{ ADC3, STRHAL_ADC_CHANNEL_2 }, 1),
+		umbilical(6, {GPIOA, 8, STRHAL_GPIO_TYPE_IHZ}, 1),
+		charging(7, {GPIOA, 9, STRHAL_GPIO_TYPE_IHZ}, 1),
+		chargingEna(8,{ GPIOA, 10, STRHAL_GPIO_TYPE_OPP }, 1),
+		out0(9,{ GPIOC, 6, STRHAL_GPIO_TYPE_OPP }, 1),
+		out1(10,{ GPIOC, 7, STRHAL_GPIO_TYPE_OPP }, 1),
+		out2(11,{ GPIOC, 8, STRHAL_GPIO_TYPE_OPP }, 1),
+		out3(12,{ GPIOC, 9, STRHAL_GPIO_TYPE_OPP }, 1),
+		payload(13,{ GPIOC, 1, STRHAL_GPIO_TYPE_OPP }, 1),
+		baro_channel(14, baro, 1),
+		x_accel(15, &imu, IMUMeasurement::X_ACCEL, 1),
+		y_accel(16, &imu, IMUMeasurement::Y_ACCEL, 1),
+		z_accel(17, &imu, IMUMeasurement::Z_ACCEL, 1),
+		x_gyro(18, &imu, IMUMeasurement::X_GYRO, 1),
+		y_gyro(19, &imu, IMUMeasurement::Y_GYRO,1),
+		z_gyro(20, &imu, IMUMeasurement::Z_GYRO, 1),
 		speaker(STRHAL_TIM_TIM2, STRHAL_TIM_TIM2_CH3_PB10)
 {
-	registerChannel(&sense_5V);
-	registerChannel(&sense_5VP);
-	registerChannel(&sense_12V);
-	//registerChannel(&umbilical);
-	//registerChannel(&charging);
+	registerChannel(&sense_5V); // 2*x in Volts
+	registerChannel(&sense_5VP); // 2*x in Volts
+	registerChannel(&sense_12V); // 6.6*x in Volts
+	registerChannel(&sense_battery); // 6.6*x in Volts
+	registerChannel(&sense_pyro); // 6.6*x in Volts
+	registerChannel(&sense_suppy_current); // 10000*x in mA
+	registerChannel(&umbilical); // if LOW -> valid input voltage present
+	registerChannel(&charging); // if LOW -> normal charging in progress
+	registerChannel(&chargingEna);
 	registerChannel(&out0);
 	registerChannel(&out1);
 	registerChannel(&out2);
