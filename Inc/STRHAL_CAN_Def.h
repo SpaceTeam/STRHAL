@@ -77,7 +77,7 @@ extern "C"
 
 #define FDCAN_TDC_OFFSET				5
 //#define FDCAN_TDC_OFFSET				5
-#define FDCAN_TDC_FILTER				0
+#define FDCAN_TDC_FILTER				8
 
 // From HAL driver
 #define SRAMCAN_FLS_NBR                  (28U)         /* Max. Filter List Standard Number      */
