@@ -91,8 +91,8 @@ bool ICM2060x_IMU::measurementReady()
 
 int ICM2060x_IMU::read()
 {
-	uint8_t i = (measDataTail + measDataNum) % BUF_DATA_SIZE;
-
+	//uint8_t i = (measDataTail + measDataNum) % BUF_DATA_SIZE;
+	uint8_t i = 0;
 	uint8_t tmp[6];
 
 	if (!readReg(IMUAddr::ACCEL_XOUT_H, &tmp[0], 6))
@@ -126,7 +126,8 @@ int ICM2060x_IMU::read()
 
 void ICM2060x_IMU::getMeasurement(uint16_t &measurement, IMUMeasurement measurementType)
 {
-	IMUData allMeasurements = measData[measDataTail];
+	//IMUData allMeasurements = measData[measDataTail];
+	IMUData allMeasurements = measData[0];
 	switch (measurementType)
 	{
 		case IMUMeasurement::X_ACCEL:

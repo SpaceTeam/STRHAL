@@ -95,15 +95,15 @@ int Can::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat, COMMode mode)
 
 		Can_MessageId_t id3 =
 		{ 0 };
-		id2.info.direction = NODE2MASTER_DIRECTION;
-		id2.info.special_cmd = STANDARD_SPECIAL_CMD;
-		id2.info.node_id = 6;
+		id3.info.direction = NODE2MASTER_DIRECTION;
+		id3.info.special_cmd = STANDARD_SPECIAL_CMD;
+		id3.info.node_id = 6;
 
 		Can_MessageId_t id4 =
 		{ 0 };
-		id2.info.direction = NODE2MASTER_DIRECTION;
-		id2.info.special_cmd = STANDARD_SPECIAL_CMD;
-		id2.info.node_id = 7;
+		id4.info.direction = NODE2MASTER_DIRECTION;
+		id4.info.special_cmd = STANDARD_SPECIAL_CMD;
+		id4.info.node_id = 7;
 
 		STRHAL_FDCAN_Filter_t mainFilter[] =
 		{
@@ -207,7 +207,8 @@ void Can::bridgeReceptor(STRHAL_FDCAN_Id_t bus_id, uint32_t id, uint8_t *data, u
 
 void Can::internalReceptor(uint32_t id, uint8_t *data, uint32_t n)
 {
-	Can::bridgeReceptor(STRHAL_FDCAN2, id, data, n);
+	//Can::bridgeReceptor(STRHAL_FDCAN2, id, data, n);
+	STRHAL_CAN_Send(STRHAL_FDCAN2, id, data, n);
 }
 
 void Can::externalReceptor(uint32_t id, uint8_t *data, uint32_t n)

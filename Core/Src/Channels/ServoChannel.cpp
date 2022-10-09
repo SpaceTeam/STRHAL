@@ -45,6 +45,9 @@ int ServoChannel::init()
 		flash.writeConfigRegsFromAddr(SERVOCONFIG_OFFSET + servoId * SERVOCONFIG_N_EACH, vals, 4);
 		adcRef = adc0Ref;
 		pwmRef = pwm0Ref;
+
+		if(!flash.writeTempConfig())
+			return -1;;
 	}
 
 	if (feedbackMeasurement == nullptr || currentMeasurement == nullptr)

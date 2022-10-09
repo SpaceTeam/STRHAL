@@ -34,16 +34,23 @@ int IMUChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &
 
 int IMUChannel::getSensorData(uint8_t *data, uint8_t &n)
 {
-	if (imu->measurementReady())
-	{
+	//if (imu->measurementReady())
+	//{
 		uint16_t *out = (uint16_t*) (data + n);
 		uint16_t measurement = 0;
 		imu->getMeasurement(measurement, measurementType);
 		*out = measurement;
 		n += ADC16_DATA_N_BYTES;
+		/*if (measurementType == IMUMeasurement::X_ACCEL)
+		{
+			int16_t signedMeas = (int16_t) measurement;
+			char buf[32] = { 0 };
+			sprintf(buf, "%i\n", signedMeas);
+			STRHAL_UART_Debug_Write_DMA(buf, strlen(buf));
+		}*/
 		return 0;
-	}
-	return -1;
+	//}
+	//return -1;
 }
 
 int IMUChannel::setVariable(uint8_t variableId, int32_t data)

@@ -112,6 +112,7 @@ typedef struct
 		int32_t longitude;
 		int32_t latitude;
 		int32_t altitude;
+		int32_t status;
 } GNSSData_t;
 
 class SAM_M8Q_GNSS: public AbstractModule

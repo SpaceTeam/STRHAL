@@ -46,6 +46,8 @@ class LPS25HB_Baro: public AbstractModule
 
 		static constexpr uint64_t EXEC_SAMPLE_TICKS = 40;
 
+		int32_t measurementData = 0;
+
 	private:
 		bool readReg(const BaroAddr &address, uint8_t *reg, uint8_t n = 0);
 		bool writeReg(const BaroAddr &address, uint8_t reg, uint16_t delay = 0);

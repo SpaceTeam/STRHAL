@@ -24,7 +24,7 @@ int Radio::init(Com_Receptor_t receptor, Com_Heartbeat_t heartbeat)
 {
 	if (heartbeat)
 	{
-		if (STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM6, 8000, 10000) != 2)
+		if (STRHAL_TIM_Heartbeat_Init(STRHAL_TIM_TIM6, 16000, 2000) != 5)
 			return -1;
 
 		if (STRHAL_TIM_Heartbeat_Subscribe(STRHAL_TIM_TIM6, heartbeat) != 0)

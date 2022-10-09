@@ -124,8 +124,8 @@ bool LPS25HB_Baro::measurementReady()
 
 int LPS25HB_Baro::read()
 {
-	uint8_t i = (measDataTail + measDataNum) % BUF_DATA_SIZE;
-
+	//uint8_t i = (measDataTail + measDataNum) % BUF_DATA_SIZE;
+	//uint8_t i = 0;
 	uint8_t tmp[3];
 	uint32_t tmpPressure;
 
@@ -138,7 +138,8 @@ int LPS25HB_Baro::read()
 	//if(tmpPressure & 0x00800000)
 	//tmpPressure |= 0xFF000000;
 
-	measData[i] = (int32_t) tmpPressure;
+	//measData[i] = (int32_t) tmpPressure;
+	measurementData = (int32_t) tmpPressure;
 
 	if (!readReg(BaroAddr::TEMP_OUT_L, &tmp[0], 2))
 		return -1;
@@ -149,17 +150,19 @@ int LPS25HB_Baro::read()
 	 sprintf(buf,"%ld\n",measData[i]);
 	 STRHAL_UART_Debug_Write(buf, strlen(buf));*/
 
-	measDataNum++;
-	measDataNum %= BUF_DATA_SIZE;
+	//measDataNum++;
+	//measDataNum %= BUF_DATA_SIZE;
 
 	return 0;
 }
 
 void LPS25HB_Baro::getMeasurement(int32_t &measurement)
 {
-	measurement = measData[measDataTail++];
-	measDataTail %= BUF_DATA_SIZE;
-	measDataNum--;
+	//measurement = measData[measDataTail++];
+	//measurement = measData[0];
+	measurement = measurementData;
+	//measDataTail %= BUF_DATA_SIZE;
+	//measDataNum--;
 }
 
 /*

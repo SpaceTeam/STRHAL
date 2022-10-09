@@ -62,6 +62,9 @@ int SAM_M8Q_GNSS::processData(uint8_t *buffer, uint32_t length)
 	{
 		if (Ubx::parseStream(buffer[i], gps_rx_buff, &position, &rx_stats, &id) == PARSER_COMPLETE)
 		{
+			//char buf[64] = { 0 };
+			//sprintf(buf, "GPS: %ld %d\n", id, position.Status);
+			//STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 200);
 			if (position.Satellites < 0)
 			{
 				position.Satellites = 0;
@@ -71,11 +74,15 @@ int SAM_M8Q_GNSS::processData(uint8_t *buffer, uint32_t length)
 			{
 				if (position.Status > GPSPOSITION_STATUS_NOFIX)
 				{
+					//sprintf(buf,"POS: %ld %ld\n",position.Longitude, position.Latitude);
+					//STRHAL_UART_Debug_Write_Blocking(buf, strlen(buf), 200);
+					//STRHAL_UART_Debug_Write_Blocking("FIX!!!\n", 7, 100);
 					// Update the timestamp for the last valid solution
 					//status.not_stored.body.gnss_last_fix_timestamp = status.main.body.timestamp;
 					gnssData.longitude = position.Longitude;
 					gnssData.latitude = position.Latitude;
 					gnssData.altitude = position.Altitude;
+					gnssData.status = position.Status;
 					ret = 1;
 				}
 				else

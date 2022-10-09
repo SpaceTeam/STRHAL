@@ -76,6 +76,7 @@ class W25Qxx_Flash: public AbstractModule
 		bool writeConfigRegs(Config *reg, uint32_t *val, uint16_t n);
 		bool writeConfigReg(Config reg, uint32_t val);
 		bool writeConfig();
+		bool writeTempConfig();
 		uint32_t readConfigReg(Config reg);
 		uint32_t readConfigReg(uint32_t regAddr);
 		bool readConfig();
@@ -92,6 +93,7 @@ class W25Qxx_Flash: public AbstractModule
 
 		void setState(FlashState nextState);
 		FlashState getState();
+		bool sendClearInitiated();
 		bool sendClearDone();
 		bool sendFull();
 		void addLog(uint8_t *data, uint8_t n);

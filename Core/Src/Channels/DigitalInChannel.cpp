@@ -60,6 +60,9 @@ int DigitalInChannel::getVariable(uint8_t variableId, int32_t &data) const
 		case ADC16_REFRESH_DIVIDER:
 			data = (int32_t) refreshDivider;
 			return 0;
+		case ADC16_MEASUREMENT:
+			data = (int32_t) (STRHAL_GPIO_Read(&digitalInPin) == STRHAL_GPIO_VALUE_L) ? 0UL : 1UL;
+			return 0;
 		default:
 			return -1;
 	}

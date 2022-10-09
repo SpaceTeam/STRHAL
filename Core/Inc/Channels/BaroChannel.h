@@ -9,7 +9,7 @@
 class BaroChannel: public AbstractChannel
 {
 	public:
-		BaroChannel(uint8_t id, LPS25HB_Baro &baro, uint32_t refreshDivider);
+		BaroChannel(uint8_t id, LPS25HB_Baro *baro, uint32_t refreshDivider);
 
 		BaroChannel(const BaroChannel &other) = delete;
 		BaroChannel& operator=(const BaroChannel &other) = delete;
@@ -31,7 +31,7 @@ class BaroChannel: public AbstractChannel
 		int getVariable(uint8_t variableId, int32_t &data) const override;
 
 	private:
-		LPS25HB_Baro baro;
+		LPS25HB_Baro *baro;
 };
 
 #endif /*BAROCHANNEL_H*/

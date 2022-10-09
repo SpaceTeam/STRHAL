@@ -142,11 +142,13 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time)
 			sectorCount = 0;
 			break;
 		case FlashState::CLEARING:
-			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "CLEARING!\n", 10, 100);
 			if (state != FlashState::IDLE)
 			{
 				return;
 			}
+			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "CLEARING!\n", 10, 100);
+			if (!sendClearInitiated())
+				return;
 			if (!readConfig())
 				return;
 
@@ -159,18 +161,18 @@ void W25Qxx_Flash::nextStateLogic(FlashState nextState, uint64_t time)
 			{
 				return;
 			}
-			if (!writeConfig())
+			if (!writeTempConfig())
 				return;
 			if (!sendClearDone())
 				return;
 
 			break;
 		case FlashState::LOGGING:
-			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "LOGGING!\n", 9, 100);
 			if (state != FlashState::READY)
 			{
 				return;
 			}
+			STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, "LOGGING!\n", 9, 100);
 			break;
 		case FlashState::FULL:
 			if (!sendFull())
@@ -191,6 +193,18 @@ void W25Qxx_Flash::setState(FlashState nextState)
 FlashState W25Qxx_Flash::getState()
 {
 	return state;
+}
+
+bool W25Qxx_Flash::sendClearInitiated()
+{
+	Can_MessageData_t msgData =
+	{ 0 };
+	msgData.bit.cmd_id = GENERIC_RES_FLASH_STATUS;
+	msgData.bit.info.channel_id = GENERIC_CHANNEL_ID;
+	msgData.bit.info.buffer = DIRECT_BUFFER;
+	msgData.bit.data.uint8[0] = INITIATED;
+
+	return (can.send(0, (uint8_t*) &msgData, 1 + sizeof(uint32_t)) == 0) ? true : false;
 }
 
 bool W25Qxx_Flash::sendClearDone()
@@ -497,6 +511,11 @@ bool W25Qxx_Flash::writeConfig()
 	if (!readConfig())
 		return false;
 
+	return write(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
+}
+
+bool W25Qxx_Flash::writeTempConfig()
+{
 	return write(CONFIG_BASE, config.bytes, sizeof(config.bytes)) == sizeof(config.bytes);
 }
 

@@ -71,7 +71,7 @@ int GenericChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8
 	switch (commandId)
 	{
 		case GENERIC_REQ_NODE_INFO:
-			LL_mDelay(100*this->nodeId);
+			//LL_mDelay(100*this->nodeId);
 			return this->getNodeInfo(returnData, n);
 		case GENERIC_REQ_DATA:
 			return this->getSensorData(returnData, n);
@@ -130,6 +130,16 @@ int GenericChannel::setVariable(uint8_t variableId, int32_t data)
 				flash.setState(FlashState::LOGGING);
 			}
 			return 0;
+		case GENERIC_LORA_ENABLED:
+			if (data == 0)
+			{
+				setLoraActive(false);
+			}
+			else
+			{
+				setLoraActive(true);
+			}
+			return 0;
 		default:
 			return -1;
 	}
@@ -144,6 +154,12 @@ int GenericChannel::getVariable(uint8_t variableId, int32_t &data) const
 			return 0;
 		case GENERIC_LOGGING_ENABLED:
 			data = (int32_t) loggingEnabled;
+			return 0;
+		case GENERIC_LORA_ENABLED:
+			if (loraActive)
+				data = 1;
+			else
+				data = 0;
 			return 0;
 		default:
 			return -1;
@@ -294,9 +310,10 @@ void GenericChannel::receptorLora(uint32_t id, uint8_t *data, uint32_t n)
 	memcpy(msgData.uint8, data, 64); //TODO only copy n bytes
 	uint8_t commandId = msgData.bit.cmd_id;
 	uint8_t channelId = msgData.bit.info.channel_id;
+	uint8_t nodeid = msgId.info.node_id;
 	uint8_t ret_n = 0;
 
-	if (channelId == 6)
+	if (nodeid == 6)
 	{ // ECU
 		if (loraActive)
 		{
@@ -305,11 +322,11 @@ void GenericChannel::receptorLora(uint32_t id, uint8_t *data, uint32_t n)
 		}
 		return;
 	}
-	else if (channelId == 7)
+	else if (nodeid == 7)
 	{ // PMU
 		if (loraActive)
 		{
-			Radio::msgArray[Radio::ECU_START_ADDR] = 1;
+			Radio::msgArray[Radio::PMU_START_ADDR] = 1;
 			memcpy(&Radio::msgArray[Radio::PMU_START_ADDR + 1], msgData.bit.data.uint8, Radio::PMU_MSG_SIZE - 1);
 		}
 		return;
@@ -399,7 +416,7 @@ void GenericChannel::heartbeatCan()
 		return;
 	}
 
-	if (loraActive && n >= 0)
+	if (loraActive)
 	{
 		Radio::msgArray[Radio::RCU_START_ADDR] = 1;
 		memcpy(&Radio::msgArray[Radio::RCU_START_ADDR + 1], msgData.bit.data.uint8, n);
@@ -420,5 +437,11 @@ void GenericChannel::heartbeatCan()
 
 void GenericChannel::heartbeatLora()
 {
-	Radio::send(0, Radio::msgArray, Radio::MSG_SIZE);
+	if (loraActive)
+	{
+		Radio::send(0, Radio::msgArray, Radio::MSG_SIZE);
+	}
+	/*char buf[48] = { 0 };
+	memcpy(buf, Radio::msgArray, Radio::MSG_SIZE);
+	STRHAL_UART_Debug_Write_Blocking(buf, 48, 400);*/
 }
