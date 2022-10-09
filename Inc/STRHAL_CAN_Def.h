@@ -65,7 +65,8 @@ extern "C"
  #define FDCAN_DATA_TIMESEG_2			2*/
 
 #define FDCAN_ELMTS_ARRAY_SIZE			64
-#define FDCAN_NOMINAL_PRESCALER			8
+
+/*#define FDCAN_NOMINAL_PRESCALER			8
 #define FDCAN_NOMINAL_SYNC_JUMP_WIDTH	1
 #define FDCAN_NOMINAL_TIMESEG_1			7
 #define FDCAN_NOMINAL_TIMESEG_2			2
@@ -76,8 +77,21 @@ extern "C"
 #define FDCAN_DATA_TIMESEG_2			2
 
 #define FDCAN_TDC_OFFSET				5
-//#define FDCAN_TDC_OFFSET				5
-#define FDCAN_TDC_FILTER				8
+#define FDCAN_TDC_FILTER				8*/
+
+#define FDCAN_NOMINAL_PRESCALER			2 // 40MHz, tq = 25ns
+#define FDCAN_NOMINAL_SYNC_JUMP_WIDTH	1
+#define FDCAN_NOMINAL_TIMESEG_1			23
+#define FDCAN_NOMINAL_TIMESEG_2			16
+
+#define FDCAN_DATA_PRESCALER			2
+#define FDCAN_DATA_SYNC_JUMP_WIDTH		2
+#define FDCAN_DATA_TIMESEG_1			7
+#define FDCAN_DATA_TIMESEG_2			2
+
+#define FDCAN_TDC_OFFSET				5
+#define FDCAN_TDC_FILTER				6
+
 
 // From HAL driver
 #define SRAMCAN_FLS_NBR                  (28U)         /* Max. Filter List Standard Number      */
