@@ -101,8 +101,8 @@ class LoRa1276F30_Radio
 		bool sendBytes(uint8_t *buffer, uint8_t n);
 
 		static constexpr uint32_t MAX_PKT_LENGTH = 255;
-		static constexpr uint32_t PKT_LENGTH = 143;
-		static constexpr float FREQUENCY = 433.0;
+		static constexpr uint32_t PKT_LENGTH = 95; //143
+		static constexpr float FREQUENCY = 433.55;
 		static constexpr uint16_t PREAMBLE_LENGTH = 8;
 		static constexpr uint8_t SPREADING_FACTOR = 7;
 		static constexpr uint32_t SIGNAL_BANDWIDTH = 250E3;

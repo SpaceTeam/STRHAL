@@ -30,7 +30,7 @@ RCU::RCU(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 {
 	// set pointer to radio object for static callbacks, enable Lora
 	//GenericChannel::radioPtr = &radio; <- this might cause hardfault later on
-	setLoraActive(false); // has to be enabled by request
+	setLoraActive(true); // has to be enabled by request
 
 	registerChannel(&sense_5V);
 	registerChannel(&sense_12V);
@@ -116,7 +116,7 @@ int RCU::exec()
 	uint64_t prevTime = STRHAL_Systick_GetTick();
 	while (1)
 	{
-		//detectReadoutMode();
+		detectReadoutMode();
 #ifdef UART_DEBUG
 
 		uint8_t tempBuf[64] =

@@ -231,6 +231,8 @@ bool LoRa1276F30_Radio::calibrateImage()
 bool LoRa1276F30_Radio::setRFFrequency()
 {
 	uint32_t frf = (FREQUENCY * (uint32_t(1) << 25)) / 32.0;
+	//uint32_t frf = (uint32_t) ((double) 433550000 / (double) (32000000/(uint32_t(1) << 25)));
+	//uint32_t frf = (uint32_t) ((double) 433000000 / (double) (32000000/(uint32_t(1) << 25)));
 	uint8_t parameter[4] =
 	{ (uint8_t) ((frf >> 24) & 0xFF), (uint8_t) ((frf >> 16) & 0xFF), (uint8_t) ((frf >> 8) & 0xFF), (uint8_t) (frf & 0xFF) };
 	return writeCommand(LoraOpcode::SET_FREQUENCY, parameter, 4, 10);
