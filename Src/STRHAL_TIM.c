@@ -178,9 +178,9 @@ void STRHAL_TIM_Init()
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM8);
 
 	NVIC_EnableIRQ(TIM6_DAC_IRQn);
-	NVIC_EnableIRQ(TIM7_IRQn);
+	NVIC_EnableIRQ(TIM7_DAC_IRQn);
 	NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 3));
-	NVIC_SetPriority(TIM7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 2)); //TODO check priorities
+	NVIC_SetPriority(TIM7_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 2)); //TODO check priorities
 }
 
 int32_t STRHAL_TIM_PWM_Init(STRHAL_TIM_TimerId_t id, uint16_t psc, uint16_t res)

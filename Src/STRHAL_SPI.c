@@ -28,7 +28,11 @@ const STRHAL_SPI_IO_t _scks[STRHAL_SPI_N_SCK] =
 
 [STRHAL_SPI_SPI3_SCK_PB3] =
 { .port = GPIOB, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, [STRHAL_SPI_SPI3_SCK_PC10] =
-{ .port = GPIOC, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, };
+{ .port = GPIOC, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, },
+
+[STRHAL_SPI_SPI4_SCK_PE2] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_2, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_SCK_PE12] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, };
 
 const STRHAL_SPI_IO_t _misos[STRHAL_SPI_N_MISO] =
 { [STRHAL_SPI_SPI1_MISO_PA6] =
@@ -41,7 +45,11 @@ const STRHAL_SPI_IO_t _misos[STRHAL_SPI_N_MISO] =
 
 [STRHAL_SPI_SPI3_MISO_PB4] =
 { .port = GPIOB, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, [STRHAL_SPI_SPI3_MISO_PC11] =
-{ .port = GPIOC, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, };
+{ .port = GPIOC, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, },
+
+[STRHAL_SPI_SPI4_MISO_PE5] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_MISO_PE13] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, };
 
 const STRHAL_SPI_IO_t _mosis[STRHAL_SPI_N_MOSI] =
 { [STRHAL_SPI_SPI1_MOSI_PA7] =
@@ -54,7 +62,11 @@ const STRHAL_SPI_IO_t _mosis[STRHAL_SPI_N_MOSI] =
 
 [STRHAL_SPI_SPI3_MOSI_PB5] =
 { .port = GPIOB, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, [STRHAL_SPI_SPI3_MOSI_PC12] =
-{ .port = GPIOC, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, };
+{ .port = GPIOC, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, },
+
+[STRHAL_SPI_SPI4_MOSI_PE6] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_MOSI_PE14] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, };
 
 const STRHAL_SPI_IO_t _nsss[STRHAL_SPI_N_NSS] =
 { [STRHAL_SPI_SPI1_NSS_PA4] =
@@ -68,7 +80,12 @@ const STRHAL_SPI_IO_t _nsss[STRHAL_SPI_N_NSS] =
 
 [STRHAL_SPI_SPI3_NSS_PA4] =
 { .port = GPIOA, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, [STRHAL_SPI_SPI3_NSS_PA15] =
-{ .port = GPIOA, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, }, };
+{ .port = GPIOA, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_6, .spi = STRHAL_SPI_SPI3, },
+
+[STRHAL_SPI_SPI4_NSS_PE3] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_NSS_PE4] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_NSS_PE11] =
+{ .port = GPIOE, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, };
 
 typedef struct
 {
@@ -84,7 +101,8 @@ STRHAL_SPI_t _spis[STRHAL_SPI_N_SPI] =
 { [STRHAL_SPI_SPI1] =
 { .spix = SPI1, }, [STRHAL_SPI_SPI2] =
 { .spix = SPI2, }, [STRHAL_SPI_SPI3] =
-{ .spix = SPI3, }, };
+{ .spix = SPI3, }, [STRHAL_SPI_SPI4] =
+{ .spix = SPI4, }, };
 
 static inline int _wait_for_txe(SPI_TypeDef *spix, uint16_t tot);
 static inline int _wait_for_rxtxend(SPI_TypeDef *spix, uint16_t tot);
@@ -103,14 +121,17 @@ void STRHAL_SPI_Init()
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI1);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI3);
+	LL_APB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI4);
 
 	LL_SPI_DeInit(SPI1);
 	LL_SPI_DeInit(SPI2);
 	LL_SPI_DeInit(SPI3);
+	LL_SPI_DeInit(SPI4);
 
 	LL_SPI_Disable(SPI1);
 	LL_SPI_Disable(SPI2);
 	LL_SPI_Disable(SPI3);
+	LL_SPI_Disable(SPI4);
 }
 
 void STRHAL_SPI_Master_Run(STRHAL_SPI_Id_t spi_id)
