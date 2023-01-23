@@ -1,9 +1,8 @@
-#include "../Inc/IOB.h"
-
+#include <IOBv1.h>
 #include <cstdio>
 #include <cstring>
 
-IOB::IOB(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
+IOBv1::IOBv1(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
 		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
 		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
@@ -15,7 +14,7 @@ IOB::IOB(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 
 }
 
-int IOB::init()
+int IOBv1::init()
 {
 	if (STRHAL_Init(STRHAL_SYSCLK_SRC_EXT, 8000000) != STRHAL_NOICE)
 		return -1;
@@ -36,7 +35,7 @@ int IOB::init()
 	return 0;
 }
 
-int IOB::exec()
+int IOBv1::exec()
 {
 	//STRHAL_OPAMP_Run();
 	STRHAL_ADC_Run();

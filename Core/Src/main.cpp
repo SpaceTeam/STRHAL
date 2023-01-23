@@ -1,8 +1,9 @@
+#include <IOBv1.h>
+
 #include <STRHAL.h>
 #include "ECU.h"
 #include "PMU.h"
 #include "RCU.h"
-#include "IOB.h"
 #include "LCB.h"
 #include "git_version.h"
 
@@ -44,8 +45,16 @@ int main(void)
 
 	STRHAL_UART_Debug_Write_Blocking("RCU STARTED\n", 12, 50);
 	rcu.exec();
-#elif defined(IOB_BOARD)
-	IOB iob(10,0xDEADBEEF,100); // TODO disregard node ID and read dipswitches in IOB/LCB class
+#elif defined(IOBv1_BOARD)
+	IOBv1 iob(10,0xDEADBEEF,100); // TODO disregard node ID and read dipswitches in IOB/LCB class
+
+	if(iob.init() != 0)
+			return -1;
+
+	STRHAL_UART_Debug_Write_Blocking("IOB STARTED\n", 12, 50);
+	iob.exec();
+#elif defined(IOBv3_BOARD)
+	IOBv3 iob(10,GIT_COMMIT_HASH_VALUE,100); // TODO disregard node ID and read dipswitches in IOB/LCB class
 
 	if(iob.init() != 0)
 			return -1;
