@@ -39,6 +39,7 @@
 # Debug files
 Debug_H7xx/
 Release_H7xx/
+Debug_G474_IOBv3/
 Debug_G491/
 Debug_G491_ECU/
 Debug_G491_PMU/
