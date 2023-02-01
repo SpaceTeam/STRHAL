@@ -4,8 +4,8 @@
 
 IOBv3::IOBv3(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
-		ledRed({ GPIOD, 1, STRHAL_GPIO_TYPE_OPP }),
-		ledGreen({ GPIOD, 2, STRHAL_GPIO_TYPE_OPP }),
+		ledRed({ GPIOB, 14, STRHAL_GPIO_TYPE_OPP }),
+		ledGreen({ GPIOB, 15, STRHAL_GPIO_TYPE_OPP }),
 		channel0(0,{ ADC5, STRHAL_ADC_CHANNEL_1 },		{ GPIOA,  9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		channel1(1,{ ADC5, STRHAL_ADC_CHANNEL_13 },		{ GPIOC,  9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		channel2(2,{ ADC2, STRHAL_ADC_CHANNEL_12 },		{ GPIOD,  8, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
@@ -48,6 +48,10 @@ int IOBv3::init()
 	STRHAL_GPIO_SingleInit(&ledRed, STRHAL_GPIO_TYPE_OPP);
 	STRHAL_GPIO_SingleInit(&ledGreen, STRHAL_GPIO_TYPE_OPP);
 
+	// init debug uart
+	if (STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
+		return -1;
+
 	if (can.init(receptor, heartbeatCan, COMMode::STANDARD_COM_MODE) != 0)
 		return -1;
 
@@ -57,6 +61,9 @@ int IOBv3::init()
 	speaker.init();
 
 	STRHAL_GPIO_Write(&ledGreen, STRHAL_GPIO_VALUE_H);
+	STRHAL_UART_Debug_Write_Blocking("Started\n", 8, 50);
+
+
 	return 0;
 }
 
