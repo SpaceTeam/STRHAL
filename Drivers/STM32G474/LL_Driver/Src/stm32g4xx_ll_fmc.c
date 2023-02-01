@@ -53,7 +53,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32g4xx_hal.h"
+//#include "stm32g4xx_hal.h"
 
 /** @addtogroup STM32G4xx_HAL_Driver
   * @{
