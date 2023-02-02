@@ -4,8 +4,9 @@
 
 IOBv3::IOBv3(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
-		ledRed({ GPIOB, 14, STRHAL_GPIO_TYPE_OPP }),
-		ledGreen({ GPIOB, 15, STRHAL_GPIO_TYPE_OPP }),
+		led1({ GPIOB, 11, STRHAL_GPIO_TYPE_OPP }),
+		led2({ GPIOB, 15, STRHAL_GPIO_TYPE_OPP }),
+		led_debug({ GPIOB, 11, STRHAL_GPIO_TYPE_OPP }),
 		channel0(0,{ ADC5, STRHAL_ADC_CHANNEL_1 },		{ GPIOA,  9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		channel1(1,{ ADC5, STRHAL_ADC_CHANNEL_13 },		{ GPIOC,  9, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 		channel2(2,{ ADC2, STRHAL_ADC_CHANNEL_12 },		{ GPIOD,  8, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
@@ -45,8 +46,23 @@ int IOBv3::init()
 		return -1;
 
 	// init status LEDs
-	STRHAL_GPIO_SingleInit(&ledRed, STRHAL_GPIO_TYPE_OPP);
-	STRHAL_GPIO_SingleInit(&ledGreen, STRHAL_GPIO_TYPE_OPP);
+	STRHAL_GPIO_SingleInit(&led1, STRHAL_GPIO_TYPE_OPP);
+	STRHAL_GPIO_SingleInit(&led2, STRHAL_GPIO_TYPE_OPP);
+	STRHAL_GPIO_SingleInit(&led_debug, STRHAL_GPIO_TYPE_OPP);
+
+while(1)
+{
+	STRHAL_GPIO_Write(&led1, STRHAL_GPIO_VALUE_H);
+	STRHAL_GPIO_Write(&led2, STRHAL_GPIO_VALUE_H);
+	STRHAL_GPIO_Write(&led_debug, STRHAL_GPIO_VALUE_H);
+	LL_mDelay(100);
+	STRHAL_GPIO_Write(&led1, STRHAL_GPIO_VALUE_L);
+	STRHAL_GPIO_Write(&led2, STRHAL_GPIO_VALUE_L);
+	STRHAL_GPIO_Write(&led_debug, STRHAL_GPIO_VALUE_L);
+	LL_mDelay(100);
+}
+
+
 
 	// init debug uart
 	if (STRHAL_UART_Instance_Init(STRHAL_UART_DEBUG) != 0)
@@ -60,7 +76,6 @@ int IOBv3::init()
 
 	speaker.init();
 
-	STRHAL_GPIO_Write(&ledGreen, STRHAL_GPIO_VALUE_H);
 	STRHAL_UART_Debug_Write_Blocking("Started\n", 8, 50);
 
 
@@ -76,7 +91,6 @@ int IOBv3::exec()
 	if (can.exec() != 0)
 		return -1;
 
-	STRHAL_GPIO_Write(&ledRed, STRHAL_GPIO_VALUE_H);
 	STRHAL_UART_Debug_Write_Blocking("RUNNING\n", 8, 50);
 
 	speaker.beep(3, 300, 200);

@@ -22,7 +22,7 @@ class IOBv3: public GenericChannel
 		int exec() override;
 
 	private:
-		STRHAL_GPIO_t ledRed, ledGreen;
+		STRHAL_GPIO_t led1, led2, led_debug;
 		DigitalOutChannel channel0, channel1, channel2, channel3, channel4, channel5, channel6, channel7, channel8, channel9, channel10, channel11;
 		Speaker speaker;
 };
