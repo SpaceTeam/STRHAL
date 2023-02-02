@@ -11,13 +11,14 @@ extern "C"
 #define STRHAL_UART_BUF_SIZE 256
 //#define STRHAL_UART_BAUDRATE 115200 // not used since it's set inside the uart struct
 
-#define STRHAL_UART_DEBUG STRHAL_UART2
+#define STRHAL_UART_DEBUG STRHAL_UART4
 
 typedef enum
 {
 	STRHAL_UART1,
 	STRHAL_UART2,
-
+	//STRHAL_UART3,
+	STRHAL_UART4,
 	STRHAL_N_UART
 } STRHAL_UART_Id_t;
 

@@ -52,121 +52,117 @@ static STRHAL_TIM_Timer_t _tims[STRHAL_TIM_N_TIM] =
 { .timx = TIM4, .ch_n = 4, .utype = STRHAL_TIM_USAGE_000, }, [STRHAL_TIM_TIM8] =
 { .timx = TIM8, .ch_n = 4, .utype = STRHAL_TIM_USAGE_000, }, };
 
+
 static const STRHAL_TIM_Channel_t _tim_channels[STRHAL_TIM_N_TIM_CHANNELS] =
 {
 /*TIM 1 channels*/
-[STRHAL_TIM_TIM1_CH1N_PA7] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH1_PA8] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH2_PA9] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH3_PA10] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH1N_PA11] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH4_PA11] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_11, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM1->CCR4, }, [STRHAL_TIM_TIM1_CH2N_PA12] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH2N_PB0] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH3N_PB1] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH3N_PB9] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_12, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH1N_PB13] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH2N_PB14] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH3N_PB15] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH1_PC0] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH2_PC1] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH3_PC2] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_2, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH4_PC3] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM1->CCR4, }, [STRHAL_TIM_TIM1_CH4N_PC5] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_6, .ccr = &TIM1->CCR4, }, [STRHAL_TIM_TIM1_CH1N_PC13] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH1N_PE8] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH1_PE9] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM1->CCR1, }, [STRHAL_TIM_TIM1_CH2N_PE10] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH2_PE11] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM1->CCR2, }, [STRHAL_TIM_TIM1_CH3N_PE12] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH3_PE13] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM1->CCR3, }, [STRHAL_TIM_TIM1_CH4_PE14] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM1->CCR4, }, [STRHAL_TIM_TIM1_CH4N_PE15] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH4N, }, [STRHAL_TIM_TIM1_CH3N_PF0] =
-{ .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOF, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH1N_PA7]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH1_PA8]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_8,  .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1,  .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH2_PA9]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2,  .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH3_PA10]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH3,  .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH1N_PA11] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH4_PA11]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_11,.n = LL_TIM_CHANNEL_CH4,  .ccr = &TIM1->CCR4, },
+[STRHAL_TIM_TIM1_CH2N_PA12] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOA, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH2N_PB0]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_0,  .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH3N_PB1]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_1,  .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH3N_PB9]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_12,.n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH1N_PB13] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH2N_PB14] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH3N_PB15] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOB, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH1_PC0]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_0,  .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1,  .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH2_PC1]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_1,  .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2,  .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH3_PC2]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_2,  .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3,  .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH4_PC3]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_3,  .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4,  .ccr = &TIM1->CCR4, },
+[STRHAL_TIM_TIM1_CH4N_PC5]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_5,  .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR4, },
+[STRHAL_TIM_TIM1_CH1N_PC13] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOC, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH1N_PE8]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_8,  .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH1_PE9]   = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1,  .ccr = &TIM1->CCR1, },
+[STRHAL_TIM_TIM1_CH2N_PE10] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH2_PE11]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2,  .ccr = &TIM1->CCR2, },
+[STRHAL_TIM_TIM1_CH3N_PE12] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH3_PE13]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3,  .ccr = &TIM1->CCR3, },
+[STRHAL_TIM_TIM1_CH4_PE14]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4,  .ccr = &TIM1->CCR4, },
+[STRHAL_TIM_TIM1_CH4N_PE15] = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOE, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH4N, .ccr = &TIM1->CCR4, },
+[STRHAL_TIM_TIM1_CH3N_PF0]  = { .tim = &_tims[STRHAL_TIM_TIM1], .port = GPIOF, .pin = LL_GPIO_PIN_0,  .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM1->CCR3, },
 
 /*TIM 2 channels*/
-[STRHAL_TIM_TIM2_CH1_PA0] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, }, [STRHAL_TIM_TIM2_CH2_PA1] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM2->CCR2, }, [STRHAL_TIM_TIM2_CH3_PA2] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_2, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, }, [STRHAL_TIM_TIM2_CH4_PA3] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, }, [STRHAL_TIM_TIM2_CH1_PA5] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, }, [STRHAL_TIM_TIM2_CH3_PA9] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, }, [STRHAL_TIM_TIM2_CH4_PA10] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, }, [STRHAL_TIM_TIM2_CH1_PA15] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, }, [STRHAL_TIM_TIM2_CH2_PB3] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOB, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM2->CCR2, }, [STRHAL_TIM_TIM2_CH3_PB10] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOB, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, }, [STRHAL_TIM_TIM2_CH4_PB11] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOB, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_1, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, }, [STRHAL_TIM_TIM2_CH1_PD3] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, }, [STRHAL_TIM_TIM2_CH2_PD4] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM2->CCR2, }, [STRHAL_TIM_TIM2_CH4_PD6] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, }, [STRHAL_TIM_TIM2_CH3_PD7] =
-{ .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, },
+[STRHAL_TIM_TIM2_CH1_PA0]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_0,  .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, },
+[STRHAL_TIM_TIM2_CH2_PA1]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_1,  .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM2->CCR2, },
+[STRHAL_TIM_TIM2_CH3_PA2]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_2,  .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, },
+[STRHAL_TIM_TIM2_CH4_PA3]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_3,  .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, },
+[STRHAL_TIM_TIM2_CH1_PA5]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_5,  .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, },
+[STRHAL_TIM_TIM2_CH3_PA9]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, },
+[STRHAL_TIM_TIM2_CH4_PA10]  = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, },
+[STRHAL_TIM_TIM2_CH1_PA15]  = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOA, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, },
+[STRHAL_TIM_TIM2_CH2_PB3]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOB, .pin = LL_GPIO_PIN_3,  .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM2->CCR2, },
+[STRHAL_TIM_TIM2_CH3_PB10]  = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOB, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, },
+[STRHAL_TIM_TIM2_CH4_PB11]  = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOB, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_1,  .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, },
+[STRHAL_TIM_TIM2_CH1_PD3]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_3,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM2->CCR1, },
+[STRHAL_TIM_TIM2_CH2_PD4]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_4,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM2->CCR2, },
+[STRHAL_TIM_TIM2_CH4_PD6]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_6,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM2->CCR4, },
+[STRHAL_TIM_TIM2_CH3_PD7]   = { .tim = &_tims[STRHAL_TIM_TIM2], .port = GPIOD, .pin = LL_GPIO_PIN_7,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM2->CCR3, },
 
-[STRHAL_TIM_TIM3_CH2_PA4] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOA, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, }, [STRHAL_TIM_TIM3_CH1_PA6] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOA, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, }, [STRHAL_TIM_TIM3_CH2_PA7] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOA, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, }, [STRHAL_TIM_TIM3_CH3_PB0] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM3->CCR3, }, [STRHAL_TIM_TIM3_CH4_PB1] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM3->CCR4, }, [STRHAL_TIM_TIM3_CH1_PB4] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, }, [STRHAL_TIM_TIM3_CH2_PB5] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, }, [STRHAL_TIM_TIM3_CH1_PC6] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, }, [STRHAL_TIM_TIM3_CH2_PC7] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, }, [STRHAL_TIM_TIM3_CH3_PC8] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM3->CCR3, }, [STRHAL_TIM_TIM3_CH4_PC9] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM3->CCR4, }, [STRHAL_TIM_TIM3_CH1_PE2] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_2, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, }, [STRHAL_TIM_TIM3_CH2_PE3] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, }, [STRHAL_TIM_TIM3_CH3_PE4] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM3->CCR3, }, [STRHAL_TIM_TIM3_CH4_PE5] =
-{ .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM3->CCR4, },
+[STRHAL_TIM_TIM3_CH2_PA4]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOA, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, },
+[STRHAL_TIM_TIM3_CH1_PA6]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOA, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, },
+[STRHAL_TIM_TIM3_CH2_PA7]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOA, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, },
+[STRHAL_TIM_TIM3_CH3_PB0]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM3->CCR3, },
+[STRHAL_TIM_TIM3_CH4_PB1]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM3->CCR4, },
+[STRHAL_TIM_TIM3_CH1_PB4]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, },
+[STRHAL_TIM_TIM3_CH2_PB5]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOB, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, },
+[STRHAL_TIM_TIM3_CH1_PC6]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, },
+[STRHAL_TIM_TIM3_CH2_PC7]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, },
+[STRHAL_TIM_TIM3_CH3_PC8]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM3->CCR3, },
+[STRHAL_TIM_TIM3_CH4_PC9]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOC, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM3->CCR4, },
+[STRHAL_TIM_TIM3_CH1_PE2]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_2, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM3->CCR1, },
+[STRHAL_TIM_TIM3_CH2_PE3]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM3->CCR2, },
+[STRHAL_TIM_TIM3_CH3_PE4]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM3->CCR3, },
+[STRHAL_TIM_TIM3_CH4_PE5]   = { .tim = &_tims[STRHAL_TIM_TIM3], .port = GPIOE, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM3->CCR4, },
 
 /*TIM4 channels*/
-[STRHAL_TIM_TIM4_CH1_PA11] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOA, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM4->CCR1, }, [STRHAL_TIM_TIM4_CH2_PA12] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOA, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM4->CCR2, }, [STRHAL_TIM_TIM4_CH3_PA13] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOA, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM4->CCR3, }, [STRHAL_TIM_TIM4_CH1_PB6] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM4->CCR1, }, [STRHAL_TIM_TIM4_CH2_PB7] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM4->CCR2, }, [STRHAL_TIM_TIM4_CH3_PB8] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM4->CCR3, }, [STRHAL_TIM_TIM4_CH4_PB9] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM4->CCR4, }, [STRHAL_TIM_TIM4_CH1_PD12] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM4->CCR1, }, [STRHAL_TIM_TIM4_CH2_PD13] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM4->CCR2, }, [STRHAL_TIM_TIM4_CH3_PD14] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM4->CCR3, }, [STRHAL_TIM_TIM4_CH4_PD15] =
-{ .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM4->CCR4, },
+[STRHAL_TIM_TIM4_CH1_PA11]  = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOA, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM4->CCR1, },
+ [STRHAL_TIM_TIM4_CH2_PA12] = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOA, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM4->CCR2, },
+ [STRHAL_TIM_TIM4_CH3_PA13] = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOA, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM4->CCR3, },
+ [STRHAL_TIM_TIM4_CH1_PB6]  = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_6,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM4->CCR1, },
+ [STRHAL_TIM_TIM4_CH2_PB7]  = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_7,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM4->CCR2, },
+ [STRHAL_TIM_TIM4_CH3_PB8]  = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_8,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM4->CCR3, },
+ [STRHAL_TIM_TIM4_CH4_PB9]  = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOB, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM4->CCR4, },
+ [STRHAL_TIM_TIM4_CH1_PD12] = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM4->CCR1, },
+ [STRHAL_TIM_TIM4_CH2_PD13] = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM4->CCR2, },
+ [STRHAL_TIM_TIM4_CH3_PD14] = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM4->CCR3, },
+ [STRHAL_TIM_TIM4_CH4_PD15] = { .tim = &_tims[STRHAL_TIM_TIM4], .port = GPIOD, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM4->CCR4, },
 
 /*TIM8 Channels*/
-[STRHAL_TIM_TIM8_CH1N_PA7] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOA, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM8->CCR1, }, [STRHAL_TIM_TIM8_CH2_PA14] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOA, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_5, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM8->CCR2, }, [STRHAL_TIM_TIM8_CH1_PA15] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOA, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_2, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM8->CCR1, }, [STRHAL_TIM_TIM8_CH2N_PB0] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM8->CCR2, }, [STRHAL_TIM_TIM8_CH3N_PB1] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM8->CCR3, }, [STRHAL_TIM_TIM8_CH1N_PB3] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM8->CCR3, }, [STRHAL_TIM_TIM8_CH2N_PB4] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM8->CCR2, }, [STRHAL_TIM_TIM8_CH3N_PB5] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_5, .afn = LL_GPIO_AF_3, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM8->CCR3, }, [STRHAL_TIM_TIM8_CH1_PB6] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_5, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM8->CCR1, }, [STRHAL_TIM_TIM8_CH2_PB8] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM8->CCR2, }, [STRHAL_TIM_TIM8_CH3_PB9] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM8->CCR3, }, [STRHAL_TIM_TIM8_CH1_PC6] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_6, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH1, .ccr = &TIM8->CCR1, }, [STRHAL_TIM_TIM8_CH2_PC7] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_7, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH2, .ccr = &TIM8->CCR2, }, [STRHAL_TIM_TIM8_CH3_PC8] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_8, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH3, .ccr = &TIM8->CCR3, }, [STRHAL_TIM_TIM8_CH4_PC9] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_9, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM8->CCR4, }, [STRHAL_TIM_TIM8_CH1N_PC10] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM8->CCR1, }, [STRHAL_TIM_TIM8_CH2N_PC11] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM8->CCR2, }, [STRHAL_TIM_TIM8_CH3N_PC12] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM8->CCR3, }, [STRHAL_TIM_TIM8_CH4N_PC13] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH4N, .ccr = &TIM8->CCR4, }, [STRHAL_TIM_TIM8_CH4N_PD0] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_0, .afn = LL_GPIO_AF_6, .n = LL_TIM_CHANNEL_CH4N, .ccr = &TIM8->CCR4, }, [STRHAL_TIM_TIM8_CH4_PD1] =
-{ .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_1, .afn = LL_GPIO_AF_4, .n = LL_TIM_CHANNEL_CH4, .ccr = &TIM8->CCR4, }, };
+[STRHAL_TIM_TIM8_CH1N_PA7]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOA, .pin = LL_GPIO_PIN_7,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM8->CCR1, },
+ [STRHAL_TIM_TIM8_CH2_PA14]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOA, .pin = LL_GPIO_PIN_14, .afn = LL_GPIO_AF_5,  .n = LL_TIM_CHANNEL_CH2,  .ccr = &TIM8->CCR2, },
+ [STRHAL_TIM_TIM8_CH1_PA15]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOA, .pin = LL_GPIO_PIN_15, .afn = LL_GPIO_AF_2,  .n = LL_TIM_CHANNEL_CH1,  .ccr = &TIM8->CCR1, },
+ [STRHAL_TIM_TIM8_CH2N_PB0]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_0,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM8->CCR2, },
+ [STRHAL_TIM_TIM8_CH3N_PB1]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_1,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM8->CCR3, },
+ [STRHAL_TIM_TIM8_CH1N_PB3]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_3,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM8->CCR3, },
+ [STRHAL_TIM_TIM8_CH2N_PB4]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_4,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM8->CCR2, },
+ [STRHAL_TIM_TIM8_CH3N_PB5]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_5,  .afn = LL_GPIO_AF_3,  .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM8->CCR3, },
+ [STRHAL_TIM_TIM8_CH1_PB6]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_6,  .afn = LL_GPIO_AF_5,  .n = LL_TIM_CHANNEL_CH1,  .ccr = &TIM8->CCR1, },
+ [STRHAL_TIM_TIM8_CH2_PB8]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_8,  .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH2,  .ccr = &TIM8->CCR2, },
+ [STRHAL_TIM_TIM8_CH3_PB9]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOB, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_10, .n = LL_TIM_CHANNEL_CH3,  .ccr = &TIM8->CCR3, },
+ [STRHAL_TIM_TIM8_CH1_PC6]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_6,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH1,  .ccr = &TIM8->CCR1, },
+ [STRHAL_TIM_TIM8_CH2_PC7]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_7,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH2,  .ccr = &TIM8->CCR2, },
+ [STRHAL_TIM_TIM8_CH3_PC8]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_8,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH3,  .ccr = &TIM8->CCR3, },
+ [STRHAL_TIM_TIM8_CH4_PC9]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_9,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH4,  .ccr = &TIM8->CCR4, },
+ [STRHAL_TIM_TIM8_CH1N_PC10] = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_10, .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH1N, .ccr = &TIM8->CCR1, },
+ [STRHAL_TIM_TIM8_CH2N_PC11] = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH2N, .ccr = &TIM8->CCR2, },
+ [STRHAL_TIM_TIM8_CH3N_PC12] = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_12, .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH3N, .ccr = &TIM8->CCR3, },
+ [STRHAL_TIM_TIM8_CH4N_PC13] = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_13, .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH4N, .ccr = &TIM8->CCR4, },
+ [STRHAL_TIM_TIM8_CH4N_PD0]  = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_0,  .afn = LL_GPIO_AF_6,  .n = LL_TIM_CHANNEL_CH4N, .ccr = &TIM8->CCR4, },
+ [STRHAL_TIM_TIM8_CH4_PD1]   = { .tim = &_tims[STRHAL_TIM_TIM8], .port = GPIOC, .pin = LL_GPIO_PIN_1,  .afn = LL_GPIO_AF_4,  .n = LL_TIM_CHANNEL_CH4,  .ccr = &TIM8->CCR4, }, };
 
 void STRHAL_TIM_Init()
 {
 	/* GPIO Ports Clock Enable */
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOF);
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOF);
 
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);

@@ -25,32 +25,38 @@ typedef struct
 	uint8_t swap; // swap tx/rx pins
 } STRHAL_UART_Handle_t;
 
-static STRHAL_UART_Handle_t _uarts[2] =
-{ [STRHAL_UART1] =
-{ .uart = USART1, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART1_RX, .dma_tx_request = LL_DMAMUX_REQ_USART1_TX, .it_rx_handler = DMA1_Channel1_IRQn, .it_tx_handler = DMA1_Channel2_IRQn, .baud_rate = 9600, .swap = 1 }, [STRHAL_UART2] =
-{ .uart = USART2, .dma_rx_channel = LL_DMA_CHANNEL_3, .dma_tx_channel = LL_DMA_CHANNEL_4, .dma_rx_request = LL_DMAMUX_REQ_USART2_RX, .dma_tx_request = LL_DMAMUX_REQ_USART2_TX, .it_rx_handler = DMA1_Channel3_IRQn, .it_tx_handler = DMA1_Channel4_IRQn, .baud_rate = 115200, .swap = 0 } };
+static STRHAL_UART_Handle_t _uarts[STRHAL_N_UART] =
+{
+//[STRHAL_UART1] =
+//{ .uart = USART1, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART1_RX, .dma_tx_request = LL_DMAMUX_REQ_USART1_TX, .it_rx_handler = DMA1_Channel1_IRQn, .it_tx_handler = DMA1_Channel2_IRQn, .baud_rate = 9600, .swap = 1 },
+//[STRHAL_UART2] =
+//{ .uart = USART2, .dma_rx_channel = LL_DMA_CHANNEL_3, .dma_tx_channel = LL_DMA_CHANNEL_4, .dma_rx_request = LL_DMAMUX_REQ_USART2_RX, .dma_tx_request = LL_DMAMUX_REQ_USART2_TX, .it_rx_handler = DMA1_Channel3_IRQn, .it_tx_handler = DMA1_Channel4_IRQn, .baud_rate = 115200, .swap = 0 },
+//[STRHAL_UART3] =
+//{ .uart = USART3, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART3_RX, .dma_tx_request = LL_DMAMUX_REQ_USART3_TX, .it_rx_handler = DMA1_Channel3_IRQn, .it_tx_handler = DMA1_Channel4_IRQn, .baud_rate = 115200, .swap = 0 },
+[STRHAL_UART4] =
+{ .uart = UART4, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_UART4_RX, .dma_tx_request = LL_DMAMUX_REQ_UART4_TX, .it_rx_handler = DMA1_Channel3_IRQn, .it_tx_handler = DMA1_Channel4_IRQn, .baud_rate = 115200, .swap = 0 } };
 
 void STRHAL_UART_Init()
 {
-	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
-	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+	//LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART3);
+	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_UART4);
+	//LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
 	{ 0 };
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_9 | LL_GPIO_PIN_10;
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_10 | LL_GPIO_PIN_11;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
 	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-	GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
-	LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
+	LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_3 | LL_GPIO_PIN_4;
-	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//	GPIO_InitStruct.Pin = LL_GPIO_PIN_3 | LL_GPIO_PIN_4;
+//	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
 int STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id)
@@ -416,7 +422,7 @@ STRHAL_UART_State_t STRHAL_UART_GetState(STRHAL_UART_Id_t uart_id)
 
 void DMA1_Channel1_IRQHandler(void)
 {
-	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART1];
+	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART4];
 	if (LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_1) && LL_DMA_IsActiveFlag_TC1(DMA1))
 	{
 		LL_DMA_ClearFlag_TC1(DMA1);
@@ -447,7 +453,7 @@ void DMA1_Channel1_IRQHandler(void)
 
 void DMA1_Channel2_IRQHandler(void)
 {
-	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART1];
+	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART4];
 	if (LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_2) && LL_DMA_IsActiveFlag_TC2(DMA1))
 	{
 		LL_DMA_ClearFlag_TC2(DMA1);
@@ -464,6 +470,7 @@ void DMA1_Channel2_IRQHandler(void)
 	}
 }
 
+/*
 void DMA1_Channel3_IRQHandler(void)
 {
 	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART2];
@@ -512,4 +519,4 @@ void DMA1_Channel4_IRQHandler(void)
 		_uart->state &= ~STRHAL_UART_STATE_TC;
 		_uart->state |= STRHAL_UART_STATE_TE;
 	}
-}
+}*/
