@@ -324,16 +324,16 @@ STRHAL_ADC_Data_t* STRHAL_ADC_SubscribeChannel(STRHAL_ADC_Channel_t *channel, ST
 	else if (channel->ADCx == ADC4)
 	{
 		analogPin = gpioMapping[3][channel->channelId];
-		data_ptr = adc3_buf.data;
-		length_ptr = &adc3_buf.length;
+		data_ptr = adc4_buf.data;
+		length_ptr = &adc4_buf.length;
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL + 3;
 		adcChannelMsk[1] = (1U) << (2 * STRHAL_ADC_CHANNEL_LAST + channel->channelId);
 	}
 	else if (channel->ADCx == ADC5)
 	{
 		analogPin = gpioMapping[4][channel->channelId];
-		data_ptr = adc3_buf.data;
-		length_ptr = &adc3_buf.length;
+		data_ptr = adc5_buf.data;
+		length_ptr = &adc5_buf.length;
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL + 4;
 		adcChannelMsk[1] = (1U) << (2 * STRHAL_ADC_CHANNEL_LAST + channel->channelId);
 	}
