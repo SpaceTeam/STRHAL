@@ -58,7 +58,7 @@ int main(void)
 #ifdef UART_DEBUG
 	IOBv3 iob(10,GIT_COMMIT_HASH_VALUE,100); // TODO disregard node ID and read dipswitches in IOB/LCB class
 #else
-	IOBv3 iob(10,GIT_COMMIT_HASH_VALUE,4); // TODO disregard node ID and read dipswitches in IOB/LCB class
+	IOBv3 iob(10,GIT_COMMIT_HASH_VALUE,1000); // TODO disregard node ID and read dipswitches in IOB/LCB class
 #endif
 	if(iob.init() != 0)
 			return -1;
