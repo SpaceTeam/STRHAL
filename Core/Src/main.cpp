@@ -1,5 +1,6 @@
 #include "IOBv1.h"
 #include "IOBv3.h"
+#include "IOBv4.h"
 
 #include <STRHAL.h>
 #include "ECU.h"
@@ -64,6 +65,17 @@ int main(void)
 			return -1;
 
 	STRHAL_UART_Debug_Write_Blocking("IOB STARTED\n", 12, 50);
+	iob.exec();
+#elif defined(IOBv4_BOARD)
+#ifdef UART_DEBUG
+	IOBv4 iob(10,GIT_COMMIT_HASH_VALUE,100); // TODO disregard node ID and read dipswitches in IOB/LCB class
+#else
+	IOBv4 iob(10,GIT_COMMIT_HASH_VALUE,1); // TODO disregard node ID and read dipswitches in IOB/LCB class
+#endif
+	if(iob.init() != 0)
+			return -1;
+
+	STRHAL_UART_Debug_Write_Blocking("IOBv4 STARTED\n", 14, 50);
 	iob.exec();
 #elif defined(LCB_BOARD)
 	LCB lcb(10,0xDEADBEEF,100);

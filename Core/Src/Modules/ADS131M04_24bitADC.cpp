@@ -1,4 +1,4 @@
-#include "../../Inc/Modules/LPS25HB_Baro.h"
+#include "../../Inc/Modules/ADS131M04_24bitADC.h"
 #include <stm32g4xx_ll_exti.h>
 #include <stm32g4xx_ll_system.h>
 
@@ -36,22 +36,22 @@ int ADS131M04_24bitADC::init()
 	STRHAL_SPI_Master_Run(spiId);
 
 	// Set Power-Down mode - reset CTRL_1 register
-	if (!writeReg(BaroAddr::CTRL_REG1, 0x0, 100))
+	if (!writeReg(ADSAddr::CTRL_REG1, 0x0, 100))
 		return -1;
 
-	if (!writeReg(BaroAddr::CTRL_REG1, 0x44, 50) || !writeReg(BaroAddr::CTRL_REG2, 0x08, 50) || !writeReg(BaroAddr::CTRL_REG3, 0x00, 50) || !writeReg(BaroAddr::CTRL_REG4, 0x01, 50)
+	if (!writeReg(ADSAddr::CTRL_REG1, 0x44, 50) || !writeReg(ADSAddr::CTRL_REG2, 0x08, 50) || !writeReg(ADSAddr::CTRL_REG3, 0x00, 50) || !writeReg(ADSAddr::CTRL_REG4, 0x01, 50)
 	//|| !writeReg(BaroAddr::FIFO_CTRL, 0x20, 50)
-			|| !writeReg(BaroAddr::RES_CONF, 0x07, 50))
+			|| !writeReg(ADSAddr::RES_CONF, 0x07, 50))
 		return -1;
 
 	uint8_t ctrlReg1Value;
-	if (!readReg(BaroAddr::CTRL_REG1, &ctrlReg1Value, 1))
+	if (!readReg(ADSAddr::CTRL_REG1, &ctrlReg1Value, 1))
 		return -1;
 
 	ctrlReg1Value |= 0x80;
 
 	// Power up
-	if (!writeReg(BaroAddr::CTRL_REG1, ctrlReg1Value, 100))
+	if (!writeReg(ADSAddr::CTRL_REG1, ctrlReg1Value, 100))
 		return -1;
 
 	if (whoAmI() != 0xBD)
@@ -82,7 +82,7 @@ int ADS131M04_24bitADC::reset()
 	return 0;
 }
 
-bool ADS131M04_24bitADC::writeReg(const BaroAddr &address, uint8_t reg, uint16_t delay)
+bool ADS131M04_24bitADC::writeReg(const ADSAddr &address, uint8_t reg, uint16_t delay)
 {
 	uint8_t cmd[2];
 
@@ -96,7 +96,7 @@ bool ADS131M04_24bitADC::writeReg(const BaroAddr &address, uint8_t reg, uint16_t
 	return true;
 }
 
-bool ADS131M04_24bitADC::readReg(const BaroAddr &address, uint8_t *reg, uint8_t n)
+bool ADS131M04_24bitADC::readReg(const ADSAddr &address, uint8_t *reg, uint8_t n)
 {
 	uint8_t cmd;
 	cmd = READ_BIT | static_cast<uint8_t>(address);
@@ -109,7 +109,7 @@ bool ADS131M04_24bitADC::readReg(const BaroAddr &address, uint8_t *reg, uint8_t 
 
 uint8_t ADS131M04_24bitADC::whoAmI() const
 {
-	uint8_t command = static_cast<uint8_t>(BaroAddr::WHO_AM_I) | READ_BIT;
+	uint8_t command = static_cast<uint8_t>(ADSAddr::WHO_AM_I) | READ_BIT;
 
 	uint8_t imuId;
 	STRHAL_SPI_Master_Transceive(spiId, &command, 1, 1, &imuId, 1, 100);
@@ -129,7 +129,7 @@ int ADS131M04_24bitADC::read()
 	uint8_t tmp[3];
 	uint32_t tmpPressure;
 
-	if (!readReg(BaroAddr::PRESS_OUT_XL, &tmp[0], 3))
+	if (!readReg(ADSAddr::PRESS_OUT_XL, &tmp[0], 3))
 		return -1;
 
 	tmpPressure = tmp[2] << 16 | tmp[1] << 8 | tmp[0];
@@ -141,7 +141,7 @@ int ADS131M04_24bitADC::read()
 	//measData[i] = (int32_t) tmpPressure;
 	measurementData = (int32_t) tmpPressure;
 
-	if (!readReg(BaroAddr::TEMP_OUT_L, &tmp[0], 2))
+	if (!readReg(ADSAddr::TEMP_OUT_L, &tmp[0], 2))
 		return -1;
 
 	//measData[i].temp = tmp[0] << 8 | tmp[1]; discarding temperature measurement

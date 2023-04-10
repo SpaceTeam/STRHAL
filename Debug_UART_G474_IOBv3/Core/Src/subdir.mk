@@ -16,6 +16,7 @@ CPP_SRCS += \
 ../Core/Src/ECU.cpp \
 ../Core/Src/IOBv1.cpp \
 ../Core/Src/IOBv3.cpp \
+../Core/Src/IOBv4.cpp \
 ../Core/Src/LCB.cpp \
 ../Core/Src/PMU.cpp \
 ../Core/Src/RCU.cpp \
@@ -36,6 +37,7 @@ OBJS += \
 ./Core/Src/ECU.o \
 ./Core/Src/IOBv1.o \
 ./Core/Src/IOBv3.o \
+./Core/Src/IOBv4.o \
 ./Core/Src/LCB.o \
 ./Core/Src/PMU.o \
 ./Core/Src/RCU.o \
@@ -54,6 +56,7 @@ CPP_DEPS += \
 ./Core/Src/ECU.d \
 ./Core/Src/IOBv1.d \
 ./Core/Src/IOBv3.d \
+./Core/Src/IOBv4.d \
 ./Core/Src/LCB.d \
 ./Core/Src/PMU.d \
 ./Core/Src/RCU.d \
@@ -74,6 +77,8 @@ Core/Src/IOBv1.o: ../Core/Src/IOBv1.cpp Core/Src/subdir.mk
 	arm-none-eabi-g++ "$<" -mcpu=cortex-m4 -std=gnu++14 -g3 -DDEBUG -DUART_DEBUG -DSTM32G474xx -DUSE_FULL_LL_DRIVER -DIOBv3_BOARD -c -I../Core/Inc -I../Core/Inc/can_houbolt -I../Drivers/STM32G474/STRHAL/Inc -I../Drivers/STM32G474/CMSIS/Include -I../Drivers/STM32G474/LL_Driver/Inc -I../Drivers/STM32G474/CMSIS/Device/ST/STM32G4xx/Include -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"Core/Src/IOBv1.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/IOBv3.o: ../Core/Src/IOBv3.cpp Core/Src/subdir.mk
 	arm-none-eabi-g++ "$<" -mcpu=cortex-m4 -std=gnu++14 -g3 -DDEBUG -DUART_DEBUG -DSTM32G474xx -DUSE_FULL_LL_DRIVER -DIOBv3_BOARD -c -I../Core/Inc -I../Core/Inc/can_houbolt -I../Drivers/STM32G474/STRHAL/Inc -I../Drivers/STM32G474/CMSIS/Include -I../Drivers/STM32G474/LL_Driver/Inc -I../Drivers/STM32G474/CMSIS/Device/ST/STM32G4xx/Include -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"Core/Src/IOBv3.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Src/IOBv4.o: ../Core/Src/IOBv4.cpp Core/Src/subdir.mk
+	arm-none-eabi-g++ "$<" -mcpu=cortex-m4 -std=gnu++14 -g3 -DDEBUG -DUART_DEBUG -DSTM32G474xx -DUSE_FULL_LL_DRIVER -DIOBv3_BOARD -c -I../Core/Inc -I../Core/Inc/can_houbolt -I../Drivers/STM32G474/STRHAL/Inc -I../Drivers/STM32G474/CMSIS/Include -I../Drivers/STM32G474/LL_Driver/Inc -I../Drivers/STM32G474/CMSIS/Device/ST/STM32G4xx/Include -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"Core/Src/IOBv4.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/LCB.o: ../Core/Src/LCB.cpp Core/Src/subdir.mk
 	arm-none-eabi-g++ "$<" -mcpu=cortex-m4 -std=gnu++14 -g3 -DDEBUG -DUART_DEBUG -DSTM32G474xx -DUSE_FULL_LL_DRIVER -DIOBv3_BOARD -c -I../Core/Inc -I../Core/Inc/can_houbolt -I../Drivers/STM32G474/STRHAL/Inc -I../Drivers/STM32G474/CMSIS/Include -I../Drivers/STM32G474/LL_Driver/Inc -I../Drivers/STM32G474/CMSIS/Device/ST/STM32G4xx/Include -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"Core/Src/LCB.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/PMU.o: ../Core/Src/PMU.cpp Core/Src/subdir.mk

@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00020784  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00025723  00000000  00000000  000207b4  2**0
+ 12 .debug_info   000255f0  00000000  00000000  000207b4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00005fa7  00000000  00000000  00045ed7  2**0
+ 13 .debug_abbrev 00005fab  00000000  00000000  00045da4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00001708  00000000  00000000  0004be80  2**3
+ 14 .debug_aranges 00001700  00000000  00000000  0004bd50  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00001510  00000000  00000000  0004d588  2**3
+ 15 .debug_ranges 00001508  00000000  00000000  0004d450  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  0002a731  00000000  00000000  0004ea98  2**0
+ 16 .debug_macro  0002ac14  00000000  00000000  0004e958  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00016e43  00000000  00000000  000791c9  2**0
+ 17 .debug_line   00016cf9  00000000  00000000  0007956c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000ddf0d  00000000  00000000  0009000c  2**0
+ 18 .debug_str    000de643  00000000  00000000  00090265  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  0016df19  2**0
+ 19 .comment      00000053  00000000  00000000  0016e8a8  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000063b8  00000000  00000000  0016df6c  2**2
+ 20 .debug_frame  00006390  00000000  00000000  0016e8fc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -965,7 +965,7 @@ IOBv3::IOBv3(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
  8000844:	603b      	str	r3, [r7, #0]
 		channel9(9,{ ADC1, STRHAL_ADC_CHANNEL_4 },		{ GPIOD,  1, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_REGULAR, 1),
 		channel10(10,{ ADC1, STRHAL_ADC_CHANNEL_2 },	{ GPIOC,  3, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_REGULAR, 1),
-		channel11(11,{ ADC2, STRHAL_ADC_CHANNEL_11 },	{ GPIOC,  5, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_REGULAR, 1),
+		channel11(11,{ ADC2, STRHAL_ADC_CHANNEL_11 },	{ GPIOC,  5, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_OPAMP, 1),
 
 		//sense_5V(0, {ADC2, STRHAL_ADC_CHANNEL_5}, 1),
 		speaker(STRHAL_TIM_TIM4, STRHAL_TIM_TIM4_CH2_PB7)
@@ -1217,7 +1217,7 @@ IOBv3::IOBv3(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
  8000b2a:	f107 02c4 	add.w	r2, r7, #196	; 0xc4
  8000b2e:	2101      	movs	r1, #1
  8000b30:	9101      	str	r1, [sp, #4]
- 8000b32:	2100      	movs	r1, #0
+ 8000b32:	2101      	movs	r1, #1
  8000b34:	9100      	str	r1, [sp, #0]
  8000b36:	210b      	movs	r1, #11
  8000b38:	4620      	mov	r0, r4
@@ -1886,7 +1886,7 @@ int main(void)
  8001042:	46bd      	mov	sp, r7
  8001044:	bd90      	pop	{r4, r7, pc}
  8001046:	bf00      	nop
- 8001048:	8e504615 	.word	0x8e504615
+ 8001048:	1fa16855 	.word	0x1fa16855
  800104c:	08008ec8 	.word	0x08008ec8
 
 08001050 <STRHAL_OofHandler>:
@@ -2970,7 +2970,7 @@ GenericChannel::GenericChannel(uint32_t nodeId, uint32_t firmwareVersion, uint32
  800169c:	bd80      	pop	{r7, pc}
  800169e:	bf00      	nop
  80016a0:	08008fc8 	.word	0x08008fc8
- 80016a4:	8e504615 	.word	0x8e504615
+ 80016a4:	1fa16855 	.word	0x1fa16855
  80016a8:	20000818 	.word	0x20000818
 
 080016ac <_ZNK14GenericChannel9getNodeIdEv>:

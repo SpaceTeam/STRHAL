@@ -25,6 +25,7 @@ int ServoChannel::init()
 
 
 	feedbackMeasurement = STRHAL_ADC_SubscribeChannel(&feedbackChannel, STRHAL_ADC_INTYPE_REGULAR);
+	if(currentChannel.ADCx)
 	currentMeasurement = STRHAL_ADC_SubscribeChannel(&currentChannel, STRHAL_ADC_INTYPE_REGULAR);
 
 	// Load and assign config
@@ -50,7 +51,7 @@ int ServoChannel::init()
 			return -1;;
 	}
 
-	if (feedbackMeasurement == nullptr || currentMeasurement == nullptr)
+	if (feedbackMeasurement == nullptr)// || currentMeasurement == nullptr)
 		return -1;
 
 	servoState = ServoState::READY;
