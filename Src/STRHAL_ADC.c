@@ -73,8 +73,8 @@ const static STRHAL_ADC_AnalogPin_t gpioMapping[5][STRHAL_ADC_CHANNEL_LAST] =
 
 		[STRHAL_ADC_CHANNEL_1] = { .port = GPIOA, .pin = LL_GPIO_PIN_0, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_1 },
 		[STRHAL_ADC_CHANNEL_2] = { .port = GPIOA, .pin = LL_GPIO_PIN_1, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_2 },
-		[STRHAL_ADC_CHANNEL_3] = { .port = GPIOA, .pin = LL_GPIO_PIN_2, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_3 },
-		[STRHAL_ADC_CHANNEL_4] = { .port = GPIOA, .pin = LL_GPIO_PIN_3, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_4 },
+		//[STRHAL_ADC_CHANNEL_3] = { .port = GPIOA, .pin = LL_GPIO_PIN_2, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_3 },
+		//[STRHAL_ADC_CHANNEL_4] = { .port = GPIOA, .pin = LL_GPIO_PIN_3, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_4 },
 
 		[STRHAL_ADC_CHANNEL_17] = { .port = GPIOA, .pin = LL_GPIO_PIN_4, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_17 },
 		[STRHAL_ADC_CHANNEL_13] = { .port = GPIOA, .pin = LL_GPIO_PIN_5, .type = STRHAL_ADC_INTYPE_REGULAR, .channel = LL_ADC_CHANNEL_13 },
