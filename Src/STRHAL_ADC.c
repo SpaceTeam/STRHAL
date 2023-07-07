@@ -168,7 +168,15 @@ static struct
 {
 	STRHAL_ADC_Data_t data[STRHAL_ADC_CHANNEL_LAST];
 	uint32_t length;
-} adc1_buf, adc2_buf, adc3_buf, adc4_buf, adc5_buf;
+} adc1_buf, adc2_buf;
+
+#ifndef STM32G431xx
+static struct
+{
+	STRHAL_ADC_Data_t data[STRHAL_ADC_CHANNEL_LAST];
+	uint32_t length;
+} adc3_buf, adc4_buf, adc5_buf;
+#endif
 
 static volatile uint64_t STRHAL_ADC_ChannelState[2] = { 0, 0 };
 
@@ -227,6 +235,7 @@ static void STRHAL_ADC_Calibrate()
 	LL_ADC_StartCalibration(ADC2, STRHAL_ADC_SINGLEDIFF);
 	while (LL_ADC_IsCalibrationOnGoing(ADC2));
 
+#ifndef STM32G431xx
 	LL_ADC_EnableInternalRegulator(ADC3);
 	LL_mDelay(100);
 	LL_ADC_StartCalibration(ADC3, STRHAL_ADC_SINGLEDIFF);
@@ -241,6 +250,7 @@ static void STRHAL_ADC_Calibrate()
 	LL_mDelay(100);
 	LL_ADC_StartCalibration(ADC5, STRHAL_ADC_SINGLEDIFF);
 	while (LL_ADC_IsCalibrationOnGoing(ADC5));
+#endif
 }
 
 void STRHAL_ADC_Init()
@@ -256,18 +266,21 @@ void STRHAL_ADC_Init()
 	}
 
 	LL_RCC_SetADCClockSource(LL_RCC_ADC12_CLKSOURCE_SYSCLK);
-	LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_SYSCLK);
 
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC12);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC345);
-
-	//Init DMA for ADC123
+	//Init DMA for ADC12
 	STRHAL_ADC_DmaInit(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL, (uint32_t) adc1_buf.data, LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC1);
 	STRHAL_ADC_DmaInit(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 1, (uint32_t) adc2_buf.data, LL_ADC_DMA_GetRegAddr(ADC2, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC2);
+
+#ifndef STM32G431xx
+	LL_RCC_SetADCClockSource(LL_RCC_ADC345_CLKSOURCE_SYSCLK);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC345);
+	//Init DMA for ADC345
 	STRHAL_ADC_DmaInit(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 2, (uint32_t) adc3_buf.data, LL_ADC_DMA_GetRegAddr(ADC3, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC3);
 	STRHAL_ADC_DmaInit(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 3, (uint32_t) adc4_buf.data, LL_ADC_DMA_GetRegAddr(ADC4, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC4);
 	STRHAL_ADC_DmaInit(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 4, (uint32_t) adc5_buf.data, LL_ADC_DMA_GetRegAddr(ADC5, LL_ADC_DMA_REG_REGULAR_DATA), LL_DMAMUX_REQ_ADC5);
+#endif
 
 	LL_ADC_CommonInitTypeDef ADC_CommonInitStruct =
 	{ 0 };
@@ -276,15 +289,19 @@ void STRHAL_ADC_Init()
 	ADC_CommonInitStruct.Multimode = LL_ADC_MULTI_INDEPENDENT;
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1), &ADC_CommonInitStruct);
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC2), &ADC_CommonInitStruct);
+
+	STRHAL_ADC_RegInit(ADC1);
+	STRHAL_ADC_RegInit(ADC2);
+
+#ifndef STM32G431xx
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC3), &ADC_CommonInitStruct);
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC4), &ADC_CommonInitStruct);
 	LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC5), &ADC_CommonInitStruct);
 
-	STRHAL_ADC_RegInit(ADC1);
-	STRHAL_ADC_RegInit(ADC2);
 	STRHAL_ADC_RegInit(ADC3);
 	STRHAL_ADC_RegInit(ADC4);
 	STRHAL_ADC_RegInit(ADC5);
+#endif
 
 	STRHAL_ADC_Calibrate();
 }
@@ -313,6 +330,7 @@ STRHAL_ADC_Data_t* STRHAL_ADC_SubscribeChannel(STRHAL_ADC_Channel_t *channel, ST
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL + 1;
 		adcChannelMsk[0] = (1U) << (STRHAL_ADC_CHANNEL_LAST + channel->channelId);
 	}
+#ifndef STM32G431xx
 	else if (channel->ADCx == ADC3)
 	{
 		analogPin = gpioMapping[2][channel->channelId];
@@ -337,6 +355,7 @@ STRHAL_ADC_Data_t* STRHAL_ADC_SubscribeChannel(STRHAL_ADC_Channel_t *channel, ST
 		dmaChannel = STRHAL_ADC_DMA_CHANNEL + 4;
 		adcChannelMsk[1] = (1U) << (2 * STRHAL_ADC_CHANNEL_LAST + channel->channelId);
 	}
+#endif
 	else
 	{
 		return NULL;
@@ -389,35 +408,47 @@ void STRHAL_ADC_Run()
 {
 	LL_ADC_REG_SetSequencerLength(ADC1, adcSeqRanks[adc1_buf.length - 1]);
 	LL_ADC_REG_SetSequencerLength(ADC2, adcSeqRanks[adc2_buf.length - 1]);
+
+#ifndef STM32G431xx
 	LL_ADC_REG_SetSequencerLength(ADC3, adcSeqRanks[adc3_buf.length - 1]);
 	LL_ADC_REG_SetSequencerLength(ADC4, adcSeqRanks[adc4_buf.length - 1]);
 	LL_ADC_REG_SetSequencerLength(ADC5, adcSeqRanks[adc5_buf.length - 1]);
+#endif
 
 	LL_DMA_EnableChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL);
 	while (!LL_DMA_IsEnabledChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL));
 	LL_DMA_EnableChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 1);
 	while (!LL_DMA_IsEnabledChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 1));
+
+#ifndef STM32G431xx
 	LL_DMA_EnableChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 2);
 	while (!LL_DMA_IsEnabledChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 2));
 	LL_DMA_EnableChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 3);
 	while (!LL_DMA_IsEnabledChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 3));
 	LL_DMA_EnableChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 4);
 	while (!LL_DMA_IsEnabledChannel(STRHAL_ADC_DMA, STRHAL_ADC_DMA_CHANNEL + 4));
+#endif
 
 	LL_ADC_Enable(ADC1);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC1) == 0);
 	LL_ADC_Enable(ADC2);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC2) == 0);
+
+#ifndef STM32G431xx
 	LL_ADC_Enable(ADC3);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC3) == 0);
 	LL_ADC_Enable(ADC4);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC4) == 0);
 	LL_ADC_Enable(ADC5);
 	while (LL_ADC_IsActiveFlag_ADRDY(ADC5) == 0);
+#endif
 
 	LL_ADC_REG_StartConversion(ADC1);
 	LL_ADC_REG_StartConversion(ADC2);
+
+#ifndef STM32G431xx
 	LL_ADC_REG_StartConversion(ADC3);
 	LL_ADC_REG_StartConversion(ADC4);
 	LL_ADC_REG_StartConversion(ADC5);
+#endif
 }

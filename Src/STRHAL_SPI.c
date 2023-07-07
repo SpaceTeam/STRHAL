@@ -97,12 +97,20 @@ typedef struct
 
 } STRHAL_SPI_t;
 
+#ifndef STM32G431xx
 STRHAL_SPI_t _spis[STRHAL_SPI_N_SPI] =
 { [STRHAL_SPI_SPI1] =
 { .spix = SPI1, }, [STRHAL_SPI_SPI2] =
 { .spix = SPI2, }, [STRHAL_SPI_SPI3] =
 { .spix = SPI3, }, [STRHAL_SPI_SPI4] =
 { .spix = SPI4, }, };
+#else
+STRHAL_SPI_t _spis[3] =
+{ [STRHAL_SPI_SPI1] =
+{ .spix = SPI1, }, [STRHAL_SPI_SPI2] =
+{ .spix = SPI2, }, [STRHAL_SPI_SPI3] =
+{ .spix = SPI3, }, };
+#endif
 
 static inline int _wait_for_txe(SPI_TypeDef *spix, uint16_t tot);
 static inline int _wait_for_rxtxend(SPI_TypeDef *spix, uint16_t tot);
@@ -121,17 +129,23 @@ void STRHAL_SPI_Init()
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI1);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI3);
-	LL_APB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI4);
+
 
 	LL_SPI_DeInit(SPI1);
 	LL_SPI_DeInit(SPI2);
 	LL_SPI_DeInit(SPI3);
-	LL_SPI_DeInit(SPI4);
 
 	LL_SPI_Disable(SPI1);
 	LL_SPI_Disable(SPI2);
 	LL_SPI_Disable(SPI3);
+
+#ifndef STM32G431xx
+	LL_APB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI4);
+
+	LL_SPI_DeInit(SPI4);
+
 	LL_SPI_Disable(SPI4);
+#endif
 }
 
 void STRHAL_SPI_Master_Run(STRHAL_SPI_Id_t spi_id)

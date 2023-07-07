@@ -91,10 +91,22 @@ typedef struct
 	uint8_t fifo_sub_state;
 } STRHAL_CAN_Handle_t;
 
+
+#ifndef STM32G431xx
+
 static STRHAL_CAN_Handle_t _fdcans[2] =
 { [STRHAL_FDCAN1] =
-{ .can = FDCAN1, .can_ram = FDCAN1_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0 }, [STRHAL_FDCAN2] =
+{ .can = FDCAN1, .can_ram = FDCAN1_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0 },
+[STRHAL_FDCAN2] =
 { .can = FDCAN2, .can_ram = FDCAN2_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0 } };
+
+#else
+
+static STRHAL_CAN_Handle_t _fdcans[1] =
+{ [STRHAL_FDCAN1] =
+{ .can = FDCAN1, .can_ram = FDCAN1_MESSAGE_RAM, .state = STRHAL_CAN_STATE_0, .filter_n = 0, .fifo_sub_state = 0 } };
+
+#endif
 
 static void STRHAL_CAN_Init_GPIO(void)
 {
@@ -373,7 +385,7 @@ void STRHAL_CAN_Run()
 {
 	// End initialisation - start FDCANs
 	STRHAL_CAN_Handle_t *fdcan1 = &_fdcans[STRHAL_FDCAN1];
-	STRHAL_CAN_Handle_t *fdcan2 = &_fdcans[STRHAL_FDCAN2];
+
 	if (fdcan1->state == STRHAL_CAN_STATE_INITIALISING)
 	{
 		if (fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX0))
@@ -397,6 +409,10 @@ void STRHAL_CAN_Run()
 		_fdcans[STRHAL_FDCAN1].state = STRHAL_CAN_STATE_RUNNING;
 		LL_mDelay(100);
 	}
+
+#ifndef STM32G431xx
+	STRHAL_CAN_Handle_t *fdcan2 = &_fdcans[STRHAL_FDCAN2];
+
 	if (fdcan2->state == STRHAL_CAN_STATE_INITIALISING)
 	{
 		if (fdcan2->fifo_sub_state & (1U << STRHAL_FDCAN_RX0))
@@ -419,6 +435,7 @@ void STRHAL_CAN_Run()
 		_fdcans[STRHAL_FDCAN2].state = STRHAL_CAN_STATE_RUNNING;
 		LL_mDelay(100);
 	}
+#endif
 
 }
 
@@ -472,6 +489,7 @@ void FDCAN1_IT0_IRQHandler(void)
 	}
 }
 
+#ifndef STM32G431xx
 void FDCAN2_IT0_IRQHandler(void)
 {
 	if (FDCAN2->IR & FDCAN_IR_RF0N)
@@ -523,3 +541,4 @@ void FDCAN2_IT0_IRQHandler(void)
 		FDCAN2->RXF1A = i & 0x7;
 	}
 }
+#endif

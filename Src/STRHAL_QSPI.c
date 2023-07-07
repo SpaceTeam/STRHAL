@@ -1,3 +1,4 @@
+#ifndef STM32G431xx //No QSPI on G431xx
 #include <string.h>
 #include <math.h>
 
@@ -259,3 +260,4 @@ void _clear_status(uint32_t flags)
 {
 	QUADSPI->FCR |= (flags);
 }
+#endif
