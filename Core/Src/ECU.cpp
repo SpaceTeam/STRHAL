@@ -107,7 +107,7 @@ int ECU::exec()
 	while (1)
 	{
 
-		detectReadoutMode();
+		//detectReadoutMode();
 #ifdef UART_DEBUG
 
 		uint8_t tempBuf[64] =

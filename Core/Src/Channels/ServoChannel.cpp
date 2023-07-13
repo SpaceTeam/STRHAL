@@ -186,6 +186,8 @@ int ServoChannel::processMessage(uint8_t cmd_id, uint8_t *ret_data, uint8_t &ret
 	}
 }
 
+
+
 int ServoChannel::getSensorData(uint8_t *data, uint8_t &n)
 {
 	uint32_t *out = (uint32_t*) (data + n);
@@ -193,6 +195,25 @@ int ServoChannel::getSensorData(uint8_t *data, uint8_t &n)
 
 	n += SERVO_DATA_N_BYTES;
 	return 0;
+}
+
+uint32_t ServoChannel::getState() const
+{
+	int32_t data = 0;
+	getVariable(SERVO_TARGET_POSITION, data);
+	return data;
+}
+
+int ServoChannel::setState(uint32_t state)
+{
+	setVariable(SERVO_TARGET_POSITION, state);
+	return 0;
+}
+
+
+bool ServoChannel::isAnalog()
+{
+	return true;
 }
 
 int ServoChannel::setVariable(uint8_t variable_id, int32_t data)

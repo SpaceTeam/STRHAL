@@ -114,7 +114,13 @@ int DigitalOutChannel::setState(uint32_t state)
 	return 0;
 }
 
-uint16_t DigitalOutChannel::getMeas() const
+
+bool DigitalOutChannel::isAnalog()
+{
+	return false;
+}
+
+uint16_t DigitalOutChannel::getMeasurement() const
 {
 	return *adcMeasurement;
 }

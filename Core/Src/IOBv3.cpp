@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <cstring>
 
+#if defined(IOBv3_BOARD)
+
 IOBv3::IOBv3(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		GenericChannel(node_id, fw_version, refresh_divider),
 		led1({ GPIOB, 15, STRHAL_GPIO_TYPE_OPP }),
@@ -95,3 +97,4 @@ int IOBv3::exec()
 
 	return 0;
 }
+#endif

@@ -1,7 +1,7 @@
 #ifndef BAROCHANNEL_H
 #define BAROCHANNEL_H
 
-#include "AbstractChannel.h"
+#include "./Channels/AbstractChannel.h"
 #include <can_houbolt/channels/adc24_channel_def.h>
 #include "../Modules/LPS25HB_Baro.h"
 #include <STRHAL.h>

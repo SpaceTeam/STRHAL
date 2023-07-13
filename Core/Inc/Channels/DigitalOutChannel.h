@@ -2,10 +2,12 @@
 #define DIGITALOUTCHANNEL_H
 
 #include "./Channels/AbstractChannel.h"
+#include "./Channels/AbstractControlInputChannel.h"
+#include "./Channels/AbstractControlOutputChannel.h"
 #include <can_houbolt/channels/digital_out_channel_def.h>
 #include <STRHAL.h>
 
-class DigitalOutChannel: public AbstractChannel
+class DigitalOutChannel: public AbstractChannel, public AbstractControlInputChannel, public AbstractControlOutputChannel
 {
 	public:
 		DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t &adcChannel, const STRHAL_GPIO_t &cntrlPin, STRHAL_ADC_InType_t adcInType, uint32_t refreshDivider);
@@ -21,12 +23,14 @@ class DigitalOutChannel: public AbstractChannel
 		int exec() override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
-		uint16_t getMeas() const;
+		uint16_t getMeasurement() const;
 
 		int processMessage(uint8_t commandI, uint8_t *returnData, uint8_t &n) override;
 
 		uint32_t getState() const;
 		int setState(uint32_t state);
+		bool isAnalog();
+
 	protected:
 
 		int setVariable(uint8_t variableId, int32_t data) override;

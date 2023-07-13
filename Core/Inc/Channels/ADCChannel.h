@@ -2,10 +2,11 @@
 #define ADCCHANNEL_H
 
 #include "./Channels/AbstractChannel.h"
+#include "./Channels/AbstractControlInputChannel.h"
 #include <can_houbolt/channels/adc16_channel_def.h>
 #include <STRHAL.h>
 
-class ADCChannel: public AbstractChannel
+class ADCChannel: public AbstractChannel, public AbstractControlInputChannel
 {
 	public:
 		ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChannel, uint32_t refreshDivider);

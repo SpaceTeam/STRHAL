@@ -2,8 +2,8 @@
 #include <cstring>
 #include <cstdio>
 
-ADCChannel::ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChanel, uint32_t refreshDivider) :
-		AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), adcChannel(adcChanel)
+ADCChannel::ADCChannel(uint8_t id, const STRHAL_ADC_Channel_t adcChannel, uint32_t refreshDivider) :
+		AbstractChannel(CHANNEL_TYPE_ADC16, id, refreshDivider), adcChannel(adcChannel)
 {
 }
 

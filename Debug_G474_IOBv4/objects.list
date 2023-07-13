@@ -17,6 +17,8 @@
 "Core/Src/system_stm32g4xx.o"
 "Core/Src/Channels/ADCChannel.o"
 "Core/Src/Channels/AbstractChannel.o"
+"Core/Src/Channels/AbstractControlInputChannel.o"
+"Core/Src/Channels/AbstractControlOutputChannel.o"
 "Core/Src/Channels/BaroChannel.o"
 "Core/Src/Channels/Data32Channel.o"
 "Core/Src/Channels/DigitalInChannel.o"

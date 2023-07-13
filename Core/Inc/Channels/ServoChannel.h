@@ -35,6 +35,12 @@ class ServoChannel: public AbstractChannel
 		int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n) override;
 		int getSensorData(uint8_t *data, uint8_t &n) override;
 
+
+
+		uint32_t getState() const;
+		int setState(uint32_t state);
+		bool isAnalog();
+
 		void setTargetPos(uint16_t pos);
 		void moveToPosInInterval(uint16_t position, uint16_t interval);
 		uint16_t getTargetPos() const;

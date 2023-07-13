@@ -1,6 +1,6 @@
 #include <Channels/PressureControlChannel.h>
 
-PressureControlChannel::PressureControlChannel(uint8_t id, const ADCChannel &pressureChannel, DigitalOutChannel &solenoidChannel, uint32_t refreshDivider) :
+PressureControlChannel::PressureControlChannel(uint8_t id, AbstractControlInputChannel &pressureChannel, AbstractControlOutputChannel &solenoidChannel, uint32_t refreshDivider) :
 		AbstractChannel(CHANNEL_TYPE_CONTROL, id, refreshDivider), pressureChannel(pressureChannel), solenoidChannel(solenoidChannel)
 {
 }
