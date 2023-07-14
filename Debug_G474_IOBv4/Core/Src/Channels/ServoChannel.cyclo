@@ -1,0 +1,22 @@
+ServoChannel.cpp:11:1:ServoChannel::ServoChannel(uint8_t, uint8_t, const STRHAL_TIM_TimerId_t&, const STRHAL_TIM_ChannelId_t&, const STRHAL_ADC_Channel_t&, const STRHAL_ADC_Channel_t&, const STRHAL_GPIO_t&, uint32_t)	1
+ServoChannel.cpp:16:5:virtual int ServoChannel::init()	9
+ServoChannel.cpp:61:5:virtual int ServoChannel::exec()	20
+ServoChannel.cpp:166:5:virtual int ServoChannel::reset()	1
+ServoChannel.cpp:171:5:virtual int ServoChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	2
+ServoChannel.cpp:191:5:virtual int ServoChannel::getSensorData(uint8_t*, uint8_t&)	1
+ServoChannel.cpp:200:10:uint32_t ServoChannel::getState() const	1
+ServoChannel.cpp:207:5:int ServoChannel::setState(uint32_t)	1
+ServoChannel.cpp:214:6:bool ServoChannel::isAnalog()	1
+ServoChannel.cpp:219:5:virtual int ServoChannel::setVariable(uint8_t, int32_t)	7
+ServoChannel.cpp:260:5:virtual int ServoChannel::getVariable(uint8_t, int32_t&) const	7
+ServoChannel.cpp:293:6:void ServoChannel::setTargetPos(uint16_t)	1
+ServoChannel.cpp:298:6:void ServoChannel::moveToPosInInterval(uint16_t, uint16_t)	1
+ServoChannel.cpp:304:10:uint16_t ServoChannel::getTargetPos() const	1
+ServoChannel.cpp:309:10:uint16_t ServoChannel::getPos() const	1
+ServoChannel.cpp:314:10:uint16_t ServoChannel::getFeedbackMeasurement() const	1
+ServoChannel.cpp:319:10:uint16_t ServoChannel::getCurrentMeasurement() const	1
+ServoChannel.cpp:324:10:static uint16_t ServoChannel::tPosToCanonic(uint16_t, const ServoRefPos&)	7
+ServoChannel.cpp:357:10:static uint16_t ServoChannel::tPosFromCanonic(uint16_t, const ServoRefPos&)	3
+ServoChannel.cpp:372:10:static uint16_t ServoChannel::distPos(uint16_t, uint16_t)	2
+ServoChannel.h:26:7:ServoChannel::~ServoChannel()	1
+ServoChannel.h:26:7:virtual ServoChannel::~ServoChannel()	1

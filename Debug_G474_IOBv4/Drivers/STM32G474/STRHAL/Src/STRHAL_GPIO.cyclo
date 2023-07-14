@@ -1,0 +1,13 @@
+stm32g4xx_ll_gpio.h:784:26:LL_GPIO_ReadInputPort	1
+stm32g4xx_ll_gpio.h:836:26:LL_GPIO_ReadOutputPort	1
+stm32g4xx_ll_gpio.h:894:22:LL_GPIO_SetOutputPin	1
+stm32g4xx_ll_gpio.h:923:22:LL_GPIO_ResetOutputPin	1
+stm32g4xx_ll_bus.h:451:22:LL_AHB2_GRP1_EnableClock	1
+STRHAL_GPIO.c:7:6:STRHAL_GPIO_Init	1
+STRHAL_GPIO.c:19:6:STRHAL_GPIO_SingleInit	7
+STRHAL_GPIO.c:62:6:STRHAL_GPIO_GroupInit	2
+STRHAL_GPIO.c:71:13:STRHAL_GPIO_Write	3
+STRHAL_GPIO.c:86:6:STRHAL_GPIO_GroupWrite	2
+STRHAL_GPIO.c:93:21:STRHAL_GPIO_Read	2
+STRHAL_GPIO.c:101:21:STRHAL_GPIO_ReadOutput	2
+STRHAL_GPIO.c:109:6:STRHAL_GPIO_GroupRead	2

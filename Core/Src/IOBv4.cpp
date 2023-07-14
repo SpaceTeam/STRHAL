@@ -28,7 +28,7 @@ IOBv4::IOBv4(uint32_t node_id, uint32_t fw_version, uint32_t refresh_divider) :
 		channel9(9,{ ADC1, STRHAL_ADC_CHANNEL_2 },		{ GPIOA,  0, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_REGULAR, 1),
 		channel10(10,{ ADC1, STRHAL_ADC_CHANNEL_9 },	{ GPIOC,  2, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_REGULAR, 1),
 		channel11(11,{ ADC1, STRHAL_ADC_CHANNEL_7 },	{ GPIOB,  3, STRHAL_GPIO_TYPE_OPP }, STRHAL_ADC_INTYPE_REGULAR, 1),
-		//pressurecontrol0(12, channel0, channel1),
+		pressurecontrol0(12, (GenericChannel&)*this, 0, channel1, 1),
 
 		speaker(STRHAL_TIM_TIM8, STRHAL_TIM_TIM8_CH4_PC9)
 {

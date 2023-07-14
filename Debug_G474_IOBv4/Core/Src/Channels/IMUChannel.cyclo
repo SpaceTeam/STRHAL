@@ -1,0 +1,10 @@
+IMUChannel.cpp:6:1:IMUChannel::IMUChannel(uint8_t, ICM2060x_IMU*, IMUMeasurement, uint32_t)	1
+IMUChannel.cpp:11:5:virtual int IMUChannel::init()	1
+IMUChannel.cpp:16:5:virtual int IMUChannel::exec()	1
+IMUChannel.cpp:21:5:virtual int IMUChannel::reset()	1
+IMUChannel.cpp:26:5:virtual int IMUChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	1
+IMUChannel.cpp:35:5:virtual int IMUChannel::getSensorData(uint8_t*, uint8_t&)	1
+IMUChannel.cpp:56:5:virtual int IMUChannel::setVariable(uint8_t, int32_t)	2
+IMUChannel.cpp:69:5:virtual int IMUChannel::getVariable(uint8_t, int32_t&) const	3
+IMUChannel.h:9:7:IMUChannel::~IMUChannel()	1
+IMUChannel.h:9:7:virtual IMUChannel::~IMUChannel()	1

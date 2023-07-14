@@ -1,0 +1,22 @@
+LoRa1276F30_Radio.cpp:8:1:LoRa1276F30_Radio::LoRa1276F30_Radio(const STRHAL_SPI_Id_t&, const STRHAL_SPI_Config_t&, const STRHAL_GPIO_t&, const STRHAL_GPIO_t&, const STRHAL_GPIO_t&)	1
+LoRa1276F30_Radio.cpp:13:5:int LoRa1276F30_Radio::init()	3
+LoRa1276F30_Radio.cpp:76:5:int LoRa1276F30_Radio::reset()	1
+LoRa1276F30_Radio.cpp:81:6:bool LoRa1276F30_Radio::isBusy()	1
+LoRa1276F30_Radio.cpp:86:6:void LoRa1276F30_Radio::waitForBusy()	2
+LoRa1276F30_Radio.cpp:91:6:bool LoRa1276F30_Radio::sendBytes(uint8_t*, uint8_t)	6
+LoRa1276F30_Radio.cpp:141:6:bool LoRa1276F30_Radio::writeReg(const LoraAddr&, uint8_t, uint16_t)	2
+LoRa1276F30_Radio.cpp:157:6:bool LoRa1276F30_Radio::writeCommand(const LoraOpcode&, uint8_t*, uint8_t, uint16_t)	3
+LoRa1276F30_Radio.cpp:173:6:bool LoRa1276F30_Radio::readReg(const LoraAddr&, uint8_t*, uint8_t)	1
+LoRa1276F30_Radio.cpp:185:9:uint8_t LoRa1276F30_Radio::getStatus()	2
+LoRa1276F30_Radio.cpp:198:9:uint8_t LoRa1276F30_Radio::getErrors()	2
+LoRa1276F30_Radio.cpp:211:9:uint8_t LoRa1276F30_Radio::getReg(const LoraAddr&)	1
+LoRa1276F30_Radio.cpp:218:6:bool LoRa1276F30_Radio::setPacketType()	1
+LoRa1276F30_Radio.cpp:224:6:bool LoRa1276F30_Radio::calibrateImage()	1
+LoRa1276F30_Radio.cpp:231:6:bool LoRa1276F30_Radio::setRFFrequency()	1
+LoRa1276F30_Radio.cpp:241:6:bool LoRa1276F30_Radio::setPAConfig()	1
+LoRa1276F30_Radio.cpp:249:6:bool LoRa1276F30_Radio::SetTxParams()	1
+LoRa1276F30_Radio.cpp:257:6:bool LoRa1276F30_Radio::SetBufferBaseAddress()	1
+LoRa1276F30_Radio.cpp:264:6:bool LoRa1276F30_Radio::setModulationParams()	1
+LoRa1276F30_Radio.cpp:271:6:bool LoRa1276F30_Radio::setPacketParams()	1
+LoRa1276F30_Radio.cpp:278:6:bool LoRa1276F30_Radio::setDioIrqParams()	1
+LoRa1276F30_Radio.cpp:285:6:bool LoRa1276F30_Radio::setTx()	1

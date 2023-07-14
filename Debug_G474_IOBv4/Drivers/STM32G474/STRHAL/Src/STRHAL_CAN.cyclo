@@ -1,0 +1,16 @@
+core_cm4.h:1667:26:__NVIC_GetPriorityGrouping	1
+core_cm4.h:1679:22:__NVIC_EnableIRQ	2
+core_cm4.h:1809:22:__NVIC_SetPriority	2
+core_cm4.h:1856:26:NVIC_EncodePriority	2
+stm32g4xx_ll_bus.h:451:22:LL_AHB2_GRP1_EnableClock	1
+stm32g4xx_ll_bus.h:913:22:LL_APB1_GRP1_EnableClock	1
+stm32g4xx_ll_rcc.h:1647:22:LL_RCC_SetFDCANClockSource	1
+STRHAL_CAN.c:99:13:STRHAL_CAN_Init_GPIO	1
+STRHAL_CAN.c:138:5:STRHAL_CAN_Instance_Init	8
+STRHAL_CAN.c:225:5:STRHAL_CAN_Subscribe	10
+STRHAL_CAN.c:276:14:STRHAL_CAN_Init	1
+STRHAL_CAN.c:284:9:STRHAL_CAN_Receive	5
+STRHAL_CAN.c:327:9:STRHAL_CAN_Send	7
+STRHAL_CAN.c:372:6:STRHAL_CAN_Run	7
+STRHAL_CAN.c:425:6:FDCAN1_IT0_IRQHandler	5
+STRHAL_CAN.c:475:6:FDCAN2_IT0_IRQHandler	5

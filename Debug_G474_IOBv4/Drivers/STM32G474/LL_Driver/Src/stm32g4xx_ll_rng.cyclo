@@ -1,0 +1,5 @@
+stm32g4xx_ll_bus.h:581:22:LL_AHB2_GRP1_ForceReset	1
+stm32g4xx_ll_bus.h:623:22:LL_AHB2_GRP1_ReleaseReset	1
+stm32g4xx_ll_rng.c:71:13:LL_RNG_DeInit	2
+stm32g4xx_ll_rng.c:102:13:LL_RNG_Init	1
+stm32g4xx_ll_rng.c:120:6:LL_RNG_StructInit	1

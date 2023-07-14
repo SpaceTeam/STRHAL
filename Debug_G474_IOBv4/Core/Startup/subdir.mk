@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
+# Toolchain: GNU Tools for STM32 (10.3-2021.10)
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
@@ -15,6 +15,13 @@ OBJS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Core/Startup/startup_stm32g491metx.o: ../Core/Startup/startup_stm32g491metx.s Core/Startup/subdir.mk
-	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"/home/georg/data/1_Uni/z_SpaceTeam/3_Software/firmware_liquids/Drivers/STM32G474" -x assembler-with-cpp -MMD -MP -MF"Core/Startup/startup_stm32g491metx.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
+Core/Startup/%.o: ../Core/Startup/%.s Core/Startup/subdir.mk
+	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"C:/Users/Zbook15 G5/Programming/firmware_liquids/Drivers/STM32G474" -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
+
+clean: clean-Core-2f-Startup
+
+clean-Core-2f-Startup:
+	-$(RM) ./Core/Startup/startup_stm32g491metx.d ./Core/Startup/startup_stm32g491metx.o
+
+.PHONY: clean-Core-2f-Startup
 

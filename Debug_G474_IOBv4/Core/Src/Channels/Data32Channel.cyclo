@@ -1,0 +1,11 @@
+Data32Channel.cpp:5:1:Data32Channel::Data32Channel(uint8_t, int32_t*, uint32_t)	1
+Data32Channel.cpp:10:5:virtual int Data32Channel::init()	2
+Data32Channel.cpp:18:5:virtual int Data32Channel::exec()	1
+Data32Channel.cpp:23:5:virtual int Data32Channel::reset()	1
+Data32Channel.cpp:28:5:virtual int Data32Channel::processMessage(uint8_t, uint8_t*, uint8_t&)	1
+Data32Channel.cpp:37:5:virtual int Data32Channel::getSensorData(uint8_t*, uint8_t&)	1
+Data32Channel.cpp:46:5:virtual int Data32Channel::setVariable(uint8_t, int32_t)	2
+Data32Channel.cpp:59:5:virtual int Data32Channel::getVariable(uint8_t, int32_t&) const	2
+Data32Channel.cpp:71:9:int32_t Data32Channel::getMeasurement() const	1
+Data32Channel.h:8:7:Data32Channel::~Data32Channel()	1
+Data32Channel.h:8:7:virtual Data32Channel::~Data32Channel()	1

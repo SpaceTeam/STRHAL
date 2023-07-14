@@ -1,0 +1,13 @@
+GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+RCU.cpp:7:1:RCU::RCU(uint32_t, uint32_t, uint32_t)	1
+RCU.cpp:56:5:virtual int RCU::init()	7
+RCU.cpp:87:5:virtual int RCU::exec()	5
+RCU.h:20:7:RCU::~RCU()	1
+RCU.h:20:7:virtual RCU::~RCU()	1
+ADCChannel.h:9:7:ADCChannel::~ADCChannel()	1
+ADCChannel.h:9:7:virtual ADCChannel::~ADCChannel()	1
+IMUChannel.h:9:7:IMUChannel::~IMUChannel()	1
+IMUChannel.h:9:7:virtual IMUChannel::~IMUChannel()	1
+Data32Channel.h:8:7:Data32Channel::~Data32Channel()	1
+Data32Channel.h:8:7:virtual Data32Channel::~Data32Channel()	1

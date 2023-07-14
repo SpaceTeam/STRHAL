@@ -1,0 +1,26 @@
+GenericChannel.cpp:9:1:GenericChannel::GenericChannel(uint32_t, uint32_t, uint32_t)	1
+GenericChannel.cpp:15:10:uint32_t GenericChannel::getNodeId() const	1
+GenericChannel.cpp:20:5:virtual int GenericChannel::init()	7
+GenericChannel.cpp:43:5:virtual int GenericChannel::exec()	7
+GenericChannel.cpp:63:5:virtual int GenericChannel::reset()	1
+GenericChannel.cpp:69:5:virtual int GenericChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	7
+GenericChannel.cpp:96:5:int GenericChannel::processMessage(uint8_t, uint8_t*, uint8_t&, uint8_t)	5
+GenericChannel.cpp:114:5:virtual int GenericChannel::setVariable(uint8_t, int32_t)	7
+GenericChannel.cpp:148:5:virtual int GenericChannel::getVariable(uint8_t, int32_t&) const	6
+GenericChannel.cpp:169:5:int GenericChannel::flashClear(uint8_t*, uint8_t&)	1
+GenericChannel.cpp:178:5:virtual int GenericChannel::getSensorData(uint8_t*, uint8_t&)	9
+GenericChannel.cpp:200:5:int GenericChannel::getFlashClearInfo(uint8_t*, uint8_t&)	4
+GenericChannel.cpp:223:30:AbstractControlInputChannel* GenericChannel::getControlInputChannel(uint8_t)	1
+GenericChannel.cpp:229:5:int GenericChannel::getNodeInfo(uint8_t*, uint8_t&)	3
+GenericChannel.cpp:252:6:void GenericChannel::registerChannel(AbstractChannel*)	2
+GenericChannel.cpp:258:6:void GenericChannel::registerChannels(AbstractChannel**, uint8_t)	2
+GenericChannel.cpp:266:6:void GenericChannel::registerModule(AbstractModule*)	2
+GenericChannel.cpp:275:6:void GenericChannel::printLog()	3
+GenericChannel.cpp:293:6:void GenericChannel::detectReadoutMode()	2
+GenericChannel.cpp:304:6:static void GenericChannel::setLoraActive(bool)	1
+GenericChannel.cpp:308:6:static void GenericChannel::receptorLora(uint32_t, uint8_t*, uint32_t)	9
+GenericChannel.cpp:361:6:static void GenericChannel::receptor(uint32_t, uint8_t*, uint32_t)	5
+GenericChannel.cpp:404:6:static void GenericChannel::heartbeatCan()	3
+GenericChannel.cpp:444:6:static void GenericChannel::heartbeatLora()	2
+GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1

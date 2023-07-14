@@ -1,0 +1,7 @@
+GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+LCB.cpp:6:1:LCB::LCB(uint32_t, uint32_t, uint32_t)	1
+LCB.cpp:17:5:virtual int LCB::init()	4
+LCB.cpp:38:5:virtual int LCB::exec()	3
+LCB.h:13:7:LCB::~LCB()	1
+LCB.h:13:7:virtual LCB::~LCB()	1

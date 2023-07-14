@@ -1,0 +1,11 @@
+AbstractModule.h:4:7:constexpr AbstractModule::AbstractModule()	1
+LPS25HB_Baro.cpp:8:1:LPS25HB_Baro::LPS25HB_Baro(const STRHAL_SPI_Id_t&, const STRHAL_SPI_Config_t&, const STRHAL_GPIO_t&)	1
+LPS25HB_Baro.cpp:13:5:virtual int LPS25HB_Baro::init()	12
+LPS25HB_Baro.cpp:65:5:virtual int LPS25HB_Baro::exec()	2
+LPS25HB_Baro.cpp:78:5:virtual int LPS25HB_Baro::reset()	1
+LPS25HB_Baro.cpp:85:6:bool LPS25HB_Baro::writeReg(const BaroAddr&, uint8_t, uint16_t)	2
+LPS25HB_Baro.cpp:99:6:bool LPS25HB_Baro::readReg(const BaroAddr&, uint8_t*, uint8_t)	2
+LPS25HB_Baro.cpp:110:9:uint8_t LPS25HB_Baro::whoAmI() const	1
+LPS25HB_Baro.cpp:120:6:bool LPS25HB_Baro::measurementReady()	1
+LPS25HB_Baro.cpp:125:5:int LPS25HB_Baro::read()	3
+LPS25HB_Baro.cpp:159:6:void LPS25HB_Baro::getMeasurement(int32_t&)	1

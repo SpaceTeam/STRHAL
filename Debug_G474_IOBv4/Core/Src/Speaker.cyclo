@@ -1,0 +1,5 @@
+Speaker.cpp:3:1:Speaker::Speaker(const STRHAL_TIM_TimerId_t&, const STRHAL_TIM_ChannelId_t&)	1
+Speaker.cpp:8:5:int Speaker::init()	4
+Speaker.cpp:24:5:int Speaker::setPWM(uint16_t)	3
+Speaker.cpp:44:6:void Speaker::enable(bool)	1
+Speaker.cpp:49:6:void Speaker::beep(uint8_t, uint16_t, uint16_t)	2

@@ -1,0 +1,13 @@
+stm32g4xx_ll_lptim.h:386:26:LL_LPTIM_IsEnabled	2
+stm32g4xx_ll_lptim.h:1150:22:LL_LPTIM_ClearFlag_CMPOK	1
+stm32g4xx_ll_lptim.h:1162:26:LL_LPTIM_IsActiveFlag_CMPOK	2
+stm32g4xx_ll_lptim.h:1173:22:LL_LPTIM_ClearFlag_ARROK	1
+stm32g4xx_ll_lptim.h:1185:26:LL_LPTIM_IsActiveFlag_ARROK	2
+stm32g4xx_ll_bus.h:1139:22:LL_APB1_GRP1_ForceReset	1
+stm32g4xx_ll_bus.h:1209:22:LL_APB1_GRP1_ReleaseReset	1
+stm32g4xx_ll_rcc.h:1600:22:LL_RCC_SetLPTIMClockSource	1
+stm32g4xx_ll_rcc.h:1825:26:LL_RCC_GetLPTIMClockSource	1
+stm32g4xx_ll_lptim.c:95:13:LL_LPTIM_DeInit	2
+stm32g4xx_ll_lptim.c:121:6:LL_LPTIM_StructInit	1
+stm32g4xx_ll_lptim.c:140:13:LL_LPTIM_Init	2
+stm32g4xx_ll_lptim.c:183:6:LL_LPTIM_Disable	11

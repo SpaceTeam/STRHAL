@@ -1,0 +1,4 @@
+stm32g4xx_ll_comp.h:692:26:LL_COMP_IsLocked	2
+stm32g4xx_ll_comp.c:284:13:LL_COMP_DeInit	2
+stm32g4xx_ll_comp.c:321:13:LL_COMP_Init	2
+stm32g4xx_ll_comp.c:375:6:LL_COMP_StructInit	1

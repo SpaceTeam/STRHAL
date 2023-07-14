@@ -1,0 +1,6 @@
+stm32g4xx_ll_fmac.h:520:22:LL_FMAC_EnableReset	1
+stm32g4xx_ll_fmac.h:531:26:LL_FMAC_IsEnabledReset	2
+stm32g4xx_ll_bus.h:320:22:LL_AHB1_GRP1_ForceReset	1
+stm32g4xx_ll_bus.h:345:22:LL_AHB1_GRP1_ReleaseReset	1
+stm32g4xx_ll_fmac.c:61:13:LL_FMAC_Init	3
+stm32g4xx_ll_fmac.c:93:13:LL_FMAC_DeInit	2

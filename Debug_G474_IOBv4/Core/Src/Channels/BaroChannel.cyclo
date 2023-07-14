@@ -1,0 +1,10 @@
+BaroChannel.cpp:6:1:BaroChannel::BaroChannel(uint8_t, LPS25HB_Baro*, uint32_t)	1
+BaroChannel.cpp:11:5:virtual int BaroChannel::init()	1
+BaroChannel.cpp:16:5:virtual int BaroChannel::exec()	1
+BaroChannel.cpp:21:5:virtual int BaroChannel::reset()	1
+BaroChannel.cpp:26:5:virtual int BaroChannel::getSensorData(uint8_t*, uint8_t&)	1
+BaroChannel.cpp:44:5:virtual int BaroChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	1
+BaroChannel.cpp:49:5:virtual int BaroChannel::setVariable(uint8_t, int32_t)	2
+BaroChannel.cpp:62:5:virtual int BaroChannel::getVariable(uint8_t, int32_t&) const	2
+BaroChannel.cpp:74:1:BaroChannel::~BaroChannel()	1
+BaroChannel.cpp:74:1:virtual BaroChannel::~BaroChannel()	1

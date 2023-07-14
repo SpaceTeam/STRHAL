@@ -1,0 +1,2 @@
+system_stm32g4xx.c:164:6:SystemInit	1
+system_stm32g4xx.c:215:6:SystemCoreClockUpdate	6

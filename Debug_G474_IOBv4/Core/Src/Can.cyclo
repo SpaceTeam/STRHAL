@@ -1,0 +1,10 @@
+Can.cpp:10:1:Can::Can(uint32_t)	1
+Can.cpp:15:6:static Can& Can::instance(uint32_t)	4
+Can.cpp:25:5:virtual int Can::init(Com_Receptor_t, Com_Heartbeat_t)	1
+Can.cpp:30:5:int Can::init(Com_Receptor_t, Com_Heartbeat_t, COMMode)	12
+Can.cpp:134:5:virtual int Can::exec()	2
+Can.cpp:143:5:static int Can::send(uint32_t, uint8_t*, uint8_t)	2
+Can.cpp:168:6:void Can::sendAsMaster(uint8_t, uint8_t, uint8_t, uint8_t*, uint8_t)	1
+Can.cpp:188:6:static void Can::bridgeReceptor(STRHAL_FDCAN_Id_t, uint32_t, uint8_t*, uint32_t)	3
+Can.cpp:208:6:static void Can::internalReceptor(uint32_t, uint8_t*, uint32_t)	1
+Can.cpp:214:6:static void Can::externalReceptor(uint32_t, uint8_t*, uint32_t)	1

@@ -1,0 +1,15 @@
+DigitalOutChannel.cpp:3:1:DigitalOutChannel::DigitalOutChannel(uint8_t, const STRHAL_ADC_Channel_t&, const STRHAL_GPIO_t&, STRHAL_ADC_InType_t, uint32_t)	1
+DigitalOutChannel.cpp:8:1:DigitalOutChannel::DigitalOutChannel(uint8_t, const STRHAL_GPIO_t&, uint32_t)	1
+DigitalOutChannel.cpp:13:5:virtual int DigitalOutChannel::init()	3
+DigitalOutChannel.cpp:27:5:virtual int DigitalOutChannel::exec()	1
+DigitalOutChannel.cpp:32:5:virtual int DigitalOutChannel::reset()	1
+DigitalOutChannel.cpp:37:5:virtual int DigitalOutChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	1
+DigitalOutChannel.cpp:46:5:virtual int DigitalOutChannel::getSensorData(uint8_t*, uint8_t&)	2
+DigitalOutChannel.cpp:55:5:virtual int DigitalOutChannel::setVariable(uint8_t, int32_t)	6
+DigitalOutChannel.cpp:78:5:virtual int DigitalOutChannel::getVariable(uint8_t, int32_t&) const	5
+DigitalOutChannel.cpp:99:10:virtual uint32_t DigitalOutChannel::getState() const	1
+DigitalOutChannel.cpp:104:5:virtual int DigitalOutChannel::setState(uint32_t)	2
+DigitalOutChannel.cpp:118:6:virtual bool DigitalOutChannel::isAnalog()	1
+DigitalOutChannel.cpp:123:10:virtual uint16_t DigitalOutChannel::getMeasurement() const	1
+DigitalOutChannel.h:10:7:DigitalOutChannel::~DigitalOutChannel()	1
+DigitalOutChannel.h:10:7:virtual DigitalOutChannel::~DigitalOutChannel()	1

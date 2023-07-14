@@ -1,0 +1,11 @@
+AbstractModule.h:4:7:constexpr AbstractModule::AbstractModule()	1
+ADS131M04_24bitADC.cpp:8:1:ADS131M04_24bitADC::ADS131M04_24bitADC(const STRHAL_SPI_Id_t&, const STRHAL_SPI_Config_t&, const STRHAL_GPIO_t&)	1
+ADS131M04_24bitADC.cpp:13:5:virtual int ADS131M04_24bitADC::init()	12
+ADS131M04_24bitADC.cpp:65:5:virtual int ADS131M04_24bitADC::exec()	2
+ADS131M04_24bitADC.cpp:78:5:virtual int ADS131M04_24bitADC::reset()	1
+ADS131M04_24bitADC.cpp:85:6:bool ADS131M04_24bitADC::writeReg(const ADSAddr&, uint8_t, uint16_t)	2
+ADS131M04_24bitADC.cpp:99:6:bool ADS131M04_24bitADC::readReg(const ADSAddr&, uint8_t*, uint8_t)	2
+ADS131M04_24bitADC.cpp:110:9:uint8_t ADS131M04_24bitADC::whoAmI() const	1
+ADS131M04_24bitADC.cpp:120:6:bool ADS131M04_24bitADC::measurementReady()	1
+ADS131M04_24bitADC.cpp:125:5:int ADS131M04_24bitADC::read()	3
+ADS131M04_24bitADC.cpp:159:6:void ADS131M04_24bitADC::getMeasurement(int32_t&)	1

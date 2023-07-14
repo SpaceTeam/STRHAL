@@ -2,6 +2,7 @@
 #define PRESSURECONTROLCHANNEL_H
 
 #include "./Channels/AbstractChannel.h"
+#include "./Channels/GenericChannel.h"
 #include "./Channels/AbstractControlInputChannel.h"
 #include "./Channels/AbstractControlOutputChannel.h"
 #include "./Channels/DigitalOutChannel.h"
@@ -12,7 +13,7 @@
 class PressureControlChannel: public AbstractChannel
 {
 	public:
-		PressureControlChannel(uint8_t id, AbstractControlInputChannel &pressureChannel, AbstractControlOutputChannel &solenoidChannel, uint32_t refreshDivider);
+		PressureControlChannel(uint8_t id, GenericChannel &parent, uint8_t inputChannelId, AbstractControlOutputChannel &solenoidChannel, uint32_t refreshDivider);
 
 		PressureControlChannel(const PressureControlChannel &other) = delete;
 		PressureControlChannel& operator=(const PressureControlChannel &other) = delete;
@@ -38,7 +39,8 @@ class PressureControlChannel: public AbstractChannel
 		uint16_t targetPressure = 0;
 		uint16_t threshold = 0;
 		uint16_t hysteresis = 0;
-		AbstractControlInputChannel &pressureChannel;
+		GenericChannel &parent;
+		uint8_t inputChannelId;
 		AbstractControlOutputChannel &solenoidChannel;
 
 		uint64_t timeLastSample = 0;

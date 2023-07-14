@@ -1,0 +1,20 @@
+RocketChannel.cpp:3:1:RocketChannel::RocketChannel(uint8_t, const ADCChannel&, const ADCChannel&, const ADCChannel&, ServoChannel&, ServoChannel&, PyroChannel&, PyroChannel&, uint32_t)	1
+RocketChannel.cpp:19:5:virtual int RocketChannel::init()	1
+RocketChannel.cpp:24:5:virtual int RocketChannel::exec()	5
+RocketChannel.cpp:56:14:ROCKET_STATE RocketChannel::currentStateLogic(uint64_t)	9
+RocketChannel.cpp:88:6:void RocketChannel::nextStateLogic(ROCKET_STATE, uint64_t)	4
+RocketChannel.cpp:140:14:ROCKET_STATE RocketChannel::autoCheck(uint64_t)	8
+RocketChannel.cpp:165:14:ROCKET_STATE RocketChannel::ignitionSequence(uint64_t)	14
+RocketChannel.cpp:233:14:ROCKET_STATE RocketChannel::holddown(uint64_t)	7
+RocketChannel.cpp:301:14:ROCKET_STATE RocketChannel::poweredAscent(uint64_t)	2
+RocketChannel.cpp:310:14:ROCKET_STATE RocketChannel::depress(uint64_t)	4
+RocketChannel.cpp:320:14:ROCKET_STATE RocketChannel::abort(uint64_t)	1
+RocketChannel.cpp:325:5:virtual int RocketChannel::reset()	1
+RocketChannel.cpp:338:5:virtual int RocketChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	10
+RocketChannel.cpp:374:5:virtual int RocketChannel::getSensorData(uint8_t*, uint8_t&)	1
+RocketChannel.cpp:383:5:virtual int RocketChannel::setVariable(uint8_t, int32_t)	6
+RocketChannel.cpp:408:5:virtual int RocketChannel::getVariable(uint8_t, int32_t&) const	6
+RocketChannel.cpp:432:6:void RocketChannel::setRocketState(uint8_t*, uint8_t&)	1
+RocketChannel.cpp:445:6:void RocketChannel::getRocketState(uint8_t*, uint8_t&)	1
+RocketChannel.h:25:7:RocketChannel::~RocketChannel()	1
+RocketChannel.h:25:7:virtual RocketChannel::~RocketChannel()	1

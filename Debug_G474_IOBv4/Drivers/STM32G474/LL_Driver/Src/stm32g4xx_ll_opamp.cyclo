@@ -1,0 +1,5 @@
+stm32g4xx_ll_opamp.h:958:26:LL_OPAMP_IsLocked	2
+stm32g4xx_ll_opamp.h:985:26:LL_OPAMP_IsTimerMuxLocked	2
+stm32g4xx_ll_opamp.c:105:13:LL_OPAMP_DeInit	4
+stm32g4xx_ll_opamp.c:157:13:LL_OPAMP_Init	3
+stm32g4xx_ll_opamp.c:231:6:LL_OPAMP_StructInit	1

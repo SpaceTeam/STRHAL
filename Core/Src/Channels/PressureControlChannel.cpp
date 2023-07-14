@@ -1,7 +1,8 @@
 #include <Channels/PressureControlChannel.h>
 
-PressureControlChannel::PressureControlChannel(uint8_t id, AbstractControlInputChannel &pressureChannel, AbstractControlOutputChannel &solenoidChannel, uint32_t refreshDivider) :
-		AbstractChannel(CHANNEL_TYPE_CONTROL, id, refreshDivider), pressureChannel(pressureChannel), solenoidChannel(solenoidChannel)
+
+PressureControlChannel::PressureControlChannel(uint8_t id, GenericChannel &parent, uint8_t inputChannelId, AbstractControlOutputChannel &solenoidChannel, uint32_t refreshDivider):
+		AbstractChannel(CHANNEL_TYPE_CONTROL, id, refreshDivider), parent(parent),inputChannelId(inputChannelId), solenoidChannel(solenoidChannel)
 {
 }
 
@@ -19,7 +20,7 @@ int PressureControlChannel::exec()
 
 	timeLastSample = time;
 
-	uint16_t pressure = pressureChannel.getMeasurement();
+	uint16_t pressure = parent.getControlInputChannel(inputChannelId)->getMeasurement(); //pressureChannel.getMeasurement();
 	if (enabled == 1)
 	{
 		if (pressure > threshold)

@@ -1,0 +1,5 @@
+Radio.cpp:10:1:Radio::Radio(uint32_t, LoRa1276F30_Radio&)	1
+Radio.cpp:16:8:static Radio& Radio::instance(uint32_t, LoRa1276F30_Radio&)	3
+Radio.cpp:23:5:virtual int Radio::init(Com_Receptor_t, Com_Heartbeat_t)	4
+Radio.cpp:37:5:virtual int Radio::exec()	2
+Radio.cpp:45:5:static int Radio::send(uint32_t, uint8_t*, uint8_t)	3

@@ -1,0 +1,5 @@
+stm32g4xx_ll_cortex.h:271:22:LL_SYSTICK_EnableIT	1
+STRHAL_SysTick.c:8:6:STRHAL_SysTick_Init	1
+STRHAL_SysTick.c:16:6:STRHAL_Systick_BusyWait	2
+STRHAL_SysTick.c:22:10:STRHAL_Systick_GetTick	1
+STRHAL_SysTick.c:27:6:SysTick_Handler	1

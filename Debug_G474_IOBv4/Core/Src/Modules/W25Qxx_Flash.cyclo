@@ -1,0 +1,44 @@
+AbstractModule.h:4:7:constexpr AbstractModule::AbstractModule()	1
+W25Qxx_Flash.cpp:10:1:W25Qxx_Flash::W25Qxx_Flash()	1
+W25Qxx_Flash.cpp:15:15:static W25Qxx_Flash& W25Qxx_Flash::instance()	3
+W25Qxx_Flash.cpp:22:5:virtual int W25Qxx_Flash::init()	5
+W25Qxx_Flash.cpp:57:5:virtual int W25Qxx_Flash::exec()	5
+W25Qxx_Flash.cpp:89:5:virtual int W25Qxx_Flash::reset()	1
+W25Qxx_Flash.cpp:97:12:FlashState W25Qxx_Flash::currentStateLogic(uint64_t)	6
+W25Qxx_Flash.cpp:131:6:void W25Qxx_Flash::nextStateLogic(FlashState, uint64_t)	16
+W25Qxx_Flash.cpp:188:6:void W25Qxx_Flash::setState(FlashState)	1
+W25Qxx_Flash.cpp:193:12:FlashState W25Qxx_Flash::getState()	1
+W25Qxx_Flash.cpp:198:6:bool W25Qxx_Flash::sendClearInitiated()	1
+W25Qxx_Flash.cpp:210:6:bool W25Qxx_Flash::sendClearDone()	1
+W25Qxx_Flash.cpp:222:6:bool W25Qxx_Flash::sendFull()	1
+W25Qxx_Flash.cpp:234:6:void W25Qxx_Flash::addLog(uint8_t*, uint8_t)	3
+W25Qxx_Flash.cpp:244:6:bool W25Qxx_Flash::readSREG1(uint8_t&) const	2
+W25Qxx_Flash.cpp:259:6:bool W25Qxx_Flash::readSREG2(uint8_t&) const	2
+W25Qxx_Flash.cpp:274:6:bool W25Qxx_Flash::readSREG3(uint8_t&) const	2
+W25Qxx_Flash.cpp:289:6:bool W25Qxx_Flash::readSREGs(uint8_t&, uint8_t&, uint8_t&) const	4
+W25Qxx_Flash.cpp:294:6:bool W25Qxx_Flash::writeEnable()	2
+W25Qxx_Flash.cpp:309:6:bool W25Qxx_Flash::writeDisable()	1
+W25Qxx_Flash.cpp:321:9:uint8_t W25Qxx_Flash::readDeviceId() const	2
+W25Qxx_Flash.cpp:337:10:uint64_t W25Qxx_Flash::readUniqueId() const	2
+W25Qxx_Flash.cpp:353:6:bool W25Qxx_Flash::readManufacturerDeviceId(uint8_t&, uint8_t&) const	2
+W25Qxx_Flash.cpp:373:6:bool W25Qxx_Flash::disableWPS()	4
+W25Qxx_Flash.cpp:398:6:bool W25Qxx_Flash::enter4ByteAddrMode()	2
+W25Qxx_Flash.cpp:414:6:bool W25Qxx_Flash::exit4ByteAddrMode()	2
+W25Qxx_Flash.cpp:430:10:uint32_t W25Qxx_Flash::writeNextPage(const uint8_t*, uint32_t)	3
+W25Qxx_Flash.cpp:462:10:uint32_t W25Qxx_Flash::write(uint32_t, const uint8_t*, uint32_t)	5
+W25Qxx_Flash.cpp:487:10:uint32_t W25Qxx_Flash::read(uint32_t, uint8_t*, uint32_t)	4
+W25Qxx_Flash.cpp:509:6:bool W25Qxx_Flash::writeConfig()	2
+W25Qxx_Flash.cpp:517:6:bool W25Qxx_Flash::writeTempConfig()	1
+W25Qxx_Flash.cpp:522:6:bool W25Qxx_Flash::writeConfigReg(Config, uint32_t)	1
+W25Qxx_Flash.cpp:527:6:bool W25Qxx_Flash::writeConfigRegs(Config*, uint32_t*, uint16_t)	4
+W25Qxx_Flash.cpp:546:6:bool W25Qxx_Flash::writeConfigRegsFromAddr(uint32_t, uint32_t*, uint16_t)	4
+W25Qxx_Flash.cpp:564:6:bool W25Qxx_Flash::readConfig()	1
+W25Qxx_Flash.cpp:570:10:uint32_t W25Qxx_Flash::readConfigReg(Config)	1
+W25Qxx_Flash.cpp:576:10:uint32_t W25Qxx_Flash::readConfigReg(uint32_t)	1
+W25Qxx_Flash.cpp:582:6:bool W25Qxx_Flash::configErase()	1
+W25Qxx_Flash.cpp:588:6:bool W25Qxx_Flash::configReset()	4
+W25Qxx_Flash.cpp:597:6:bool W25Qxx_Flash::sectorErase(uint32_t)	5
+W25Qxx_Flash.cpp:622:6:bool W25Qxx_Flash::chipErase()	4
+W25Qxx_Flash.cpp:647:5:int W25Qxx_Flash::waitForSREGFlag(uint8_t, bool, uint16_t)	8
+W25Qxx_Flash.cpp:678:10:uint32_t W25Qxx_Flash::getPageCount()	1
+W25Qxx_Flash.cpp:683:10:uint32_t W25Qxx_Flash::getSectorCount()	1

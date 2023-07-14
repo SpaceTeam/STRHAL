@@ -1,0 +1,3 @@
+stm32g4xx_ll_bus.h:1539:22:LL_APB2_GRP1_ForceReset	1
+stm32g4xx_ll_bus.h:1575:22:LL_APB2_GRP1_ReleaseReset	1
+stm32g4xx_ll_hrtim.c:56:13:LL_HRTIM_DeInit	1

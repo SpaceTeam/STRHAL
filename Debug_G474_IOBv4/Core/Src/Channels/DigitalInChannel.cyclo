@@ -1,0 +1,11 @@
+DigitalInChannel.cpp:3:1:DigitalInChannel::DigitalInChannel(uint8_t, const STRHAL_GPIO_t&, uint32_t)	1
+DigitalInChannel.cpp:8:5:virtual int DigitalInChannel::init()	1
+DigitalInChannel.cpp:15:5:virtual int DigitalInChannel::exec()	1
+DigitalInChannel.cpp:20:5:virtual int DigitalInChannel::reset()	1
+DigitalInChannel.cpp:25:5:virtual int DigitalInChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	1
+DigitalInChannel.cpp:34:5:virtual int DigitalInChannel::getSensorData(uint8_t*, uint8_t&)	1
+DigitalInChannel.cpp:43:5:virtual int DigitalInChannel::setVariable(uint8_t, int32_t)	2
+DigitalInChannel.cpp:56:5:virtual int DigitalInChannel::getVariable(uint8_t, int32_t&) const	3
+DigitalInChannel.cpp:71:10:uint16_t DigitalInChannel::getMeasurement() const	1
+DigitalInChannel.h:8:7:DigitalInChannel::~DigitalInChannel()	1
+DigitalInChannel.h:8:7:virtual DigitalInChannel::~DigitalInChannel()	1

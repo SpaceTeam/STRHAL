@@ -1,0 +1,9 @@
+stm32g4xx_ll_gpio.h:923:22:LL_GPIO_ResetOutputPin	1
+stm32g4xx_it.c:4:6:NMI_Handler	1
+stm32g4xx_it.c:8:6:HardFault_Handler	1
+stm32g4xx_it.c:16:6:MemManage_Handler	1
+stm32g4xx_it.c:23:6:BusFault_Handler	1
+stm32g4xx_it.c:30:6:UsageFault_Handler	1
+stm32g4xx_it.c:37:6:SVC_Handler	1
+stm32g4xx_it.c:41:6:DebugMon_Handler	1
+stm32g4xx_it.c:45:6:PendSV_Handler	1

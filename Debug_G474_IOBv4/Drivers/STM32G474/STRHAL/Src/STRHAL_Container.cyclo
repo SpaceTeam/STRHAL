@@ -1,0 +1,10 @@
+STRHAL_Container.c:3:6:STRHAL_LinearBuffer_Init	1
+STRHAL_Container.c:11:10:STRHAL_LinearBuffer_Write	4
+STRHAL_Container.c:27:10:STRHAL_LinearBuffer_Read	5
+STRHAL_Container.c:44:6:STRHAL_CircularBuffer_Init	1
+STRHAL_Container.c:52:17:STRHAL_CircularBuffer_VWrite	2
+STRHAL_Container.c:61:17:STRHAL_CircularBuffer_VRead	2
+STRHAL_Container.c:72:17:STRHAL_CircularBuffer_Write	3
+STRHAL_Container.c:85:17:STRHAL_CircularBuffer_Read	3
+STRHAL_Container.c:97:17:STRHAL_CircularBuffer_GetFreeSpace	1
+STRHAL_Container.c:101:13:STRHAL_CircularBuffer_Flush	1

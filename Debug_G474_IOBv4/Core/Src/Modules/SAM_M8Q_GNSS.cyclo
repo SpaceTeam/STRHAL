@@ -1,0 +1,19 @@
+AbstractModule.h:4:7:constexpr AbstractModule::AbstractModule()	1
+SAM_M8Q_GNSS.cpp:9:1:SAM_M8Q_GNSS::SAM_M8Q_GNSS(STRHAL_UART_Id_t, const STRHAL_GPIO_t&)	1
+SAM_M8Q_GNSS.cpp:14:5:virtual int SAM_M8Q_GNSS::init()	3
+SAM_M8Q_GNSS.cpp:36:5:virtual int SAM_M8Q_GNSS::exec()	2
+SAM_M8Q_GNSS.cpp:49:5:virtual int SAM_M8Q_GNSS::reset()	1
+SAM_M8Q_GNSS.cpp:57:5:int SAM_M8Q_GNSS::processData(uint8_t*, uint32_t)	6
+SAM_M8Q_GNSS.cpp:98:5:int SAM_M8Q_GNSS::sendConfiguration(GNSSConstellation, GNSSSbasConstellation, GNSSDynamicsMode)	2
+SAM_M8Q_GNSS.cpp:125:6:void SAM_M8Q_GNSS::resetChecksum()	1
+SAM_M8Q_GNSS.cpp:131:6:void SAM_M8Q_GNSS::updateChecksum(uint8_t)	1
+SAM_M8Q_GNSS.cpp:137:5:int SAM_M8Q_GNSS::sendConfigDataChecksummed(const uint8_t*, uint16_t, uint32_t)	4
+SAM_M8Q_GNSS.cpp:168:5:int SAM_M8Q_GNSS::waitForACK(uint32_t)	5
+SAM_M8Q_GNSS.cpp:200:5:int SAM_M8Q_GNSS::enableMessage(uint8_t, uint8_t, uint8_t)	1
+SAM_M8Q_GNSS.cpp:215:5:int SAM_M8Q_GNSS::setMessageRate(uint16_t)	1
+SAM_M8Q_GNSS.cpp:231:5:int SAM_M8Q_GNSS::setMode(GNSSDynamicsMode)	6
+SAM_M8Q_GNSS.cpp:273:5:int SAM_M8Q_GNSS::setTimepulse()	1
+SAM_M8Q_GNSS.cpp:298:5:int SAM_M8Q_GNSS::setSbas(GNSSSbasConstellation)	5
+SAM_M8Q_GNSS.cpp:338:5:int SAM_M8Q_GNSS::pollVersion()	1
+SAM_M8Q_GNSS.cpp:345:5:int SAM_M8Q_GNSS::setConstellation(GNSSConstellation, GNSSSbasConstellation)	6
+SAM_M8Q_GNSS.cpp:428:5:int SAM_M8Q_GNSS::clearConfig()	1

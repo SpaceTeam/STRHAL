@@ -1,0 +1,12 @@
+AbstractModule.h:4:7:constexpr AbstractModule::AbstractModule()	1
+ICM2060x_IMU.cpp:5:1:ICM2060x_IMU::ICM2060x_IMU(const STRHAL_SPI_Id_t&, const STRHAL_SPI_Config_t&, const STRHAL_GPIO_t&, uint8_t)	1
+ICM2060x_IMU.cpp:10:5:virtual int ICM2060x_IMU::init()	16
+ICM2060x_IMU.cpp:31:5:virtual int ICM2060x_IMU::exec()	3
+ICM2060x_IMU.cpp:43:5:virtual int ICM2060x_IMU::reset()	1
+ICM2060x_IMU.cpp:50:6:bool ICM2060x_IMU::writeReg(const IMUAddr&, uint8_t, uint16_t)	2
+ICM2060x_IMU.cpp:64:6:bool ICM2060x_IMU::readReg(const IMUAddr&, uint8_t*, uint8_t)	1
+ICM2060x_IMU.cpp:72:9:uint8_t ICM2060x_IMU::whoAmI() const	1
+ICM2060x_IMU.cpp:82:6:bool ICM2060x_IMU::dataReady()	1
+ICM2060x_IMU.cpp:87:6:bool ICM2060x_IMU::measurementReady()	1
+ICM2060x_IMU.cpp:92:5:int ICM2060x_IMU::read()	4
+ICM2060x_IMU.cpp:127:6:void ICM2060x_IMU::getMeasurement(uint16_t&, IMUMeasurement)	7

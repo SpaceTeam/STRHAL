@@ -1,0 +1,15 @@
+GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+PMU.cpp:6:1:PMU::PMU(uint32_t, uint32_t, uint32_t)	1
+PMU.cpp:63:5:virtual int PMU::init()	5
+PMU.cpp:88:5:virtual int PMU::exec()	3
+PMU.h:15:7:PMU::~PMU()	1
+PMU.h:15:7:virtual PMU::~PMU()	1
+ADCChannel.h:9:7:ADCChannel::~ADCChannel()	1
+ADCChannel.h:9:7:virtual ADCChannel::~ADCChannel()	1
+DigitalInChannel.h:8:7:DigitalInChannel::~DigitalInChannel()	1
+DigitalInChannel.h:8:7:virtual DigitalInChannel::~DigitalInChannel()	1
+DigitalOutChannel.h:10:7:DigitalOutChannel::~DigitalOutChannel()	1
+DigitalOutChannel.h:10:7:virtual DigitalOutChannel::~DigitalOutChannel()	1
+IMUChannel.h:9:7:IMUChannel::~IMUChannel()	1
+IMUChannel.h:9:7:virtual IMUChannel::~IMUChannel()	1

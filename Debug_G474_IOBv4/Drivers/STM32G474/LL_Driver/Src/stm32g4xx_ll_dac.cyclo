@@ -1,0 +1,6 @@
+stm32g4xx_ll_dac.h:2079:26:LL_DAC_IsEnabled	2
+stm32g4xx_ll_bus.h:581:22:LL_AHB2_GRP1_ForceReset	1
+stm32g4xx_ll_bus.h:623:22:LL_AHB2_GRP1_ReleaseReset	1
+stm32g4xx_ll_dac.c:215:13:LL_DAC_DeInit	5
+stm32g4xx_ll_dac.c:292:13:LL_DAC_Init	4
+stm32g4xx_ll_dac.c:393:6:LL_DAC_StructInit	1

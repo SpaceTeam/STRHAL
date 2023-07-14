@@ -1,0 +1,12 @@
+stm32g4xx_ll_bus.h:451:22:LL_AHB2_GRP1_EnableClock	1
+stm32g4xx_ll_bus.h:1427:22:LL_APB2_GRP1_EnableClock	1
+stm32g4xx_ll_gpio.h:285:22:LL_GPIO_SetPinMode	3
+stm32g4xx_ll_opamp.h:453:22:LL_OPAMP_SetFunctionalMode	1
+stm32g4xx_ll_opamp.h:492:22:LL_OPAMP_SetPGAGain	1
+stm32g4xx_ll_opamp.h:564:22:LL_OPAMP_SetInputNonInverting	1
+stm32g4xx_ll_opamp.h:599:22:LL_OPAMP_SetInputInverting	1
+stm32g4xx_ll_opamp.h:736:22:LL_OPAMP_SetInternalOutput	1
+stm32g4xx_ll_opamp.h:908:22:LL_OPAMP_Enable	1
+stm32g4xx_ll_opamp.h:931:26:LL_OPAMP_IsEnabled	2
+STRHAL_OPAMP.c:3:6:STRHAL_OPAMP_Init	1
+STRHAL_OPAMP.c:31:6:STRHAL_OPAMP_Run	3

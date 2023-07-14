@@ -1,0 +1,12 @@
+ADCChannel.cpp:5:1:ADCChannel::ADCChannel(uint8_t, STRHAL_ADC_Channel_t, uint32_t)	1
+ADCChannel.cpp:10:1:ADCChannel::ADCChannel(uint8_t, STRHAL_ADC_Data_t*, uint32_t)	1
+ADCChannel.cpp:15:5:virtual int ADCChannel::init()	3
+ADCChannel.cpp:26:5:virtual int ADCChannel::exec()	1
+ADCChannel.cpp:31:5:virtual int ADCChannel::reset()	1
+ADCChannel.cpp:36:5:virtual int ADCChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	1
+ADCChannel.cpp:45:5:virtual int ADCChannel::getSensorData(uint8_t*, uint8_t&)	1
+ADCChannel.cpp:60:5:virtual int ADCChannel::setVariable(uint8_t, int32_t)	2
+ADCChannel.cpp:73:5:virtual int ADCChannel::getVariable(uint8_t, int32_t&) const	3
+ADCChannel.cpp:88:10:virtual uint16_t ADCChannel::getMeasurement() const	1
+ADCChannel.h:9:7:ADCChannel::~ADCChannel()	1
+ADCChannel.h:9:7:virtual ADCChannel::~ADCChannel()	1
