@@ -5,6 +5,7 @@ AbstractChannel.cpp:21:9:uint8_t AbstractChannel::getChannelId() const	1
 AbstractChannel.cpp:26:6:bool AbstractChannel::IsChannelType(CHANNEL_TYPE) const	1
 AbstractChannel.cpp:31:6:bool AbstractChannel::IsChannelId(uint8_t) const	1
 AbstractChannel.cpp:36:6:bool AbstractChannel::IsRefreshed()	3
-AbstractChannel.cpp:48:5:virtual int AbstractChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	6
-AbstractChannel.cpp:81:1:AbstractChannel::~AbstractChannel()	1
-AbstractChannel.cpp:81:1:virtual AbstractChannel::~AbstractChannel()	1
+AbstractChannel.cpp:49:10:uint16_t AbstractChannel::getMeasurement() const	1
+AbstractChannel.cpp:54:5:virtual int AbstractChannel::processMessage(uint8_t, uint8_t*, uint8_t&)	6
+AbstractChannel.cpp:87:1:AbstractChannel::~AbstractChannel()	1
+AbstractChannel.cpp:87:1:virtual AbstractChannel::~AbstractChannel()	1

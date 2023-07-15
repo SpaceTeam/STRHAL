@@ -2,12 +2,11 @@
 #define DIGITALOUTCHANNEL_H
 
 #include "./Channels/AbstractChannel.h"
-#include "./Channels/AbstractControlInputChannel.h"
 #include "./Channels/AbstractControlOutputChannel.h"
 #include <can_houbolt/channels/digital_out_channel_def.h>
 #include <STRHAL.h>
 
-class DigitalOutChannel: public AbstractChannel, public AbstractControlInputChannel, public AbstractControlOutputChannel
+class DigitalOutChannel: public AbstractChannel, public AbstractControlOutputChannel
 {
 	public:
 		DigitalOutChannel(uint8_t id, const STRHAL_ADC_Channel_t &adcChannel, const STRHAL_GPIO_t &cntrlPin, STRHAL_ADC_InType_t adcInType, uint32_t refreshDivider);

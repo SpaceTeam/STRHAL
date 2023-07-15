@@ -1,5 +1,5 @@
-GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
-GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:virtual GenericChannel::~GenericChannel()	1
 IOBv4.cpp:8:1:IOBv4::IOBv4(uint32_t, uint32_t, uint32_t)	1
 IOBv4.cpp:57:5:virtual int IOBv4::init()	5
 IOBv4.cpp:89:5:virtual int IOBv4::exec()	3
@@ -7,7 +7,7 @@ IOBv4.h:15:7:IOBv4::~IOBv4()	1
 IOBv4.h:15:7:virtual IOBv4::~IOBv4()	1
 ServoChannel.h:26:7:ServoChannel::~ServoChannel()	1
 ServoChannel.h:26:7:virtual ServoChannel::~ServoChannel()	1
-DigitalOutChannel.h:10:7:DigitalOutChannel::~DigitalOutChannel()	1
-DigitalOutChannel.h:10:7:virtual DigitalOutChannel::~DigitalOutChannel()	1
-PressureControlChannel.h:13:7:PressureControlChannel::~PressureControlChannel()	1
-PressureControlChannel.h:13:7:virtual PressureControlChannel::~PressureControlChannel()	1
+DigitalOutChannel.h:9:7:DigitalOutChannel::~DigitalOutChannel()	1
+DigitalOutChannel.h:9:7:virtual DigitalOutChannel::~DigitalOutChannel()	1
+PressureControlChannel.h:12:7:PressureControlChannel::~PressureControlChannel()	1
+PressureControlChannel.h:12:7:virtual PressureControlChannel::~PressureControlChannel()	1

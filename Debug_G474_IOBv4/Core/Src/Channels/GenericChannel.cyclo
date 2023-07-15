@@ -10,7 +10,7 @@ GenericChannel.cpp:148:5:virtual int GenericChannel::getVariable(uint8_t, int32_
 GenericChannel.cpp:169:5:int GenericChannel::flashClear(uint8_t*, uint8_t&)	1
 GenericChannel.cpp:178:5:virtual int GenericChannel::getSensorData(uint8_t*, uint8_t&)	9
 GenericChannel.cpp:200:5:int GenericChannel::getFlashClearInfo(uint8_t*, uint8_t&)	4
-GenericChannel.cpp:223:30:AbstractControlInputChannel* GenericChannel::getControlInputChannel(uint8_t)	1
+GenericChannel.cpp:223:18:AbstractChannel* GenericChannel::getControlInputChannel(uint8_t)	1
 GenericChannel.cpp:229:5:int GenericChannel::getNodeInfo(uint8_t*, uint8_t&)	3
 GenericChannel.cpp:252:6:void GenericChannel::registerChannel(AbstractChannel*)	2
 GenericChannel.cpp:258:6:void GenericChannel::registerChannels(AbstractChannel**, uint8_t)	2
@@ -22,5 +22,5 @@ GenericChannel.cpp:308:6:static void GenericChannel::receptorLora(uint32_t, uint
 GenericChannel.cpp:361:6:static void GenericChannel::receptor(uint32_t, uint8_t*, uint32_t)	5
 GenericChannel.cpp:404:6:static void GenericChannel::heartbeatCan()	3
 GenericChannel.cpp:444:6:static void GenericChannel::heartbeatLora()	2
-GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
-GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:virtual GenericChannel::~GenericChannel()	1

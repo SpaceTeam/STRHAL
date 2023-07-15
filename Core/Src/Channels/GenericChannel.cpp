@@ -220,9 +220,9 @@ int GenericChannel::getFlashClearInfo(uint8_t *data, uint8_t &n)
 	return 0;
 }
 
-AbstractControlInputChannel* GenericChannel::getControlInputChannel(uint8_t id)
+AbstractChannel* GenericChannel::getControlInputChannel(uint8_t id)
 {
-	return (AbstractControlInputChannel*)(channels[id]);
+	return channels[id];
 }
 
 

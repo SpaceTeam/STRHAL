@@ -1,5 +1,5 @@
-GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
-GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:virtual GenericChannel::~GenericChannel()	1
 IOBv1.cpp:5:1:IOBv1::IOBv1(uint32_t, uint32_t, uint32_t)	1
 IOBv1.cpp:17:5:virtual int IOBv1::init()	4
 IOBv1.cpp:38:5:virtual int IOBv1::exec()	3

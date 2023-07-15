@@ -7,6 +7,6 @@ ADCChannel.cpp:36:5:virtual int ADCChannel::processMessage(uint8_t, uint8_t*, ui
 ADCChannel.cpp:45:5:virtual int ADCChannel::getSensorData(uint8_t*, uint8_t&)	1
 ADCChannel.cpp:60:5:virtual int ADCChannel::setVariable(uint8_t, int32_t)	2
 ADCChannel.cpp:73:5:virtual int ADCChannel::getVariable(uint8_t, int32_t&) const	3
-ADCChannel.cpp:88:10:virtual uint16_t ADCChannel::getMeasurement() const	1
-ADCChannel.h:9:7:ADCChannel::~ADCChannel()	1
-ADCChannel.h:9:7:virtual ADCChannel::~ADCChannel()	1
+ADCChannel.cpp:88:10:uint16_t ADCChannel::getMeasurement() const	1
+ADCChannel.h:8:7:ADCChannel::~ADCChannel()	1
+ADCChannel.h:8:7:virtual ADCChannel::~ADCChannel()	1

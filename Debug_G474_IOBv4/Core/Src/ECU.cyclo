@@ -1,5 +1,5 @@
-GenericChannel.h:13:7:GenericChannel::~GenericChannel()	1
-GenericChannel.h:13:7:virtual GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:GenericChannel::~GenericChannel()	1
+GenericChannel.h:12:7:virtual GenericChannel::~GenericChannel()	1
 ECU.cpp:6:1:ECU::ECU(uint32_t, uint32_t, uint32_t)	1
 ECU.cpp:62:5:virtual int ECU::init()	5
 ECU.cpp:87:5:virtual int ECU::exec()	3
@@ -7,17 +7,17 @@ ECU.cpp:155:6:void ECU::testServo(ServoChannel&)	4
 ECU.cpp:188:6:void ECU::testChannels()	9
 ECU.h:17:7:ECU::~ECU()	1
 ECU.h:17:7:virtual ECU::~ECU()	1
-ADCChannel.h:9:7:ADCChannel::~ADCChannel()	1
-ADCChannel.h:9:7:virtual ADCChannel::~ADCChannel()	1
+ADCChannel.h:8:7:ADCChannel::~ADCChannel()	1
+ADCChannel.h:8:7:virtual ADCChannel::~ADCChannel()	1
 ServoChannel.h:26:7:ServoChannel::~ServoChannel()	1
 ServoChannel.h:26:7:virtual ServoChannel::~ServoChannel()	1
 DigitalInChannel.h:8:7:DigitalInChannel::~DigitalInChannel()	1
 DigitalInChannel.h:8:7:virtual DigitalInChannel::~DigitalInChannel()	1
 PyroChannel.h:9:7:PyroChannel::~PyroChannel()	1
 PyroChannel.h:9:7:virtual PyroChannel::~PyroChannel()	1
-DigitalOutChannel.h:10:7:DigitalOutChannel::~DigitalOutChannel()	1
-DigitalOutChannel.h:10:7:virtual DigitalOutChannel::~DigitalOutChannel()	1
-PressureControlChannel.h:13:7:PressureControlChannel::~PressureControlChannel()	1
-PressureControlChannel.h:13:7:virtual PressureControlChannel::~PressureControlChannel()	1
+DigitalOutChannel.h:9:7:DigitalOutChannel::~DigitalOutChannel()	1
+DigitalOutChannel.h:9:7:virtual DigitalOutChannel::~DigitalOutChannel()	1
+PressureControlChannel.h:12:7:PressureControlChannel::~PressureControlChannel()	1
+PressureControlChannel.h:12:7:virtual PressureControlChannel::~PressureControlChannel()	1
 RocketChannel.h:25:7:RocketChannel::~RocketChannel()	1
 RocketChannel.h:25:7:virtual RocketChannel::~RocketChannel()	1

@@ -6,5 +6,5 @@ PressureControlChannel.cpp:53:5:virtual int PressureControlChannel::processMessa
 PressureControlChannel.cpp:62:5:virtual int PressureControlChannel::getSensorData(uint8_t*, uint8_t&)	1
 PressureControlChannel.cpp:71:5:virtual int PressureControlChannel::setVariable(uint8_t, int32_t)	10
 PressureControlChannel.cpp:101:5:virtual int PressureControlChannel::getVariable(uint8_t, int32_t&) const	6
-PressureControlChannel.h:13:7:PressureControlChannel::~PressureControlChannel()	1
-PressureControlChannel.h:13:7:virtual PressureControlChannel::~PressureControlChannel()	1
+PressureControlChannel.h:12:7:PressureControlChannel::~PressureControlChannel()	1
+PressureControlChannel.h:12:7:virtual PressureControlChannel::~PressureControlChannel()	1

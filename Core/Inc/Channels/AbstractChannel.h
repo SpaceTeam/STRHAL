@@ -24,6 +24,7 @@ class AbstractChannel
 
 		virtual int processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n);
 		virtual int getSensorData(uint8_t *data, uint8_t &n) = 0;
+		uint16_t getMeasurement() const;
 
 	protected:
 		uint32_t refreshDivider, refreshCounter;

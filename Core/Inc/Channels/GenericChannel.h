@@ -2,7 +2,6 @@
 #define GENERICCHANNEL_H
 
 #include "AbstractChannel.h"
-#include "AbstractControlInputChannel.h"
 
 #include <can_houbolt/channels/generic_channel_def.h>
 #include <STRHAL.h>
@@ -27,7 +26,7 @@ class GenericChannel: public AbstractChannel
 		int flashClear(uint8_t *data, uint8_t &n);
 		void printLog();
 		void detectReadoutMode();
-		AbstractControlInputChannel* getControlInputChannel(uint8_t id);
+		AbstractChannel* getControlInputChannel(uint8_t id);
 
 
 		uint32_t getNodeId() const;

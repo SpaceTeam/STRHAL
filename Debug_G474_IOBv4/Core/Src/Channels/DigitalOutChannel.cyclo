@@ -10,6 +10,6 @@ DigitalOutChannel.cpp:78:5:virtual int DigitalOutChannel::getVariable(uint8_t, i
 DigitalOutChannel.cpp:99:10:virtual uint32_t DigitalOutChannel::getState() const	1
 DigitalOutChannel.cpp:104:5:virtual int DigitalOutChannel::setState(uint32_t)	2
 DigitalOutChannel.cpp:118:6:virtual bool DigitalOutChannel::isAnalog()	1
-DigitalOutChannel.cpp:123:10:virtual uint16_t DigitalOutChannel::getMeasurement() const	1
-DigitalOutChannel.h:10:7:DigitalOutChannel::~DigitalOutChannel()	1
-DigitalOutChannel.h:10:7:virtual DigitalOutChannel::~DigitalOutChannel()	1
+DigitalOutChannel.cpp:123:10:uint16_t DigitalOutChannel::getMeasurement() const	1
+DigitalOutChannel.h:9:7:DigitalOutChannel::~DigitalOutChannel()	1
+DigitalOutChannel.h:9:7:virtual DigitalOutChannel::~DigitalOutChannel()	1

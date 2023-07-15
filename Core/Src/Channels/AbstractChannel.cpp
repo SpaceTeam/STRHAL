@@ -45,6 +45,12 @@ bool AbstractChannel::IsRefreshed()
 	return true;
 }
 
+
+uint16_t AbstractChannel::getMeasurement() const
+{
+	return -1;
+}
+
 int AbstractChannel::processMessage(uint8_t commandId, uint8_t *returnData, uint8_t &n)
 {
 	SetMsg_t *setMsg;

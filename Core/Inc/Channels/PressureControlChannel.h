@@ -3,7 +3,6 @@
 
 #include "./Channels/AbstractChannel.h"
 #include "./Channels/GenericChannel.h"
-#include "./Channels/AbstractControlInputChannel.h"
 #include "./Channels/AbstractControlOutputChannel.h"
 #include "./Channels/DigitalOutChannel.h"
 #include "./Channels/ADCChannel.h"

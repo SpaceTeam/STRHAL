@@ -25,8 +25,8 @@ class IOBv4: public GenericChannel
 
 	private:
 		STRHAL_GPIO_t led1, led2, led_debug;
-		ServoChannel /**/servo0,/**/ servo1, servo2;
-		DigitalOutChannel channel0, /**/channel1, channel2,/**/ channel3, channel4, channel5, channel6, channel7, channel8, channel9, channel10, channel11;//, channel12;
+		ServoChannel /*servo0,*/ servo1, servo2;
+		DigitalOutChannel channel0, /*channel1, channel2,*/ channel3, channel4, channel5, channel6, channel7, channel8, channel9, channel10, channel11;//, channel12;
 		PressureControlChannel pressurecontrol0;
 		Speaker speaker;
 
