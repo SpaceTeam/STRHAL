@@ -96,7 +96,9 @@ static void STRHAL_ADC_RegInit(ADC_TypeDef *ADCx)
 	ADC_REG_InitStruct.DMATransfer = LL_ADC_REG_DMA_TRANSFER_UNLIMITED;
 	LL_ADC_REG_Init(ADCx, &ADC_REG_InitStruct);
 	LL_ADC_SetGainCompensation(ADCx, 0);
-	LL_ADC_SetOverSamplingScope(ADCx, LL_ADC_OVS_DISABLE);
+    LL_ADC_ConfigOverSamplingRatioShift(ADCx, LL_ADC_OVS_RATIO_16, LL_ADC_OVS_SHIFT_NONE);
+
+	LL_ADC_SetOverSamplingScope(ADCx, LL_ADC_OVS_GRP_REGULAR_CONTINUED);
 	LL_ADC_DisableDeepPowerDown(ADCx);
 }
 
