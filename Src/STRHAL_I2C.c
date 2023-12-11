@@ -1,3 +1,4 @@
+/*
 #include <stm32g4xx_ll_bus.h>
 #include <stddef.h>
 #include <stm32g4xx_ll_gpio.h>
@@ -57,14 +58,14 @@ int32_t STRHAL_I2C_Master_Init(STRHAL_I2C_Id_t i2c_id, const STRHAL_I2C_Config_t
     LL_I2C_InitTypeDef I2C_InitStruct =
     { 0 };
 
-    /* I2C1 interrupt Init */
+    // I2C1 interrupt Init
     NVIC_SetPriority(I2C1_EV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
     NVIC_EnableIRQ(I2C1_EV_IRQn);
     NVIC_SetPriority(I2C1_ER_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
     NVIC_EnableIRQ(I2C1_ER_IRQn);
 
-      /** I2C Initialization
-    */
+    // I2C Initialization
+
     I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
     I2C_InitStruct.Timing = 0x00200205;
     I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_DISABLE;
@@ -79,8 +80,7 @@ int32_t STRHAL_I2C_Master_Init(STRHAL_I2C_Id_t i2c_id, const STRHAL_I2C_Config_t
     LL_I2C_DisableGeneralCall(I2C1);
     LL_I2C_EnableClockStretching(I2C1);
 
-    /** I2C Fast mode Plus enable
-    */
+    // I2C Fast mode Plus enable
     LL_SYSCFG_EnableFastModePlus(LL_SYSCFG_I2C_FASTMODEPLUS_I2C1);
 
 }
@@ -94,3 +94,4 @@ uint32_t I2C1_ER_IRQn()
 {
     
 }
+*/
