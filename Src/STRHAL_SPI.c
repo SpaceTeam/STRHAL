@@ -85,7 +85,10 @@ const STRHAL_SPI_IO_t _nsss[STRHAL_SPI_N_NSS] =
 [STRHAL_SPI_SPI4_NSS_PE3] =
 { .port = GPIOE, .pin = LL_GPIO_PIN_3, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_NSS_PE4] =
 { .port = GPIOE, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI4_NSS_PE11] =
-{ .port = GPIOE, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, };
+{ .port = GPIOE, .pin = LL_GPIO_PIN_11, .afn = LL_GPIO_AF_5, .spi = STRHAL_SPI_SPI4, }, [STRHAL_SPI_SPI1_NSS_PC4] =
+{ .port = GPIOC, .pin = LL_GPIO_PIN_4, .afn = LL_GPIO_AF_15, .spi = STRHAL_SPI_SPI1, } //MASTER ONLY; NOT CONNECTED TO SPI 1 VIA PERIPHERAL
+
+};
 
 typedef struct
 {
@@ -121,7 +124,7 @@ void STRHAL_SPI_Init()
 	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI1);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
 	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI3);
-	LL_APB1_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI4);
+	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI4);
 
 	LL_SPI_DeInit(SPI1);
 	LL_SPI_DeInit(SPI2);
@@ -150,13 +153,23 @@ void STRHAL_SPI_Master_Stop(STRHAL_SPI_Id_t spi_id)
 	LL_SPI_Disable(_spis[spi_id].spix);
 }
 
+void STRHAL_SPI_NSS_Init(STRHAL_SPI_NSSId_t nss)
+{
+	LL_GPIO_InitTypeDef GPIO_InitStruct =
+	{ 0 };
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+	GPIO_InitStruct.Pin = _nsss[nss].pin;
+	LL_GPIO_SetOutputPin(_nsss[nss].port, _nsss[nss].pin);
+	LL_GPIO_Init(_nsss[nss].port, &GPIO_InitStruct);
+	LL_GPIO_SetOutputPin(_nsss[nss].port, _nsss[nss].pin);
+
+}
 int32_t STRHAL_SPI_Master_Init(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t *config)
 {
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
 	{ 0 };
 
-	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
 
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
@@ -211,6 +224,15 @@ int32_t STRHAL_SPI_Master_Init(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t
 
 	return SystemCoreClock / ((uint32_t) 1 << config->psc);
 }
+void STRHAL_SPI_Select_Chip(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t *config)
+{
+	_spis[spi_id].sck = &_scks[config->sck];
+	_spis[spi_id].miso = &_misos[config->miso];
+	_spis[spi_id].mosi = &_mosis[config->mosi];
+	_spis[spi_id].nss = &_nsss[config->nss];
+	_spis[spi_id].psc = config->psc;
+}
+
 int32_t STRHAL_SPI_Master_Transceive(STRHAL_SPI_Id_t spi_id, const uint8_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, uint8_t *rx_data, uint32_t rx_n, uint16_t tot)
 {
 	STRHAL_SPI_t *spi = &_spis[spi_id];
@@ -255,7 +277,7 @@ int32_t STRHAL_SPI_Master_Transceive(STRHAL_SPI_Id_t spi_id, const uint8_t *tx_d
 			if ((rx_n + rx_skip_n) > 1)
 			{
 				//there is still data left to read without specified tx data => append dummy byte filling 2byte DR
-				LL_SPI_TransmitData16(spi->spix, (uint16_t) *(tx_data++) | 0x6900);
+				LL_SPI_TransmitData16(spi->spix, (uint16_t) *(tx_data++));
 			}
 			else
 			{
@@ -268,7 +290,7 @@ int32_t STRHAL_SPI_Master_Transceive(STRHAL_SPI_Id_t spi_id, const uint8_t *tx_d
 		else if (rx_n > 1)
 		{
 			//there is are more than two bytes ready to ONLY READ (without corresponding tx data) => load DR with dummy data for transmission
-			LL_SPI_TransmitData16(spi->spix, 0x6969);
+			LL_SPI_TransmitData16(spi->spix, 0x0000);
 		}
 		else
 		{

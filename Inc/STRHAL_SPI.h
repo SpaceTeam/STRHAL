@@ -87,6 +87,9 @@ typedef enum
 	STRHAL_SPI_SPI4_NSS_PE4,
 	STRHAL_SPI_SPI4_NSS_PE11,
 
+	STRHAL_SPI_SPI1_NSS_PC4,
+
+
 	STRHAL_SPI_N_NSS,
 } STRHAL_SPI_NSSId_t;
 
@@ -119,11 +122,13 @@ typedef struct
 } STRHAL_SPI_Config_t;
 
 void STRHAL_SPI_Init();
+void STRHAL_SPI_NSS_Init(STRHAL_SPI_NSSId_t nss);
 
 int32_t STRHAL_SPI_Master_Init(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t *config);
 
 void STRHAL_SPI_Master_Run(STRHAL_SPI_Id_t spi_id);
 void STRHAL_SPI_Master_Stop(STRHAL_SPI_Id_t spi_id);
+void STRHAL_SPI_Select_Chip(STRHAL_SPI_Id_t spi_id, const STRHAL_SPI_Config_t *config);
 
 int32_t STRHAL_SPI_Master_Transceive(STRHAL_SPI_Id_t spi_id, const uint8_t *tx_data, uint32_t tx_n, uint32_t rx_skip_n, uint8_t *rx_data, uint32_t rx_n, uint16_t tot);
 #ifdef __cplusplus

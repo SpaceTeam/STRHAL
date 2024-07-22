@@ -27,8 +27,8 @@ typedef struct
 
 static STRHAL_UART_Handle_t _uarts[STRHAL_N_UART] =
 {
-//[STRHAL_UART1] =
-//{ .uart = USART1, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART1_RX, .dma_tx_request = LL_DMAMUX_REQ_USART1_TX, .it_rx_handler = DMA1_Channel1_IRQn, .it_tx_handler = DMA1_Channel2_IRQn, .baud_rate = 9600, .swap = 1 },
+[STRHAL_UART1] =
+{ .uart = USART1, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART1_RX, .dma_tx_request = LL_DMAMUX_REQ_USART1_TX, .it_rx_handler = DMA1_Channel1_IRQn, .it_tx_handler = DMA1_Channel2_IRQn, .baud_rate = 115200, .swap = 0 },
 //[STRHAL_UART2] =
 //{ .uart = USART2, .dma_rx_channel = LL_DMA_CHANNEL_3, .dma_tx_channel = LL_DMA_CHANNEL_4, .dma_rx_request = LL_DMAMUX_REQ_USART2_RX, .dma_tx_request = LL_DMAMUX_REQ_USART2_TX, .it_rx_handler = DMA1_Channel3_IRQn, .it_tx_handler = DMA1_Channel4_IRQn, .baud_rate = 115200, .swap = 0 },
 //[STRHAL_UART3] =
@@ -38,22 +38,27 @@ static STRHAL_UART_Handle_t _uarts[STRHAL_N_UART] =
 
 void STRHAL_UART_Init()
 {
+
+	//#ifdef ECU_LAMARR_BOARD
+	LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
+	//#else
 	//LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART3);
-	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_UART4);
+	//LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_UART4);
+	//#endif
 	//LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
 	LL_GPIO_InitTypeDef GPIO_InitStruct =
 	{ 0 };
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_10 | LL_GPIO_PIN_11;
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_9 | LL_GPIO_PIN_10;
 	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
 	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
 	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
 	GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-	GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
-	LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+	GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
+	LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 //	GPIO_InitStruct.Pin = LL_GPIO_PIN_3 | LL_GPIO_PIN_4;
 //	LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -147,12 +152,12 @@ int STRHAL_UART_Instance_Init(STRHAL_UART_Id_t uart_id)
 
 int32_t STRHAL_UART_Debug_Write_DMA(const char *data, uint32_t n)
 {
-	return STRHAL_UART_Write_DMA(STRHAL_UART_DEBUG, data, n);
+	return STRHAL_UART_Write_DMA(STRHAL_UART1, data, n);
 }
 
 int32_t STRHAL_UART_Debug_Write_Blocking(const char *data, uint32_t n, uint16_t timeout)
 {
-	return STRHAL_UART_Write_Blocking(STRHAL_UART_DEBUG, data, n, timeout);
+	return STRHAL_UART_Write_Blocking(STRHAL_UART1, data, n, timeout);
 }
 
 int32_t STRHAL_UART_Write_DMA(STRHAL_UART_Id_t uart_id, const char *data, uint32_t n)
@@ -422,7 +427,7 @@ STRHAL_UART_State_t STRHAL_UART_GetState(STRHAL_UART_Id_t uart_id)
 
 void DMA1_Channel1_IRQHandler(void)
 {
-	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART4];
+	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART1];
 	if (LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_1) && LL_DMA_IsActiveFlag_TC1(DMA1))
 	{
 		LL_DMA_ClearFlag_TC1(DMA1);
@@ -453,7 +458,7 @@ void DMA1_Channel1_IRQHandler(void)
 
 void DMA1_Channel2_IRQHandler(void)
 {
-	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART4];
+	STRHAL_UART_Handle_t *_uart = &_uarts[STRHAL_UART1];
 	if (LL_DMA_IsEnabledIT_TC(DMA1, LL_DMA_CHANNEL_2) && LL_DMA_IsActiveFlag_TC2(DMA1))
 	{
 		LL_DMA_ClearFlag_TC2(DMA1);
