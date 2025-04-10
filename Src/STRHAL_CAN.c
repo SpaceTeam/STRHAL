@@ -369,6 +369,25 @@ int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *
 	return n;
 }
 
+uint32_t STRHAL_CAN_Read_PSR_Reg(STRHAL_FDCAN_Id_t fdcan_id) {
+	if (fdcan_id == STRHAL_FDCAN1) {
+		return READ_REG(FDCAN1->PSR);
+	}
+	if (fdcan_id == STRHAL_FDCAN2) {
+		return READ_REG(FDCAN2->PSR);
+	}
+	return 0;
+}
+uint32_t STRHAL_CAN_Read_ECR_Reg(STRHAL_FDCAN_Id_t fdcan_id) {
+	if (fdcan_id == STRHAL_FDCAN1) {
+		return READ_REG(FDCAN1->ECR);
+	}
+	if (fdcan_id == STRHAL_FDCAN2) {
+		return READ_REG(FDCAN2->ECR);
+	}
+	return 0;
+}
+
 void STRHAL_CAN_Run()
 {
 	// End initialisation - start FDCANs

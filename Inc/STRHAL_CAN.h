@@ -51,6 +51,8 @@ int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id,
 void STRHAL_CAN_Run();
 int32_t STRHAL_CAN_Receive(STRHAL_FDCAN_Id_t fdcan_id, uint32_t *id, uint8_t *data, uint32_t n);
 int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, uint32_t n);
+uint32_t STRHAL_CAN_Read_PSR_Reg(STRHAL_FDCAN_Id_t fdcan_id);
+uint32_t STRHAL_CAN_Read_ECR_Reg(STRHAL_FDCAN_Id_t fdcan_id);
 
 #ifdef __cplusplus
 }
