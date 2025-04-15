@@ -380,13 +380,19 @@ void STRHAL_CAN_Run()
 		{
 			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO0);
 			SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
+			//Enable Interrupt for new Messages
 			SET_BIT(FDCAN1->IE, FDCAN_IE_RF0NE);
+			//Enable Interrupt for Bus-Off State
+			SET_BIT(FDCAN1->IE, FDCAN_IE_BOE);
 		}
 		if (fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX1))
 		{
 			CLEAR_BIT(FDCAN1->ILS, FDCAN_ILS_RXFIFO1);
 			SET_BIT(FDCAN1->ILE, FDCAN_ILE_EINT0);
+			//Enable Interrupt for new Messages
 			SET_BIT(FDCAN1->IE, FDCAN_IE_RF1NE);
+			//Enable Interrupt for Bus-Off State
+			SET_BIT(FDCAN1->IE, FDCAN_IE_BOE);
 		}
 
 		NVIC_SetPriority(FDCAN1_IT0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 1));
@@ -403,13 +409,19 @@ void STRHAL_CAN_Run()
 		{
 			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO0);
 			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
+			//Enable Interrupt for new Messages
 			SET_BIT(FDCAN2->IE, FDCAN_IE_RF0NE);
+			//Enable Interrupt for Bus-Off State
+			SET_BIT(FDCAN2->IE, FDCAN_IE_BOE);
 		}
 		if (fdcan2->fifo_sub_state & (1U << STRHAL_FDCAN_RX1))
 		{
 			CLEAR_BIT(FDCAN2->ILS, FDCAN_ILS_RXFIFO1);
 			SET_BIT(FDCAN2->ILE, FDCAN_ILE_EINT0);
+			//Enable Interrupt for new Messages
 			SET_BIT(FDCAN2->IE, FDCAN_IE_RF1NE);
+			//Enable Interrupt for Bus-Off State
+			SET_BIT(FDCAN2->IE, FDCAN_IE_BOE);
 		}
 
 		NVIC_SetPriority(FDCAN2_IT0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 2));
@@ -470,6 +482,15 @@ void FDCAN1_IT0_IRQHandler(void)
 			rec(id, rx_fifo->data.byte, l - 2);
 		FDCAN1->RXF1A = i & 0x7;
 	}
+	if (FDCAN1->IR & FDCAN_IR_BO) {
+		SET_BIT(FDCAN1->IR, FDCAN_IR_BO);
+		// Check if we are actually in the busoff state
+		if (READ_BIT(FDCAN1->CCCR, FDCAN_CCCR_INIT)) {
+			//Enables reintegration into the can-bus if the can is in bus-off state
+			CLEAR_BIT(FDCAN1->CCCR, FDCAN_CCCR_INIT);
+
+		}
+	}
 }
 
 void FDCAN2_IT0_IRQHandler(void)
@@ -521,5 +542,14 @@ void FDCAN2_IT0_IRQHandler(void)
 		if (rec != NULL)
 			rec(id, rx_fifo->data.byte, l - 2);
 		FDCAN2->RXF1A = i & 0x7;
+	}
+	if (FDCAN2->IR & FDCAN_IR_BO) {
+		SET_BIT(FDCAN2->IR, FDCAN_IR_BO);
+		// Check if we are actually in the busoff state
+		if (READ_BIT(FDCAN2->CCCR, FDCAN_CCCR_INIT)) {
+			//Enables reintegration into the can-bus if the can is in bus-off state
+			CLEAR_BIT(FDCAN2->CCCR, FDCAN_CCCR_INIT);
+
+		}
 	}
 }
