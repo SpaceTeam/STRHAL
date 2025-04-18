@@ -497,7 +497,7 @@ void FDCAN2_IT0_IRQHandler(void)
 {
 	if (FDCAN2->IR & FDCAN_IR_RF0N)
 	{
-		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_RF0N);
+		SET_BIT(FDCAN2->IR, FDCAN_IR_RF0N);
 
 		STRHAL_CAN_Receptor_t rec = _fdcans[STRHAL_FDCAN2].rxReceptors[0];
 		Can_Message_RAM *can_ram = _fdcans[STRHAL_FDCAN2].can_ram;
@@ -522,7 +522,7 @@ void FDCAN2_IT0_IRQHandler(void)
 	}
 	if (FDCAN2->IR & FDCAN_IR_RF1N)
 	{
-		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_RF1N);
+		SET_BIT(FDCAN2->IR, FDCAN_IR_RF1N);
 
 		STRHAL_CAN_Receptor_t rec = _fdcans[STRHAL_FDCAN2].rxReceptors[1];
 		Can_Message_RAM *can_ram = _fdcans[STRHAL_FDCAN2].can_ram;
@@ -544,7 +544,7 @@ void FDCAN2_IT0_IRQHandler(void)
 		FDCAN2->RXF1A = i & 0x7;
 	}
 	if (FDCAN2->IR & FDCAN_IR_BO) {
-		SET_BIT(FDCAN2->IR, FDCAN_IR_BO);
+		CLEAR_BIT(FDCAN2->IR, FDCAN_IR_BO);
 		// Check if we are actually in the busoff state
 		if (READ_BIT(FDCAN2->CCCR, FDCAN_CCCR_INIT)) {
 			//Enables reintegration into the can-bus if the can is in bus-off state
