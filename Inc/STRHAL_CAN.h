@@ -5,7 +5,6 @@
 #include <stm32g4xx_ll_bus.h>
 #include <stm32g4xx_ll_rcc.h>
 #include <stm32g4xx_ll_utils.h>
-#include <STRHAL.h>
 #include <STRHAL_CAN_Def.h>
 #include <STRHAL_Oof.h>
 
