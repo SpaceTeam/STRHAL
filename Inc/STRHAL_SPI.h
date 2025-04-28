@@ -1,5 +1,5 @@
 #ifndef STRHAL_SPI_H
-#define STRHAL_SIP_H
+#define STRHAL_SPI_H
 
 #ifdef __cplusplus
 extern "C"
