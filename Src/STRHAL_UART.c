@@ -28,7 +28,7 @@ typedef struct
 static STRHAL_UART_Handle_t _uarts[STRHAL_N_UART] =
 {
 [STRHAL_UART1] =
-{ .uart = USART1, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART1_RX, .dma_tx_request = LL_DMAMUX_REQ_USART1_TX, .it_rx_handler = DMA1_Channel1_IRQn, .it_tx_handler = DMA1_Channel2_IRQn, .baud_rate = 9600, .swap = 1 },
+{ .uart = USART1, .dma_rx_channel = LL_DMA_CHANNEL_1, .dma_tx_channel = LL_DMA_CHANNEL_2, .dma_rx_request = LL_DMAMUX_REQ_USART1_RX, .dma_tx_request = LL_DMAMUX_REQ_USART1_TX, .it_rx_handler = DMA1_Channel1_IRQn, .it_tx_handler = DMA1_Channel2_IRQn, .baud_rate = 9600, .swap = 0 },
 //[STRHAL_UART2] =
 //{ .uart = USART2, .dma_rx_channel = LL_DMA_CHANNEL_3, .dma_tx_channel = LL_DMA_CHANNEL_4, .dma_rx_request = LL_DMAMUX_REQ_USART2_RX, .dma_tx_request = LL_DMAMUX_REQ_USART2_TX, .it_rx_handler = DMA1_Channel3_IRQn, .it_tx_handler = DMA1_Channel4_IRQn, .baud_rate = 115200, .swap = 0 },
 //[STRHAL_UART3] =
