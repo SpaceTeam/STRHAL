@@ -87,6 +87,7 @@ typedef struct
 	//STRHAL_CAN_Filters_t filters; TODO: Add filter, noob
 	volatile STRHAL_CAN_State_t state;
 	STRHAL_CAN_Receptor_t rxReceptors[STRHAL_FDCAN_N_RX];
+	STRHAL_CAN_Transmitted_t transmitted;
 	uint8_t filter_n;
 	uint8_t fifo_sub_state;
 } STRHAL_CAN_Handle_t;
@@ -222,7 +223,7 @@ int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id)
 	return 0;
 }
 
-int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id, STRHAL_FDCAN_Filter_t *filter, uint8_t n, STRHAL_CAN_Receptor_t receptor)
+int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id, STRHAL_FDCAN_Filter_t *filter, uint8_t n, STRHAL_CAN_Receptor_t receptor, STRHAL_CAN_Transmitted_t transmitted)
 {
 	/* Error handling for user inputs */
 	if (fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN) // invalid fdcan instance
@@ -242,6 +243,8 @@ int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id,
 		return -1;
 
 	Can_Message_RAM *can_ram = fdcan->can_ram;
+
+	fdcan->transmitted = transmitted;
 
 	uint32_t sfec;
 
@@ -327,7 +330,7 @@ int32_t STRHAL_CAN_Receive(STRHAL_FDCAN_Id_t fdcan_id, uint32_t *id, uint8_t *da
 int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, uint32_t n)
 {
 	if (fdcan_id < 0 || fdcan_id >= STRHAL_N_FDCAN)
-		return -1;
+		return -STRHAL_CAN_EINVALID;
 
 	if (n == 0)
 		return 0;
@@ -336,7 +339,7 @@ int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *
 	Can_Message_RAM *can_ram = _fdcans[fdcan_id].can_ram;
 
 	if (!(can->TXFQS & FDCAN_TXFQS_TFFL))
-		return -1;
+		return -STRHAL_CAN_EFULL;
 
 	if (n > FDCAN_ELMTS_ARRAY_SIZE)
 		n = FDCAN_ELMTS_ARRAY_SIZE;
@@ -384,6 +387,8 @@ void STRHAL_CAN_Run()
 			SET_BIT(FDCAN1->IE, FDCAN_IE_RF0NE);
 			//Enable Interrupt for Bus-Off State
 			SET_BIT(FDCAN1->IE, FDCAN_IE_BOE);
+			// Enable Interrupt for Transmission Complete
+			SET_BIT(FDCAN1->IE, FDCAN_IE_TCE);
 		}
 		if (fdcan1->fifo_sub_state & (1U << STRHAL_FDCAN_RX1))
 		{
@@ -393,6 +398,8 @@ void STRHAL_CAN_Run()
 			SET_BIT(FDCAN1->IE, FDCAN_IE_RF1NE);
 			//Enable Interrupt for Bus-Off State
 			SET_BIT(FDCAN1->IE, FDCAN_IE_BOE);
+			// Enable Interrupt for Transmission Complete
+			SET_BIT(FDCAN1->IE, FDCAN_IE_TCE);
 		}
 
 		NVIC_SetPriority(FDCAN1_IT0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 1));
@@ -491,6 +498,9 @@ void FDCAN1_IT0_IRQHandler(void)
 
 		}
 	}
+	if (FDCAN1->IR & FDCAN_IR_TC) {
+		_fdcans[STRHAL_FDCAN1].transmitted();
+	}
 }
 
 void FDCAN2_IT0_IRQHandler(void)
@@ -551,5 +561,8 @@ void FDCAN2_IT0_IRQHandler(void)
 			CLEAR_BIT(FDCAN2->CCCR, FDCAN_CCCR_INIT);
 
 		}
+	}
+	if (FDCAN2->IR & FDCAN_IR_TC) {
+		_fdcans[STRHAL_FDCAN2].transmitted();
 	}
 }

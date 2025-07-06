@@ -20,6 +20,11 @@ extern "C"
 #define STRHAL_CAN_EXT_FILTER_NUMBER		0
 #define STRHAL_CAN_RAM_N_FILTER			28
 
+// The buffer is full
+#define STRHAL_CAN_EFULL 2
+// The request was invalid
+#define STRHAL_CAN_EINVALID 3
+
 typedef enum
 {
 	STRHAL_FDCAN1,
@@ -44,10 +49,11 @@ typedef struct
 } STRHAL_FDCAN_Filter_t;
 
 typedef void (*STRHAL_CAN_Receptor_t)(uint32_t id, uint8_t *data, uint32_t n);
+typedef void (*STRHAL_CAN_Transmitted_t)();
 
 STRHAL_Oof_t STRHAL_CAN_Init();
 int STRHAL_CAN_Instance_Init(STRHAL_FDCAN_Id_t fdcan_id);
-int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id, STRHAL_FDCAN_Filter_t *filter, uint8_t n, STRHAL_CAN_Receptor_t receptor);
+int STRHAL_CAN_Subscribe(STRHAL_FDCAN_Id_t fdcan_id, STRHAL_FDCAN_Rx_Id_t rx_id, STRHAL_FDCAN_Filter_t *filter, uint8_t n, STRHAL_CAN_Receptor_t receptor, STRHAL_CAN_Transmitted_t transmitted);
 void STRHAL_CAN_Run();
 int32_t STRHAL_CAN_Receive(STRHAL_FDCAN_Id_t fdcan_id, uint32_t *id, uint8_t *data, uint32_t n);
 int32_t STRHAL_CAN_Send(STRHAL_FDCAN_Id_t fdcan_id, uint32_t id, const uint8_t *data, uint32_t n);
